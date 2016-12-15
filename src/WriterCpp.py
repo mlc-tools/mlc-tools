@@ -42,12 +42,12 @@ class WriterCpp(Writer):
 	def writeFunction(self, function, tabs):
 		out = Writer.writeFunction(self, function, tabs)
 		header = "{0} {1}({2})\n"
-		body = "{4}__begin__\n{3}\n{4}__end__\n"
+		body = "{4}__begin__{3}\n{4}__end__\n"
 		fstr = header + body
 		body = ""
 		for operation in function.operations:
 			fline = "{0};"
-			line = self.tabs(tabs+1) + fline.format(operation);
+			line = "\n" + self.tabs(tabs+1) + fline.format(operation);
 			body += line
 		args = ", ".join(function.args)
 		out += fstr.format( function.return_type, function.name, args, body, self.tabs(tabs) )
