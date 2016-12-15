@@ -1,0 +1,25 @@
+int t;
+int t=0;
+list<int> someList;
+map<int, int> someMap;
+
+class BattleSystem<SerializedObject>
+{
+	float health=1
+	float velocity=1
+	float damage_phisicaly=0
+	function int method()
+	{
+		return 0;
+	}
+}
+class BattleSystem2<SerializedObject>
+{
+	float H=1
+	float V=1
+	float D=0
+	function int M(int arg1)
+	{
+		return arg1;
+	}
+}

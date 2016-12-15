@@ -1,0 +1,175 @@
+
+===== common_replaces begin =====
+this. this-> [-1] .back()
+===== common_replaces end =====
+===== header begin =====
+#ifndef ____ClassName___h__
+#define ____ClassName___h__
+
+#include "support/RapidJson.h"
+__includes_section__
+namespace __namespace__
+{
+	class CommandDelegate;
+	
+	class __ClassName____ParentSection__	{
+	public:
+		static const std::string __type__;
+		virtual std::string getType()override;
+		
+		__ClassName__();
+		virtual ~__ClassName__();
+		
+		virtual void serialize( cocos2d::RapidJsonNode& json )override;
+		virtual void deserialize( const cocos2d::RapidJsonNode& json )override;
+__methods_section____commanddelegate_header_accept__	public:
+__fields_section__	};
+}
+
+#endif
+===== header end =====
+
+===== source begin =====
+#include "__ClassName__.h"
+#include "CommandDelegate.h"
+#include "online/CommandFactory.h"
+
+namespace __namespace__
+{
+	const std::string __ClassName__::__type__( "__ClassFactoryName__" );
+	REGISTRATION_SERIALIZED( __ClassName__ );
+
+	std::string __ClassName__::getType()
+	{
+		return __type__;
+	}
+
+	__ClassName__::__ClassName__()
+	{
+__initialization_section__	}
+
+	__ClassName__::~__ClassName__()
+	{
+	}
+
+	void __ClassName__::serialize( cocos2d::RapidJsonNode& json )
+	{
+__serialize_parent_section____serialize_fields_section__	}
+	
+	void __ClassName__::deserialize( const cocos2d::RapidJsonNode& json )
+	{
+__deserialize_parent_section____deserialize_fields_section__	}
+__methods_defination_section____commanddelegate_source_accept__}
+===== source end =====
+
+===== commanddelegate cpp begin =====
+#ifndef __CommandDelegate_h__
+#define __CommandDelegate_h__
+
+#include <assert.h>
+
+namespace __namespace__
+{
+__forward_declarations_section__
+	class CommandDelegate
+	{
+	public:
+__methods_section__	};
+}
+
+#endif
+===== commanddelegate cpp end =====
+===== commanddelegate fd begin =====
+	class __ClassName__;
+===== commanddelegate fd end =====
+===== commanddelegate method begin =====
+		virtual void apply( __ClassName__* command ){ assert(0); };
+===== commanddelegate method end =====
+===== commanddelegate accept header begin =====
+		virtual void accept( CommandDelegate* commandDelegate );
+===== commanddelegate accept header end =====
+===== commanddelegate accept source begin =====
+	void __ClassName__::accept( CommandDelegate* commandDelegate )
+	{
+		commandDelegate->apply( this );
+	}
+===== commanddelegate accept source end =====
+
+
+===== field begin =====
+		type name;
+===== field end =====
+===== initialization begin =====
+		this.name=value;
+===== initialization end =====
+===== include begin =====
+#include file
+===== include end =====
+===== forward declaration begin =====
+===== forward declaration end =====
+===== parent class begin =====
+ : public parent
+===== parent class end =====
+===== parent class next begin =====
+		, public parent
+===== parent class next end =====
+
+===== parent_serialization begin =====
+		parent::serialize(json);
+===== parent_serialization end =====
+===== simple_serialization begin =====
+		json.append_node( "name" ).set<type>( this->name );
+===== simple_serialization end =====
+===== serialized_serialization begin =====
+		name.serialize(json.append_node("name"));
+===== serialized_serialization end =====
+===== list_serialization begin =====
+		auto arr_name = json.append_array( "name" );
+		for( auto& t : this->name )
+		{
+__serialize_line__		}
+===== list_serialization end =====
+===== simple_item_serialization begin =====
+			arr_name.push_back().set<type>( t );
+===== simple_item_serialization end =====
+===== serialized_item_serialization begin =====
+			t.serialize(arr_name.push_back());
+===== serialized_item_serialization end =====
+
+===== parent_deserialization begin =====
+		parent::deserialize(json);
+===== parent_deserialization end =====
+===== simple_deserialization begin =====
+		this->name = json.get<type>( "name" );
+===== simple_deserialization end =====
+===== serialized_deserialization begin =====
+		name.deserialize(json.node("name"));
+===== serialized_deserialization end =====
+===== list_deserialization begin =====
+		auto arr_name = json.node( "name" );
+		for( size_t i = 0; i < arr_name.size(); ++i )
+		{
+__serialize_line__		}
+===== list_deserialization end =====
+===== simple_item_deserialization begin =====
+			this->name.emplace_back();
+			this->name.back() = arr_name.get<type>(i);
+===== simple_item_deserialization end =====
+===== serialized_item_deserialization begin =====
+			this->name.emplace_back();
+			this->name.back().deserialize(arr_name.at(i));
+===== serialized_item_deserialization end =====
+
+
+===== method_declaration begin =====
+		statictype name(args);
+===== method_declaration end =====
+===== method_defination begin =====
+
+	type __ClassName__::name(args)
+	{
+method_body	}
+===== method_defination end =====
+===== method_body_line begin =====
+	line
+===== method_body_line end =====
