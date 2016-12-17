@@ -4,6 +4,7 @@ class SerializedObject
 
 class BattleSystem<SerializedObject>
 {
+	list<int> list_of_integers
 	float health
 	float velocity=1.f
 	float damage_phisicaly=0.f
