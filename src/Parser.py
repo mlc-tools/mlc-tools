@@ -90,6 +90,10 @@ class Parser:
 
 	def _find_dependences(self):
 		for cls in self.classes:
+			if cls.is_visitor and self.getVisitorType(cls) != cls.name:
+				if cls.name.find( "IVisitor" ) != 0:
+					self.createVisitor(cls)
+
 			behaviors = []
 			for name in cls.behaviors:
 				c = self._findClass(name)
@@ -98,6 +102,9 @@ class Parser:
 				behaviors.append( c )
 			cls.behaviors = behaviors
 			cls.is_serialized = self.isSerialised(cls)
+			cls.is_visitor = self.isVisitor(cls)
+			if cls.is_visitor and cls.name != self.getVisitorType(cls):
+				self.appendVisitor(cls)
 
 	def isSerialised(self, cls):
 		if cls.is_serialized:
@@ -106,6 +113,14 @@ class Parser:
 		for c in cls.behaviors:
 			is_seriazed = is_seriazed or self.isSerialised(c)
 		return is_seriazed
+
+	def isVisitor(self, cls):
+		if cls.is_visitor:
+			return True
+		is_visitor = False
+		for c in cls.behaviors:
+			is_visitor = is_visitor or self.isVisitor(c)
+		return is_visitor
 
 	def isFunctionOverride(self, cls, function):
 		for c in cls.behaviors:
@@ -116,3 +131,38 @@ class Parser:
 		for c in cls.behaviors:
 			is_override = is_override or self.isFunctionOverride(c, function)
 		return is_override
+
+	def getVisitorType(self, cls):
+		if not cls.is_visitor:
+			return None
+
+		if cls.name.find( "IVisitor" ) == 0:
+			return cls.name
+
+		for c in cls.behaviors:
+			if not isinstance(c, Class):
+				return "IVisitor" + cls.name
+			if c.is_visitor:
+			    return self.getVisitorType(c)
+		return "IVisitor" + cls.name
+
+	def createVisitor(self, cls):
+		visitorName = self.getVisitorType(cls)
+		visitor = self._findClass( visitorName )
+		if visitor == None:
+			visitor = Class()
+			visitor.name = visitorName
+			visitor.type = "class"
+			visitor.is_abstract = True
+			visitor.is_visitor = True
+			self.classes.append( visitor )
+
+	def appendVisitor(self, cls):
+		visitorName = self.getVisitorType(cls)
+		visitor = self._findClass( visitorName )
+		function = Function()
+		function.name = "visit"
+		function.return_type = "void"
+		function.args["ctx"] = cls.name + "*"
+		visitor.functions.append(function)
+		

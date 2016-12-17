@@ -1,9 +1,10 @@
 class SerializedObject:abstract:serialized
 {
 }
-
-class Request<SerializedObject>
+class Request<SerializedObject>:visitor
 {
-	int value=0
-	string type=""
+}
+class RequestScore<Request>
+{
+	int id
 }

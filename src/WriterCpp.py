@@ -100,7 +100,7 @@ class WriterCpp(Writer):
 		objects = self.writeObjects(cls.members, 1, FLAG_HPP)
 		functions = self.writeFunctions(cls.functions, 1, FLAG_HPP)
 		constructor = self._createConstructorFunctionHpp(cls, 1)
-		includes = self._findIncludes(cls)
+		includes, forward_declarations = self._findIncludes(cls,FLAG_HPP)
 		self._currentClass = None
 
 		fstr = ""
@@ -119,7 +119,7 @@ class WriterCpp(Writer):
 
 		fstr += "\n__begin__\npublic:\n{5}" + F + O + "__end__;\n\n"
 
-		fstr = "namespace {0}\n__begin__\n\n{1}__end__//namespace {0}".format( self._getNamespace(cls), fstr )
+		fstr = "namespace {0}\n__begin__\n{2}\n\n{1}__end__//namespace {0}".format( self._getNamespace(cls), fstr, forward_declarations )
 		fstr = "#ifndef __{0}_h__\n#define __{0}_h__\n{2}\n\n{1}\n\n#endif //#ifndef __{0}_h__".format( cls.name, fstr, includes )
 
 		out[FLAG_HPP] += fstr.format( cls.type, cls.name, behaviors, objects[FLAG_HPP], functions[FLAG_HPP], constructor);
@@ -132,9 +132,10 @@ class WriterCpp(Writer):
 		self._currentClass = cls
 		functions = self.writeFunctions(cls.functions, 0, FLAG_CPP)
 		constructor = self._createConstructorFunctionCpp(cls, tabs)
+		includes, f = self._findIncludes(cls,FLAG_CPP)
 		self._currentClass = None
-		fstr = "#include\"{0}.h\"\n\nnamespace {3}\n__begin__\n\n{2}\n{1}__end__"
-		out[FLAG_CPP] += fstr.format( cls.name, functions[FLAG_CPP], constructor, self._getNamespace(cls) )
+		fstr = "#include \"{0}.h\"{4}\n\nnamespace {3}\n__begin__\n\n{2}\n{1}__end__"
+		out[FLAG_CPP] += fstr.format( cls.name, functions[FLAG_CPP], constructor, self._getNamespace(cls), includes )
 		out[FLAG_CPP] = re.sub("__begin__", "{", out[FLAG_CPP])
 		out[FLAG_CPP] = re.sub("__end__", "}", out[FLAG_CPP])
 		return out
@@ -170,7 +171,7 @@ class WriterCpp(Writer):
 			if not self._currentClass.is_abstract:
 				fstr = "{3}virtual {0} {1}({2}) {4};\n"
 			else:
-				fstr = "{3}virtual {0} {1}({2}) = 0;\n"
+				fstr = "{3}virtual {0} {1}({2}) {4} = 0;\n"
 			args = []
 			for arg in function.args:
 				args.append(function.args[arg] + " " + arg)
@@ -178,6 +179,7 @@ class WriterCpp(Writer):
 			is_override = ""
 			if self.parser.isFunctionOverride(self._currentClass, function):
 				is_override = "override"
+
 			out[FLAG_HPP] = fstr.format( function.return_type, function.name, args, self.tabs(tabs), is_override )
 		if flags & FLAG_CPP:
 			header = "{4}{0} {5}::{1}({2})\n"
@@ -229,6 +231,14 @@ class WriterCpp(Writer):
 			if have == False:
 				self.addSerialization(cls, SERIALIZATION)
 				self.addSerialization(cls, DESERIALIZATION)
+		if cls.is_visitor:
+			have = False
+			for function in cls.functions:
+				if function.name == "accept":
+					have = True
+					break
+			if have == False:
+				self.addAccept(cls)
 			
 		return cls
 
@@ -236,12 +246,12 @@ class WriterCpp(Writer):
 
 		function = Function()
 		if serialization_type == SERIALIZATION:
-			function.name = "serialize";
-			function.args["json"] = "RapidJsonNode&";
+			function.name = "serialize"
+			function.args["json"] = "RapidJsonNode&"
 		if serialization_type == DESERIALIZATION:
-			function.name = "deserialize";
-			function.args["json"] = "const RapidJsonNode&";
-		function.return_type = "void";
+			function.name = "deserialize"
+			function.args["json"] = "const RapidJsonNode&"
+		function.return_type = "void"
 		for obj in cls.members:
 			index = 0 
 			if obj.initial_value == None:
@@ -261,8 +271,21 @@ class WriterCpp(Writer):
 			function.operations.append(str)
 		cls.functions.append(function)
 
-	def _findIncludes(self, cls):
+	def addAccept(self, cls):
+		visitor = self.parser.getVisitorType(cls)
+		if visitor == cls.name:
+			return
+		function = Function()
+		function.name = "accept"
+		function.return_type = "void"
+		function.args["visitor"] = visitor + "*";
+		function.operations.append("visitor->visit( this )")
+		cls.functions.append(function)
+
+	def _findIncludes(self, cls, flags):
 		out = ""
+		forward_declarations = ""
+
 		fstr = "\n#include \"{0}.h\""
 		fstr_std = "\n#include <{0}>"
 
@@ -279,6 +302,7 @@ class WriterCpp(Writer):
 			return not type in types
 
 		types = {}
+		ftypes = {}
 		
 		for t in cls.behaviors:
 			types[t.name] = 1
@@ -289,12 +313,19 @@ class WriterCpp(Writer):
 				type = re.sub("const", "", f.args[t]).strip()
 				type = re.sub("\*", "", type).strip()
 				type = re.sub("&", "", type).strip()
-				types[type] = 1
+				if flags == FLAG_CPP or f.args[t] != type + "*":
+					types[type] = 1
+				if flags == FLAG_HPP and f.args[t] == type + "*":
+					ftypes[type] = 1
 
 		for t in types:
 			if is_std_type(t):
 				out += fstr_std.format( t )
 			elif need_include(t):
 				out += fstr.format( t )
+		
+		fstr = "\nclass {0};"
+		for t in ftypes:
+			forward_declarations += fstr.format( t )
 
-		return out
+		return out, forward_declarations

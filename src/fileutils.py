@@ -65,6 +65,7 @@ def write( path, buffer ):
 	if rewrite:
 		createDirForFile( path )
 		open(path,"w").write(buffer)	
+	return rewrite
 			
 cacheFile = "bin/cache.tmp"
 def isFileChanges(file):

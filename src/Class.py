@@ -10,6 +10,7 @@ class Class(Object):
 		self.functions = []
 		self.is_abstract = False
 		self.is_serialized = False
+		self.is_visitor = False
 
 	def parse(self, line):
 		str = line.strip()
@@ -34,6 +35,8 @@ class Class(Object):
 	def _findModifiers(self, str):
 		self.is_abstract = str.find( ":abstract" ) != -1
 		self.is_serialized = str.find( ":serialized" ) != -1
+		self.is_visitor = str.find( ":visitor" ) != -1
 		str = re.sub(":abstract", "", str)
 		str = re.sub(":serialized", "", str)
+		str = re.sub(":visitor", "", str)
 		return str
