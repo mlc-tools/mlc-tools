@@ -4,7 +4,7 @@ class SerializedObject
 
 class BattleSystem<SerializedObject>
 {
-	float health=1.f
+	float health
 	float velocity=1.f
 	float damage_phisicaly=0.f
 	float resist_phisicaly=0.f

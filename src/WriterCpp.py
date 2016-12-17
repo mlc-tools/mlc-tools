@@ -6,9 +6,35 @@ from Function import Function
 
 FLAG_HPP = 2
 FLAG_CPP = 4
+SERIALIZATION = 0
+DESERIALIZATION = 1
 
 class WriterCpp(Writer):
 	def __init__(self, outDirectory, parser):
+		self.serialize_formats = []
+		self.serialize_formats.append({})
+		self.serialize_formats.append({})
+		self.serialize_formats[SERIALIZATION]["simple"] = []
+		self.serialize_formats[SERIALIZATION]["simple"].append( "if({0} != {2}) \n\t\t  json.append_node( \"{0}\" ).set<{1}>( {0} )" )
+		self.serialize_formats[SERIALIZATION]["simple"].append( "json.append_node( \"{0}\" ).set<{1}>( {0} )" )
+		self.serialize_formats[DESERIALIZATION]["simple"] = []
+		self.serialize_formats[DESERIALIZATION]["simple"].append( "if(json.is_exist(\"{0}\")) \n\t\t {0} = json.get<{1}>( \"{0}\" );\n\telse \n\t\t{0} = {2}" )
+		self.serialize_formats[DESERIALIZATION]["simple"].append( "{0} = json.get<{1}>( \"{0}\" )" )
+
+		for i in range(2):
+			self.serialize_formats[i]["int"] = []
+			self.serialize_formats[i]["int"].append( self.serialize_formats[i]["simple"][0] )
+			self.serialize_formats[i]["int"].append( self.serialize_formats[i]["simple"][1] )
+			self.serialize_formats[i]["float"] = []
+			self.serialize_formats[i]["float"].append( self.serialize_formats[i]["simple"][0] )
+			self.serialize_formats[i]["float"].append( self.serialize_formats[i]["simple"][1] )
+			self.serialize_formats[i]["bool"] = []
+			self.serialize_formats[i]["bool"].append( self.serialize_formats[i]["simple"][0] )
+			self.serialize_formats[i]["bool"].append( self.serialize_formats[i]["simple"][1] )
+			self.serialize_formats[i]["string"] = []
+			self.serialize_formats[i]["string"].append( self.serialize_formats[i]["simple"][0] )
+			self.serialize_formats[i]["string"].append( self.serialize_formats[i]["simple"][1] )
+
 		Writer.__init__(self, outDirectory, parser)
 		self._currentClass = None
 		return
@@ -30,6 +56,8 @@ class WriterCpp(Writer):
 
 	def writeClass(self, cls, tabs, flags):
 		out = {}
+		cls = self.addMethods(cls);
+
 		if flags & FLAG_HPP:
 			out = Writer._add(self, out, self._writeClassHpp(cls, tabs))
 		if flags & FLAG_CPP:
@@ -141,3 +169,37 @@ class WriterCpp(Writer):
 
 	def _getNamespace(self, cls):
 		return "mg"
+
+	def addMethods(self, cls):
+		if self.isSerialised(cls):
+			have = False
+			for function in cls.functions:
+				if function.name == "serialize":
+					have = True
+					break
+			if have == False:
+				self.addSerialization(cls, SERIALIZATION)
+				self.addSerialization(cls, DESERIALIZATION)
+			
+		return cls
+
+	def isSerialised(self, cls):
+		return "SerializedObject" in cls.behaviors
+
+	def addSerialization(self, cls, serialization_type):
+
+		function = Function()
+		if serialization_type == SERIALIZATION:
+			function.name = "serialize";
+		if serialization_type == DESERIALIZATION:
+			function.name = "deserialize";
+		function.return_type = "void";
+		function.args["json"] = "RapidJsonNode&";
+		for obj in cls.members:
+			index = 0 
+			if obj.initial_value == None:
+				index = 1
+			fstr = self.serialize_formats[serialization_type][obj.type][index]
+			str = fstr.format(obj.name, obj.type, obj.initial_value, "{", "}")
+			function.operations.append(str)
+		cls.functions.append(function)
