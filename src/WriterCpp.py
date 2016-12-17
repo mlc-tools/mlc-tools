@@ -20,45 +20,42 @@ class WriterCpp(Writer):
 		self.serialize_formats = []
 		self.serialize_formats.append({})
 		self.serialize_formats.append({})
+		
 		self.serialize_formats[SERIALIZATION]["simple"] = []
 		self.serialize_formats[SERIALIZATION]["simple"].append( "if({0} != {2}) \n\t\t  json.append_node( \"{0}\" ).set<{1}>( {0} )" )
 		self.serialize_formats[SERIALIZATION]["simple"].append( "json.append_node( \"{0}\" ).set<{1}>( {0} )" )
 		self.serialize_formats[DESERIALIZATION]["simple"] = []
 		self.serialize_formats[DESERIALIZATION]["simple"].append( "if(json.is_exist(\"{0}\")) \n\t\t {0} = json.get<{1}>( \"{0}\" );\n\telse \n\t\t{0} = {2}" )
 		self.serialize_formats[DESERIALIZATION]["simple"].append( "{0} = json.get<{1}>( \"{0}\" )" )
+		
 		self.serialize_formats[SERIALIZATION]["simple_list"] = []
-		self.serialize_formats[SERIALIZATION]["simple_list"].append( "static_assert(0, \"list not should have a initialize value\")" )
+		self.serialize_formats[SERIALIZATION]["simple_list"].append( "static_assert(0, \"list '{0}' not should have a initialize value\")" )
 		self.serialize_formats[SERIALIZATION]["simple_list"].append( "auto arr_{0} = json.append_array( \"{0}\" );\n\tfor( auto& t : {0} )\n\t\tarr_{0}.push_back().set<{5}>( t )" )
 		self.serialize_formats[DESERIALIZATION]["simple_list"] = []
-		self.serialize_formats[DESERIALIZATION]["simple_list"].append( "static_assert(0, \"list not should have a initialize value\")" )
+		self.serialize_formats[DESERIALIZATION]["simple_list"].append( "static_assert(0, \"list '{0}' not should have a initialize value\")" )
 		self.serialize_formats[DESERIALIZATION]["simple_list"].append( "auto arr_{0} = json.node( \"{0}\" );\n\tfor( size_t i = 0; i < arr_{0}.size(); ++i )\n\t{3}\n\t\t{0}.emplace_back();\n\t\t{0}.back() = arr_{0}.get<{5}>(i);\n\t{4}" )
+		
+		self.serialize_formats[SERIALIZATION]["serialized_list"] = []
+		self.serialize_formats[SERIALIZATION]["serialized_list"].append( "static_assert(0, \"list '{0}' not should have a initialize value\")" )
+		self.serialize_formats[SERIALIZATION]["serialized_list"].append( "auto arr_{0} = json.append_array( \"{0}\" );\n\tfor( auto& t : {0} )\n\t\tt.serialize(arr_{0}.push_back());" )
+		self.serialize_formats[DESERIALIZATION]["serialized_list"] = []
+		self.serialize_formats[DESERIALIZATION]["serialized_list"].append( "static_assert(0, \"list '{0}' not should have a initialize value\")" )
+		self.serialize_formats[DESERIALIZATION]["serialized_list"].append( "auto arr_{0} = json.node( \"{0}\" );\n\tfor( size_t i = 0; i < arr_{0}.size(); ++i )\n\t{3}\n\t\t{0}.emplace_back();\n\t\t{0}.back().deserialize(arr_{0}.at(i));\n\t{4}" )
 
+		self.simple_types = ["int", "float", "bool", "string"]
 		for i in range(2):
-			self.serialize_formats[i]["int"] = []
-			self.serialize_formats[i]["int"].append( self.serialize_formats[i]["simple"][0] )
-			self.serialize_formats[i]["int"].append( self.serialize_formats[i]["simple"][1] )
-			self.serialize_formats[i]["float"] = []
-			self.serialize_formats[i]["float"].append( self.serialize_formats[i]["simple"][0] )
-			self.serialize_formats[i]["float"].append( self.serialize_formats[i]["simple"][1] )
-			self.serialize_formats[i]["bool"] = []
-			self.serialize_formats[i]["bool"].append( self.serialize_formats[i]["simple"][0] )
-			self.serialize_formats[i]["bool"].append( self.serialize_formats[i]["simple"][1] )
-			self.serialize_formats[i]["string"] = []
-			self.serialize_formats[i]["string"].append( self.serialize_formats[i]["simple"][0] )
-			self.serialize_formats[i]["string"].append( self.serialize_formats[i]["simple"][1] )
+			for type in self.simple_types:
+				self.serialize_formats[i][type] = []
+				self.serialize_formats[i][type].append( self.serialize_formats[i]["simple"][0] )
+				self.serialize_formats[i][type].append( self.serialize_formats[i]["simple"][1] )
+				list_type = "list<{0}>".format(type)
+				self.serialize_formats[i][list_type] = []
+				self.serialize_formats[i][list_type].append( self.serialize_formats[i]["simple_list"][0] )
+				self.serialize_formats[i][list_type].append( self.serialize_formats[i]["simple_list"][1] )
 
-			self.serialize_formats[i]["list<int>"] = []
-			self.serialize_formats[i]["list<int>"].append( self.serialize_formats[i]["simple_list"][0] )
-			self.serialize_formats[i]["list<int>"].append( self.serialize_formats[i]["simple_list"][1] )
-			self.serialize_formats[i]["list<float>"] = []
-			self.serialize_formats[i]["list<float>"].append( self.serialize_formats[i]["simple_list"][0] )
-			self.serialize_formats[i]["list<float>"].append( self.serialize_formats[i]["simple_list"][1] )
-			self.serialize_formats[i]["list<bool>"] = []
-			self.serialize_formats[i]["list<bool>"].append( self.serialize_formats[i]["simple_list"][0] )
-			self.serialize_formats[i]["list<bool>"].append( self.serialize_formats[i]["simple_list"][1] )
-			self.serialize_formats[i]["list<string>"] = []
-			self.serialize_formats[i]["list<string>"].append( self.serialize_formats[i]["simple_list"][0] )
-			self.serialize_formats[i]["list<string>"].append( self.serialize_formats[i]["simple_list"][1] )
+			self.serialize_formats[i]["list<serialized>"] = []
+			self.serialize_formats[i]["list<serialized>"].append( self.serialize_formats[i]["serialized_list"][0] )
+			self.serialize_formats[i]["list<serialized>"].append( self.serialize_formats[i]["serialized_list"][1] )
 
 		Writer.__init__(self, outDirectory, parser)
 		self._currentClass = None
@@ -224,9 +221,14 @@ class WriterCpp(Writer):
 			index = 0 
 			if obj.initial_value == None:
 				index = 1
+			
 			type = obj.type
 			if len(obj.template_args) > 0:
-				type = "{0}<{1}>".format( type, ", ".join(obj.template_args) )
+				if obj.template_args[0] == "SerializedObject":
+					type = "{0}<serialized>".format( type )
+				else:
+					type = "{0}<{1}>".format( type, ", ".join(obj.template_args) )
+
 			fstr = self.serialize_formats[serialization_type][type][index]
 			str = fstr.format(obj.name, obj.type, obj.initial_value, "{", "}", *obj.template_args)
 			function.operations.append(str)
