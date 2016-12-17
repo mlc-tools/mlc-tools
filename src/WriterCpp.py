@@ -138,7 +138,7 @@ class WriterCpp(Writer):
 		initialize = ""
 		for obj in cls.members:
 			if obj.initial_value != None:
-				fstr = "\n{2} {0}({1})"
+				fstr = "\n\t{2} {0}({1})"
 				s = ","
 				if initialize == "": 
 					s = ":"
@@ -220,10 +220,11 @@ class WriterCpp(Writer):
 		function = Function()
 		if serialization_type == SERIALIZATION:
 			function.name = "serialize";
+			function.args["json"] = "RapidJsonNode&";
 		if serialization_type == DESERIALIZATION:
 			function.name = "deserialize";
+			function.args["json"] = "const RapidJsonNode&";
 		function.return_type = "void";
-		function.args["json"] = "RapidJsonNode&";
 		for obj in cls.members:
 			index = 0 
 			if obj.initial_value == None:
