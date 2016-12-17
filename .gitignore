@@ -1,4 +1,17 @@
 *.suo
 *.pyc
+*.opensdf
+*.sdf
+*.exe
+*.pdb
+*.ilk
+*.obj
+*.user
+/packages/
 /bin/
 /out/
+
+tests/cpp/Test/Debug/
+tests/cpp/Test/Release/
+tests/java/TestJava/bin/
+tests/java/TestJava/obj/
