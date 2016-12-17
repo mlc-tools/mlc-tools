@@ -1,10 +1,16 @@
 class SerializedObject:abstract:serialized
 {
 }
-class Request<SerializedObject>:visitor
+
+class Command<SerializedObject>
 {
 }
-class RequestScore<Request>
+
+class Request:visitor
+{
+}
+
+class RequestScore<Command, Request>
 {
 	int id
 }

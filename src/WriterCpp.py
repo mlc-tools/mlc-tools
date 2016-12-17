@@ -95,7 +95,7 @@ class WriterCpp(Writer):
 		self._currentClass = cls
 		behaviors = []
 		for c in cls.behaviors:
-			behaviors.append(c.name)
+			behaviors.append("public " + c.name)
 		behaviors = ", ".join(behaviors)
 		objects = self.writeObjects(cls.members, 1, FLAG_HPP)
 		functions = self.writeFunctions(cls.functions, 1, FLAG_HPP)
@@ -105,7 +105,7 @@ class WriterCpp(Writer):
 
 		fstr = ""
 		if len(cls.behaviors) > 0: 
-			fstr += "{0} {1} : public {2}"
+			fstr += "{0} {1} : {2}"
 		else:
 		    fstr += "{0} {1}"
 		if functions[FLAG_HPP].strip() == "": 
