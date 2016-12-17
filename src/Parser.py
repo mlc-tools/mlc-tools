@@ -74,20 +74,3 @@ class Parser:
 		function.parseBody(body)
 		self.functions.append(function)
 		return text
-
-
-
-		
-
-
-str = open("declaration.txt","r").read()
-
-parser = Parser()
-parser.parse(str)
-
-writer = WriterJava(parser)
-for key in writer.buffers:
-	print "======================="
-	print key
-	print "======================="
-	print writer.buffers[key]

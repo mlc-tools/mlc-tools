@@ -8,8 +8,8 @@ FLAG_HPP = 2
 FLAG_CPP = 4
 
 class WriterCpp(Writer):
-	def __init__(self, parser):
-		Writer.__init__(self, parser)
+	def __init__(self, outDirectory, parser):
+		Writer.__init__(self, outDirectory, parser)
 		self._currentClass = None
 		return
 	
@@ -117,9 +117,13 @@ class WriterCpp(Writer):
 	def writeClasses(self, classes, tabs, flags):
 		out = {FLAG_CPP : "", FLAG_HPP : ""}
 		for cls in classes:
-			out = self._add( out, self.writeClass(cls, tabs, FLAG_HPP) )
+			dict = self.writeClass(cls, tabs, FLAG_HPP)
+			self.save( cls.name + ".h", dict[FLAG_HPP] )
+			out = self._add( out, dict )
 		for cls in classes: 
-			out = self._add( out, self.writeClass(cls, tabs, FLAG_CPP) )
+			dict = self.writeClass(cls, tabs, FLAG_CPP)
+			self.save( cls.name + ".cpp", dict[FLAG_CPP] )
+			out = self._add( out, dict )
 		return out
 
 	def writeFunctions(self, functions, tabs, flags):

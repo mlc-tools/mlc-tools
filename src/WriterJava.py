@@ -2,8 +2,8 @@ import re
 from Writer import Writer
 
 class WriterJava(Writer):
-	def __init__(self, parser):
-		Writer.__init__(self, parser)
+	def __init__(self, outDirectory, parser):
+		Writer.__init__(self, outDirectory, parser)
 
 	def writeObject(self, object, tabs, flags):
 		out = ""
@@ -62,3 +62,6 @@ class WriterJava(Writer):
 
 	def _getImports(self, cls):
 		return ""
+
+	def _getFilenameForClass(self, class_name):
+		return class_name + ".java"

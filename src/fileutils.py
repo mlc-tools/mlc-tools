@@ -57,6 +57,14 @@ def saveDictToFile(path, dict):
 	except:
 		return False
 	return True
+
+def write( path, buffer ):
+	rewrite = True
+	if os.path.exists(path):
+		rewrite = open(path).read() != buffer			
+	if rewrite:
+		createDirForFile( path )
+		open(path,"w").write(buffer)	
 			
 cacheFile = "bin/cache.tmp"
 def isFileChanges(file):

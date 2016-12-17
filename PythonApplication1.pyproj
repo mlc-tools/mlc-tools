@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>63453e4e-76e8-4077-838b-019e0a23e155</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>src\Parser.py</StartupFile>
+    <StartupFile>src\main.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>

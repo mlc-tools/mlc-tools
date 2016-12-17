@@ -1,9 +1,13 @@
+import fileutils
+
+
 class Writer:
-	def __init__(self, parser):
+	def __init__(self, outDirectory, parser):
 		self.buffers = {}
+		self.out_directory = outDirectory
 		
-		self.buffers = self._add(self.buffers, self.writeObjects(parser.objects, 0, 0))
-		self.buffers = self._add(self.buffers, self.writeFunctions(parser.functions, 0, 0))
+		#self.buffers = self._add(self.buffers, self.writeObjects(parser.objects, 0, 0))
+		#self.buffers = self._add(self.buffers, self.writeFunctions(parser.functions, 0, 0))
 		self.buffers = self._add(self.buffers, self.writeClasses(parser.classes, 0, 0))
 
 		return
@@ -39,10 +43,20 @@ class Writer:
 	def writeClasses(self, classes, tabs, flags):
 		out = {flags:"\n"}
 		for cls in classes:
-			out = self._add(out, self.writeClass(cls, tabs, flags))
+			dict = self.writeClass(cls, tabs, flags)
+			self.save( self._getFilenameForClass(cls.name), dict[flags] )
+			out = self._add( out, dict )
 		return out;
 
 	def writeFunctions(self, functions, tabs, flags):
 		out = ""
 		for function in functions: out += self.tabs(tabs) + self.writeFunction(function, tabs, flags)
 		return out
+
+	def save( self, filename, string ):
+		filename = self.out_directory + "/" + filename;
+		fileutils.write(filename, string)
+
+	def _getFilenameForClass(self, class_name):
+		return class_name
+		
