@@ -4,6 +4,10 @@ from Function import Function
 from  WriterCpp import WriterCpp
 from  WriterJava import WriterJava
 
+def throw_error( msg ):
+	print msg
+	exit(-1)
+
 class Parser:
 	def __init__(self):
 		self.classes=[]
@@ -21,6 +25,8 @@ class Parser:
 				text = self._createFunction(text)
 			else:
 				text = self._createDeclaration(text)
+
+		self._find_dependences()
 	
 	def _is_class(self,line):
 		return line.strip().find("class") == 0
@@ -75,3 +81,27 @@ class Parser:
 		function.parseBody(body)
 		self.functions.append(function)
 		return text
+
+	def _findClass(self, name):
+		for cls in self.classes:
+			if cls.name == name:
+				return cls
+		return None
+
+	def _find_dependences(self):
+		for cls in self.classes:
+			behaviors = []
+			for name in cls.behaviors:
+				c = self._findClass(name)
+				if c == None:
+					throw_error( "cannot find behavior class: {0}<{1}>".format(cls.name, name) );
+				behaviors.append( c )
+			cls.behaviors = behaviors
+			cls.is_serialized = self.isSerialised(cls)
+
+	def isSerialised(self, cls):
+		if cls.is_serialized:
+			return True
+		for c in cls.behaviors:
+			return self.isSerialised(c)
+		return False				

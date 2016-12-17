@@ -93,24 +93,34 @@ class WriterCpp(Writer):
 	def _writeClassHpp(self, cls, tabs):
 		out = Writer.writeClass(self, cls, tabs, FLAG_HPP)
 		self._currentClass = cls
-		behaviors = ", ".join(cls.behaviors)
+		behaviors = []
+		for c in cls.behaviors:
+			behaviors.append(c.name)
+		behaviors = ", ".join(behaviors)
 		objects = self.writeObjects(cls.members, 1, FLAG_HPP)
 		functions = self.writeFunctions(cls.functions, 1, FLAG_HPP)
 		constructor = self._createConstructorFunctionHpp(cls, 1)
+		includes = self._findIncludes(cls)
 		self._currentClass = None
 
 		fstr = ""
-		if len(cls.behaviors) > 0: fstr += "{0} {1} : public {2}"
-		else: fstr += "{0} {1}"
-		if functions[FLAG_HPP].strip() == "": F = ""
-		else: F = "\n{4}"
-		if objects[FLAG_HPP].strip() == "": O = ""
-		else: O = "\nprotected:\n{3}"
+		if len(cls.behaviors) > 0: 
+			fstr += "{0} {1} : public {2}"
+		else:
+		    fstr += "{0} {1}"
+		if functions[FLAG_HPP].strip() == "": 
+			F = ""
+		else:
+		    F = "\n{4}"
+		if objects[FLAG_HPP].strip() == "":
+		    O = ""
+		else:
+		    O = "\nprotected:\n{3}"
 
 		fstr += "\n__begin__\npublic:\n{5}" + F + O + "__end__;\n\n"
 
 		fstr = "namespace {0}\n__begin__\n\n{1}__end__//namespace {0}".format( self._getNamespace(cls), fstr )
-		fstr = "#ifndef __{0}_h__\n#define __{0}_h__\n\n{1}\n\n#endif //#ifndef __{0}_h__".format( cls.name, fstr )
+		fstr = "#ifndef __{0}_h__\n#define __{0}_h__\n{2}\n\n{1}\n\n#endif //#ifndef __{0}_h__".format( cls.name, fstr, includes )
 
 		out[FLAG_HPP] += fstr.format( cls.type, cls.name, behaviors, objects[FLAG_HPP], functions[FLAG_HPP], constructor);
 		out[FLAG_HPP] = re.sub("__begin__", "{", out[FLAG_HPP])
@@ -130,8 +140,12 @@ class WriterCpp(Writer):
 		return out
 	
 	def _createConstructorFunctionHpp(self, cls, tabs):
-		fstr = "{1}{0}();\n"
-		return fstr.format( cls.name, self.tabs(tabs) )
+		fstr = "{1}{0}()"
+		fstr = fstr.format( cls.name, self.tabs(tabs) )
+		if cls.is_abstract:
+			fstr += "{}"
+		fstr += ";\n"
+		return fstr
 
 	def _createConstructorFunctionCpp(self, cls, tabs):
 		initialize = ""
@@ -205,7 +219,7 @@ class WriterCpp(Writer):
 		return "mg"
 
 	def addMethods(self, cls):
-		if self.isSerialised(cls):
+		if cls.is_serialized:
 			have = False
 			for function in cls.functions:
 				if function.name == "serialize":
@@ -216,9 +230,6 @@ class WriterCpp(Writer):
 				self.addSerialization(cls, DESERIALIZATION)
 			
 		return cls
-
-	def isSerialised(self, cls):
-		return cls.is_serialized or "SerializedObject" in cls.behaviors
 
 	def addSerialization(self, cls, serialization_type):
 
@@ -248,3 +259,41 @@ class WriterCpp(Writer):
 			str = fstr.format(obj.name, obj.type, obj.initial_value, "{", "}", *obj.template_args)
 			function.operations.append(str)
 		cls.functions.append(function)
+
+	def _findIncludes(self, cls):
+		out = ""
+		fstr = "\n#include \"{0}.h\""
+		fstr_std = "\n#include <{0}>"
+
+		def is_std_type(type):
+			std_types = []
+			std_types.append( "string" )
+			std_types.append( "list" )
+			return type in std_types
+		def need_include(type):
+			types = []
+			types.append( "int" )
+			types.append( "float" )
+			types.append( "bool" )
+			return not type in types
+
+		types = {}
+		
+		for t in cls.behaviors:
+			types[t.name] = 1
+		for t in cls.members:
+			types[t.type] = 1
+		for f in cls.functions:
+			for t in f.args:
+				type = re.sub("const", "", f.args[t]).strip()
+				type = re.sub("\*", "", type).strip()
+				type = re.sub("&", "", type).strip()
+				types[type] = 1
+
+		for t in types:
+			if is_std_type(t):
+				out += fstr_std.format( t )
+			elif need_include(t):
+				out += fstr.format( t )
+
+		return out

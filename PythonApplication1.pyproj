@@ -52,14 +52,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="out\" />
     <Folder Include="src\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="declaration.txt" />
-    <Content Include="out\BattleSystem.cpp" />
-    <Content Include="out\BattleSystem.h" />
-    <Content Include="out\CommandDelegate.h" />
     <Content Include="templates.txt" />
     <Content Include="reg_expresions.txt" />
   </ItemGroup>

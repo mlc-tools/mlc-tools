@@ -18,8 +18,11 @@ class WriterJava(Writer):
 		out += "{0}\n\n".format( self._getPackage() )
 		out += "{0}\n\n".format( self._getImports(cls) )
 		if len(cls.behaviors) > 0:
-			behaviors = ", ".join(cls.behaviors)
-			out += "public class {0} extend {1}__begin__\n".format( cls.name, behaviors )
+			behaviors = []
+			for c in cls.behaviors:
+				behaviors.append(c.name)
+			behaviors = ", ".join(behaviors)
+			out += "public class {0} extends {1}__begin__\n".format( cls.name, behaviors )
 		else:
 			out += "public class {0}__begin__\n".format( cls.name )
 		
