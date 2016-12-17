@@ -29,7 +29,7 @@ class Writer:
 		return {flags:""}
 	
 	def writeClass(self, cls, tabs, flags):
-		return {flags:"\n"}
+		return {flags:""}
 	
 	def writeFunction(self, function, tabs, flags):
 		return {flags:""}

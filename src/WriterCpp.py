@@ -43,14 +43,18 @@ class WriterCpp(Writer):
 		functions = self.writeFunctions(cls.functions, 1, FLAG_HPP)
 		constructor = self._createConstructorFunctionHpp(cls, 1)
 
-		if len(cls.behaviors) > 0: fstr = "{0} {1} : public {2}"
-		else: fstr = "{0} {1}"
+		fstr = ""
+		if len(cls.behaviors) > 0: fstr += "{0} {1} : public {2}"
+		else: fstr += "{0} {1}"
 		if functions[FLAG_HPP].strip() == "": F = ""
 		else: F = "\n{4}"
 		if objects[FLAG_HPP].strip() == "": O = ""
 		else: O = "\nprotected:\n{3}"
 
 		fstr += "\n__begin__\npublic:\n{5}" + F + O + "__end__;\n\n"
+
+		fstr = "namespace {0}\n__begin__\n\n{1}__end__//namespace {0}".format( self._getNamespace(cls), fstr )
+		fstr = "#ifndef __{0}_h__\n#define __{0}_h__\n\n{1}\n\n#endif //#ifndef __{0}_h__".format( cls.name, fstr )
 
 		out[FLAG_HPP] += fstr.format( cls.type, cls.name, behaviors, objects[FLAG_HPP], functions[FLAG_HPP], constructor);
 		out[FLAG_HPP] = re.sub("__begin__", "{", out[FLAG_HPP])
@@ -63,8 +67,8 @@ class WriterCpp(Writer):
 		functions = self.writeFunctions(cls.functions, 0, FLAG_CPP)
 		constructor = self._createConstructorFunctionCpp(cls, tabs)
 		self._currentClass = None
-		fstr = "#include\"{0}.h\"\n\n{2}\n{1}"
-		out[FLAG_CPP] += fstr.format( cls.name, functions[FLAG_CPP], constructor )
+		fstr = "#include\"{0}.h\"\n\nnamespace {3}\n__begin__\n\n{2}\n{1}__end__"
+		out[FLAG_CPP] += fstr.format( cls.name, functions[FLAG_CPP], constructor, self._getNamespace(cls) )
 		out[FLAG_CPP] = re.sub("__begin__", "{", out[FLAG_CPP])
 		out[FLAG_CPP] = re.sub("__end__", "}", out[FLAG_CPP])
 		return out
@@ -101,7 +105,7 @@ class WriterCpp(Writer):
 			out[FLAG_HPP] = fstr.format( function.return_type, function.name, args, self.tabs(tabs) )
 		if flags & FLAG_CPP:
 			header = "{4}{0} {5}::{1}({2})\n"
-			body = "{4}__begin__{3}\n{4}__end__\n"
+			body = "{4}__begin__{3}\n{4}__end__\n\n"
 			fstr = header + body
 			body = ""
 			for operation in function.operations:
@@ -135,3 +139,5 @@ class WriterCpp(Writer):
 			out = self._add( out, self.writeFunction(function, tabs, flags) )
 		return out
 
+	def _getNamespace(self, cls):
+		return "mg"
