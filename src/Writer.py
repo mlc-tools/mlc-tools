@@ -3,6 +3,7 @@ import fileutils
 
 class Writer:
 	def __init__(self, outDirectory, parser):
+		self.parser = parser
 		self.buffers = {}
 		self.out_directory = outDirectory
 		
@@ -59,4 +60,5 @@ class Writer:
 
 	def _getFilenameForClass(self, class_name):
 		return class_name
+
 		

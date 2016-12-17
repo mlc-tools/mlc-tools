@@ -175,8 +175,9 @@ class WriterCpp(Writer):
 			for arg in function.args:
 				args.append(function.args[arg] + " " + arg)
 			args = ", ".join(args)
-			#TODO: find function in behavior classes
-			is_override = "" # "override"
+			is_override = ""
+			if self.parser.isFunctionOverride(self._currentClass, function):
+				is_override = "override"
 			out[FLAG_HPP] = fstr.format( function.return_type, function.name, args, self.tabs(tabs), is_override )
 		if flags & FLAG_CPP:
 			header = "{4}{0} {5}::{1}({2})\n"

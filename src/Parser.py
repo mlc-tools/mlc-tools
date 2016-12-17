@@ -102,6 +102,17 @@ class Parser:
 	def isSerialised(self, cls):
 		if cls.is_serialized:
 			return True
+		is_seriazed = False
 		for c in cls.behaviors:
-			return self.isSerialised(c)
-		return False				
+			is_seriazed = is_seriazed or self.isSerialised(c)
+		return is_seriazed
+
+	def isFunctionOverride(self, cls, function):
+		for c in cls.behaviors:
+			for f in c.functions:
+				if f.name == function.name and f.return_type == function.return_type and f.args == function.args:
+					return True
+		is_override = False
+		for c in cls.behaviors:
+			is_override = is_override or self.isFunctionOverride(c, function)
+		return is_override
