@@ -73,14 +73,11 @@ class WriterCpp(Writer):
 		value = ""
 		args = ", ".join(object.template_args)
 		if len(object.template_args) > 0:
-			fstr = "{4}{0}<{3}> {1}"
+			fstr = "{3}{0}<{2}> {1}"
 		else:
-			fstr = "{4}{0} {1}"
-		if object.initial_value != None:
-			fstr += " = {2}"
-			value = object.initial_value
+			fstr = "{3}{0} {1}"
 		fstr += ";\n"
-		out[flags] += fstr.format(object.type, object.name, value, args, self.tabs(tabs))
+		out[flags] += fstr.format(object.type, object.name, args, self.tabs(tabs))
 		return out
 
 	def writeClass(self, cls, tabs, flags):
@@ -95,10 +92,12 @@ class WriterCpp(Writer):
 	
 	def _writeClassHpp(self, cls, tabs):
 		out = Writer.writeClass(self, cls, tabs, FLAG_HPP)
+		self._currentClass = cls
 		behaviors = ", ".join(cls.behaviors)
 		objects = self.writeObjects(cls.members, 1, FLAG_HPP)
 		functions = self.writeFunctions(cls.functions, 1, FLAG_HPP)
 		constructor = self._createConstructorFunctionHpp(cls, 1)
+		self._currentClass = None
 
 		fstr = ""
 		if len(cls.behaviors) > 0: fstr += "{0} {1} : public {2}"
@@ -154,12 +153,17 @@ class WriterCpp(Writer):
 	def writeFunction(self, function, tabs, flags):
 		out = {}
 		if flags & FLAG_HPP:
-			fstr = "{3}{0} {1}({2});\n"
+			if not self._currentClass.is_abstract:
+				fstr = "{3}virtual {0} {1}({2}) {4};\n"
+			else:
+				fstr = "{3}virtual {0} {1}({2}) = 0;\n"
 			args = []
 			for arg in function.args:
 				args.append(function.args[arg] + " " + arg)
 			args = ", ".join(args)
-			out[FLAG_HPP] = fstr.format( function.return_type, function.name, args, self.tabs(tabs) )
+			#TODO: find function in behavior classes
+			is_override = "" # "override"
+			out[FLAG_HPP] = fstr.format( function.return_type, function.name, args, self.tabs(tabs), is_override )
 		if flags & FLAG_CPP:
 			header = "{4}{0} {5}::{1}({2})\n"
 			body = "{4}__begin__{3}\n{4}__end__\n\n"
@@ -185,9 +189,10 @@ class WriterCpp(Writer):
 			self.save( cls.name + ".h", dict[FLAG_HPP] )
 			out = self._add( out, dict )
 		for cls in classes: 
-			dict = self.writeClass(cls, tabs, FLAG_CPP)
-			self.save( cls.name + ".cpp", dict[FLAG_CPP] )
-			out = self._add( out, dict )
+			if not cls.is_abstract:
+				dict = self.writeClass(cls, tabs, FLAG_CPP)
+				self.save( cls.name + ".cpp", dict[FLAG_CPP] )
+				out = self._add( out, dict )
 		return out
 
 	def writeFunctions(self, functions, tabs, flags):
@@ -213,7 +218,7 @@ class WriterCpp(Writer):
 		return cls
 
 	def isSerialised(self, cls):
-		return "SerializedObject" in cls.behaviors
+		return cls.is_serialized or "SerializedObject" in cls.behaviors
 
 	def addSerialization(self, cls, serialization_type):
 

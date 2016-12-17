@@ -1,27 +1,9 @@
-class SerializedObject
+class SerializedObject:abstract:serialized
 {
 }
 
-class BattleSystem<SerializedObject>
+class Request<SerializedObject>
 {
-	SerializedObject object
-	list<SerializedObject> complex_list
-	list<int> list_of_integers
-	float health
-	float velocity=1.f
-	float damage_phisicaly=0.f
-	float resist_phisicaly=0.f
-
-	function void load(xml_node xml)
-	{
-	}
-	function void update(float dt)
-	{
-		self._velocity_timer_applyed -= dt;
-		if( self._velocity_timer_applyed <= 0)
-		{
-			self._velocity_timer_applyed = 0;
-			self._velocity_rate_applyed = 0.f;
-		}
-	}
+	int value=0
+	string type=""
 }
