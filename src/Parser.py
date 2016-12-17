@@ -12,6 +12,7 @@ class Parser:
 		return
 	
 	def parse(self, text):
+		text = text.strip()
 		while len(text) > 0:
 			text = text.strip()
 			if self._is_class(text):

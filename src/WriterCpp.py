@@ -43,11 +43,14 @@ class WriterCpp(Writer):
 		functions = self.writeFunctions(cls.functions, 1, FLAG_HPP)
 		constructor = self._createConstructorFunctionHpp(cls, 1)
 
-		if len(cls.behaviors) > 0:
-			fstr = "{0} {1} : public {2}"
-		else:
-			fstr = "{0} {1}"
-		fstr += "\n__begin__\npublic:\n{5}\n{4}\nprotected:\n{3}__end__;\n\n"
+		if len(cls.behaviors) > 0: fstr = "{0} {1} : public {2}"
+		else: fstr = "{0} {1}"
+		if functions[FLAG_HPP].strip() == "": F = ""
+		else: F = "\n{4}"
+		if objects[FLAG_HPP].strip() == "": O = ""
+		else: O = "\nprotected:\n{3}"
+
+		fstr += "\n__begin__\npublic:\n{5}" + F + O + "__end__;\n\n"
 
 		out[FLAG_HPP] += fstr.format( cls.type, cls.name, behaviors, objects[FLAG_HPP], functions[FLAG_HPP], constructor);
 		out[FLAG_HPP] = re.sub("__begin__", "{", out[FLAG_HPP])
@@ -127,7 +130,7 @@ class WriterCpp(Writer):
 		return out
 
 	def writeFunctions(self, functions, tabs, flags):
-		out = {}
+		out = {FLAG_CPP : "", FLAG_HPP : ""}
 		for function in functions: 
 			out = self._add( out, self.writeFunction(function, tabs, flags) )
 		return out

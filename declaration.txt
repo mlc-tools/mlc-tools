@@ -1,3 +1,7 @@
+class SerializedObject
+{
+}
+
 class BattleSystem<SerializedObject>
 {
 	float health=1.f
