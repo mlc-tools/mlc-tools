@@ -28,6 +28,13 @@ class WriterCpp(Writer):
 		self.serialize_formats[DESERIALIZATION]["simple"].append( "if(json.is_exist(\"{0}\")) \n\t\t {0} = json.get<{1}>( \"{0}\" );\n\telse \n\t\t{0} = {2}" )
 		self.serialize_formats[DESERIALIZATION]["simple"].append( "{0} = json.get<{1}>( \"{0}\" )" )
 		
+		self.serialize_formats[SERIALIZATION]["serialized"] = []
+		self.serialize_formats[SERIALIZATION]["serialized"].append( "static_assert(0, \"field '{0}' not should have a initialize value\")" )
+		self.serialize_formats[SERIALIZATION]["serialized"].append( "{0}.serialize(json.append_node(\"{0}\"))" )
+		self.serialize_formats[DESERIALIZATION]["serialized"] = []
+		self.serialize_formats[DESERIALIZATION]["serialized"].append( "static_assert(0, \"field '{0}' not should have a initialize value\")" )
+		self.serialize_formats[DESERIALIZATION]["serialized"].append( "{0}.deserialize(json.append_node(\"{0}\"))" )
+		
 		self.serialize_formats[SERIALIZATION]["simple_list"] = []
 		self.serialize_formats[SERIALIZATION]["simple_list"].append( "static_assert(0, \"list '{0}' not should have a initialize value\")" )
 		self.serialize_formats[SERIALIZATION]["simple_list"].append( "auto arr_{0} = json.append_array( \"{0}\" );\n\tfor( auto& t : {0} )\n\t\tarr_{0}.push_back().set<{5}>( t )" )
@@ -223,11 +230,13 @@ class WriterCpp(Writer):
 				index = 1
 			
 			type = obj.type
+			if not type in self.simple_types and type != "list":
+				type = "serialized"
 			if len(obj.template_args) > 0:
-				if obj.template_args[0] == "SerializedObject":
-					type = "{0}<serialized>".format( type )
+				if obj.template_args[0] in self.simple_types:
+					type = "{0}<{1}>".format( type, obj.template_args[0] )
 				else:
-					type = "{0}<{1}>".format( type, ", ".join(obj.template_args) )
+					type = "{0}<serialized>".format( type )
 
 			fstr = self.serialize_formats[serialization_type][type][index]
 			str = fstr.format(obj.name, obj.type, obj.initial_value, "{", "}", *obj.template_args)

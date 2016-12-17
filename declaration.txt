@@ -4,6 +4,7 @@ class SerializedObject
 
 class BattleSystem<SerializedObject>
 {
+	SerializedObject object
 	list<SerializedObject> complex_list
 	list<int> list_of_integers
 	float health
