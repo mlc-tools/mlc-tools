@@ -33,9 +33,9 @@ class Class(Object):
 		return
 
 	def _findModifiers(self, str):
-		self.is_abstract = str.find( ":abstract" ) != -1
-		self.is_serialized = str.find( ":serialized" ) != -1
-		self.is_visitor = str.find( ":visitor" ) != -1
+		self.is_abstract = self.is_abstract or str.find( ":abstract" ) != -1
+		self.is_serialized = self.is_serialized or str.find( ":serialized" ) != -1
+		self.is_visitor = self.is_visitor or str.find( ":visitor" ) != -1
 		str = re.sub(":abstract", "", str)
 		str = re.sub(":serialized", "", str)
 		str = re.sub(":visitor", "", str)

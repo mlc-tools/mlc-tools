@@ -9,6 +9,16 @@ FLAG_CPP = 4
 SERIALIZATION = 0
 DESERIALIZATION = 1
 
+def convertType(type):
+	types = {}
+	types["cc.point"] = "cocos2d::Point"
+	types["list"] = "std::vector"
+	types["string"] = "std::string"
+	if type in types:
+		return types[type]
+	return type 
+
+
 class WriterCpp(Writer):
 	def __init__(self, outDirectory, parser):
 		#{0} - field name
@@ -77,7 +87,7 @@ class WriterCpp(Writer):
 		else:
 			fstr = "{3}{0} {1}"
 		fstr += ";\n"
-		out[flags] += fstr.format(object.type, object.name, args, self.tabs(tabs))
+		out[flags] += fstr.format(convertType(object.type), object.name, args, self.tabs(tabs))
 		return out
 
 	def writeClass(self, cls, tabs, flags):
@@ -180,8 +190,8 @@ class WriterCpp(Writer):
 			if self.parser.isFunctionOverride(self._currentClass, function):
 				is_override = "override"
 
-			out[FLAG_HPP] = fstr.format( function.return_type, function.name, args, self.tabs(tabs), is_override )
-		if flags & FLAG_CPP:
+			out[FLAG_HPP] = fstr.format( convertType(function.return_type), function.name, args, self.tabs(tabs), is_override )
+		if flags & FLAG_CPP and not function.is_external:
 			header = "{4}{0} {5}::{1}({2})\n"
 			body = "{4}__begin__{3}\n{4}__end__\n\n"
 			fstr = header + body
@@ -194,7 +204,7 @@ class WriterCpp(Writer):
 			for arg in function.args:
 				args.append(function.args[arg] + " " + arg)
 			args = ", ".join(args)
-			out[FLAG_CPP] = fstr.format( function.return_type, function.name, args, body, self.tabs(tabs), self._currentClass.name )
+			out[FLAG_CPP] = fstr.format( convertType(function.return_type), function.name, args, body, self.tabs(tabs), self._currentClass.name )
 			out[FLAG_CPP] = re.sub("self.", "this->", out[FLAG_CPP])
 
 		return out
@@ -253,6 +263,8 @@ class WriterCpp(Writer):
 			function.args["json"] = "const RapidJsonNode&"
 		function.return_type = "void"
 		for obj in cls.members:
+			if obj.is_runtime:
+				continue
 			index = 0 
 			if obj.initial_value == None:
 				index = 1
@@ -267,7 +279,7 @@ class WriterCpp(Writer):
 					type = "{0}<serialized>".format( type )
 
 			fstr = self.serialize_formats[serialization_type][type][index]
-			str = fstr.format(obj.name, obj.type, obj.initial_value, "{", "}", *obj.template_args)
+			str = fstr.format(obj.name, convertType(obj.type), obj.initial_value, "{", "}", *obj.template_args)
 			function.operations.append(str)
 		cls.functions.append(function)
 

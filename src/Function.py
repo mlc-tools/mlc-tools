@@ -1,3 +1,4 @@
+import re
 from Object import Object
 
 class Function:
@@ -6,9 +7,11 @@ class Function:
 		self.return_type = ""
 		self.name = ""
 		self.args = {}
+		self.is_external = False
 
 	def parse(self, line):
 		line = line.strip()
+		line = self._findModifiers(line)
 		k = line.find("function")
 		if k > -1:
 			line = line[k+8:].strip()
@@ -51,3 +54,8 @@ class Function:
 			if len(operation) > 0:
 				self.operations.append(operation)
 		return
+	
+	def _findModifiers(self, str):
+		self.is_external = str.find( ":external" ) != -1
+		str = re.sub(":external", "", str)
+		return str

@@ -5,12 +5,14 @@ import re
 #	return 0;
 #}
 
+
 class Object:
 	def __init__(self):
 		self.type = ""
 		self.template_args = []
 		self.name = ""
 		self.initial_value = None
+		self.is_runtime = False
 
 	#float value;
 	#float value = 0;
@@ -18,6 +20,7 @@ class Object:
 	#int value = 1 + 3;
 	def parse(self,line):
 		str = line.strip();
+		str = self._findModifiers(str)
 		str = re.sub(";", "", str)
 		str = re.sub(", ", ",", str)
 		str = re.sub(" ,", ",", str)
@@ -50,3 +53,7 @@ class Object:
 			self.type = self.type[0:l]
 
 
+	def _findModifiers(self, str):
+		self.is_runtime = str.find( ":runtime" ) != -1
+		str = re.sub(":runtime", "", str)
+		return str
