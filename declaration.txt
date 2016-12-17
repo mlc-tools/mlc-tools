@@ -6,11 +6,11 @@ class Command<SerializedObject>
 {
 }
 
-class Request:visitor
+class Request<Command>:visitor
 {
 }
 
-class RequestScore<Command, Request>
+class RequestScore<Request>
 {
 	int id
 }
