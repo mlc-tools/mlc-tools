@@ -1,25 +1,20 @@
-int t;
-int t=0;
-list<int> someList;
-map<int, int> someMap;
-
 class BattleSystem<SerializedObject>
 {
-	float health=1
-	float velocity=1
-	float damage_phisicaly=0
-	function int method()
+	float health=1.f
+	float velocity=1.f
+	float damage_phisicaly=0.f
+	float resist_phisicaly=0.f
+
+	function void load(xml_node xml)
 	{
-		return 0;
 	}
-}
-class BattleSystem2<SerializedObject>
-{
-	float H=1
-	float V=1
-	float D=0
-	function int M(int arg1)
+	function void update(float dt)
 	{
-		return arg1;
+		self._velocity_timer_applyed -= dt;
+		if( self._velocity_timer_applyed <= 0)
+		{
+			self._velocity_timer_applyed = 0;
+			self._velocity_rate_applyed = 0.f;
+		}
 	}
 }

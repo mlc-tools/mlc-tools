@@ -85,4 +85,8 @@ parser = Parser()
 parser.parse(str)
 
 writer = WriterCpp(parser)
-print writer.out
+for key in writer.buffers:
+	print "======================="
+	print key
+	print "======================="
+	print writer.buffers[key]
