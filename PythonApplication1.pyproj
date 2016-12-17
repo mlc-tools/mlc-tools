@@ -47,6 +47,9 @@
     <Compile Include="src\Writer.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="src\WriterJava.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="out\" />

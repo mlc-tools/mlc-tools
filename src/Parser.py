@@ -2,6 +2,7 @@ from Object import Object
 from Class import Class
 from Function import Function
 from  WriterCpp import WriterCpp
+from  WriterJava import WriterJava
 
 class Parser:
 	def __init__(self):
@@ -84,7 +85,7 @@ str = open("declaration.txt","r").read()
 parser = Parser()
 parser.parse(str)
 
-writer = WriterCpp(parser)
+writer = WriterJava(parser)
 for key in writer.buffers:
 	print "======================="
 	print key
