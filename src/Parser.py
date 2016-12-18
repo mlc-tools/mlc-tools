@@ -163,6 +163,6 @@ class Parser:
 		function = Function()
 		function.name = "visit"
 		function.return_type = "void"
-		function.args["ctx"] = cls.name + "*"
+		function.args.append(["ctx", cls.name + "*"])
 		visitor.functions.append(function)
 		

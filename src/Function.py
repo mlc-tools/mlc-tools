@@ -6,7 +6,7 @@ class Function:
 		self.operations = []
 		self.return_type = ""
 		self.name = ""
-		self.args = {}
+		self.args = []
 		self.is_const = False
 		self.is_external = False
 
@@ -26,21 +26,21 @@ class Function:
 						exit(-1)
 					type = arg.split("*")[0].strip() + "*"
 					name = arg.split("*")[1].strip()
-					self.args[name] = type
+					self.args.append( [name, type] )
 				elif arg.find( "&" ) > -1:
 					if not (len(arg.split("&")) == 2):
 						print "args pair not pair";
 						exit(-1)
 					type = arg.split("&")[0].strip() + "&"
 					name = arg.split("&")[1].strip()
-					self.args[name] = type
+					self.args.append( [name, type] )
 				elif arg.find( " " ) > -1:
 					if not (len(arg.split(" ")) == 2):
 						print "args pair not pair";
 						exit(-1)
 					type = arg.split(" ")[0].strip()
 					name = arg.split(" ")[1].strip()
-					self.args[name] = type
+					self.args.append( [name, type] )
 				else:
 					print "error parsing arguments"
 					exit(-1)

@@ -201,7 +201,7 @@ class WriterCpp(Writer):
 				fstr = "{3}{6} {0} {1}({2}) {4} {5} = 0;\n"
 			args = []
 			for arg in function.args:
-				args.append(function.args[arg] + " " + arg)
+				args.append(arg[1] + " " + arg[0])
 			args = ", ".join(args)
 			modifier = "virtual"
 			if function.name == TEST_FUNCTION_CREATE:
@@ -228,7 +228,7 @@ class WriterCpp(Writer):
 				body += line
 			args = []
 			for arg in function.args:
-				args.append(function.args[arg] + " " + arg)
+				args.append(arg[1] + " " + arg[0])
 			args = ", ".join(args)
 			out[FLAG_CPP] = fstr.format( convertType(function.return_type), function.name, args, body, self.tabs(tabs), self._currentClass.name, is_const )
 			out[FLAG_CPP] = re.sub("self.", "this->", out[FLAG_CPP])
@@ -302,10 +302,10 @@ class WriterCpp(Writer):
 		if serialization_type == SERIALIZATION:
 			function.is_const = True
 			function.name = "serialize"
-			function.args["json"] = "RapidJsonNode&"
+			function.args.append(["json","RapidJsonNode&"])
 		if serialization_type == DESERIALIZATION:
 			function.name = "deserialize"
-			function.args["json"] = "const RapidJsonNode&"
+			function.args.append(["json", "const RapidJsonNode&"])
 		function.return_type = "void"
 		for obj in cls.members:
 			if obj.is_runtime:
@@ -335,7 +335,7 @@ class WriterCpp(Writer):
 		function = Function()
 		function.name = "accept"
 		function.return_type = "void"
-		function.args["visitor"] = visitor + "*";
+		function.args.append(["visitor", visitor + "*"])
 		function.operations.append("visitor->visit( this )")
 		cls.functions.append(function)
 
@@ -343,7 +343,7 @@ class WriterCpp(Writer):
 		function = Function()
 		function.name = "operator =="
 		function.return_type = "bool"
-		function.args["rhs"] = "const " + cls.name + "&";
+		function.args.append(["rhs", "const " + cls.name + "&"])
 		function.is_const = True
 		fbody_line = "result = result && {0} == rhs.{0}"
 		function.operations.append( "bool result = true");
@@ -411,12 +411,12 @@ class WriterCpp(Writer):
 				types[arg] = 1
 		for f in cls.functions:
 			for t in f.args:
-				type = re.sub("const", "", f.args[t]).strip()
+				type = re.sub("const", "", t[1]).strip()
 				type = re.sub("\*", "", type).strip()
 				type = re.sub("&", "", type).strip()
-				if flags == FLAG_CPP or f.args[t] != type + "*":
+				if flags == FLAG_CPP or t[1] != type + "*":
 					types[type] = 1
-				if flags == FLAG_HPP and f.args[t] == type + "*":
+				if flags == FLAG_HPP and t[1] == type + "*":
 					ftypes[type] = 1
 
 		for t in types:
