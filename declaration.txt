@@ -1,8 +1,8 @@
-class SerializedObject:abstract:serialized
+class SerializedObject:serialized:abstract
 {
 }
 
-class Command<SerializedObject>
+class Command<SerializedObject>:abstract
 {
 }
 
@@ -10,7 +10,57 @@ class Request<Command>:visitor
 {
 }
 
-class RequestScore<Request>
+class Response<Command>:visitor
 {
-	int id
+}
+
+class RoutePoint<SerializedObject>
+{
+	int triger=0
+	float radius=0.f
+	string message
+	bool is_dynamic = false
+}
+
+class Route<SerializedObject>
+{
+	list<RoutePoint> points
+	list<float>:runtime lengths
+	int id=-1
+}
+
+class TripleRoute<SerializedObject>
+{
+	int layer=0
+	bool desantRoute=false
+	Route main
+	Route left
+	Route right
+}
+
+class BattleSystem<SerializedObject>
+{
+	float health=1.f
+	float velocity=1.f
+	float damage_phisicaly=0.f
+	float resist_phisicaly=0.f
+	float damage_ice=0.f
+	float resist_ice=0.f
+	float damage_fire=0.f
+	float resist_fire=0.f
+	float damage_electro=0.f
+	float resist_electro=0.f
+	float velocity_rate=1.f
+	float velocity_rate_time=0.f
+	float velocity_resist=0.f
+	float firerate=1.f
+	float attack_radius=0.f
+	int max_targets=1
+	float:runtime _velocity_rate_applyed=0.f
+	float:runtime _velocity_timer_applyed=0.f
+	
+	function float _getDamage(BattleSystem* attacker)
+	{
+		return 0;
+	}
 }

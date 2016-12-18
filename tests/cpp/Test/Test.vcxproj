@@ -79,19 +79,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\..\out\Command.cpp" />
-    <ClCompile Include="..\..\..\out\Request.cpp" />
-    <ClCompile Include="..\..\..\out\RequestScore.cpp" />
+    <ClCompile Include="Generics.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="RapidJsonNode.cpp" />
+    <ClCompile Include="TestSerialization.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\out\Command.h" />
-    <ClInclude Include="..\..\..\out\IVisitorRequest.h" />
-    <ClInclude Include="..\..\..\out\Request.h" />
-    <ClInclude Include="..\..\..\out\RequestScore.h" />
-    <ClInclude Include="..\..\..\out\SerializedObject.h" />
+    <ClInclude Include="Generics.h" />
     <ClInclude Include="RapidJsonNode.h" />
+    <ClInclude Include="TestSerialization.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

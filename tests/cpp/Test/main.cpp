@@ -1,24 +1,8 @@
-#include "../../../out/RequestScore.h"
-#include "../../../out/SerializedObject.h"
-#include "../../../out/IVisitorRequest.h"
+#include "TestSerialization.h"
 
-using namespace mg;
-
-class Visitor : public IVisitorRequest
-{
-	virtual void visit( Request* ctx )
-	{
-	}
-
-	virtual void visit( RequestScore* ctx )
-	{
-	}
-};
 
 int main()
 {
-	Visitor visitor;
-	Request* request = new RequestScore;
-	request->accept( &visitor );
-	return 0;
+	TestSerialization test;
+	return test.execute() ? 0 : -1;
 }

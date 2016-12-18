@@ -1,4 +1,6 @@
 import re
+import random
+import fileutils
 from Writer import Writer
 from Object import Object
 from Class import Class
@@ -8,6 +10,8 @@ FLAG_HPP = 2
 FLAG_CPP = 4
 SERIALIZATION = 0
 DESERIALIZATION = 1
+TEST_FUNCTION_CREATE = "__create_instance__"
+
 
 def convertType(type):
 	types = {}
@@ -29,13 +33,14 @@ def getIncludeFile(file):
 
 
 class WriterCpp(Writer):
-	def __init__(self, outDirectory, parser):
+	def __init__(self, outDirectory, parser, createTests):
 		#{0} - field name
 		#{1} - field type
 		#{2} - field initialize value
 		#{3} - {
 		#{4} - }
 		#{5}, {6}, ... - arguments of field type (list<int>)
+		self.createTests = createTests
 		self.serialize_formats = []
 		self.serialize_formats.append({})
 		self.serialize_formats.append({})
@@ -83,8 +88,11 @@ class WriterCpp(Writer):
 			self.serialize_formats[i]["list<serialized>"].append( self.serialize_formats[i]["serialized_list"][0] )
 			self.serialize_formats[i]["list<serialized>"].append( self.serialize_formats[i]["serialized_list"][1] )
 
+		self.tests = []
 		Writer.__init__(self, outDirectory, parser)
 		self._currentClass = None
+		if self.createTests:
+			self._createTests()
 		return
 	
 	def writeObject(self, object, tabs, flags):
@@ -267,6 +275,24 @@ class WriterCpp(Writer):
 					break
 			if have == False:
 				self.addAccept(cls)
+		if not cls.is_abstract:
+			have = False
+			for function in cls.functions:
+				if function.name == "operator ==":
+					have = True
+					break
+			if have == False:
+				self.addEquals(cls)
+		if self.createTests and not cls.is_abstract:
+			have = False
+			for function in cls.functions:
+				if function.name == TEST_FUNCTION_CREATE:
+					have = True
+					break
+			if have == False:
+				self.addTests(cls)
+				self.tests.append(cls)
+			
 			
 		return cls
 
@@ -312,6 +338,54 @@ class WriterCpp(Writer):
 		function.args["visitor"] = visitor + "*";
 		function.operations.append("visitor->visit( this )")
 		cls.functions.append(function)
+
+	def addEquals(self, cls):
+		function = Function()
+		function.name = "operator =="
+		function.return_type = "bool"
+		function.args["rhs"] = "const " + cls.name + "&";
+		function.is_const = True
+		fbody_line = "result = result && {0} == rhs.{0}"
+		function.operations.append( "bool result = true");
+		for m in cls.members:
+			function.operations.append( fbody_line.format(m.name) )
+		function.operations.append( "return result");
+		cls.functions.append(function)
+
+	def addTests(self, cls):
+		function = Function()
+		function.name = TEST_FUNCTION_CREATE
+		function.return_type = cls.name
+
+		fbody_line = "instance.{0} = {1}"
+		function.operations.append( "{0} instance".format(cls.name) );
+		for m in cls.members:
+			value = self._getTestValue(m)
+			if value == None:
+				continue
+			str = fbody_line.format(m.name, value)
+			function.operations.append( str )
+		function.operations.append( "return instance");
+
+		cls.functions.append(function)
+
+	def _getTestValue(self, m):
+		value = ""
+		if m.is_runtime:
+			return None
+		if m.type == "list":
+			return None
+		if m.type == "int" or m.type == "float":
+			value = str(random.randint(-99999, 99999))
+		if m.type == "bool":
+			value = str(random.randint(0, 1))
+		if self.parser._findClass(m.type):
+			value = "{0}::{1}()".format(m.type,TEST_FUNCTION_CREATE)
+		elif m.type == "string":
+			value = "\"somestringvalue\""
+		if value == "":
+			value = "0"
+		return value
 
 	def _findIncludes(self, cls, flags):
 		out = ""

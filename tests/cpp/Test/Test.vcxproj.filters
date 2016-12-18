@@ -2,42 +2,13 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="..\..\..\out\Command.cpp">
-      <Filter>mg</Filter>
-    </ClCompile>
-    <ClCompile Include="RapidJsonNode.cpp">
-      <Filter>mg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\out\Request.cpp">
-      <Filter>mg</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\out\RequestScore.cpp">
-      <Filter>mg</Filter>
-    </ClCompile>
+    <ClCompile Include="Generics.cpp" />
+    <ClCompile Include="RapidJsonNode.cpp" />
+    <ClCompile Include="TestSerialization.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\out\Command.h">
-      <Filter>mg</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\out\IVisitorRequest.h">
-      <Filter>mg</Filter>
-    </ClInclude>
-    <ClInclude Include="RapidJsonNode.h">
-      <Filter>mg</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\out\Request.h">
-      <Filter>mg</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\out\RequestScore.h">
-      <Filter>mg</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\out\SerializedObject.h">
-      <Filter>mg</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <Filter Include="mg">
-      <UniqueIdentifier>{11ac27db-8acf-4401-bbf8-920d6197aff3}</UniqueIdentifier>
-    </Filter>
+    <ClInclude Include="Generics.h" />
+    <ClInclude Include="RapidJsonNode.h" />
+    <ClInclude Include="TestSerialization.h" />
   </ItemGroup>
 </Project>
