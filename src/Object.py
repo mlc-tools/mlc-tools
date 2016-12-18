@@ -13,6 +13,8 @@ class Object:
 		self.name = ""
 		self.initial_value = None
 		self.is_runtime = False
+		self.is_static = False
+		self.is_const = False
 
 	#float value;
 	#float value = 0;
@@ -55,5 +57,9 @@ class Object:
 
 	def _findModifiers(self, str):
 		self.is_runtime = str.find( ":runtime" ) != -1
+		self.is_const = str.find( ":const" ) != -1
+		self.is_static = str.find( ":static" ) != -1
 		str = re.sub(":runtime", "", str)
+		str = re.sub(":const", "", str)
+		str = re.sub(":static", "", str)
 		return str

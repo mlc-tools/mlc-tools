@@ -97,14 +97,35 @@ class WriterCpp(Writer):
 	
 	def writeObject(self, object, tabs, flags):
 		out = Writer.writeObject(self, object, tabs, flags)
-		value = ""
-		args = ", ".join(object.template_args)
-		if len(object.template_args) > 0:
-			fstr = "{3}{0}<{2}> {1}"
-		else:
-			fstr = "{3}{0} {1}"
-		fstr += ";\n"
-		out[flags] += fstr.format(convertType(object.type), object.name, args, self.tabs(tabs))
+		if flags == FLAG_HPP:
+			value = ""
+			args = ", ".join(object.template_args)
+			modifiers = ""
+			if object.is_static:
+				modifiers += "static "
+			if object.is_const:
+				modifiers += "const ";
+			if len(object.template_args) > 0:
+				fstr = "{4}{3}{0}<{2}> {1}"
+			else:
+				fstr = "{4}{3}{0} {1}"
+			fstr += ";\n"
+			out[flags] += fstr.format(convertType(object.type), object.name, args, modifiers, self.tabs(tabs))
+		if flags == FLAG_CPP:
+			if object.is_static:
+				if object.initial_value == None:
+					print "static object have not initial_value"
+					exit(-1)
+				if len(object.template_args) > 0:
+					#TODO:
+					exit(-1)
+				value = ""
+				fstr = "{4}{0} {2}::{1} = {3}"
+				fstr += ";\n"
+				modifier = ""
+				if object.is_const:
+					modifier = "const "
+				out[flags] += fstr.format(convertType(object.type), object.name, self._currentClass.name, object.initial_value, modifier)
 		return out
 
 	def writeClass(self, cls, tabs, flags):
@@ -157,12 +178,13 @@ class WriterCpp(Writer):
 	def _writeClassCpp(self, cls, tabs):
 		out = Writer.writeClass(self, cls, tabs, FLAG_CPP)
 		self._currentClass = cls
+		objects = self.writeObjects(cls.members, 1, FLAG_CPP)
 		functions = self.writeFunctions(cls.functions, 0, FLAG_CPP)
 		constructor = self._createConstructorFunctionCpp(cls, tabs)
 		includes, f = self._findIncludes(cls,FLAG_CPP)
 		self._currentClass = None
-		fstr = "#include \"{0}.h\"{4}\n\nnamespace {3}\n__begin__\n\n{2}\n{1}__end__"
-		out[FLAG_CPP] += fstr.format( cls.name, functions[FLAG_CPP], constructor, self._getNamespace(cls), includes )
+		fstr = "#include \"{0}.h\"{4}\n\nnamespace {3}\n__begin__\n{5}\n{2}\n{1}__end__"
+		out[FLAG_CPP] += fstr.format( cls.name, functions[FLAG_CPP], constructor, self._getNamespace(cls), includes, objects[FLAG_CPP] )
 		out[FLAG_CPP] = re.sub("__begin__", "{", out[FLAG_CPP])
 		out[FLAG_CPP] = re.sub("__end__", "}", out[FLAG_CPP])
 		return out
@@ -178,7 +200,7 @@ class WriterCpp(Writer):
 	def _createConstructorFunctionCpp(self, cls, tabs):
 		initialize = ""
 		for obj in cls.members:
-			if obj.initial_value != None:
+			if obj.initial_value != None and not obj.is_static:
 				fstr = "\n\t{2} {0}({1})"
 				s = ","
 				if initialize == "": 
@@ -204,7 +226,7 @@ class WriterCpp(Writer):
 				args.append(arg[1] + " " + arg[0])
 			args = ", ".join(args)
 			modifier = "virtual"
-			if function.name == TEST_FUNCTION_CREATE:
+			if function.is_static:
 				modifier = "static"
 			is_override = ""
 			if self.parser.isFunctionOverride(self._currentClass, function):
@@ -308,7 +330,7 @@ class WriterCpp(Writer):
 			function.args.append(["json", "const RapidJsonNode&"])
 		function.return_type = "void"
 		for obj in cls.members:
-			if obj.is_runtime:
+			if obj.is_runtime or obj.is_static or obj.is_const:
 				continue
 			index = 0 
 			if obj.initial_value == None:
@@ -348,6 +370,8 @@ class WriterCpp(Writer):
 		fbody_line = "result = result && {0} == rhs.{0}"
 		function.operations.append( "bool result = true");
 		for m in cls.members:
+			if m.is_static or m.is_const:
+				continue
 			function.operations.append( fbody_line.format(m.name) )
 		function.operations.append( "return result");
 		cls.functions.append(function)
@@ -356,6 +380,7 @@ class WriterCpp(Writer):
 		function = Function()
 		function.name = TEST_FUNCTION_CREATE
 		function.return_type = cls.name
+		function.is_static = True
 
 		fbody_line = "instance.{0} = {1}"
 		function.operations.append( "{0} instance".format(cls.name) );

@@ -9,6 +9,7 @@ class Function:
 		self.args = []
 		self.is_const = False
 		self.is_external = False
+		self.is_static = False
 
 	def parse(self, line):
 		line = line.strip()
@@ -58,5 +59,7 @@ class Function:
 	
 	def _findModifiers(self, str):
 		self.is_external = str.find( ":external" ) != -1
+		self.is_static = str.find( ":static" ) != -1
 		str = re.sub(":external", "", str)
+		str = re.sub(":static", "", str)
 		return str

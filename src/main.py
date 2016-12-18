@@ -18,7 +18,7 @@ str = open("declaration.txt","r").read()
 
 parser = Parser()
 parser.parse(str)
-writer = WriterCpp("out", parser, True)
+writer = WriterCpp("out", parser, False)
 removeOldFiles(parser)
 
 #parser = Parser()
