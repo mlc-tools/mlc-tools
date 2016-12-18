@@ -21,6 +21,8 @@ class Parser:
 			text = text.strip()
 			if self._is_class(text):
 				text = self._createClass(text)
+			if self._is_enum(text):
+				text = self._createEnumClass(text)
 			elif self._is_functon(text):
 				text = self._createFunction(text)
 			else:
@@ -32,7 +34,9 @@ class Parser:
 		return line.strip().find("class") == 0
 	def _is_functon(self,line):
 		return line.strip().find("function") == 0
-	
+	def _is_enum(self,line):
+		return line.strip().find("enum") == 0
+
 	def _findBody(self, text):
 		text = text.strip()
 		body = ""
@@ -60,6 +64,15 @@ class Parser:
 	def _createClass(self, text):
 		body, header, text = self._findBody(text)
 		cls = Class()
+		cls.parse(header)
+		cls.parseBody( Parser(), body )
+		self.classes.append(cls)
+		return text
+
+	def _createEnumClass(self, text):
+		body, header, text = self._findBody(text)
+		cls = Class()
+		cls.type = "enum"
 		cls.parse(header)
 		cls.parseBody( Parser(), body )
 		self.classes.append(cls)

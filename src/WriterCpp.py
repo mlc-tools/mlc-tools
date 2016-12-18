@@ -159,18 +159,21 @@ class WriterCpp(Writer):
 		if functions[FLAG_HPP].strip() == "": 
 			F = ""
 		else:
-		    F = "\n{4}\n"
+		    F = "\n{4}"
 		if objects[FLAG_HPP].strip() == "":
 		    O = ""
 		else:
-		    O = "\npublic:\n{3}"
+		    O = "\npublic:{3}"
 
-		fstr += "\n__begin__\npublic:\n{5}" + F + O + "__end__;\n\n"
+		if cls.type != "enum":
+			fstr += "\n__begin__\npublic:\n{5}" + F + O + "__end__;\n\n"
+		else:
+			fstr += "\n__begin__{5}" + O + F + "__end__;\n\n"
 
 		fstr = "namespace {0}\n__begin__\n{2}\n\n{1}__end__//namespace {0}".format( self._getNamespace(cls), fstr, forward_declarations )
 		fstr = "#ifndef __{0}_h__\n#define __{0}_h__\n{2}\n\n{1}\n\n#endif //#ifndef __{0}_h__".format( cls.name, fstr, includes )
 
-		out[FLAG_HPP] += fstr.format( cls.type, cls.name, behaviors, objects[FLAG_HPP], functions[FLAG_HPP], constructor);
+		out[FLAG_HPP] += fstr.format( "class", cls.name, behaviors, objects[FLAG_HPP], functions[FLAG_HPP], constructor);
 		out[FLAG_HPP] = re.sub("__begin__", "{", out[FLAG_HPP])
 		out[FLAG_HPP] = re.sub("__end__", "}", out[FLAG_HPP])
 		return out
@@ -190,6 +193,8 @@ class WriterCpp(Writer):
 		return out
 	
 	def _createConstructorFunctionHpp(self, cls, tabs):
+		if cls.type == "enum":
+			return ""
 		fstr = "{1}{0}()"
 		fstr = fstr.format( cls.name, self.tabs(tabs) )
 		if cls.is_abstract:
@@ -198,6 +203,8 @@ class WriterCpp(Writer):
 		return fstr
 
 	def _createConstructorFunctionCpp(self, cls, tabs):
+		if cls.type == "enum":
+			return ""
 		initialize = ""
 		for obj in cls.members:
 			if obj.initial_value != None and not obj.is_static:
@@ -218,22 +225,24 @@ class WriterCpp(Writer):
 		out = {}
 		if flags & FLAG_HPP:
 			if not self._currentClass.is_abstract:
-				fstr = "{3}{6} {0} {1}({2}) {4} {5};\n"
+				fstr = "{3}{6}{0} {1}({2}){4}{5};\n"
 			else:
-				fstr = "{3}{6} {0} {1}({2}) {4} {5} = 0;\n"
+				fstr = "{3}{6}{0} {1}({2}){4}{5} = 0;\n"
 			args = []
 			for arg in function.args:
 				args.append(arg[1] + " " + arg[0])
 			args = ", ".join(args)
-			modifier = "virtual"
+			modifier = "virtual "
 			if function.is_static:
-				modifier = "static"
+				modifier = "static "
+			if function.name == self._currentClass.name or function.name.find("operator ") == 0:
+				modifier = ""
 			is_override = ""
 			if self.parser.isFunctionOverride(self._currentClass, function):
-				is_override = "override"
+				is_override = " override"
 			is_const = ""
 			if function.is_const:
-				is_const = "const"
+				is_const = " const"
 
 			out[FLAG_HPP] = fstr.format( convertType(function.return_type), function.name, args, self.tabs(tabs), is_const, is_override, modifier )
 		if flags & FLAG_CPP and not function.is_external:
@@ -280,7 +289,7 @@ class WriterCpp(Writer):
 		return "mg"
 
 	def addMethods(self, cls):
-		if cls.is_serialized:
+		if cls.is_serialized or cls.type == "enum":
 			have = False
 			for function in cls.functions:
 				if function.name == "serialize":
