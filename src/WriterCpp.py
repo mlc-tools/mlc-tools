@@ -16,6 +16,7 @@ TEST_FUNCTION_CREATE = "__create_instance__"
 def convertType(type):
 	types = {}
 	types["cc.point"] = "cocos2d::Point"
+	types["cc.point*"] = "cocos2d::Point*"
 	types["list"] = "std::vector"
 	types["string"] = "std::string"
 	if type in types:
@@ -24,7 +25,7 @@ def convertType(type):
 
 def getIncludeFile(file):
 	types = {}
-	types["cc.point"] = "\"cocos2d::Point.h\""
+	types["cc.point"] = "\"cocos2d.h\""
 	types["list"] = "<vector>"
 	types["string"] = "<string>"
 	if file in types:
@@ -73,7 +74,7 @@ class WriterCpp(Writer):
 		self.serialize_formats[DESERIALIZATION]["serialized_list"].append( "static_assert(0, \"list '{0}' not should have a initialize value\")" )
 		self.serialize_formats[DESERIALIZATION]["serialized_list"].append( "auto arr_{0} = json.node( \"{0}\" );\n\tfor( size_t i = 0; i < arr_{0}.size(); ++i )\n\t{3}\n\t\t{0}.emplace_back();\n\t\t{0}.back().deserialize(arr_{0}.at(i));\n\t{4}" )
 
-		self.simple_types = ["int", "float", "bool", "string"]
+		self.simple_types = ["int", "float", "bool", "string", "cc.point"]
 		for i in range(2):
 			for type in self.simple_types:
 				self.serialize_formats[i][type] = []
@@ -91,8 +92,7 @@ class WriterCpp(Writer):
 		self.tests = []
 		Writer.__init__(self, outDirectory, parser)
 		self._currentClass = None
-		if self.createTests:
-			self._createTests()
+		self._createTests()
 		return
 	
 	def writeObject(self, object, tabs, flags):
@@ -230,7 +230,7 @@ class WriterCpp(Writer):
 				fstr = "{3}{6}{0} {1}({2}){4}{5} = 0;\n"
 			args = []
 			for arg in function.args:
-				args.append(arg[1] + " " + arg[0])
+				args.append(convertType(arg[1]) + " " + arg[0])
 			args = ", ".join(args)
 			modifier = "virtual "
 			if function.is_static:
@@ -259,7 +259,7 @@ class WriterCpp(Writer):
 				body += line
 			args = []
 			for arg in function.args:
-				args.append(arg[1] + " " + arg[0])
+				args.append(convertType(arg[1]) + " " + arg[0])
 			args = ", ".join(args)
 			out[FLAG_CPP] = fstr.format( convertType(function.return_type), function.name, args, body, self.tabs(tabs), self._currentClass.name, is_const )
 			out[FLAG_CPP] = re.sub("self.", "this->", out[FLAG_CPP])
@@ -268,6 +268,10 @@ class WriterCpp(Writer):
 
 	def writeClasses(self, classes, tabs, flags):
 		out = {FLAG_CPP : "", FLAG_HPP : ""}
+		for cls in classes:
+			if not cls.is_abstract:
+				self.tests.append(cls)
+
 		for cls in classes:
 			dict = self.writeClass(cls, tabs, FLAG_HPP)
 			self.save( cls.name + ".h", dict[FLAG_HPP] )
@@ -322,8 +326,6 @@ class WriterCpp(Writer):
 					break
 			if have == False:
 				self.addTests(cls)
-				self.tests.append(cls)
-			
 			
 		return cls
 
@@ -415,6 +417,8 @@ class WriterCpp(Writer):
 			value = str(random.randint(-99999, 99999))
 		if m.type == "bool":
 			value = str(random.randint(0, 1))
+		if m.type == "cc.point":
+			value = "cocos2d::Point({0},{1})".format(random.randint(-99999, 99999), random.randint(-99999, 99999))
 		if self.parser._findClass(m.type):
 			value = "{0}::{1}()".format(m.type,TEST_FUNCTION_CREATE)
 		elif m.type == "string":
@@ -445,7 +449,11 @@ class WriterCpp(Writer):
 		for t in cls.behaviors:
 			types[t.name] = 1
 		for t in cls.members:
-			types[t.type] = 1
+			type = t.type
+			type = re.sub( "const", "", type ).strip()
+			type = re.sub( "\*", "", type ).strip()
+			type = re.sub( "&", "", type ).strip()
+			types[type] = 1
 			for arg in t.template_args:
 				types[arg] = 1
 		for f in cls.functions:
@@ -468,9 +476,16 @@ class WriterCpp(Writer):
 			if need_include(t):
 				out += fstr.format( getIncludeFile(t) )
 		
-		fstr = "\nclass {0};"
 		for t in ftypes:
-				forward_declarations += fstr.format( t )
+			type = convertType(t)
+			if type.find( "::" ) == -1:
+				forward_declarations += "\nclass {0};".format( type )
+			else:
+				continue
+				ns = type[0:type.find( "::" )]
+				type = type[type.find( "::" )+2:]
+				str = "\nnamespace {1}\n__begin__\n\tclass {0};\n__end__".format( type, ns );
+				forward_declarations += str
 
 		return out, forward_declarations
 
@@ -482,7 +497,8 @@ class WriterCpp(Writer):
 			finc = "#include \"../../../out/{}.cpp\"\n".format(cls.name)
 			ftst = "\t_tests.push_back( new TestT<mg::{}> );\n".format(cls.name)
 			includes += finc
-			tests += ftst
+			if self.createTests:
+				tests += ftst
 		fstr = fstr.format( includes, tests )
 		fstr = re.sub("__begin__", "{", fstr)
 		fstr = re.sub("__end__", "}", fstr)
