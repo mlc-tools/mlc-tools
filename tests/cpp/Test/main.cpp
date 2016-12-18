@@ -55,10 +55,6 @@ public:
 	{
 	}
 
-	virtual void visit( RequestPreloadedUnits* ctx )
-	{
-	}
-
 	virtual void visit( RequestStartWave* ctx )
 	{
 	}

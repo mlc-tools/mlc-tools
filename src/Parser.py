@@ -21,14 +21,12 @@ class Parser:
 			text = text.strip()
 			if self._is_class(text):
 				text = self._createClass(text)
-			if self._is_enum(text):
+			elif self._is_enum(text):
 				text = self._createEnumClass(text)
 			elif self._is_functon(text):
 				text = self._createFunction(text)
 			else:
 				text = self._createDeclaration(text)
-
-		self._find_dependences()
 	
 	def _is_class(self,line):
 		return line.strip().find("class") == 0
@@ -107,14 +105,17 @@ class Parser:
 				return cls
 		return None
 
-	def _find_dependences(self):
+	def link(self):
 		for cls in self.classes:
 			if cls.type == "class":
 				self.createGetTypeFunction(cls);
+
+		for cls in self.classes:
 			if cls.is_visitor and self.getVisitorType(cls) != cls.name:
 				if cls.name.find( "IVisitor" ) != 0:
 					self.createVisitor(cls)
 
+		for cls in self.classes:
 			behaviors = []
 			for name in cls.behaviors:
 				c = self._findClass(name)
@@ -122,6 +123,8 @@ class Parser:
 					throw_error( "cannot find behavior class: {0}<{1}>".format(cls.name, name) );
 				behaviors.append( c )
 			cls.behaviors = behaviors
+
+		for cls in self.classes:
 			cls.is_serialized = self.isSerialised(cls)
 			cls.is_visitor = self.isVisitor(cls)
 			if cls.is_visitor and cls.name != self.getVisitorType(cls):

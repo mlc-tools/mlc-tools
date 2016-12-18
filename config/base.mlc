@@ -1,0 +1,17 @@
+class SerializedObject:serialized:abstract
+
+class Command<SerializedObject>
+{
+	int id:key;
+	function string getSerializedString():external:const;
+	function void serialize(RapidJsonNode& json):external:const;
+	function void deserialize(const RapidJsonNode& json):external;
+	function void accept(IVisitorRequest* visitor)
+	{
+		throw_error( getType() + " command cannot accepted with IVisitorRequest. " );
+	}
+	function void accept(IVisitorResponse* visitor)
+	{
+		throw_error( getType() + " command cannot accepted with IVisitorResponse. " );
+	}
+}
