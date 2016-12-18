@@ -4,7 +4,7 @@ class SerializedObject:serialized:abstract
 
 class Command<SerializedObject>
 {
-	int id;
+	int id:key;
 	function string getSerializedString():external:const;
 	function void serialize(RapidJsonNode& json):external:const;
 	function void deserialize(const RapidJsonNode& json):external;

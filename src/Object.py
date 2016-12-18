@@ -15,6 +15,7 @@ class Object:
 		self.is_runtime = False
 		self.is_static = False
 		self.is_const = False
+		self.is_key = False
 
 	#float value;
 	#float value = 0;
@@ -59,7 +60,9 @@ class Object:
 		self.is_runtime = str.find( ":runtime" ) != -1
 		self.is_const = str.find( ":const" ) != -1
 		self.is_static = str.find( ":static" ) != -1
+		self.is_key = str.find( ":key" ) != -1
 		str = re.sub(":runtime", "", str)
 		str = re.sub(":const", "", str)
 		str = re.sub(":static", "", str)
+		str = re.sub(":key", "", str)
 		return str

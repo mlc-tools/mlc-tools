@@ -207,8 +207,13 @@ class WriterCpp(Writer):
 		if cls.type == "enum":
 			return ""
 		initialize = ""
+		initialize2 = ""
 		for obj in cls.members:
-			if obj.initial_value != None and not obj.is_static:
+			if obj.is_key:
+				str1 = "\n\tstatic {0} {1}_key = 0;".format(obj.type, obj.name)
+				str2 = "\n\t{0} = ++{0}_key;".format(obj.name)
+				initialize2 += str1 + str2
+			elif obj.initial_value != None and not obj.is_static:
 				fstr = "\n\t{2} {0}({1})"
 				s = ","
 				if initialize == "": 
@@ -216,8 +221,8 @@ class WriterCpp(Writer):
 				str = fstr.format(obj.name, obj.initial_value, s)
 				initialize += str
 
-		fstr = "{0}::{0}(){1}\n__begin__\n{2}\n__end__\n"
-		str = fstr.format( cls.name, initialize, self.tabs(tabs) )
+		fstr = "{0}::{0}(){1}\n__begin__{2}\n{3}\n__end__\n"
+		str = fstr.format( cls.name, initialize, initialize2, self.tabs(tabs) )
 		str = re.sub("__begin__", "{", str)
 		str = re.sub("__end__", "}", str)
 		return str
