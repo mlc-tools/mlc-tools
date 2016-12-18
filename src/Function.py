@@ -7,6 +7,7 @@ class Function:
 		self.return_type = ""
 		self.name = ""
 		self.args = {}
+		self.is_const = False
 		self.is_external = False
 
 	def parse(self, line):

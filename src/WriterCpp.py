@@ -18,6 +18,15 @@ def convertType(type):
 		return types[type]
 	return type 
 
+def getIncludeFile(file):
+	types = {}
+	types["cc.point"] = "\"cocos2d::Point.h\""
+	types["list"] = "<vector>"
+	types["string"] = "<string>"
+	if file in types:
+		return types[file]
+	return "\"{0}.h\"".format(file)
+
 
 class WriterCpp(Writer):
 	def __init__(self, outDirectory, parser):
@@ -43,7 +52,7 @@ class WriterCpp(Writer):
 		self.serialize_formats[SERIALIZATION]["serialized"].append( "{0}.serialize(json.append_node(\"{0}\"))" )
 		self.serialize_formats[DESERIALIZATION]["serialized"] = []
 		self.serialize_formats[DESERIALIZATION]["serialized"].append( "static_assert(0, \"field '{0}' not should have a initialize value\")" )
-		self.serialize_formats[DESERIALIZATION]["serialized"].append( "{0}.deserialize(json.append_node(\"{0}\"))" )
+		self.serialize_formats[DESERIALIZATION]["serialized"].append( "{0}.deserialize(json.node(\"{0}\"))" )
 		
 		self.serialize_formats[SERIALIZATION]["simple_list"] = []
 		self.serialize_formats[SERIALIZATION]["simple_list"].append( "static_assert(0, \"list '{0}' not should have a initialize value\")" )
@@ -121,11 +130,11 @@ class WriterCpp(Writer):
 		if functions[FLAG_HPP].strip() == "": 
 			F = ""
 		else:
-		    F = "\n{4}"
+		    F = "\n{4}\n"
 		if objects[FLAG_HPP].strip() == "":
 		    O = ""
 		else:
-		    O = "\nprotected:\n{3}"
+		    O = "\npublic:\n{3}"
 
 		fstr += "\n__begin__\npublic:\n{5}" + F + O + "__end__;\n\n"
 
@@ -174,25 +183,34 @@ class WriterCpp(Writer):
 		str = re.sub("__begin__", "{", str)
 		str = re.sub("__end__", "}", str)
 		return str
-	
+		
 	def writeFunction(self, function, tabs, flags):
 		out = {}
 		if flags & FLAG_HPP:
 			if not self._currentClass.is_abstract:
-				fstr = "{3}virtual {0} {1}({2}) {4};\n"
+				fstr = "{3}{6} {0} {1}({2}) {4} {5};\n"
 			else:
-				fstr = "{3}virtual {0} {1}({2}) {4} = 0;\n"
+				fstr = "{3}{6} {0} {1}({2}) {4} {5} = 0;\n"
 			args = []
 			for arg in function.args:
 				args.append(function.args[arg] + " " + arg)
 			args = ", ".join(args)
+			modifier = "virtual"
+			if function.name == TEST_FUNCTION_CREATE:
+				modifier = "static"
 			is_override = ""
 			if self.parser.isFunctionOverride(self._currentClass, function):
 				is_override = "override"
+			is_const = ""
+			if function.is_const:
+				is_const = "const"
 
-			out[FLAG_HPP] = fstr.format( convertType(function.return_type), function.name, args, self.tabs(tabs), is_override )
+			out[FLAG_HPP] = fstr.format( convertType(function.return_type), function.name, args, self.tabs(tabs), is_const, is_override, modifier )
 		if flags & FLAG_CPP and not function.is_external:
-			header = "{4}{0} {5}::{1}({2})\n"
+			is_const = ""
+			if function.is_const:
+				is_const = "const"
+			header = "{4}{0} {5}::{1}({2}) {6}\n"
 			body = "{4}__begin__{3}\n{4}__end__\n\n"
 			fstr = header + body
 			body = ""
@@ -204,7 +222,7 @@ class WriterCpp(Writer):
 			for arg in function.args:
 				args.append(function.args[arg] + " " + arg)
 			args = ", ".join(args)
-			out[FLAG_CPP] = fstr.format( convertType(function.return_type), function.name, args, body, self.tabs(tabs), self._currentClass.name )
+			out[FLAG_CPP] = fstr.format( convertType(function.return_type), function.name, args, body, self.tabs(tabs), self._currentClass.name, is_const )
 			out[FLAG_CPP] = re.sub("self.", "this->", out[FLAG_CPP])
 
 		return out
@@ -256,6 +274,7 @@ class WriterCpp(Writer):
 
 		function = Function()
 		if serialization_type == SERIALIZATION:
+			function.is_const = True
 			function.name = "serialize"
 			function.args["json"] = "RapidJsonNode&"
 		if serialization_type == DESERIALIZATION:
@@ -298,14 +317,8 @@ class WriterCpp(Writer):
 		out = ""
 		forward_declarations = ""
 
-		fstr = "\n#include \"{0}.h\""
-		fstr_std = "\n#include <{0}>"
+		fstr = "\n#include {0}"
 
-		def is_std_type(type):
-			std_types = []
-			std_types.append( "string" )
-			std_types.append( "list" )
-			return type in std_types
 		def need_include(type):
 			types = []
 			types.append( "int" )
@@ -320,6 +333,8 @@ class WriterCpp(Writer):
 			types[t.name] = 1
 		for t in cls.members:
 			types[t.type] = 1
+			for arg in t.template_args:
+				types[arg] = 1
 		for f in cls.functions:
 			for t in f.args:
 				type = re.sub("const", "", f.args[t]).strip()
@@ -331,13 +346,25 @@ class WriterCpp(Writer):
 					ftypes[type] = 1
 
 		for t in types:
-			if is_std_type(t):
-				out += fstr_std.format( t )
-			elif need_include(t):
-				out += fstr.format( t )
+			if need_include(t):
+				out += fstr.format( getIncludeFile(t) )
 		
 		fstr = "\nclass {0};"
 		for t in ftypes:
-			forward_declarations += fstr.format( t )
+				forward_declarations += fstr.format( t )
 
 		return out, forward_declarations
+
+	def _createTests(self):
+		fstr = "#include \"TestSerialization.h\"\n{0}\n\nvoid TestSerialization::build()\n__begin__\n{1}\n__end__\n"
+		includes = ""
+		tests = ""
+		for cls in self.tests:
+			finc = "#include \"../../../out/{}.cpp\"\n".format(cls.name)
+			ftst = "\t_tests.push_back( new TestT<mg::{}> );\n".format(cls.name)
+			includes += finc
+			tests += ftst
+		fstr = fstr.format( includes, tests )
+		fstr = re.sub("__begin__", "{", fstr)
+		fstr = re.sub("__end__", "}", fstr)
+		fileutils.write("tests/cpp/Test/TestSerialization.cpp", fstr)

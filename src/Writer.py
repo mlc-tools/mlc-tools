@@ -57,7 +57,8 @@ class Writer:
 	def save( self, filename, string ):
 		filename = self.out_directory + "/" + filename;
 		result = fileutils.write(filename, string)
-		print "file", filename, "recteated:", result
+		if result:
+			print "recreate:", filename
 		
 
 	def _getFilenameForClass(self, class_name):
