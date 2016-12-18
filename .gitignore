@@ -13,5 +13,7 @@
 
 tests/cpp/Test/Debug/
 tests/cpp/Test/Release/
+tests/cpp/Test/TestSerialization.cpp
+
 tests/java/TestJava/bin/
 tests/java/TestJava/obj/
