@@ -2,6 +2,14 @@
 #define __RapidJson_h__
 #include "rapidjson/document.h"
 #include <memory>
+#include <math.h>
+#include <algorithm>
+#include <iostream>
+#include <string>
+
+void throw_error( const std::string& message );
+
+typedef std::string string;
 
 class RapidJsonNode
 {

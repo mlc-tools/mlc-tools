@@ -79,12 +79,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CommandSequence.cpp" />
     <ClCompile Include="Generics.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="RapidJsonNode.cpp" />
     <ClCompile Include="TestSerialization.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cocos2d.h" />
+    <ClInclude Include="CommandSequence.h" />
+    <ClInclude Include="Factory.h" />
     <ClInclude Include="Generics.h" />
     <ClInclude Include="RapidJsonNode.h" />
     <ClInclude Include="TestSerialization.h" />

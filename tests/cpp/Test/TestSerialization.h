@@ -2,6 +2,7 @@
 #include <vector>
 #include "RapidJsonNode.h"
 #include <iostream>
+#include <string>
 
 class TestCase
 {

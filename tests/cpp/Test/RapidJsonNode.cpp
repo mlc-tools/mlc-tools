@@ -4,6 +4,14 @@
 #include "rapidjson/writer.h"
 #include <fstream>
 #include "Generics.h"
+#include "cocos2d.h"
+
+
+void throw_error( const std::string& message )
+{
+	std::cout << std::endl << message;
+	assert( 0 );
+}
 
 
 RapidJsonNode::RapidJsonNode()
@@ -220,6 +228,11 @@ template<> bool RapidJsonNode::set( bool value )
 	return _value != nullptr;
 }
 
+template<> bool RapidJsonNode::set( cocos2d::Point value )
+{
+	return set<std::string>( toStr( value ) );
+}
+
 template<> std::string RapidJsonNode::get( const std::string& key )const
 {
 	if( _value && _value->IsObject() && _value->FindMember( key.c_str() ) != _value->MemberEnd() )
@@ -260,6 +273,14 @@ template<> bool RapidJsonNode::get( const std::string& key )const
 		return false;
 }
 
+template<> cocos2d::Point RapidJsonNode::get( const std::string& key )const
+{
+	if( _value && _value->IsObject() && _value->FindMember( key.c_str() ) != _value->MemberEnd() )
+		return strTo<cocos2d::Point>( (*_value)[key.c_str()].GetString() );
+	else
+		return cocos2d::Point();
+}
+
 template<> std::string RapidJsonNode::get( size_t index )const
 {
 	return _value && index < _value->Size() ? (*_value)[index].GetString() : std::string();
@@ -278,6 +299,11 @@ template<> float RapidJsonNode::get( size_t index )const
 template<> bool RapidJsonNode::get( size_t index )const
 {
 	return strTo<bool>( get<std::string>( index ) );
+}
+
+template<> cocos2d::Point RapidJsonNode::get( size_t index )const
+{
+	return strTo<cocos2d::Point>( get<std::string>( index ) );
 }
 
 bool RapidJsonNode::contain( const std::string & key ) const

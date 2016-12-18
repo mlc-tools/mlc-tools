@@ -12,6 +12,7 @@
 #include <cstdint>
 #include "Generics.h"
 #include <sstream>
+#include "cocos2d.h"
 
 // from string
 
@@ -86,9 +87,21 @@ template <> uint64_t strTo(const std::string &value)
 {
 	return static_cast<uint64_t>(strToInt(value));
 }
-template <> bool strTo(const std::string &value)
+template <> bool strTo( const std::string &value )
 {
-	return strToBool(value);
+	return strToBool( value );
+}
+template <> cocos2d::Point strTo( const std::string &value )
+{
+	int k = value.find( "x" );
+	if( k != std::string::npos )
+	{
+		cocos2d::Point p;
+		p.x = strTo<float>( value.substr( 0, k ) );
+		p.y = strTo<float>( value.substr( k + 1 ) );
+		return p;
+	}
+	return cocos2d::Point();
 }
 
 // to string
@@ -136,4 +149,8 @@ template <> std::string toStr(bool value)
 template <> std::string toStr( float value )
 {
 	return floatToStr( value );
+}
+template <> std::string toStr( cocos2d::Point value )
+{
+	return floatToStr( value.x ) + "x" + floatToStr(value.y);
 }

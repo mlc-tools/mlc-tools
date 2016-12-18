@@ -5,10 +5,14 @@
     <ClCompile Include="Generics.cpp" />
     <ClCompile Include="RapidJsonNode.cpp" />
     <ClCompile Include="TestSerialization.cpp" />
+    <ClCompile Include="CommandSequence.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Generics.h" />
     <ClInclude Include="RapidJsonNode.h" />
     <ClInclude Include="TestSerialization.h" />
+    <ClInclude Include="cocos2d.h" />
+    <ClInclude Include="Factory.h" />
+    <ClInclude Include="CommandSequence.h" />
   </ItemGroup>
 </Project>
