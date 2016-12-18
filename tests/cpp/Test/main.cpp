@@ -1,5 +1,6 @@
 #include "TestSerialization.h"
 #include "../../../out/RoutePoint.h"
+#include "../../../out/BattleSystem.h"
 #include "cocos2d.h"
 #include "Factory.h"
 #include "CommandSequence.h"
@@ -142,6 +143,11 @@ cocos2d::Point RoutePoint::getDynamic()
 {
 	return cocos2d::Point();
 }
+void mg::BattleSystem::load( pugi::xml_node xml )
+{
+}
+
+cocos2d::Point cocos2d::Point::ZERO;
 
 int main()
 {

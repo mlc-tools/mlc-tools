@@ -90,6 +90,7 @@
     <ClInclude Include="CommandSequence.h" />
     <ClInclude Include="Factory.h" />
     <ClInclude Include="Generics.h" />
+    <ClInclude Include="json.hpp" />
     <ClInclude Include="RapidJsonNode.h" />
     <ClInclude Include="TestSerialization.h" />
   </ItemGroup>

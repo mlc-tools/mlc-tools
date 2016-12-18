@@ -109,7 +109,8 @@ class Parser:
 
 	def _find_dependences(self):
 		for cls in self.classes:
-			self.createGetTypeFunction(cls);
+			if cls.type == "class":
+				self.createGetTypeFunction(cls);
 			if cls.is_visitor and self.getVisitorType(cls) != cls.name:
 				if cls.name.find( "IVisitor" ) != 0:
 					self.createVisitor(cls)

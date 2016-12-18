@@ -14,5 +14,6 @@
     <ClInclude Include="cocos2d.h" />
     <ClInclude Include="Factory.h" />
     <ClInclude Include="CommandSequence.h" />
+    <ClInclude Include="json.hpp" />
   </ItemGroup>
 </Project>

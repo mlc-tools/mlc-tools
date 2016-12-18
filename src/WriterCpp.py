@@ -33,6 +33,14 @@ def getIncludeFile(file):
 		return types[file]
 	return "\"{0}.h\"".format(file)
 
+def autoReplaces(text):
+	text = re.sub( "math.max", "std::max", text)
+	text = re.sub( "math.min", "std::min", text)
+	text = re.sub( "self.", "this->", text)
+	text = re.sub( ".append", ".push_back", text)
+	text = re.sub( ".push_back_node", ".append_node", text)
+	text = re.sub( ".push_back_array", ".append_array", text)
+	return text
 
 class WriterCpp(Writer):
 	def __init__(self, outDirectory, parser, createTests):
@@ -187,7 +195,10 @@ class WriterCpp(Writer):
 		constructor = self._createConstructorFunctionCpp(cls, tabs)
 		includes, f = self._findIncludes(cls,FLAG_CPP)
 		self._currentClass = None
-		fstr = "#include \"{0}.h\"{4}\n\nnamespace {3}\n__begin__\n{5}\nREGISTRATION_OBJECT( {0} );\n{2}\n{1}__end__"
+		if cls.type == "class":
+			fstr = "#include \"{0}.h\"{4}\n\nnamespace {3}\n__begin__\n{5}\nREGISTRATION_OBJECT( {0} );\n{2}\n{1}__end__"
+		else:
+			fstr = "#include \"{0}.h\"{4}\n\nnamespace {3}\n__begin__\n{5}\n{2}\n{1}__end__"
 		out[FLAG_CPP] += fstr.format( cls.name, functions[FLAG_CPP], constructor, self._getNamespace(cls), includes, objects[FLAG_CPP] )
 		out[FLAG_CPP] = re.sub("__begin__", "{", out[FLAG_CPP])
 		out[FLAG_CPP] = re.sub("__end__", "}", out[FLAG_CPP])
@@ -268,7 +279,7 @@ class WriterCpp(Writer):
 				args.append(convertType(arg[1]) + " " + arg[0])
 			args = ", ".join(args)
 			out[FLAG_CPP] = fstr.format( convertType(function.return_type), function.name, args, body, self.tabs(tabs), self._currentClass.name, is_const )
-			out[FLAG_CPP] = re.sub("self.", "this->", out[FLAG_CPP])
+			out[FLAG_CPP] = autoReplaces( out[FLAG_CPP] )
 
 		return out
 

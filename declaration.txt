@@ -50,7 +50,7 @@ class BattleSystem<SerializedObject>
 	
 	function float _getDamage(float damage, float resist)
 	{
-		return damage * std::max((1.f - resist), 0.f);
+		return damage * math.max((1.f - resist), 0.f);
 	}
 	function float _getDamage(BattleSystem* attacker)
 	{
@@ -65,7 +65,7 @@ class BattleSystem<SerializedObject>
 		_apply_velocity_rate(attacker);
 		float damage = _getDamage(attacker);
 		float min = serverSide ? 0.f : 1.f;
-		health = std::max(min, health - damage * count);
+		health = math.max(min, health - damage * count);
 		return damage;
 	}
 	function void update(float dt)
@@ -80,12 +80,12 @@ class BattleSystem<SerializedObject>
 	function void _apply_velocity_rate(BattleSystem* attacker)
 	{
 		float rate = _getDamage(attacker->velocity_rate, velocity_resist);
-		_velocity_rate_applyed = std::min(_velocity_rate_applyed, rate);
-		_velocity_timer_applyed = std::max(_velocity_timer_applyed, attacker->velocity_rate_time);
+		_velocity_rate_applyed = math.min(_velocity_rate_applyed, rate);
+		_velocity_timer_applyed = math.max(_velocity_timer_applyed, attacker->velocity_rate_time);
 	}
 	function float getVelocity()
 	{
-		return velocity * std::max(0.f, std::min(1.f, 1.f - _velocity_rate_applyed));
+		return velocity * math.max(0.f, math.min(1.f, 1.f - _velocity_rate_applyed));
 	}
 }
 
@@ -124,14 +124,14 @@ class Route<SerializedObject>
 		for( unsigned i=0;i<points.size()-1; ++i )
 		{
 			length += points[i].position.getDistance( points[i+1].position );
-			lengths.push_back(length);
+			lengths.append(length);
 		}
 	}
 	function cc.point compute_position(float S)
 	{
 		if( lengths.size() == 0 )
 		{
-			return cocos2d::Point();
+			return cocos2d::Point::ZERO;
 		}
 		float curr = 0;
 		for( unsigned i=0;i<lengths.size(); ++i )
@@ -154,7 +154,7 @@ class Route<SerializedObject>
 
 class TripleRoute<SerializedObject>
 {
-	int layer=0
+	UnitLayer layer
 	bool desantRoute=false
 	Route main
 	Route left
@@ -191,8 +191,8 @@ class UnitData<SerializedObject>
 	string name
 	float health=1.f
 	float attack_radius = 0.f
-	int layer=0
-	int target_layer=0
+	UnitLayer layer
+	UnitLayer target_layer
 	int score=0
 	int id=-1
 	int current_level=1
@@ -303,8 +303,8 @@ class ResponseCreateBonusItem<Response>
 
 class RequestUpgradeTower<Request>
 {
-int unit_id=-1
-int current_level=-1
+	int unit_id=-1
+	int current_level=-1
 }
 
 class ResponseUpgradeTower<Response>
@@ -390,14 +390,22 @@ class ResponseSynchronizeTime<Response>
 	float match_time
 }
 
+enum UnitLayer
+{
+	earth
+	sky
+	sea
+	any
+}
+
 class ModelUnit<SerializedObject>
 {
 	int id=0
 	int level=1
 	string name
 	cc.point position
-	int layer=0
-	int target_layer=0
+	UnitLayer layer
+	UnitLayer target_layer
 	float damage_timer=0
 	float life_time=36000
 	int route_id=0
@@ -405,10 +413,12 @@ class ModelUnit<SerializedObject>
 	float start_move_time=0
 	list<int> targets
 	BattleSystem battle_system
+
 	function float get_health()
 	{
 		return battle_system.health;
 	}
+
 	function bool target_is_correct(ModelUnit& target)
 	{
 		bool result = target.get_health() > 0;
@@ -417,6 +427,7 @@ class ModelUnit<SerializedObject>
 		result = result && position.getDistanceSq(target.position) <= (battle_system.attack_radius*battle_system.attack_radius);
 		return result;
 	}
+
 	function void move_on_route(Route& route,float match_time)
 	{
 		float t = match_time - start_move_time;

@@ -7,6 +7,7 @@ namespace cocos2d
 	class Point
 	{
 	public:
+		static Point ZERO;
 		float x;
 		float y;
 

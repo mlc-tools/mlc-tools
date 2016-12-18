@@ -48,7 +48,7 @@ class WriterJava(Writer):
 		
 		args = []
 		for arg in function.args:
-			args.append(function.args[arg] + " " + arg)
+			args.append(arg[1] + " " + arg[0])
 		args = ", ".join(args)
 		
 		body = ""
