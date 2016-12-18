@@ -40,8 +40,11 @@ class Parser:
 	def _findBody(self, text):
 		text = text.strip()
 		body = ""
-		header = text[0:text.find("\n")]
-		if header.find(":external") == -1:
+		if text.find("\n") != -1:
+			header = text[0:text.find("\n")]
+		else:
+			header = text
+		if header.find(":external") == -1 and header.find(":abstract") == -1:
 			text = text[text.find("{"):]
 			counter = 0
 			index = 0
@@ -106,6 +109,7 @@ class Parser:
 
 	def _find_dependences(self):
 		for cls in self.classes:
+			self.createGetTypeFunction(cls);
 			if cls.is_visitor and self.getVisitorType(cls) != cls.name:
 				if cls.name.find( "IVisitor" ) != 0:
 					self.createVisitor(cls)
@@ -181,4 +185,21 @@ class Parser:
 		function.return_type = "void"
 		function.args.append(["ctx", cls.name + "*"])
 		visitor.functions.append(function)
+		
+	def createGetTypeFunction(self, cls):
+		if not cls.is_abstract:
+			member = Object()
+			member.is_static = True
+			member.is_const = True
+			member.type = "string"
+			member.name = "__type__"
+			member.initial_value = "\"{}\"".format(cls.name)
+			cls.members.append(member)
+
+		function = Function()
+		function.name = "getType"
+		function.return_type = "string"
+		function.is_const = True
+		function.operations.append( "return {}::__type__".format(cls.name) )
+		cls.functions.append(function)
 		

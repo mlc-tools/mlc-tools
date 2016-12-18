@@ -46,7 +46,7 @@ class Object:
 	
 	def __parceType(self):
 		l = self.type.find("<")
-		r = self.type.find(">")
+		r = self.type.find(">", l)
 		if l > -1 and r > -1:
 			args = self.type[l+1:r].split(",")
 			for arg in args:

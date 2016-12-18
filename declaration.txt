@@ -2,8 +2,20 @@ class SerializedObject:serialized:abstract
 {
 }
 
-class Command<SerializedObject>:abstract
+class Command<SerializedObject>
 {
+	int id;
+	function string getSerializedString():external:const;
+	function void serialize(RapidJsonNode& json):external:const;
+	function void deserialize(const RapidJsonNode& json):external;
+	function void accept(IVisitorRequest* visitor)
+	{
+		throw_error( getType() + " command cannot accepted with IVisitorRequest. " );
+	}
+	function void accept(IVisitorResponse* visitor)
+	{
+		throw_error( getType() + " command cannot accepted with IVisitorResponse. " );
+	}
 }
 
 class Request<Command>:visitor
@@ -11,32 +23,7 @@ class Request<Command>:visitor
 }
 
 class Response<Command>:visitor
-{
-}
-
-class RoutePoint<SerializedObject>
-{
-	int triger=0
-	float radius=0.f
-	string message
-	bool is_dynamic = false
-}
-
-class Route<SerializedObject>
-{
-	list<RoutePoint> points
-	list<float>:runtime lengths
-	int id=-1
-}
-
-class TripleRoute<SerializedObject>
-{
-	int layer=0
-	bool desantRoute=false
-	Route main
-	Route left
-	Route right
-}
+{}
 
 class BattleSystem<SerializedObject>
 {
@@ -59,8 +46,382 @@ class BattleSystem<SerializedObject>
 	float:runtime _velocity_rate_applyed=0.f
 	float:runtime _velocity_timer_applyed=0.f
 	
+	function void load( pugi::xml_node xml ):external;
+	
+	function float _getDamage(float damage, float resist)
+	{
+		return damage * std::max((1.f - resist), 0.f);
+	}
 	function float _getDamage(BattleSystem* attacker)
 	{
-		return 0;
+		float p = _getDamage(attacker->damage_phisicaly, resist_phisicaly);
+		float i = _getDamage(attacker->damage_ice, resist_ice);
+		float f = _getDamage(attacker->damage_fire, resist_fire);
+		float e = _getDamage(attacker->damage_electro, resist_electro);
+		return p + i + f + e;
+	}
+	function float applyDamage(BattleSystem* attacker, int count,bool serverSide)
+	{
+		_apply_velocity_rate(attacker);
+		float damage = _getDamage(attacker);
+		float min = serverSide ? 0.f : 1.f;
+		health = std::max(min, health - damage * count);
+		return damage;
+	}
+	function void update(float dt)
+	{
+		_velocity_timer_applyed -= dt;
+		if( _velocity_timer_applyed <= 0)
+		{
+			_velocity_timer_applyed = 0;
+			_velocity_rate_applyed = 0.f;
+		}
+	}
+	function void _apply_velocity_rate(BattleSystem* attacker)
+	{
+		float rate = _getDamage(attacker->velocity_rate, velocity_resist);
+		_velocity_rate_applyed = std::min(_velocity_rate_applyed, rate);
+		_velocity_timer_applyed = std::max(_velocity_timer_applyed, attacker->velocity_rate_time);
+	}
+	function float getVelocity()
+	{
+		return velocity * std::max(0.f, std::min(1.f, 1.f - _velocity_rate_applyed));
+	}
+}
+
+class RoutePoint<SerializedObject>
+{
+	cc.point position
+	int triger=0
+	float radius=0.f
+	string message
+	bool is_dynamic = false
+	cc.point*:runtime dynanic_point=nullptr
+	function cc.point getDynamic:external()
+	function bool isDynamic()
+	{
+		return is_dynamic;
+	}
+	function void setDynamic(bool var)
+	{
+		is_dynamic = var;
+	}
+	function void setDynamicPoint(cc.point* point)
+	{
+		dynanic_point = point;
+		is_dynamic = dynanic_point != nullptr;
+	}
+}
+
+class Route<SerializedObject>
+{
+	list<RoutePoint> points
+	list<float>:runtime lengths
+	int id=-1
+	function void compute_lengths()
+	{
+		float length = 0.f;
+		for( unsigned i=0;i<points.size()-1; ++i )
+		{
+			length += points[i].position.getDistance( points[i+1].position );
+			lengths.push_back(length);
+		}
+	}
+	function cc.point compute_position(float S)
+	{
+		if( lengths.size() == 0 )
+		{
+			return cocos2d::Point();
+		}
+		float curr = 0;
+		for( unsigned i=0;i<lengths.size(); ++i )
+		{
+			if( S < lengths[i] )
+			{
+				float t = (S - curr) / (lengths[i] - curr);
+				auto point = points[i].position + (points[i+1].position - points[i].position) * t;
+				return point;
+			}
+			curr = lengths[i];
+		}
+		return points.back().position;
+	}
+	function bool is_finish_point(cc.point point)
+	{
+		return points.back().position == point;
+	}
+}
+
+class TripleRoute<SerializedObject>
+{
+	int layer=0
+	bool desantRoute=false
+	Route main
+	Route left
+	Route right
+}
+
+class TowerPlaceInfo<SerializedObject>
+{
+	cc.point position
+	float rate_radius=1.f
+	string name
+}
+
+class WaveUnitInfo<SerializedObject>
+{
+	string name
+	float rate=1.f
+	float delay=1.f
+	float velocity=0.f
+	int route_index=0
+	int route_sub_type
+	int score=10
+}
+
+class PreloadedUnitInfo<SerializedObject>
+{
+	string name
+	cc.point position
+	int add_z_order
+}
+
+class UnitData<SerializedObject>
+{
+	string name
+	float health=1.f
+	float attack_radius = 0.f
+	int layer=0
+	int target_layer=0
+	int score=0
+	int id=-1
+	int current_level=1
+	bool invalid=false
+	cc.point:runtime position
+}
+
+class WaveInfo<SerializedObject>
+{
+	list<WaveUnitInfo> units
+	float delay=0
+}
+
+class LevelDecorationData<SerializedObject>
+{
+	string name
+	cc.point position
+	int z_order=0
+	string action_desc
+}
+
+class LevelInfo<SerializedObject>
+{
+	string map_resource
+	string fort
+	int silver=0
+	int life=0
+	float rate=1.f
+	list<int> healthForStar
+}
+
+class LevelData<SerializedObject>
+{
+	int level_index=-1
+	list<TripleRoute> routes
+	list<TowerPlaceInfo> places
+	list<PreloadedUnitInfo> preloaded_units
+	list<WaveInfo> waves
+	list<LevelDecorationData> decorations
+	LevelInfo info
+}
+
+class RequestCreateTower<Request>
+{
+	string name
+	cc.point position
+}
+
+class ResponseCreateTower<Response>
+{
+	string name
+	int unit_id=-1
+	cc.point position
+	BattleSystem battle_system
+	bool as_preloaded=false
+}
+
+class RequestAuthorize<Request>
+{
+	int user=-1
+	string auth_key
+}
+
+class ResponseAuthorize<Response>
+{
+	int session_id=-1
+	bool valid=false
+}
+
+class ResponseChangeLevelScore<Response>
+{
+	cc.point position
+	int diff_silver=0
+	int diff_gold=0
+	int diff_gems=0
+	int diff_level_health=0
+	int silver=0
+	int gold=0
+	int gems=0
+	int level_health=0
+}
+
+class ResponseCreateCreep<Response>
+{
+	string name 
+	int unit_id=-1
+	int route_id=-1
+	cc.point position
+	int cost=0
+	float start_time=0.f
+	BattleSystem battle_system
+}
+
+class RequestCreateBonusItem<Request>
+{
+	string name 
+	cc.point position
+}
+
+class ResponseCreateBonusItem<Response>
+{
+	string name 
+	int unit_id=-1
+	cc.point position
+	int level=0
+	BattleSystem battle_system
+}
+
+class RequestUpgradeTower<Request>
+{
+int unit_id=-1
+int current_level=-1
+}
+
+class ResponseUpgradeTower<Response>
+{
+	int unit_id=-1
+	int to_level=-1
+	BattleSystem battle_system
+}
+
+class RequestSellTower<Request>
+{
+	int unit_id=-1
+}
+
+class ResponseRemoveUnit<Response>
+{
+	int unit_id=-1
+}
+
+class RequestLoadLevel<Request>
+{
+	int level_index=-1
+}
+
+class RequestLoadedLevelData<Request>{}
+
+class ResponseLevelData<Response>
+{
+	LevelData level_data
+}
+
+class RequestStartLevel<Request>{}
+
+class RequestPreloadedUnits<Request>{}
+
+class ResponseStartLevel<Response>{}
+
+class ResponseFinishLevel<Response>
+{
+	bool isWin=false
+	int health=0
+	int rewardGems=0
+	int stars=1
+}
+
+class ResponseWaveStarted<Response>
+{
+	int index=-1
+}
+
+class ResponseWavePredelay<Response>
+{
+	int index=-1
+}
+
+class ResponseWaveFinished<Response>
+{
+	int index=-1
+}
+
+class ResponseAllWavesFinished<Response>{}
+
+class RequestStartWave<Request>{}
+
+class RequestBreakLevel<Request>{}
+
+class ResponseBreakLevel<Response>{}
+
+class ResponseCaptureTarget<Response>
+{
+	int unit_id
+	list<int> targets
+	list<float> healths
+}
+
+class ResponseUnitsDeath<Response>
+{
+	list<int> ids
+}
+
+class ResponseSynchronizeTime<Response>
+{
+	float match_time
+}
+
+class ModelUnit<SerializedObject>
+{
+	int id=0
+	int level=1
+	string name
+	cc.point position
+	int layer=0
+	int target_layer=0
+	float damage_timer=0
+	float life_time=36000
+	int route_id=0
+	int score=0
+	float start_move_time=0
+	list<int> targets
+	BattleSystem battle_system
+	function float get_health()
+	{
+		return battle_system.health;
+	}
+	function bool target_is_correct(ModelUnit& target)
+	{
+		bool result = target.get_health() > 0;
+		result = result && (target_layer & target.layer);
+		auto distance = position.getDistance( target.position );
+		result = result && position.getDistanceSq(target.position) <= (battle_system.attack_radius*battle_system.attack_radius);
+		return result;
+	}
+	function void move_on_route(Route& route,float match_time)
+	{
+		float t = match_time - start_move_time;
+		float v = battle_system.getVelocity();
+		float s = v * t;
+		position = route.compute_position( s );
 	}
 }

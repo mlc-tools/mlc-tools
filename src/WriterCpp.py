@@ -28,6 +28,7 @@ def getIncludeFile(file):
 	types["cc.point"] = "\"cocos2d.h\""
 	types["list"] = "<vector>"
 	types["string"] = "<string>"
+	types["pugi::xml_node"] = "\"pugixml/pugixml.hpp\""
 	if file in types:
 		return types[file]
 	return "\"{0}.h\"".format(file)
@@ -186,7 +187,7 @@ class WriterCpp(Writer):
 		constructor = self._createConstructorFunctionCpp(cls, tabs)
 		includes, f = self._findIncludes(cls,FLAG_CPP)
 		self._currentClass = None
-		fstr = "#include \"{0}.h\"{4}\n\nnamespace {3}\n__begin__\n{5}\n{2}\n{1}__end__"
+		fstr = "#include \"{0}.h\"{4}\n\nnamespace {3}\n__begin__\n{5}\nREGISTRATION_OBJECT( {0} );\n{2}\n{1}__end__"
 		out[FLAG_CPP] += fstr.format( cls.name, functions[FLAG_CPP], constructor, self._getNamespace(cls), includes, objects[FLAG_CPP] )
 		out[FLAG_CPP] = re.sub("__begin__", "{", out[FLAG_CPP])
 		out[FLAG_CPP] = re.sub("__end__", "}", out[FLAG_CPP])
@@ -224,7 +225,7 @@ class WriterCpp(Writer):
 	def writeFunction(self, function, tabs, flags):
 		out = {}
 		if flags & FLAG_HPP:
-			if not self._currentClass.is_abstract:
+			if not self._currentClass.is_abstract and not function.is_abstract:
 				fstr = "{3}{6}{0} {1}({2}){4}{5};\n"
 			else:
 				fstr = "{3}{6}{0} {1}({2}){4}{5} = 0;\n"
@@ -245,7 +246,7 @@ class WriterCpp(Writer):
 				is_const = " const"
 
 			out[FLAG_HPP] = fstr.format( convertType(function.return_type), function.name, args, self.tabs(tabs), is_const, is_override, modifier )
-		if flags & FLAG_CPP and not function.is_external:
+		if flags & FLAG_CPP and not function.is_external and not function.is_abstract:
 			is_const = ""
 			if function.is_const:
 				is_const = "const"
@@ -340,6 +341,13 @@ class WriterCpp(Writer):
 			function.name = "deserialize"
 			function.args.append(["json", "const RapidJsonNode&"])
 		function.return_type = "void"
+
+		for behabior in cls.behaviors:
+			if not behabior.is_serialized or behabior.is_abstract:
+				continue
+			str = "{0}::{1}(json)".format( behabior.name, function.name )
+			function.operations.append(str)
+
 		for obj in cls.members:
 			if obj.is_runtime or obj.is_static or obj.is_const:
 				continue
@@ -487,6 +495,8 @@ class WriterCpp(Writer):
 				str = "\nnamespace {1}\n__begin__\n\tclass {0};\n__end__".format( type, ns );
 				forward_declarations += str
 
+		if flags == FLAG_CPP:
+			out += "\n#include \"Factory.h\""
 		return out, forward_declarations
 
 	def _createTests(self):
