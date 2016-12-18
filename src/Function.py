@@ -60,6 +60,8 @@ class Function:
 	def _findModifiers(self, str):
 		self.is_external = str.find( ":external" ) != -1
 		self.is_static = str.find( ":static" ) != -1
+		self.is_const = str.find( ":const" ) != -1
 		str = re.sub(":external", "", str)
 		str = re.sub(":static", "", str)
+		str = re.sub(":const", "", str)
 		return str

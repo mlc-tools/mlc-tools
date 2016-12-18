@@ -81,14 +81,15 @@ class Class(Object):
 		
 		function = createFunction("", self.name, [], False).operations = ["_value = " + self.members[0].name];
 		function = createFunction("", self.name, [["value",cast]], False).operations = ["_value = value"];
-		function = createFunction("", self.name, [["rhs","const EquipmentItemType&"]], False).operations = ["_value = rhs._value"];
+		function = createFunction("", self.name, [["rhs","const {0}&".format(self.name)]], False).operations = ["_value = rhs._value"];
 		function = createFunction("", "operator int", [], True).operations = ["return _value"];
-		function = createFunction("const EquipmentItemType&", "operator =", [["rhs","const EquipmentItemType&"]], False).operations = ["_value = rhs._value", "return *this"];
-		function = createFunction("bool", "operator ==", [["rhs","const EquipmentItemType&"]], True).operations = ["return _value == rhs._value"];
-		function = createFunction("bool", "operator <", [["rhs","const EquipmentItemType&"]], True).operations = ["return _value < rhs._value"];
+		function = createFunction("const {0}&".format(self.name), "operator =", [["rhs","const {0}&".format(self.name)]], False).operations = ["_value = rhs._value", "return *this"];
+		function = createFunction("bool", "operator ==", [["rhs","const {0}&".format(self.name)]], True).operations = ["return _value == rhs._value"];
+		function = createFunction("bool", "operator ==", [["rhs","int"]], True).operations = ["return _value == rhs"];
+		function = createFunction("bool", "operator <", [["rhs","const {0}&".format(self.name)]], True).operations = ["return _value < rhs._value"];
 		
 		function1 = createFunction("", self.name, [["value", "const string&"]], False)
-		function2 = createFunction("const EquipmentItemType&", "operator =", [["value", "const string&"]], False)
+		function2 = createFunction("const {0}&".format(self.name), "operator =", [["value", "const string&"]], False)
 		function3 = createFunction("", "operator string", [], True)
 		for m in self.members:
 			function1.operations.append( re.sub("__e__","}", re.sub("__b__","{", "if( value == \"{0}\" ) __b__ _value = {0}; return; __e__".format( m.name ) ) ) )

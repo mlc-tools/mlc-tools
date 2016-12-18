@@ -397,6 +397,8 @@ class WriterCpp(Writer):
 			value = self._getTestValue(m)
 			if value == None:
 				continue
+			if m.is_const or m.is_static:
+				continue
 			str = fbody_line.format(m.name, value)
 			function.operations.append( str )
 		function.operations.append( "return instance");
@@ -428,10 +430,13 @@ class WriterCpp(Writer):
 		fstr = "\n#include {0}"
 
 		def need_include(type):
+			if type == "":
+				return False
 			types = []
 			types.append( "int" )
 			types.append( "float" )
 			types.append( "bool" )
+			types.append( "void" )
 			return not type in types
 
 		types = {}
@@ -452,6 +457,12 @@ class WriterCpp(Writer):
 					types[type] = 1
 				if flags == FLAG_HPP and t[1] == type + "*":
 					ftypes[type] = 1
+
+			type = f.return_type
+			type = re.sub( "const", "", type ).strip()
+			type = re.sub( "\*", "", type ).strip()
+			type = re.sub( "&", "", type ).strip()
+			types[type] = 1
 
 		for t in types:
 			if need_include(t):
