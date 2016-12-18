@@ -37,22 +37,25 @@ class Parser:
 		text = text.strip()
 		body = ""
 		header = text[0:text.find("\n")]
-		text = text[text.find("{"):]
-		counter = 0
-		index = 0
-		for ch in text:
-			index += 1
-			if counter == 0 and ch == '{':
-				counter += 1
-				continue
-			if ch == '{':
-				counter += 1
-			if ch == '}':
-				counter -= 1
-			if counter == 0:
-				text = text[index:]
-				break
-			body += ch
+		if header.find(":external") == -1:
+			text = text[text.find("{"):]
+			counter = 0
+			index = 0
+			for ch in text:
+				index += 1
+				if counter == 0 and ch == '{':
+					counter += 1
+					continue
+				if ch == '{':
+					counter += 1
+				if ch == '}':
+					counter -= 1
+				if counter == 0:
+					text = text[index:]
+					break
+				body += ch
+		else:
+			text = text[len(header):].strip()
 		return body, header, text
 	def _createClass(self, text):
 		body, header, text = self._findBody(text)
