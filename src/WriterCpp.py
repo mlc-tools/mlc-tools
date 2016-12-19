@@ -79,7 +79,7 @@ class WriterCpp(Writer):
 		
 		self.serialize_formats[SERIALIZATION]["serialized_list"] = []
 		self.serialize_formats[SERIALIZATION]["serialized_list"].append( "static_assert(0, \"list '{0}' not should have a initialize value\")" )
-		self.serialize_formats[SERIALIZATION]["serialized_list"].append( "__begin__auto& arr_{0} = json[\"{0}\"];\n\tsize_t i=0; for( auto& t : {0} )\n\t\tt.serialize(arr_{0}[i]);__end__" )
+		self.serialize_formats[SERIALIZATION]["serialized_list"].append( "__begin__auto& arr_{0} = json[\"{0}\"];\n\tsize_t i=0; for( auto& t : {0} )\n\t\tt.serialize(arr_{0}[i++]);__end__" )
 		self.serialize_formats[DESERIALIZATION]["serialized_list"] = []
 		self.serialize_formats[DESERIALIZATION]["serialized_list"].append( "static_assert(0, \"list '{0}' not should have a initialize value\")" )
 		self.serialize_formats[DESERIALIZATION]["serialized_list"].append( "auto& arr_{0} = json[\"{0}\"];\n\tfor( size_t i = 0; i < arr_{0}.size(); ++i )\n\t{3}\n\t\t{0}.emplace_back();\n\t\t{0}.back().deserialize(arr_{0}[i]);\n\t{4}" )
