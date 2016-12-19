@@ -13,7 +13,7 @@
     <Name>mlc</Name>
     <RootNamespace>mlc</RootNamespace>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>-i config -o out -t yes</CommandLineArguments>
+    <CommandLineArguments>-i config -o out -t no</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -55,7 +55,14 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="config\" />
     <Folder Include="src\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="config\base.mlc" />
+    <Content Include="config\commands.mlc" />
+    <Content Include="config\model.mlc" />
+    <Content Include="config\requests.mlc" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

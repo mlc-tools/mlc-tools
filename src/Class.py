@@ -56,11 +56,12 @@ class Class(Object):
 			m.type = cast
 			m.is_static = True
 			m.is_const = True
-			if cast == "int":
-				m.initial_value = str(1 << shift)
-			else:
-				#TODO
-				exit(-1)
+			if m.initial_value == None:
+				if cast == "int":
+					m.initial_value = str(1 << shift)
+				else:
+					#TODO
+					exit(-1)
 			shift += 1
 		self.behaviors = []
 
