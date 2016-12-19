@@ -11,9 +11,9 @@
 /bin/
 /out/
 
-tests/cpp/Test/Debug/
-tests/cpp/Test/Release/
-tests/cpp/Test/TestSerialization.cpp
+tests/cpp/TestCpp/Debug/
+tests/cpp/TestCpp/Release/
+tests/cpp/TestCpp/TestSerialization.cpp
 
 tests/java/TestJava/bin/
 tests/java/TestJava/obj/

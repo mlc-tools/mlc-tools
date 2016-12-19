@@ -28,12 +28,12 @@ parser.link()
 
 writer = WriterCpp(out_directory, parser, tests)
 
-files = fileutils.getFilesList( "out/" )
+files = fileutils.getFilesList( out_directory )
 for file in files:
 	name = file[0:file.find(".")]
 	if parser._findClass(name) == None:
-		print "remove", "out/" + file
-		fileutils.remove("out/" + file)
+		print "remove", out_directory + file
+		fileutils.remove(out_directory + file)
 
 #parser = Parser()
 #parser.parse(str)
