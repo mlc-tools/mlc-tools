@@ -29,6 +29,7 @@ def getIncludeFile(file):
 	types["list"] = "<vector>"
 	types["string"] = "<string>"
 	types["pugi::xml_node"] = "\"pugixml/pugixml.hpp\""
+	types["Json::Value"] = "\"jsoncpp/json.h\""
 	if file in types:
 		return types[file]
 	return "\"{0}.h\"".format(file)
@@ -56,32 +57,32 @@ class WriterCpp(Writer):
 		self.serialize_formats.append({})
 		
 		self.serialize_formats[SERIALIZATION]["simple"] = []
-		self.serialize_formats[SERIALIZATION]["simple"].append( "if({0} != {2}) \n\t\t  json.append_node( \"{0}\" ).set<{1}>( {0} )" )
-		self.serialize_formats[SERIALIZATION]["simple"].append( "json.append_node( \"{0}\" ).set<{1}>( {0} )" )
+		self.serialize_formats[SERIALIZATION]["simple"].append( "if({0} != {2}) \n\t\tset(json,\"{0}\",{0})" )
+		self.serialize_formats[SERIALIZATION]["simple"].append( "set(json,\"{0}\",{0})" )
 		self.serialize_formats[DESERIALIZATION]["simple"] = []
-		self.serialize_formats[DESERIALIZATION]["simple"].append( "if(json.is_exist(\"{0}\")) \n\t\t {0} = json.get<{1}>( \"{0}\" );\n\telse \n\t\t{0} = {2}" )
-		self.serialize_formats[DESERIALIZATION]["simple"].append( "{0} = json.get<{1}>( \"{0}\" )" )
+		self.serialize_formats[DESERIALIZATION]["simple"].append( "if(json.isMember(\"{0}\")) \n\t\t {0} = get<{1}>( json[\"{0}\"] );\n\telse \n\t\t{0} = {2}" )
+		self.serialize_formats[DESERIALIZATION]["simple"].append( "{0} = get<{1}>( json[\"{0}\"] )" )
 		
 		self.serialize_formats[SERIALIZATION]["serialized"] = []
 		self.serialize_formats[SERIALIZATION]["serialized"].append( "static_assert(0, \"field '{0}' not should have a initialize value\")" )
-		self.serialize_formats[SERIALIZATION]["serialized"].append( "{0}.serialize(json.append_node(\"{0}\"))" )
+		self.serialize_formats[SERIALIZATION]["serialized"].append( "{0}.serialize(json[\"{0}\"])" )
 		self.serialize_formats[DESERIALIZATION]["serialized"] = []
 		self.serialize_formats[DESERIALIZATION]["serialized"].append( "static_assert(0, \"field '{0}' not should have a initialize value\")" )
-		self.serialize_formats[DESERIALIZATION]["serialized"].append( "{0}.deserialize(json.node(\"{0}\"))" )
+		self.serialize_formats[DESERIALIZATION]["serialized"].append( "{0}.deserialize(json[\"{0}\"])" )
 		
 		self.serialize_formats[SERIALIZATION]["simple_list"] = []
 		self.serialize_formats[SERIALIZATION]["simple_list"].append( "static_assert(0, \"list '{0}' not should have a initialize value\")" )
-		self.serialize_formats[SERIALIZATION]["simple_list"].append( "auto arr_{0} = json.append_array( \"{0}\" );\n\tfor( auto& t : {0} )\n\t\tarr_{0}.push_back().set<{5}>( t )" )
+		self.serialize_formats[SERIALIZATION]["simple_list"].append( "__begin__auto& arr_{0} = json[\"{0}\"];\n\tsize_t i=0; for( auto& t : {0} )\n\t\tset(arr_{0}[i++], t);__end__" )
 		self.serialize_formats[DESERIALIZATION]["simple_list"] = []
 		self.serialize_formats[DESERIALIZATION]["simple_list"].append( "static_assert(0, \"list '{0}' not should have a initialize value\")" )
-		self.serialize_formats[DESERIALIZATION]["simple_list"].append( "auto arr_{0} = json.node( \"{0}\" );\n\tfor( size_t i = 0; i < arr_{0}.size(); ++i )\n\t{3}\n\t\t{0}.emplace_back();\n\t\t{0}.back() = arr_{0}.get<{5}>(i);\n\t{4}" )
+		self.serialize_formats[DESERIALIZATION]["simple_list"].append( "auto& arr_{0} = json[\"{0}\"];\n\tfor( size_t i = 0; i < arr_{0}.size(); ++i )\n\t{3}\n\t\t{0}.emplace_back();\n\t\t{0}.back() = get<{5}>(arr_{0}[i]);\n\t{4}" )
 		
 		self.serialize_formats[SERIALIZATION]["serialized_list"] = []
 		self.serialize_formats[SERIALIZATION]["serialized_list"].append( "static_assert(0, \"list '{0}' not should have a initialize value\")" )
-		self.serialize_formats[SERIALIZATION]["serialized_list"].append( "auto arr_{0} = json.append_array( \"{0}\" );\n\tfor( auto& t : {0} )\n\t\tt.serialize(arr_{0}.push_back());" )
+		self.serialize_formats[SERIALIZATION]["serialized_list"].append( "__begin__auto& arr_{0} = json[\"{0}\"];\n\tsize_t i=0; for( auto& t : {0} )\n\t\tt.serialize(arr_{0}[i]);__end__" )
 		self.serialize_formats[DESERIALIZATION]["serialized_list"] = []
 		self.serialize_formats[DESERIALIZATION]["serialized_list"].append( "static_assert(0, \"list '{0}' not should have a initialize value\")" )
-		self.serialize_formats[DESERIALIZATION]["serialized_list"].append( "auto arr_{0} = json.node( \"{0}\" );\n\tfor( size_t i = 0; i < arr_{0}.size(); ++i )\n\t{3}\n\t\t{0}.emplace_back();\n\t\t{0}.back().deserialize(arr_{0}.at(i));\n\t{4}" )
+		self.serialize_formats[DESERIALIZATION]["serialized_list"].append( "auto& arr_{0} = json[\"{0}\"];\n\tfor( size_t i = 0; i < arr_{0}.size(); ++i )\n\t{3}\n\t\t{0}.emplace_back();\n\t\t{0}.back().deserialize(arr_{0}[i]);\n\t{4}" )
 
 		self.simple_types = ["int", "float", "bool", "string", "cc.point"]
 		for i in range(2):
@@ -196,9 +197,9 @@ class WriterCpp(Writer):
 		includes, f = self._findIncludes(cls,FLAG_CPP)
 		self._currentClass = None
 		if cls.type == "class":
-			fstr = "#include \"{0}.h\"{4}\n\nnamespace {3}\n__begin__\n{5}\nREGISTRATION_OBJECT( {0} );\n{2}\n{1}__end__"
+			fstr = "#include \"{0}.h\"\n#include \"Generics.h\"{4}\n\nnamespace {3}\n__begin__\n{5}\nREGISTRATION_OBJECT( {0} );\n{2}\n{1}__end__"
 		else:
-			fstr = "#include \"{0}.h\"{4}\n\nnamespace {3}\n__begin__\n{5}\n{2}\n{1}__end__"
+			fstr = "#include \"{0}.h\"\n#include \"Generics.h\"{4}\n\nnamespace {3}\n__begin__\n{5}\n{2}\n{1}__end__"
 		out[FLAG_CPP] += fstr.format( cls.name, functions[FLAG_CPP], constructor, self._getNamespace(cls), includes, objects[FLAG_CPP] )
 		out[FLAG_CPP] = re.sub("__begin__", "{", out[FLAG_CPP])
 		out[FLAG_CPP] = re.sub("__end__", "}", out[FLAG_CPP])
@@ -352,10 +353,10 @@ class WriterCpp(Writer):
 		if serialization_type == SERIALIZATION:
 			function.is_const = True
 			function.name = "serialize"
-			function.args.append(["json","RapidJsonNode&"])
+			function.args.append(["json","Json::Value&"])
 		if serialization_type == DESERIALIZATION:
 			function.name = "deserialize"
-			function.args.append(["json", "const RapidJsonNode&"])
+			function.args.append(["json", "const Json::Value&"])
 		function.return_type = "void"
 
 		for behabior in cls.behaviors:
