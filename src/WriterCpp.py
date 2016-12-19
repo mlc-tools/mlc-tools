@@ -102,7 +102,8 @@ class WriterCpp(Writer):
 		self.tests = []
 		Writer.__init__(self, outDirectory, parser)
 		self._currentClass = None
-		self._createTests()
+		if self.createTests:
+			self._createTests()
 		return
 	
 	def writeObject(self, object, tabs, flags):
