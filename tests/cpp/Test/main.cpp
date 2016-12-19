@@ -1,13 +1,16 @@
 #include "TestSerialization.h"
+#include "TestSerializationCommandSequence.h"
 #include "../../../out/RoutePoint.h"
 #include "../../../out/BattleSystem.h"
 #include "cocos2d.h"
 #include "Factory.h"
 #include "CommandSequence.h"
+#include "Generics.h"
 #include "../../../out/RequestAuthorize.h"
 #include "../../../out/ResponseAuthorize.h"
 #include "../../../out/IVisitorRequest.h"
 #include "../../../out/IVisitorResponse.h"
+#include "jsoncpp/json.h"
 
 using namespace mg;
 
@@ -147,17 +150,46 @@ cocos2d::Point cocos2d::Point::ZERO;
 
 int main()
 {
+	//Json::Value root;
+	//root["123"][1] = 1;
+	//
+	//Json::StreamWriterBuilder wbuilder;
+	//wbuilder["indentation"] = "";
+	//wbuilder["slightly"] = " ";
+	//auto str = Json::writeString( wbuilder, root );
+	//std::cout << str;
+	//
+	//Json::Value value;
+	//Json::Reader reader;
+	//reader.parse( str, value );
+	//std::cout << std::endl << value;
+	//
+	//float t;
+	//if( value.isMember( "123" ) && value["123"].isArray() )
+	//	t = strTo<float>( value["123"][0].asString() );
+	//if( value.isMember( "1231" ) )
+	//{
+	//	std::cout << value["1231"].asFloat();
+	//}
+	//if( json.is_exist( "health" ) )
+	//	health = json.get<float>( "health" );
+
 	VisitorRequest visitor;
 	VisitorResponse visitor2;
 
-	Command* command = new RequestAuthorize;
-	command->accept( &visitor );
-	
-	command = new ResponseAuthorize;
-	command->accept( &visitor2 );
-
-	TestSerialization test;
-	return test.execute() ? 0 : -1;
-
+	//Command* command = new RequestAuthorize;
+	//command->accept( &visitor );
+	//
+	//command = new ResponseAuthorize;
+	//command->accept( &visitor2 );
+	std::vector< std::shared_ptr<TestCase> > tests;
+	tests.push_back( std::make_shared<TestSerializationCommandSequence>() );
+	tests.push_back( std::make_shared<TestSerialization>() );
+	bool result = true;
+	for( auto test : tests )
+	{
+		result = test->execute() && result;
+	}
+	return result ? 0 : -1;
 
 }

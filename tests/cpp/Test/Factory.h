@@ -5,8 +5,14 @@
 #include <map>
 #include <iostream>
 #include "../../../out/SerializedObject.h"
+#include <assert.h>
 
 #define REGISTRATION_OBJECT( T ) class registrator__##T {public: registrator__##T() { Factory::shared().registrationCommand<T>( T::__type__ ); } }___registrator__##T; 
+
+void throw_error( const std::string& message );
+
+typedef std::string string;
+
 
 
 class Factory

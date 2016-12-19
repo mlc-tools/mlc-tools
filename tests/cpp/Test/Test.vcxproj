@@ -58,6 +58,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>jsoncpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -81,19 +82,19 @@
   <ItemGroup>
     <ClCompile Include="CommandSequence.cpp" />
     <ClCompile Include="Generics.cpp" />
-    <ClCompile Include="json11.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="RapidJsonNode.cpp" />
     <ClCompile Include="TestSerialization.cpp" />
+    <ClCompile Include="TestSerializationCommandSequence.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cocos2d.h" />
     <ClInclude Include="CommandSequence.h" />
     <ClInclude Include="Factory.h" />
     <ClInclude Include="Generics.h" />
-    <ClInclude Include="json11.hpp" />
     <ClInclude Include="RapidJsonNode.h" />
     <ClInclude Include="TestSerialization.h" />
+    <ClInclude Include="TestSerializationCommandSequence.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

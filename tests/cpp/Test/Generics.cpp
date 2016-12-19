@@ -154,3 +154,30 @@ template <> std::string toStr( cocos2d::Point value )
 {
 	return floatToStr( value.x ) + "x" + floatToStr(value.y);
 }
+
+
+template <> void set( Json::Value& json, int8_t value ) { json = value; }
+template <> void set( Json::Value& json, int16_t value ) { json = value; }
+template <> void set( Json::Value& json, int32_t value ) { json = value; }
+template <> void set( Json::Value& json, int64_t value ) { json = value; }
+template <> void set( Json::Value& json, uint8_t value ) { json = value; }
+template <> void set( Json::Value& json, uint16_t value ) { json = value; }
+template <> void set( Json::Value& json, uint32_t value ) { json = value; }
+template <> void set( Json::Value& json, uint64_t value ) { json = value; }
+template <> void set( Json::Value& json, bool value ) { json = value; }
+template <> void set( Json::Value& json, float value ) { json = value; }
+template <> void set( Json::Value& json, std::string value ) { json = value; }
+template <> void set( Json::Value& json, cocos2d::Point value ) { json = toStr(value); }
+
+template <> int8_t get( const Json::Value& json ) { return json.asInt(); }
+template <> int16_t get( const Json::Value& json ) { return json.asInt(); }
+template <> int32_t get( const Json::Value& json ) { return json.asInt(); }
+template <> int64_t get( const Json::Value& json ) { return json.asInt64(); }
+template <> uint8_t get( const Json::Value& json ) { return json.asUInt(); }
+template <> uint16_t get( const Json::Value& json ) { return json.asUInt(); }
+template <> uint32_t get( const Json::Value& json ) { return json.asUInt(); }
+template <> uint64_t get( const Json::Value& json ) { return json.asUInt64(); }
+template <> bool get( const Json::Value& json ) { return json.asBool(); }
+template <> float get( const Json::Value& json ) { return json.asFloat(); }
+template <> std::string get( const Json::Value& json ) { return json.asString(); }
+template <> cocos2d::Point get( const Json::Value& json ) { return strTo<cocos2d::Point>( json.asString() ); }

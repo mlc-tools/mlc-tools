@@ -6,7 +6,7 @@
     <ClCompile Include="RapidJsonNode.cpp" />
     <ClCompile Include="TestSerialization.cpp" />
     <ClCompile Include="CommandSequence.cpp" />
-    <ClCompile Include="json11.cpp" />
+    <ClCompile Include="TestSerializationCommandSequence.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Generics.h" />
@@ -15,6 +15,6 @@
     <ClInclude Include="cocos2d.h" />
     <ClInclude Include="Factory.h" />
     <ClInclude Include="CommandSequence.h" />
-    <ClInclude Include="json11.hpp" />
+    <ClInclude Include="TestSerializationCommandSequence.h" />
   </ItemGroup>
 </Project>

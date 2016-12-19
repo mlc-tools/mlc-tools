@@ -7,10 +7,6 @@
 #include <iostream>
 #include <string>
 
-void throw_error( const std::string& message );
-
-typedef std::string string;
-
 class RapidJsonNode
 {
 public:

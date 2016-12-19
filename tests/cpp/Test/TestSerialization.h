@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include "RapidJsonNode.h"
+#include "jsoncpp/json.h"
 #include <iostream>
 #include <string>
 
@@ -41,12 +41,14 @@ private:
 			auto one = T::__create_instance__();
 			auto two = T();
 			
-			RapidJsonNode json;
+			Json::Value json;
 			one.serialize( json );
 			two.deserialize( json );
 
-			std::string string;
-			json.toString( string );
+			Json::StreamWriterBuilder wbuilder;
+			//wbuilder["indentation"] = "";
+			auto string = Json::writeString( wbuilder, json );
+
 			std::cout << std::endl << string;
 			return one == two;
 		}
