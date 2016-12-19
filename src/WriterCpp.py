@@ -530,4 +530,4 @@ class WriterCpp(Writer):
 		fstr = fstr.format( includes, tests )
 		fstr = re.sub("__begin__", "{", fstr)
 		fstr = re.sub("__end__", "}", fstr)
-		fileutils.write("tests/cpp/Test/TestSerialization.cpp", fstr)
+		fileutils.write("tests/cpp/TestCpp/TestSerialization.cpp", fstr)

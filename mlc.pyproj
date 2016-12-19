@@ -57,11 +57,6 @@
   <ItemGroup>
     <Folder Include="src\" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="declaration.txt" />
-    <Content Include="templates.txt" />
-    <Content Include="reg_expresions.txt" />
-  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
