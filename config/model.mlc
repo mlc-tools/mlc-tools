@@ -1,257 +1,67 @@
-enum UnitLayer
-{
-	none = 0
-	earth = 1<<0
-	sky = 1<<1
-	sea = 1<<2
-	any = (1<<3-1)
-}
 
-class BattleSystem<SerializedObject>
+class Model<SerializedObject>
 {
-	float health=1.f
-	float velocity=1.f
-	float damage_phisicaly=0.f
-	float resist_phisicaly=0.f
-	float damage_ice=0.f
-	float resist_ice=0.f
-	float damage_fire=0.f
-	float resist_fire=0.f
-	float damage_electro=0.f
-	float resist_electro=0.f
-	float velocity_rate=1.f
-	float velocity_rate_time=0.f
-	float velocity_resist=0.f
-	float firerate=1.f
-	float attack_radius=0.f
-	int max_targets=1
-	float:runtime _velocity_rate_applyed=0.f
-	float:runtime _velocity_timer_applyed=0.f
-	
-	function void load( pugi::xml_node xml ):external;
-	
-	function float _getDamage(float damage, float resist)
+	Observer:runtime eventQuestsChanged;
+
+	list<QuestBase*> quests
+	list<Item*> items
+
+	function void push_quest_event(string event, int value)
 	{
-		return damage * math.max((1.f - resist), 0.f);
-	}
-	function float _getDamage(BattleSystem* attacker)
-	{
-		float p = _getDamage(attacker->damage_phisicaly, resist_phisicaly);
-		float i = _getDamage(attacker->damage_ice, resist_ice);
-		float f = _getDamage(attacker->damage_fire, resist_fire);
-		float e = _getDamage(attacker->damage_electro, resist_electro);
-		return p + i + f + e;
-	}
-	function float applyDamage(BattleSystem* attacker, int count,bool serverSide)
-	{
-		_apply_velocity_rate(attacker);
-		float damage = _getDamage(attacker);
-		float min = serverSide ? 0.f : 1.f;
-		health = math.max(min, health - damage * count);
-		return damage;
-	}
-	function void update(float dt)
-	{
-		_velocity_timer_applyed -= dt;
-		if( _velocity_timer_applyed <= 0)
+		bool result = false;
+		for( auto& quest : quests)
 		{
-			_velocity_timer_applyed = 0;
-			_velocity_rate_applyed = 0.f;
+			result = quest->push(event, value) || result;
+		}
+		if( result )
+		{
+			eventQuestsChanged.pushevent();
 		}
 	}
-	function void _apply_velocity_rate(BattleSystem* attacker)
+
+	function void add_item(Item* item)
 	{
-		float rate = _getDamage(attacker->velocity_rate, velocity_resist);
-		_velocity_rate_applyed = math.min(_velocity_rate_applyed, rate);
-		_velocity_timer_applyed = math.max(_velocity_timer_applyed, attacker->velocity_rate_time);
-	}
-	function float getVelocity()
-	{
-		return velocity * math.max(0.f, math.min(1.f, 1.f - _velocity_rate_applyed));
+		items.push_back(item);
 	}
 }
 
-class RoutePoint<SerializedObject>
+class Controller<SerializedObject>
 {
-	cc.point position
-	int triger=0
-	float radius=0.f
-	string message
-	bool is_dynamic = false
-	cc.point*:runtime dynanic_point=nullptr
-	function cc.point getDynamic:external()
-	function bool isDynamic()
-	{
-		return is_dynamic;
-	}
-	function void setDynamic(bool var)
-	{
-		is_dynamic = var;
-	}
-	function void setDynamicPoint(cc.point* point)
-	{
-		dynanic_point = point;
-		is_dynamic = dynanic_point != nullptr;
-	}
-}
+	Model* model
 
-class Route<SerializedObject>
-{
-	list<RoutePoint> points
-	list<float>:runtime lengths
-	int id=-1
-	function void compute_lengths()
+	function void loot(Item* item)
 	{
-		float length = 0.f;
-		for( unsigned i=0;i<points.size()-1; ++i )
+		if(item)
 		{
-			length += points[i].position.getDistance( points[i+1].position );
-			lengths.append(length);
+			auto event = "loot_" + item->type;
+			model->add_item(item);
+			model->push_quest_event(event, 1);
 		}
 	}
-	function cc.point compute_position(float S)
-	{
-		if( lengths.size() == 0 )
-		{
-			return cocos2d::Point::ZERO;
-		}
-		float curr = 0;
-		for( unsigned i=0;i<lengths.size(); ++i )
-		{
-			if( S < lengths[i] )
-			{
-				float t = (S - curr) / (lengths[i] - curr);
-				auto point = points[i].position + (points[i+1].position - points[i].position) * t;
-				return point;
-			}
-			curr = lengths[i];
-		}
-		return points.back().position;
-	}
-	function bool is_finish_point(cc.point point)
-	{
-		return points.back().position == point;
-	}
 }
 
-class TripleRoute<SerializedObject>
+class Interaction<SerializedObject>:visitor{}
+class InteractionAttack<Interaction>{}
+class InteractionTakeItem<Interaction>{}
+class InteractionLootItem<Interaction>{}
+class InteractionSpawnUnit<Interaction>
 {
-	UnitLayer layer
-	bool desantRoute=false
-	Route main
-	Route left
-	Route right
+	Unit* unit
 }
-
-class TowerPlaceInfo<SerializedObject>
+class InteractionMoveBy<Interaction>
 {
-	cc.point position
-	float rate_radius=1.f
-	string name
+	float x;
+	float y;
 }
-
-class WaveUnitInfo<SerializedObject>
+class InteractionMoveTo<Interaction>
 {
-	string name
-	float rate=1.f
-	float delay=1.f
-	float velocity=0.f
-	int route_index=0
-	int route_sub_type
-	int score=10
+	float x;
+	float y;
 }
-
-class PreloadedUnitInfo<SerializedObject>
+class InteractionPushEvent<Interaction>
 {
-	string name
-	cc.point position
-	int add_z_order
+	string event
 }
-
-class UnitData<SerializedObject>
+class InteractionLever<Interaction>
 {
-	string name
-	float health=1.f
-	float attack_radius = 0.f
-	UnitLayer layer
-	UnitLayer target_layer
-	int score=0
-	int id=-1
-	int current_level=1
-	bool invalid=false
-	cc.point:runtime position
-}
-
-class WaveInfo<SerializedObject>
-{
-	list<WaveUnitInfo> units
-	float delay=0
-}
-
-class LevelDecorationData<SerializedObject>
-{
-	string name
-	cc.point position
-	int z_order=0
-	string action_desc
-}
-
-class LevelInfo<SerializedObject>
-{
-	string map_resource
-	string fort
-	int silver=0
-	int life=0
-	float rate=1.f
-	list<int> healthForStar
-}
-
-class LevelData<SerializedObject>
-{
-	int level_index=-1
-	list<TripleRoute> routes
-	list<TowerPlaceInfo> places
-	list<PreloadedUnitInfo> preloaded_units
-	list<WaveInfo> waves
-	list<LevelDecorationData> decorations
-	LevelInfo info
-}
-
-class ModelUnit<SerializedObject>
-{
-	int id=0
-	int level=1
-	string name
-	cc.point position
-	UnitLayer layer
-	UnitLayer target_layer
-	float damage_timer=0
-	float life_time=36000
-	int route_id=0
-	int score=0
-	float start_move_time=0
-	list<int> targets
-	BattleSystem battle_system
-
-	function float get_health()
-	{
-		return battle_system.health;
-	}
-
-	function bool target_is_correct(ModelUnit& target)
-	{
-		bool result = target.get_health() > 0;
-		result = result && (target_layer & target.layer);
-		auto distance = position.getDistance( target.position );
-		result = result && position.getDistanceSq(target.position) <= (battle_system.attack_radius*battle_system.attack_radius);
-		return result;
-	}
-
-	function void move_on_route(Route& route,float match_time)
-	{
-		float t = match_time - start_move_time;
-		float v = battle_system.getVelocity();
-		float s = v * t;
-		position = route.compute_position( s );
-	}
 }

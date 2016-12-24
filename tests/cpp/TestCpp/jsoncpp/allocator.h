@@ -7,7 +7,7 @@
 #define CPPTL_JSON_ALLOCATOR_H_INCLUDED
 
 #include <cstring>
-#include <memory>
+#include "IntrusivePtr.h"
 
 #pragma pack(push, 8)
 

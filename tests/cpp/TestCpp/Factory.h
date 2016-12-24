@@ -1,10 +1,10 @@
 #ifndef __CommandFactory_h__
 #define __CommandFactory_h__
 #include <string>
-#include <memory>
+#include "IntrusivePtr.h"
 #include <map>
 #include <iostream>
-#include "../../../out/SerializedObject.h"
+#include "SerializedObject.h"
 #include <assert.h>
 
 #define REGISTRATION_OBJECT( T ) class registrator__##T {public: registrator__##T() { Factory::shared().registrationCommand<T>( T::__type__ ); } }___registrator__##T; 
@@ -17,17 +17,17 @@ typedef std::string string;
 
 class Factory
 {
-	class IObject
+	class IObject : public mg::SerializedObject
 	{
-	public: virtual std::shared_ptr<mg::SerializedObject> build() = 0;
+	public: virtual IntrusivePtr<mg::SerializedObject> build() = 0;
 	};
 	template<class T>
 	class Object : public IObject
 	{
 	public: 
-		virtual std::shared_ptr<mg::SerializedObject> build()
+		virtual IntrusivePtr<mg::SerializedObject> build()
 		{
-			return std::static_pointer_cast<mg::SerializedObject>(std::make_shared<T>());
+			return dynamic_pointer_cast_intrusive<mg::SerializedObject>( make_intrusive<T>() );
 		};
 	};
 public:
@@ -45,11 +45,11 @@ public:
 			std::cout << std::endl << "I already have object with key [" << key << "]";
 		}
 		assert( _builders.find( key ) == _builders.end() );
-		auto ptr = std::make_shared<Object<T>>();
+		auto ptr = make_intrusive<Object<T>>();
 		_builders[key] = ptr;
 	};
 
-	std::shared_ptr<mg::SerializedObject> build( const std::string & key )
+	IntrusivePtr<mg::SerializedObject> build( const std::string & key )
 	{
 		bool isreg = _builders.find( key ) != _builders.end();
 		if( !isreg )
@@ -58,21 +58,21 @@ public:
 	}
 
 	template < class T >
-	std::shared_ptr<T> build( const std::string & key )
+	IntrusivePtr<T> build( const std::string & key )
 	{
-		std::shared_ptr<mg::SerializedObject> ptr = build( key );
-		std::shared_ptr<T> result = std::dynamic_pointer_cast<T>( ptr );
+		IntrusivePtr<mg::SerializedObject> ptr = build( key );
+		IntrusivePtr<T> result = dynamic_pointer_cast_intrusive<T>( ptr );
 		return result;
 	};
 
 	template < class T >
-	static std::shared_ptr<T> build()
+	static IntrusivePtr<T> build()
 	{
-		auto result = std::make_shared<T>();
+		auto result = make_intrusive<T>();
 		return result;
 	};
 private:
-	std::map< std::string, std::shared_ptr<IObject> > _builders;
+	std::map< std::string, IntrusivePtr<IObject> > _builders;
 };
 
 #endif

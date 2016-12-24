@@ -1,17 +1,28 @@
-class SerializedObject:serialized:abstract
+class SerializedObject:serialized
+{
+	int _reference_counter = 1
+	function int retain()
+	{
+		return ++_reference_counter;
+	}
+	function int release()
+	{
+		auto c = --_reference_counter;
+		if( c == 0)
+		{
+			delete this;
+		}
+		return c;
+	}
+}
 
-class Command<SerializedObject>
+class commands/Command<SerializedObject>
 {
 	int id:key;
 	function string getSerializedString():external:const;
-	function void serialize(Json::Value& json):external:const;
-	function void deserialize(const Json::Value& json):external;
-	function void accept(IVisitorRequest* visitor)
-	{
-		throw_error( getType() + " command cannot accepted with IVisitorRequest. " );
-	}
-	function void accept(IVisitorResponse* visitor)
-	{
-		throw_error( getType() + " command cannot accepted with IVisitorResponse. " );
-	}
+}
+
+class CommandSequence<Command>
+{
+	list<Command*> commands
 }

@@ -1,0 +1,14 @@
+
+class QuestTaskFindItem<QuestTaskBase>
+{
+	function bool push(string event, int value)
+	{
+		if( event == "loot_" + item )
+		{
+			_add(value);
+			return true;
+		}
+		return false;
+	}
+	string item;
+}

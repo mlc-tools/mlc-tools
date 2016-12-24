@@ -6,6 +6,7 @@ class Writer:
 		self.parser = parser
 		self.buffers = {}
 		self.out_directory = outDirectory
+		self.created_files = []
 		
 		#self.buffers = self._add(self.buffers, self.writeObjects(parser.objects, 0, 0))
 		#self.buffers = self._add(self.buffers, self.writeFunctions(parser.functions, 0, 0))
@@ -45,7 +46,7 @@ class Writer:
 		out = {flags:"\n"}
 		for cls in classes:
 			dict = self.writeClass(cls, tabs, flags)
-			self.save( self._getFilenameForClass(cls.name), dict[flags] )
+			self.save( self._getFilenameForClass(cls), dict[flags] )
 			out = self._add( out, dict )
 		return out;
 
@@ -54,14 +55,29 @@ class Writer:
 		for function in functions: out += self.tabs(tabs) + self.writeFunction(function, tabs, flags)
 		return out
 
+	def prepareFile(self, body):
+		return body
+
 	def save( self, filename, string ):
+		string = self.prepareFile(string)
 		filename = self.out_directory + filename;
-		result = fileutils.write(filename, string)
-		if result:
-			print "recreate:", filename
+		self.created_files.append(filename)
+		exist = fileutils.isfile(filename)
+		writed = fileutils.write(filename, string)
+		if writed:
+			msg = "create:" if not exist else "rewrited"
+			print msg, filename
+
+	def removeOld(self):
+		files = fileutils.getFilesList( self.out_directory )
+		for file in files:
+			if self.out_directory + file not in self.created_files:
+				print "remove", file
+				fileutils.remove(self.out_directory + file)
+
 		
 
-	def _getFilenameForClass(self, class_name):
-		return class_name
+	def _getFilenameForClass(self, cls):
+		return cls.name
 
 		

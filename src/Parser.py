@@ -67,6 +67,9 @@ class Parser:
 		cls = Class()
 		cls.parse(header)
 		cls.parseBody( Parser(), body )
+		if self._findClass(cls.name):
+			print "Error: duplicate classes [{}]".format(cls.name)
+			exit -1
 		self.classes.append(cls)
 		return text
 
@@ -129,6 +132,13 @@ class Parser:
 			cls.is_visitor = self.isVisitor(cls)
 			if cls.is_visitor and cls.name != self.getVisitorType(cls):
 				self.appendVisitor(cls)
+
+		for cls in self.classes:
+			for member in cls.members:
+				args = []
+				for arg in member.template_args:
+					args.append( self.objectType(arg) )
+				member.template_args = args
 
 	def isSerialised(self, cls):
 		if cls.is_serialized:
@@ -204,6 +214,15 @@ class Parser:
 		function.name = "getType"
 		function.return_type = "string"
 		function.is_const = True
-		function.operations.append( "return {}::__type__".format(cls.name) )
+		function.operations.append( "return {}::__type__;".format(cls.name) )
 		cls.functions.append(function)
-		
+
+	def objectType(self, typeName):
+		cls = self._findClass(typeName)	
+		if cls:
+			return cls
+		object = Object()
+		object.type = typeName
+		object._parceType()
+		object.name = ""
+		return object

@@ -1,10 +1,11 @@
 #pragma once
 #include <vector>
 #include "jsoncpp/json.h"
+#include "SerializedObject.h"
 #include <iostream>
 #include <string>
 
-class TestCase
+class TestCase : public mg::SerializedObject
 {
 public:
 	virtual bool execute() = 0;

@@ -13,26 +13,26 @@ DESERIALIZATION = 1
 TEST_FUNCTION_CREATE = "__create_instance__"
 
 
+def random_int():
+	max = 0;
+	return random.randint(-max, max)
+def random_bool():
+	max = 0;
+	return random.randint(0, max)
+def random_float():
+	max = 0;
+	return random.randint(-max, max)
+
 def convertType(type):
 	types = {}
 	types["cc.point"] = "cocos2d::Point"
 	types["cc.point*"] = "cocos2d::Point*"
 	types["list"] = "std::vector"
 	types["string"] = "std::string"
+	types["Observer"] = "Observer<std::function<void()>>"
 	if type in types:
 		return types[type]
 	return type 
-
-def getIncludeFile(file):
-	types = {}
-	types["cc.point"] = "\"cocos2d.h\""
-	types["list"] = "<vector>"
-	types["string"] = "<string>"
-	types["pugi::xml_node"] = "\"pugixml/pugixml.hpp\""
-	types["Json::Value"] = "\"jsoncpp/json.h\""
-	if file in types:
-		return types[file]
-	return "\"{0}.h\"".format(file)
 
 def autoReplaces(text):
 	text = re.sub( "math.max", "std::max", text)
@@ -56,33 +56,71 @@ class WriterCpp(Writer):
 		self.serialize_formats.append({})
 		self.serialize_formats.append({})
 		
-		self.serialize_formats[SERIALIZATION]["simple"] = []
-		self.serialize_formats[SERIALIZATION]["simple"].append( "if({0} != {2}) \n\t\tset(json,\"{0}\",{0})" )
-		self.serialize_formats[SERIALIZATION]["simple"].append( "set(json,\"{0}\",{0})" )
-		self.serialize_formats[DESERIALIZATION]["simple"] = []
-		self.serialize_formats[DESERIALIZATION]["simple"].append( "if(json.isMember(\"{0}\")) \n\t\t {0} = get<{1}>( json[\"{0}\"] );\n\telse \n\t\t{0} = {2}" )
-		self.serialize_formats[DESERIALIZATION]["simple"].append( "{0} = get<{1}>( json[\"{0}\"] )" )
+		self.serialize_formats[SERIALIZATION]['simple'] = []
+		self.serialize_formats[SERIALIZATION]['simple'].append( 'if({0} != {2}) \n__begin__\nset(json,"{0}",{0});\n__end__' )
+		self.serialize_formats[SERIALIZATION]['simple'].append( 'set(json,"{0}",{0});' )
+		self.serialize_formats[DESERIALIZATION]['simple'] = []
+		self.serialize_formats[DESERIALIZATION]['simple'].append( 'if(json.isMember("{0}")) \n __begin__\n{0} = get<{1}>( json["{0}"] );\n__end__\nelse \n__begin__\n{0} = {2};\n__end__' )
+		self.serialize_formats[DESERIALIZATION]['simple'].append( '{0} = get<{1}>( json["{0}"] );' )
 		
-		self.serialize_formats[SERIALIZATION]["serialized"] = []
-		self.serialize_formats[SERIALIZATION]["serialized"].append( "static_assert(0, \"field '{0}' not should have a initialize value\")" )
-		self.serialize_formats[SERIALIZATION]["serialized"].append( "{0}.serialize(json[\"{0}\"])" )
-		self.serialize_formats[DESERIALIZATION]["serialized"] = []
-		self.serialize_formats[DESERIALIZATION]["serialized"].append( "static_assert(0, \"field '{0}' not should have a initialize value\")" )
-		self.serialize_formats[DESERIALIZATION]["serialized"].append( "{0}.deserialize(json[\"{0}\"])" )
+		self.serialize_formats[SERIALIZATION]['serialized'] = []
+		self.serialize_formats[SERIALIZATION]['serialized'].append( 'static_assert(0, "field "{0}" not should have a initialize value");' )
+		self.serialize_formats[SERIALIZATION]['serialized'].append( '{0}.serialize(json["{0}"]);' )
+		self.serialize_formats[DESERIALIZATION]['serialized'] = []
+		self.serialize_formats[DESERIALIZATION]['serialized'].append( 'static_assert(0, "field "{0}" not should have a initialize value");' )
+		self.serialize_formats[DESERIALIZATION]['serialized'].append( '{0}.deserialize(json["{0}"]);' )
 		
-		self.serialize_formats[SERIALIZATION]["simple_list"] = []
-		self.serialize_formats[SERIALIZATION]["simple_list"].append( "static_assert(0, \"list '{0}' not should have a initialize value\")" )
-		self.serialize_formats[SERIALIZATION]["simple_list"].append( "__begin__auto& arr_{0} = json[\"{0}\"];\n\tsize_t i=0; for( auto& t : {0} )\n\t\tset(arr_{0}[i++], t);__end__" )
-		self.serialize_formats[DESERIALIZATION]["simple_list"] = []
-		self.serialize_formats[DESERIALIZATION]["simple_list"].append( "static_assert(0, \"list '{0}' not should have a initialize value\")" )
-		self.serialize_formats[DESERIALIZATION]["simple_list"].append( "auto& arr_{0} = json[\"{0}\"];\n\tfor( size_t i = 0; i < arr_{0}.size(); ++i )\n\t{3}\n\t\t{0}.emplace_back();\n\t\t{0}.back() = get<{5}>(arr_{0}[i]);\n\t{4}" )
+		self.serialize_formats[SERIALIZATION]['pointer'] = []
+		self.serialize_formats[SERIALIZATION]['pointer'].append( 'static_assert(0, "field "{0}" not should have a initialize value");' )
+		self.serialize_formats[SERIALIZATION]['pointer'].append( '''
+																	if({0})
+																	{3}
+																		{0}->serialize(json["{0}"][{0}->getType()]);
+																	{4}''' )
+		self.serialize_formats[DESERIALIZATION]['pointer'] = []
+		self.serialize_formats[DESERIALIZATION]['pointer'].append( 'static_assert(0, "field "{0}" not should have a initialize value");' )
+		self.serialize_formats[DESERIALIZATION]['pointer'].append( '''
+																	if(json.isMember("{0}"))
+																	{3}
+																		auto type_{0} = json["{0}"].getMemberNames()[0];
+																		{0} = Factory::shared().build<{1}>( type_{0} );
+																		{0}->deserialize(json["{0}"][type_{0}]);
+																	{4}''')
 		
-		self.serialize_formats[SERIALIZATION]["serialized_list"] = []
-		self.serialize_formats[SERIALIZATION]["serialized_list"].append( "static_assert(0, \"list '{0}' not should have a initialize value\")" )
-		self.serialize_formats[SERIALIZATION]["serialized_list"].append( "__begin__auto& arr_{0} = json[\"{0}\"];\n\tsize_t i=0; for( auto& t : {0} )\n\t\tt.serialize(arr_{0}[i++]);__end__" )
-		self.serialize_formats[DESERIALIZATION]["serialized_list"] = []
-		self.serialize_formats[DESERIALIZATION]["serialized_list"].append( "static_assert(0, \"list '{0}' not should have a initialize value\")" )
-		self.serialize_formats[DESERIALIZATION]["serialized_list"].append( "auto& arr_{0} = json[\"{0}\"];\n\tfor( size_t i = 0; i < arr_{0}.size(); ++i )\n\t{3}\n\t\t{0}.emplace_back();\n\t\t{0}.back().deserialize(arr_{0}[i]);\n\t{4}" )
+		self.serialize_formats[SERIALIZATION]['list<simple>'] = []
+		self.serialize_formats[SERIALIZATION]['list<simple>'].append( 'static_assert(0, "list "{0}" not should have a initialize value");' )
+		self.serialize_formats[SERIALIZATION]['list<simple>'].append( '{3}\nauto& arr_{0} = json["{0}"];\nsize_t i=0;\nfor( auto& t : {0} )\nset(arr_{0}[i++], t);\n{4}' )
+		self.serialize_formats[DESERIALIZATION]['list<simple>'] = []
+		self.serialize_formats[DESERIALIZATION]['list<simple>'].append( 'static_assert(0, "list "{0}" not should have a initialize value");' )
+		self.serialize_formats[DESERIALIZATION]['list<simple>'].append( 'auto& arr_{0} = json["{0}"];\nfor( size_t i = 0; i < arr_{0}.size(); ++i )\n{3}\n{0}.emplace_back();\n{0}.back() = get<{5}>(arr_{0}[i]);\n{4};' )
+		
+		self.serialize_formats[SERIALIZATION]['serialized_list'] = []
+		self.serialize_formats[SERIALIZATION]['serialized_list'].append( 'static_assert(0, "list "{0}" not should have a initialize value");' )
+		self.serialize_formats[SERIALIZATION]['serialized_list'].append( '{3}\nauto& arr_{0} = json["{0}"];\nsize_t i=0;\nfor( auto& t : {0} )\n{3}\nt.serialize(arr_{0}[i++]);\n{4}\n{4}' )
+		self.serialize_formats[DESERIALIZATION]['serialized_list'] = []
+		self.serialize_formats[DESERIALIZATION]['serialized_list'].append( 'static_assert(0, "list "{0}" not should have a initialize value");' )
+		self.serialize_formats[DESERIALIZATION]['serialized_list'].append( 'auto& arr_{0} = json["{0}"];\nfor( size_t i = 0; i < arr_{0}.size(); ++i )\n{3}\n{0}.emplace_back();\n{0}.back().deserialize(arr_{0}[i]);\n{4}' )
+
+		self.serialize_formats[SERIALIZATION]['pointer_list'] = []
+		self.serialize_formats[SERIALIZATION]['pointer_list'].append( 'static_assert(0, "list "{0}" not should have a initialize value");' )
+		self.serialize_formats[SERIALIZATION]['pointer_list'].append( '''auto& arr_{0} = json["{0}"];
+																		 for( auto& t : {0} )
+																		 {3}
+																			auto index = arr_{0}.size();
+																		 	t->serialize(arr_{0}[index][t->getType()]); 
+																		 {4}''' )
+		self.serialize_formats[DESERIALIZATION]['pointer_list'] = []
+		self.serialize_formats[DESERIALIZATION]['pointer_list'].append( 'static_assert(0, "list "{0}" not should have a initialize value");' )
+		self.serialize_formats[DESERIALIZATION]['pointer_list'].append( '''auto& arr_{0} = json["{0}"];
+																		auto size_{0} = arr_{0}.size();
+																		for( size_t i = 0; i < size_{0}; ++i )
+																		{3}
+																			assert( arr_{0}[i].size() == 1 );
+																			auto type = arr_{0}[i].getMemberNames()[0];
+																			auto obj = Factory::shared().build<{5}>( type );
+																			{0}.emplace_back(obj);
+																			{0}.back()->deserialize( arr_{0}[i][type] );
+																		{4}''' )
 
 		self.simple_types = ["int", "float", "bool", "string", "cc.point"]
 		for i in range(2):
@@ -92,8 +130,8 @@ class WriterCpp(Writer):
 				self.serialize_formats[i][type].append( self.serialize_formats[i]["simple"][1] )
 				list_type = "list<{0}>".format(type)
 				self.serialize_formats[i][list_type] = []
-				self.serialize_formats[i][list_type].append( self.serialize_formats[i]["simple_list"][0] )
-				self.serialize_formats[i][list_type].append( self.serialize_formats[i]["simple_list"][1] )
+				self.serialize_formats[i][list_type].append( self.serialize_formats[i]["list<simple>"][0] )
+				self.serialize_formats[i][list_type].append( self.serialize_formats[i]["list<simple>"][1] )
 
 			self.serialize_formats[i]["list<serialized>"] = []
 			self.serialize_formats[i]["list<serialized>"].append( self.serialize_formats[i]["serialized_list"][0] )
@@ -110,7 +148,23 @@ class WriterCpp(Writer):
 		out = Writer.writeObject(self, object, tabs, flags)
 		if flags == FLAG_HPP:
 			value = ""
-			args = ", ".join(object.template_args)
+			args = []
+			for arg in object.template_args:
+				type = arg.name if isinstance(arg, Class) else arg.type
+				type = convertType(type)
+				if arg.is_pointer:
+					type = "IntrusivePtr<{}>".format(type)
+				args.append(type)
+			args = ", ".join(args)
+			type = object.type
+			if object.is_pointer:
+				f = "{}*"
+				cls = self.parser._findClass(object.type)
+				if cls:
+					for b in cls.behaviors:
+						if b.name == "SerializedObject":
+							f = "IntrusivePtr<{}>"
+				type = f.format(convertType(type))
 			modifiers = ""
 			if object.is_static:
 				modifiers += "static "
@@ -121,14 +175,15 @@ class WriterCpp(Writer):
 			else:
 				fstr = "{4}{3}{0} {1}"
 			fstr += ";\n"
-			out[flags] += fstr.format(convertType(object.type), object.name, args, modifiers, self.tabs(tabs))
+			out[flags] += fstr.format(convertType(type), object.name, args, modifiers, self.tabs(tabs))
 		if flags == FLAG_CPP:
 			if object.is_static:
 				if object.initial_value == None:
-					print "static object have not initial_value"
+					print "static object {} of class {} have not initial_value".format(object.name, self._currentClass.name)
 					exit(-1)
 				if len(object.template_args) > 0:
 					#TODO:
+					print "#TODO: static object {} of class {} have template arguments".format(object.name, self._currentClass.name)
 					exit(-1)
 				value = ""
 				fstr = "{4}{0} {2}::{1} = {3}"
@@ -159,6 +214,7 @@ class WriterCpp(Writer):
 		objects = self.writeObjects(cls.members, 1, FLAG_HPP)
 		functions = self.writeFunctions(cls.functions, 1, FLAG_HPP)
 		constructor = self._createConstructorFunctionHpp(cls, 1)
+		destructor = self._createDestructorFunctionHpp(cls, tabs)
 		includes, forward_declarations = self._findIncludes(cls,FLAG_HPP)
 		self._currentClass = None
 
@@ -177,14 +233,14 @@ class WriterCpp(Writer):
 		    O = "\npublic:{3}"
 
 		if cls.type != "enum":
-			fstr += "\n__begin__\npublic:\n{5}" + F + O + "__end__;\n\n"
+			fstr += "\n__begin__\npublic:\n{5}{6}" + F + O + "__end__;\n\n"
 		else:
 			fstr += "\n__begin__{5}" + O + F + "__end__;\n\n"
 
-		fstr = "namespace {0}\n__begin__\n{2}\n\n{1}__end__//namespace {0}".format( self._getNamespace(cls), fstr, forward_declarations )
+		fstr = "namespace {0}\n__begin__{2}\n\n{1}__end__//namespace {0}".format( self._getNamespace(cls), fstr, forward_declarations )
 		fstr = "#ifndef __{0}_h__\n#define __{0}_h__\n{2}\n\n{1}\n\n#endif //#ifndef __{0}_h__".format( cls.name, fstr, includes )
 
-		out[FLAG_HPP] += fstr.format( "class", cls.name, behaviors, objects[FLAG_HPP], functions[FLAG_HPP], constructor);
+		out[FLAG_HPP] += fstr.format( "class", cls.name, behaviors, objects[FLAG_HPP], functions[FLAG_HPP], constructor, destructor);
 		out[FLAG_HPP] = re.sub("__begin__", "{", out[FLAG_HPP])
 		out[FLAG_HPP] = re.sub("__end__", "}", out[FLAG_HPP])
 		return out
@@ -195,13 +251,18 @@ class WriterCpp(Writer):
 		objects = self.writeObjects(cls.members, 1, FLAG_CPP)
 		functions = self.writeFunctions(cls.functions, 0, FLAG_CPP)
 		constructor = self._createConstructorFunctionCpp(cls, tabs)
+		destructor = self._createDestructorFunctionCpp(cls, tabs)
 		includes, f = self._findIncludes(cls,FLAG_CPP)
 		self._currentClass = None
 		if cls.type == "class":
-			fstr = "#include \"{0}.h\"\n#include \"Generics.h\"{4}\n\nnamespace {3}\n__begin__\n{5}\nREGISTRATION_OBJECT( {0} );\n{2}\n{1}__end__"
+			fstr = "#include \"{0}.h\"\n#include \"Generics.h\"{4}\n\nnamespace {3}\n__begin__{5}{6}\n{2}\n{7}\n{1}__end__"
 		else:
-			fstr = "#include \"{0}.h\"\n#include \"Generics.h\"{4}\n\nnamespace {3}\n__begin__\n{5}\n{2}\n{1}__end__"
-		out[FLAG_CPP] += fstr.format( cls.name, functions[FLAG_CPP], constructor, self._getNamespace(cls), includes, objects[FLAG_CPP] )
+			fstr = "#include \"{0}.h\"\n#include \"Generics.h\"{4}\n\nnamespace {3}\n__begin__\n{5}\n{2}{7}\n{1}__end__"
+		registration = "REGISTRATION_OBJECT( {0} );\n".format(cls.name)
+		for func in cls.functions:
+			if func.is_abstract: registration = ""
+		if cls.is_abstract: registration = ""
+		out[FLAG_CPP] += fstr.format( cls.name, functions[FLAG_CPP], constructor, self._getNamespace(cls), includes, objects[FLAG_CPP], registration, destructor )
 		out[FLAG_CPP] = re.sub("__begin__", "{", out[FLAG_CPP])
 		out[FLAG_CPP] = re.sub("__end__", "}", out[FLAG_CPP])
 		return out
@@ -215,6 +276,15 @@ class WriterCpp(Writer):
 			fstr += "{}"
 		fstr += ";\n"
 		return fstr
+	def _createDestructorFunctionHpp(self, cls, tabs):
+		if cls.type == "enum":
+			return ""
+		fstr = "{1}virtual ~{0}()"
+		fstr = fstr.format( cls.name, self.tabs(tabs) )
+		if cls.is_abstract:
+			fstr += "{}"
+		fstr += ";\n"
+		return fstr
 
 	def _createConstructorFunctionCpp(self, cls, tabs):
 		if cls.type == "enum":
@@ -223,11 +293,11 @@ class WriterCpp(Writer):
 		initialize2 = ""
 		for obj in cls.members:
 			if obj.is_key:
-				str1 = "\n\tstatic {0} {1}_key = 0;".format(obj.type, obj.name)
-				str2 = "\n\t{0} = ++{0}_key;".format(obj.name)
+				str1 = "\nstatic {0} {1}_key = 0;".format(obj.type, obj.name)
+				str2 = "\n{0} = ++{0}_key;".format(obj.name)
 				initialize2 += str1 + str2
 			elif obj.initial_value != None and not obj.is_static:
-				fstr = "\n\t{2} {0}({1})"
+				fstr = "\n{2} {0}({1})"
 				s = ","
 				if initialize == "": 
 					s = ":"
@@ -236,6 +306,15 @@ class WriterCpp(Writer):
 
 		fstr = "{0}::{0}(){1}\n__begin__{2}\n{3}\n__end__\n"
 		str = fstr.format( cls.name, initialize, initialize2, self.tabs(tabs) )
+		str = re.sub("__begin__", "{", str)
+		str = re.sub("__end__", "}", str)
+		return str
+
+	def _createDestructorFunctionCpp(self, cls, tabs):
+		if cls.type == "enum":
+			return ""
+		fstr = "{0}::~{0}()\n__begin__\n__end__\n"
+		str = fstr.format( cls.name )
 		str = re.sub("__begin__", "{", str)
 		str = re.sub("__end__", "}", str)
 		return str
@@ -273,7 +352,7 @@ class WriterCpp(Writer):
 			fstr = header + body
 			body = ""
 			for operation in function.operations:
-				fline = "{0};"
+				fline = "{0}"
 				line = "\n" + self.tabs(tabs+1) + fline.format(operation);
 				body += line
 			args = []
@@ -293,12 +372,18 @@ class WriterCpp(Writer):
 
 		for cls in classes:
 			dict = self.writeClass(cls, tabs, FLAG_HPP)
-			self.save( cls.name + ".h", dict[FLAG_HPP] )
+			filename = cls.name + ".h"
+			if cls.group:
+				filename = cls.group + "/" + filename
+			self.save( filename, dict[FLAG_HPP] )
 			out = self._add( out, dict )
 		for cls in classes: 
 			if not cls.is_abstract:
 				dict = self.writeClass(cls, tabs, FLAG_CPP)
-				self.save( cls.name + ".cpp", dict[FLAG_CPP] )
+				filename = cls.name + ".cpp"
+				if cls.group:
+					filename = cls.group + "/" + filename
+				self.save( filename, dict[FLAG_CPP] )
 				out = self._add( out, dict )
 		return out
 
@@ -363,7 +448,7 @@ class WriterCpp(Writer):
 		for behabior in cls.behaviors:
 			if not behabior.is_serialized or behabior.is_abstract:
 				continue
-			str = "{0}::{1}(json)".format( behabior.name, function.name )
+			str = "{0}::{1}(json);".format( behabior.name, function.name )
 			function.operations.append(str)
 
 		for obj in cls.members:
@@ -373,17 +458,26 @@ class WriterCpp(Writer):
 			if obj.initial_value == None:
 				index = 1
 			
-			type = obj.type
-			if not type in self.simple_types and type != "list":
-				type = "serialized"
+			type = obj.name if isinstance(obj, Class) else obj.type
+			if type not in self.simple_types and type != "list":
+				if obj.is_pointer:
+					type = "pointer"
+				else:
+					type = "serialized"
+			template_args = []
 			if len(obj.template_args) > 0:
-				if obj.template_args[0] in self.simple_types:
-					type = "{0}<{1}>".format( type, obj.template_args[0] )
+				arg = obj.template_args[0]
+				arg_type = arg.name if isinstance(arg, Class) else arg.type
+				template_args.append(convertType(arg_type))
+				if arg_type in self.simple_types:
+					type = "{0}<simple>".format( type )
+				elif arg.is_pointer:
+					type = "pointer_list"
 				else:
 					type = "{0}<serialized>".format( type )
 
 			fstr = self.serialize_formats[serialization_type][type][index]
-			str = fstr.format(obj.name, convertType(obj.type), obj.initial_value, "{", "}", *obj.template_args)
+			str = fstr.format(obj.name, convertType(obj.type), obj.initial_value, "{", "}", *template_args)
 			function.operations.append(str)
 		cls.functions.append(function)
 
@@ -395,7 +489,7 @@ class WriterCpp(Writer):
 		function.name = "accept"
 		function.return_type = "void"
 		function.args.append(["visitor", visitor + "*"])
-		function.operations.append("visitor->visit( this )")
+		function.operations.append("visitor->visit( this );")
 		cls.functions.append(function)
 
 	def addEquals(self, cls):
@@ -404,13 +498,13 @@ class WriterCpp(Writer):
 		function.return_type = "bool"
 		function.args.append(["rhs", "const " + cls.name + "&"])
 		function.is_const = True
-		fbody_line = "result = result && {0} == rhs.{0}"
-		function.operations.append( "bool result = true");
+		fbody_line = "result = result && {0} == rhs.{0};"
+		function.operations.append( "bool result = true;");
 		for m in cls.members:
 			if m.is_static or m.is_const:
 				continue
 			function.operations.append( fbody_line.format(m.name) )
-		function.operations.append( "return result");
+		function.operations.append( "return result;");
 		cls.functions.append(function)
 
 	def addTests(self, cls):
@@ -419,8 +513,8 @@ class WriterCpp(Writer):
 		function.return_type = cls.name
 		function.is_static = True
 
-		fbody_line = "instance.{0} = {1}"
-		function.operations.append( "{0} instance".format(cls.name) );
+		fbody_line = "instance.{0} = {1};"
+		function.operations.append( "{0} instance;".format(cls.name) );
 		for m in cls.members:
 			value = self._getTestValue(m)
 			if value == None:
@@ -429,7 +523,7 @@ class WriterCpp(Writer):
 				continue
 			str = fbody_line.format(m.name, value)
 			function.operations.append( str )
-		function.operations.append( "return instance");
+		function.operations.append( "return instance;");
 
 		cls.functions.append(function)
 
@@ -440,11 +534,11 @@ class WriterCpp(Writer):
 		if m.type == "list":
 			return None
 		if m.type == "int" or m.type == "float":
-			value = str(random.randint(-99999, 99999))
+			value = str(random_int())
 		if m.type == "bool":
-			value = str(random.randint(0, 1))
+			value = str(random_bool())
 		if m.type == "cc.point":
-			value = "cocos2d::Point({0},{1})".format(random.randint(-99999, 99999), random.randint(-99999, 99999))
+			value = "cocos2d::Point({0},{1})".format(random_float(), random_float())
 		if self.parser._findClass(m.type):
 			value = "{0}::{1}()".format(m.type,TEST_FUNCTION_CREATE)
 		elif m.type == "string":
@@ -480,8 +574,18 @@ class WriterCpp(Writer):
 			type = re.sub( "\*", "", type ).strip()
 			type = re.sub( "&", "", type ).strip()
 			types[type] = 1
+			if t.is_pointer:
+				types["IntrusivePtr"] = 1
 			for arg in t.template_args:
-				types[arg] = 1
+				type = arg.name if isinstance(arg, Class) else arg.type
+				if arg.is_pointer:
+					if flags == FLAG_CPP:
+						types[type] = 1
+					if flags == FLAG_HPP:
+						ftypes[type] = 1
+					type = "IntrusivePtr"
+				types[type] = 1
+
 		for f in cls.functions:
 			for t in f.args:
 				type = re.sub("const", "", t[1]).strip()
@@ -499,10 +603,13 @@ class WriterCpp(Writer):
 			types[type] = 1
 
 		for t in types:
+			if t == self._currentClass.name: continue
 			if need_include(t):
-				out += fstr.format( getIncludeFile(t) )
+				out += fstr.format( self.getIncludeFile(t) )
 		
 		for t in ftypes:
+			if t == self._currentClass.name:
+				continue
 			type = convertType(t)
 			if type.find( "::" ) == -1:
 				forward_declarations += "\nclass {0};".format( type )
@@ -510,11 +617,21 @@ class WriterCpp(Writer):
 				continue
 				ns = type[0:type.find( "::" )]
 				type = type[type.find( "::" )+2:]
-				str = "\nnamespace {1}\n__begin__\n\tclass {0};\n__end__".format( type, ns );
+				str = "\nnamespace {1}\n__begin__\nclass {0};\n__end__".format( type, ns );
 				forward_declarations += str
 
 		if flags == FLAG_CPP:
-			out += "\n#include \"Factory.h\""
+			out += '\n#include "Factory.h"'
+			out += '\n#include <algorithm>'
+		
+		out = out.split("\n")
+		out.sort()
+		out = "\n".join( out )
+		
+		forward_declarations = forward_declarations.split("\n")
+		forward_declarations.sort()
+		forward_declarations = "\n".join( forward_declarations )
+
 		return out, forward_declarations
 
 	def _createTests(self):
@@ -523,7 +640,7 @@ class WriterCpp(Writer):
 		tests = ""
 		for cls in self.tests:
 			finc = "#include \"../../../out/{}.cpp\"\n".format(cls.name)
-			ftst = "\t_tests.push_back( new TestT<mg::{}> );\n".format(cls.name)
+			ftst = "_tests.push_back( new TestT<mg::{}> );\n".format(cls.name)
 			includes += finc
 			if self.createTests:
 				tests += ftst
@@ -531,3 +648,42 @@ class WriterCpp(Writer):
 		fstr = re.sub("__begin__", "{", fstr)
 		fstr = re.sub("__end__", "}", fstr)
 		fileutils.write("tests/cpp/TestCpp/TestSerialization.cpp", fstr)
+
+	def prepareFile(self, body):
+		tabs = 0
+		lines = body.split('\n')
+		body = []
+		ch = ''
+		for line in lines:
+			line = line.strip()
+
+			if line and line[0] == "}":
+				tabs-=1
+			if "public:" in line:
+				tabs -= 1
+			line = self.tabs(tabs) + line
+			if "public:" in line:
+				tabs += 1
+			if line.strip() and line.strip()[0] == "{":
+				tabs+=1
+			body.append(line)
+		body = ('\n').join(body)
+		return body
+
+	def getIncludeFile(self, file):
+		types = {}
+		types["cc.point"] = "\"cocos2d.h\""
+		types["list"] = "<vector>"
+		types["string"] = "<string>"
+		types["IntrusivePtr"] = '"IntrusivePtr.h"'
+		types["pugi::xml_node"] = '"pugixml/pugixml.hpp"'
+		types["Json::Value"] = '"jsoncpp/json.h"'
+		types["Observer"] = '"Observer.h"'
+		if file in types:
+			return types[file]
+		cls = self.parser._findClass(file)
+		if cls and cls.name == file:
+			f = '"{1}/{0}.h"' if cls.group else '"{0}.h"'
+			return f.format(cls.name, cls.group)
+		return '"{0}.h"'.format(file)
+

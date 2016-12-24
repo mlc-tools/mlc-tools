@@ -66,5 +66,5 @@ class WriterJava(Writer):
 	def _getImports(self, cls):
 		return ""
 
-	def _getFilenameForClass(self, class_name):
-		return class_name + ".java"
+	def _getFilenameForClass(self, cls):
+		return cls.name + ".java"

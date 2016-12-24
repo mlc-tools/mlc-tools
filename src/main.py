@@ -27,13 +27,7 @@ for file in files:
 parser.link()
 
 writer = WriterCpp(out_directory, parser, tests)
-
-files = fileutils.getFilesList( out_directory )
-for file in files:
-	name = file[0:file.find(".")]
-	if parser._findClass(name) == None:
-		print "remove", out_directory + file
-		fileutils.remove(out_directory + file)
+writer.removeOld()
 
 #parser = Parser()
 #parser.parse(str)
