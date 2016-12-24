@@ -69,6 +69,8 @@ class Writer:
 			print msg, filename
 
 	def removeOld(self):
+		if not fileutils.isdir(self.out_directory):
+			return
 		files = fileutils.getFilesList( self.out_directory )
 		for file in files:
 			if self.out_directory + file not in self.created_files:
