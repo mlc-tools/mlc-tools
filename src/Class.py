@@ -11,6 +11,7 @@ class Class(Object):
 		self.is_abstract = False
 		self.is_serialized = False
 		self.is_visitor = False
+		self.generate_set_function = False
 		self.type = "class"
 		self.group = ""
 
@@ -41,14 +42,74 @@ class Class(Object):
 			self.convertToEnum()
 		return
 
+	def onLinked(self):
+		if self.generate_set_function:
+			self._generateSettersFunction()
+			self._generateGettersFunction()
+
 	def _findModifiers(self, str):
 		self.is_abstract = self.is_abstract or ":abstract" in str
 		self.is_serialized = self.is_serialized or ":serialized" in str
 		self.is_visitor = self.is_visitor or ":visitor" in str
+		self.generate_set_function = self.generate_set_function or ":set_function" in str
 		str = re.sub(":abstract", "", str)
 		str = re.sub(":serialized", "", str)
 		str = re.sub(":visitor", "", str)
+		str = re.sub(":set_function", "", str)
 		return str
+
+	def _generateSettersFunction(self):
+		function = Function();
+		function.name = "set"
+		function.return_type = "void"
+		function.args.append(["name", "string"])
+		function.args.append(["value", "string"])
+
+		add_function = False
+		for i, member in enumerate(self.members):
+			if member.is_pointer:
+				continue
+			if member.is_runtime:
+				continue
+			if member.is_static:
+				continue
+			if member.is_const:
+				continue
+			supported_types = { "string":"std::string", "int":0, "float":0, "bool":0 }
+			if member.type in supported_types:
+				type = member.type
+				type = type if supported_types[type] == 0 else supported_types[type] 
+				if i == 0:
+					op = 'if( name == "{0}" ) \n{2}\n{0} = strTo<{1}>(value);\n{3}'.format( member.name, type, '{', '}' )
+				else:
+					op = 'else if( name == "{0}" )\n{2}\n{0} = strTo<{1}>(value);\n{3}'.format( member.name, type, '{', '}' )
+				function.operations.append(op)
+				add_function = True
+		
+		override = False
+		if self.behaviors:
+			for cls in self.behaviors:
+				for func in cls.functions:
+					equal = func.name == function.name and func.return_type == function.return_type
+					for i, arg in enumerate(func.args):
+						equal = equal and func.args[i][1] == function.args[i][1]
+					if equal:
+						override = True
+						if len(function.operations):
+							op = "else \n{1}\n{0}::set(name, value);\n{2}".format(cls.name, '{', '}')
+						else:
+							op = "{0}::set(name, value);".format(cls.name)
+						function.operations.append(op)
+						break;
+		
+		if add_function or not override:
+			self.functions.append(function)
+
+		return
+
+	def _generateGettersFunction(self):
+		return
+
 
 	def convertToEnum(self):
 		shift = 0
