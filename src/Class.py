@@ -105,11 +105,53 @@ class Class(Object):
 		if add_function or not override:
 			self.functions.append(function)
 
-		return
 
 	def _generateGettersFunction(self):
-		return
+		function = Function();
+		function.name = "get"
+		function.return_type = "string"
+		function.args.append(["name", "string"])
 
+		add_function = False
+		for i, member in enumerate(self.members):
+			if member.is_pointer:
+				continue
+			if member.is_runtime:
+				continue
+			if member.is_static:
+				continue
+			if member.is_const:
+				continue
+			supported_types = [ "string", "int", "float", "bool" ]
+			if member.type in supported_types:
+				type = member.type
+				if i == 0:
+					op = 'if( name == "{0}" ) \n{2}\n return toStr({0});\n{3}'.format( member.name, type, '{', '}' )
+				else:
+					op = 'else if( name == "{0}" ) \n{2}\n return toStr({0});\n{3}'.format( member.name, type, '{', '}' )
+				function.operations.append(op)
+				add_function = True
+		
+		override = False
+		if self.behaviors:
+			for cls in self.behaviors:
+				for func in cls.functions:
+					equal = func.name == function.name and func.return_type == function.return_type
+					for i, arg in enumerate(func.args):
+						equal = equal and func.args[i][1] == function.args[i][1]
+					if equal:
+						override = True
+						if len(function.operations):
+							op = "else \n{1}\n return {0}::get(name);\n{2}".format(cls.name, '{', '}')
+						else:
+							op = "return {0}::get(name, value);".format(cls.name)
+						function.operations.append(op)
+						break;
+		if not override:
+			function.operations.append('return "";')
+		
+		if add_function or not override:
+			self.functions.append(function)
 
 	def convertToEnum(self):
 		shift = 0

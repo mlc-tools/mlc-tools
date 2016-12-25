@@ -34,6 +34,11 @@ def convertType(type):
 		return types[type]
 	return type 
 
+def convertArgumentType(type):
+	if type == "string" or type == "std::string":
+		return "const std::string&"
+	return type
+
 def autoReplaces(text):
 	text = re.sub( "math.max", "std::max", text)
 	text = re.sub( "math.min", "std::min", text)
@@ -60,8 +65,8 @@ class WriterCpp(Writer):
 		self.serialize_formats[SERIALIZATION]['simple'].append( 'if({0} != {2}) \n__begin__\n::set(json,"{0}",{0});\n__end__' )
 		self.serialize_formats[SERIALIZATION]['simple'].append( '::set(json,"{0}",{0});' )
 		self.serialize_formats[DESERIALIZATION]['simple'] = []
-		self.serialize_formats[DESERIALIZATION]['simple'].append( 'if(json.isMember("{0}")) \n __begin__\n{0} = get<{1}>( json["{0}"] );\n__end__\nelse \n__begin__\n{0} = {2};\n__end__' )
-		self.serialize_formats[DESERIALIZATION]['simple'].append( '{0} = get<{1}>( json["{0}"] );' )
+		self.serialize_formats[DESERIALIZATION]['simple'].append( 'if(json.isMember("{0}")) \n __begin__\n{0} = ::get<{1}>( json["{0}"] );\n__end__\nelse \n__begin__\n{0} = {2};\n__end__' )
+		self.serialize_formats[DESERIALIZATION]['simple'].append( '{0} = ::get<{1}>( json["{0}"] );' )
 		
 		self.serialize_formats[SERIALIZATION]['serialized'] = []
 		self.serialize_formats[SERIALIZATION]['serialized'].append( 'static_assert(0, "field "{0}" not should have a initialize value");' )
@@ -92,7 +97,7 @@ class WriterCpp(Writer):
 		self.serialize_formats[SERIALIZATION]['list<simple>'].append( '{3}\nauto& arr_{0} = json["{0}"];\nsize_t i=0;\nfor( auto& t : {0} )\n::set(arr_{0}[i++], t);\n{4}' )
 		self.serialize_formats[DESERIALIZATION]['list<simple>'] = []
 		self.serialize_formats[DESERIALIZATION]['list<simple>'].append( 'static_assert(0, "list "{0}" not should have a initialize value");' )
-		self.serialize_formats[DESERIALIZATION]['list<simple>'].append( 'auto& arr_{0} = json["{0}"];\nfor( size_t i = 0; i < arr_{0}.size(); ++i )\n{3}\n{0}.emplace_back();\n{0}.back() = get<{5}>(arr_{0}[i]);\n{4};' )
+		self.serialize_formats[DESERIALIZATION]['list<simple>'].append( 'auto& arr_{0} = json["{0}"];\nfor( size_t i = 0; i < arr_{0}.size(); ++i )\n{3}\n{0}.emplace_back();\n{0}.back() = ::get<{5}>(arr_{0}[i]);\n{4};' )
 		
 		self.serialize_formats[SERIALIZATION]['serialized_list'] = []
 		self.serialize_formats[SERIALIZATION]['serialized_list'].append( 'static_assert(0, "list "{0}" not should have a initialize value");' )
@@ -328,7 +333,7 @@ class WriterCpp(Writer):
 				fstr = "{3}{6}{0} {1}({2}){4}{5} = 0;\n"
 			args = []
 			for arg in function.args:
-				args.append(convertType(arg[1]) + " " + arg[0])
+				args.append(convertArgumentType(convertType(arg[1])) + " " + arg[0])
 			args = ", ".join(args)
 			modifier = "virtual "
 			if function.is_static:
@@ -357,7 +362,7 @@ class WriterCpp(Writer):
 				body += line
 			args = []
 			for arg in function.args:
-				args.append(convertType(arg[1]) + " " + arg[0])
+				args.append(convertArgumentType(convertType(arg[1])) + " " + arg[0])
 			args = ", ".join(args)
 			out[FLAG_CPP] = fstr.format( convertType(function.return_type), function.name, args, body, self.tabs(tabs), self._currentClass.name, is_const )
 			out[FLAG_CPP] = autoReplaces( out[FLAG_CPP] )
