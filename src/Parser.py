@@ -139,6 +139,9 @@ class Parser:
 				for arg in member.template_args:
 					args.append( self.objectType(arg) )
 				member.template_args = args
+		
+		for cls in self.classes:
+			cls.onLinked()
 
 	def isSerialised(self, cls):
 		if cls.is_serialized:
@@ -186,6 +189,7 @@ class Parser:
 		if visitor == None:
 			visitor = Class()
 			visitor.name = visitorName
+			visitor.group = cls.group
 			visitor.type = "class"
 			visitor.is_abstract = True
 			visitor.is_visitor = True

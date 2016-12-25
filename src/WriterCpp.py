@@ -57,8 +57,8 @@ class WriterCpp(Writer):
 		self.serialize_formats.append({})
 		
 		self.serialize_formats[SERIALIZATION]['simple'] = []
-		self.serialize_formats[SERIALIZATION]['simple'].append( 'if({0} != {2}) \n__begin__\nset(json,"{0}",{0});\n__end__' )
-		self.serialize_formats[SERIALIZATION]['simple'].append( 'set(json,"{0}",{0});' )
+		self.serialize_formats[SERIALIZATION]['simple'].append( 'if({0} != {2}) \n__begin__\n::set(json,"{0}",{0});\n__end__' )
+		self.serialize_formats[SERIALIZATION]['simple'].append( '::set(json,"{0}",{0});' )
 		self.serialize_formats[DESERIALIZATION]['simple'] = []
 		self.serialize_formats[DESERIALIZATION]['simple'].append( 'if(json.isMember("{0}")) \n __begin__\n{0} = get<{1}>( json["{0}"] );\n__end__\nelse \n__begin__\n{0} = {2};\n__end__' )
 		self.serialize_formats[DESERIALIZATION]['simple'].append( '{0} = get<{1}>( json["{0}"] );' )
@@ -89,7 +89,7 @@ class WriterCpp(Writer):
 		
 		self.serialize_formats[SERIALIZATION]['list<simple>'] = []
 		self.serialize_formats[SERIALIZATION]['list<simple>'].append( 'static_assert(0, "list "{0}" not should have a initialize value");' )
-		self.serialize_formats[SERIALIZATION]['list<simple>'].append( '{3}\nauto& arr_{0} = json["{0}"];\nsize_t i=0;\nfor( auto& t : {0} )\nset(arr_{0}[i++], t);\n{4}' )
+		self.serialize_formats[SERIALIZATION]['list<simple>'].append( '{3}\nauto& arr_{0} = json["{0}"];\nsize_t i=0;\nfor( auto& t : {0} )\n::set(arr_{0}[i++], t);\n{4}' )
 		self.serialize_formats[DESERIALIZATION]['list<simple>'] = []
 		self.serialize_formats[DESERIALIZATION]['list<simple>'].append( 'static_assert(0, "list "{0}" not should have a initialize value");' )
 		self.serialize_formats[DESERIALIZATION]['list<simple>'].append( 'auto& arr_{0} = json["{0}"];\nfor( size_t i = 0; i < arr_{0}.size(); ++i )\n{3}\n{0}.emplace_back();\n{0}.back() = get<{5}>(arr_{0}[i]);\n{4};' )
@@ -682,8 +682,11 @@ class WriterCpp(Writer):
 		if file in types:
 			return types[file]
 		cls = self.parser._findClass(file)
-		if cls and cls.name == file:
-			f = '"{1}/{0}.h"' if cls.group else '"{0}.h"'
-			return f.format(cls.name, cls.group)
+		if cls and cls.name == file and self._currentClass.group != cls.group:
+			back = ""
+			for i in self._currentClass.group.split("/"):
+				back += "../"
+			f = '"{2}{1}/{0}.h"' if cls.group else '"{2}{0}.h"'
+			return f.format(cls.name, cls.group, back)
 		return '"{0}.h"'.format(file)
 
