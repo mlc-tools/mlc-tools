@@ -196,9 +196,9 @@ class Class(Object):
 		function = createFunction("bool", "operator ==", [["rhs","int"]], True).operations = ["return _value == rhs;"];
 		function = createFunction("bool", "operator <", [["rhs","const {0}&".format(self.name)]], True).operations = ["return _value < rhs._value;"];
 		
-		function1 = createFunction("", self.name, [["value", "const string&"]], False)
-		function2 = createFunction("const {0}&".format(self.name), "operator =", [["value", "const string&"]], False)
-		function3 = createFunction("", "operator string", [], True)
+		function1 = createFunction("", self.name, [["value", "string"]], False)
+		function2 = createFunction("const {0}&".format(self.name), "operator =", [["value", "string"]], False)
+		function3 = createFunction("", "operator std::string", [], True)
 		for m in self.members:
 			function1.operations.append( re.sub("__e__","}", re.sub("__b__","{", "if( value == \"{0}\" ) __b__ _value = {0}; return; __e__;".format( m.name ) ) ) )
 			function2.operations.append( re.sub("__e__","}", re.sub("__b__","{", "if( value == \"{0}\" ) __b__ _value = {0}; return *this; __e__;".format( m.name ) ) ) )
