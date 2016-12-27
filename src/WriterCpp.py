@@ -28,6 +28,8 @@ def convertType(type):
 	types["cc.point"] = "cocos2d::Point"
 	types["cc.point*"] = "cocos2d::Point*"
 	types["list"] = "std::vector"
+	types["map"] = "std::map"
+	types["set"] = "std::set"
 	types["string"] = "std::string"
 	types["Observer"] = "Observer<std::function<void()>>"
 	if type in types:
@@ -459,19 +461,37 @@ class WriterCpp(Writer):
 		for obj in cls.members:
 			if obj.is_runtime or obj.is_static or obj.is_const:
 				continue
-			index = 0 
-			if obj.initial_value == None:
-				index = 1
+			str = self._buildSerializeObjectOperation(obj, serialization_type)
+			function.operations.append(str)
+		cls.functions.append(function)
+
+	def _buildSerializeObjectOperation(self, obj, serialization_type):
+		type = obj.name if isinstance(obj, Class) else obj.type
+		return self._buildSerializeOperation(obj.name, type, obj.initial_value, obj.is_pointer, obj.template_args, serialization_type)
+
+	def _buildSerializeOperation(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args, serialization_type):
+		index = 0 
+		if obj_value == None:
+			index = 1
 			
-			type = obj.name if isinstance(obj, Class) else obj.type
-			if type not in self.simple_types and type != "list":
-				if obj.is_pointer:
-					type = "pointer"
-				else:
-					type = "serialized"
-			template_args = []
-			if len(obj.template_args) > 0:
-				arg = obj.template_args[0]
+		type = obj_type
+		if obj_type not in self.simple_types and type != "list" and type != "map":
+			if obj_is_pointer:
+				type = "pointer"
+			else:
+				type = "serialized"
+		template_args = []
+		if len(obj_template_args) > 0:
+			if type == "map":
+				if len(obj_template_args) != 2:
+					print "map should have 2 arguments"
+					exit -1
+				if serialization_type == SERIALIZATION:
+					return self.buildMapSerialization(obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args)
+				if serialization_type == DESERIALIZATION:
+					return  self.buildMapDeserialization(obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args)
+			else:
+				arg = obj_template_args[0]
 				arg_type = arg.name if isinstance(arg, Class) else arg.type
 				template_args.append(convertType(arg_type))
 				if arg_type in self.simple_types:
@@ -481,10 +501,62 @@ class WriterCpp(Writer):
 				else:
 					type = "{0}<serialized>".format( type )
 
-			fstr = self.serialize_formats[serialization_type][type][index]
-			str = fstr.format(obj.name, convertType(obj.type), obj.initial_value, "{", "}", *template_args)
-			function.operations.append(str)
-		cls.functions.append(function)
+		fstr = self.serialize_formats[serialization_type][type][index]
+		str = fstr.format(obj_name, convertType(obj_type), obj_value, "{", "}", *template_args)
+		return str
+	
+	def buildMapSerialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args):
+		key = obj_template_args[0]
+		value = obj_template_args[1]
+		key_type = key.name if isinstance(key, Class) else key.type
+		value_type = value.name if isinstance(value, Class) else value.type
+		str = '''
+		auto& map_{0} = json["{0}"];
+		for( auto pair : {0} )
+		__begin__
+			auto& json = map_{0}[map_{0}.size()];
+
+			auto& key = pair.first; {1}
+
+			auto& value = pair.second; {2}
+		__end__
+		'''
+		_value_is_pointer = value.is_pointer
+		a0 = obj_name
+		a1 = self._buildSerializeOperation("key", key_type, None, False, [], SERIALIZATION)
+		a2 = self._buildSerializeOperation("value", value_type, None, _value_is_pointer, [], SERIALIZATION)
+		return str.format( a0, a1, a2)
+		#a1 = serialize key /simple, serialized
+		#a2 = serialize value /simple, serialized, pointer,
+	
+	def buildMapDeserialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args):	
+		key = obj_template_args[0]
+		value = obj_template_args[1]
+		key_type = key.name if isinstance(key, Class) else key.type
+		value_type = value.name if isinstance(value, Class) else value.type
+		str = '''
+		auto& map_{0} = json["{0}"];
+		auto size_{0}= map_{0}.size();
+		for( size_t i = 0; i < size_{0}; ++i )
+		__begin__
+			auto& json = map_{0}[i];
+
+			{3} key; {1}
+
+			{4} value; {2}
+
+			{0}[key] = value;
+		__end__
+		'''
+		_value_is_pointer = value.is_pointer if isinstance(value, Object) else false
+		a0 = obj_name
+		a1 = self._buildSerializeOperation("key", key_type, None, False, [], DESERIALIZATION)
+		a2 = self._buildSerializeOperation("value", value_type, None, _value_is_pointer, [], DESERIALIZATION)
+		a3 = key_type
+		a4 = value_type
+		if value.is_pointer:
+			a4 = "IntrusivePtr<{}>".format(value_type)
+		return str.format( a0, a1, a2, a3, a4 )
 
 	def addAccept(self, cls):
 		visitor = self.parser.getVisitorType(cls)
@@ -536,7 +608,7 @@ class WriterCpp(Writer):
 		value = ""
 		if m.is_runtime:
 			return None
-		if m.type == "list":
+		if m.type == "list" or m.type == "map" or m.type == "set":
 			return None
 		if m.type == "int" or m.type == "float":
 			value = str(random_int())
@@ -679,6 +751,8 @@ class WriterCpp(Writer):
 		types = {}
 		types["cc.point"] = "\"cocos2d.h\""
 		types["list"] = "<vector>"
+		types["map"] = "<map>"
+		types["set"] = "<set>"
 		types["string"] = "<string>"
 		types["IntrusivePtr"] = '"IntrusivePtr.h"'
 		types["pugi::xml_node"] = '"pugixml/pugixml.hpp"'
@@ -689,7 +763,8 @@ class WriterCpp(Writer):
 		cls = self.parser._findClass(file)
 		if cls and cls.name == file and self._currentClass.group != cls.group:
 			back = ""
-			for i in self._currentClass.group.split("/"):
+			backs = len(self._currentClass.group.split("/")) if self._currentClass.group else 0
+			for i in range(backs):
 				back += "../"
 			f = '"{2}{1}/{0}.h"' if cls.group else '"{2}{0}.h"'
 			return f.format(cls.name, cls.group, back)
