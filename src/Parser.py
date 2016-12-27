@@ -17,6 +17,17 @@ class Parser:
 	
 	def parse(self, text):
 		text = text.strip()
+		l = text.find('/*')
+		while l != -1:
+			r = text.find('*/')
+			if r != -1:
+				text = text[:l] + text[r+2:]
+			l = text.find('/*')
+		lines = text.split('\n')
+		for i, line in enumerate(lines):
+			if '//' in line:
+				lines[i] = line[0:line.find('//')]
+		text = '\n'.join(lines)
 		while len(text) > 0:
 			text = text.strip()
 			if self._is_class(text):
