@@ -584,6 +584,14 @@ class WriterCpp(Writer):
 		function.operations.append( "return result;");
 		cls.functions.append(function)
 
+		function = Function()
+		function.name = "operator !="
+		function.return_type = "bool"
+		function.args.append(["rhs", "const " + cls.name + "&"])
+		function.is_const = True
+		function.operations.append( "return !(*this == rhs);" )
+		cls.functions.append(function)
+		
 	def addTests(self, cls):
 		function = Function()
 		function.name = TEST_FUNCTION_CREATE
@@ -760,6 +768,7 @@ class WriterCpp(Writer):
 		types["Observer"] = '"Observer.h"'
 		if file in types:
 			return types[file]
+
 		cls = self.parser._findClass(file)
 		if cls and cls.name == file and self._currentClass.group != cls.group:
 			back = ""

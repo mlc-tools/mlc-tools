@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>63453e4e-76e8-4077-838b-019e0a23e155</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>src\main.py</StartupFile>
+    <StartupFile>src\convert.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -13,8 +13,9 @@
     <Name>mlc</Name>
     <RootNamespace>mlc</RootNamespace>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>-i config -o out -t n</CommandLineArguments>
+    <CommandLineArguments> -i ../../configs -o ../../Classes/mg -t False</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
+    <IsWindowsApplication>False</IsWindowsApplication>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -25,6 +26,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="src\convert.py" />
     <Compile Include="src\arguments_parser.py">
       <SubType>Code</SubType>
     </Compile>

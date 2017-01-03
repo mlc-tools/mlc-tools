@@ -199,13 +199,16 @@ class Class(Object):
 		function1 = createFunction("", self.name, [["value", "string"]], False)
 		function2 = createFunction("const {0}&".format(self.name), "operator =", [["value", "string"]], False)
 		function3 = createFunction("", "operator std::string", [], True)
+		function4 = createFunction("string", "str", [], True)
 		for m in self.members:
 			function1.operations.append( re.sub("__e__","}", re.sub("__b__","{", "if( value == \"{0}\" ) __b__ _value = {0}; return; __e__;".format( m.name ) ) ) )
 			function2.operations.append( re.sub("__e__","}", re.sub("__b__","{", "if( value == \"{0}\" ) __b__ _value = {0}; return *this; __e__;".format( m.name ) ) ) )
 			function3.operations.append( "if( _value == {0} ) return \"{0}\";".format( m.name ) )
+			function4.operations.append( "if( _value == {0} ) return \"{0}\";".format( m.name ) )
 		function1.operations.append( "_value = 0;" )
 		function2.operations.append( "return *this;" )
 		function3.operations.append( "return \"\";" )
+		function4.operations.append( "return \"\";" )
 
 
 		
