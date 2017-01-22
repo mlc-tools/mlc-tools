@@ -3,6 +3,7 @@ from arguments_parser import get_arg
 from Parser import Parser
 from WriterCpp import WriterCpp
 from WriterJava import WriterJava
+from WriterPython import WriterPython
 
 
 print "MLC step1: parce arguments"
@@ -16,6 +17,8 @@ if out_directory[-1] != "/":
 
 tests = get_arg( "-t", "False" )
 tests = tests == "True" or tests == "true" or tests == "yes" or tests == "y"
+
+language = get_arg( "-l", "cpp" )
 
 print "MLC step2: find config files"
 str = ""
@@ -31,7 +34,10 @@ print "MLC step4: link "
 parser.link()
 
 print "MLC step5: create classes"
-writer = WriterCpp(out_directory, parser, tests)
+if language == 'py':
+	writer = WriterPython(out_directory, parser, tests, configs_directory)
+if language == 'cpp':
+	writer = WriterCpp(out_directory, parser, tests)
 print "MLC step6: remove old files"
 writer.removeOld()
 print "MLC finished successful"

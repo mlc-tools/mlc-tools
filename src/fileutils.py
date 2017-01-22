@@ -3,16 +3,19 @@ import hashlib
 from os.path import isfile, join, isdir
 
 def _getFilesList(path, prefix):
-	list = os.listdir(path)
-	listFiles = []
-	for i in list:
-		if isdir(path + i):
-			result = _getFilesList( path + i + "/", prefix + i + "/" )
-			for r in result:
-				listFiles.append(r)
-		if isfile(path + i):
-			listFiles.append( prefix + i )
-	return listFiles;
+	try:
+		list = os.listdir(path)
+		listFiles = []
+		for i in list:
+			if isdir(path + i):
+				result = _getFilesList( path + i + "/", prefix + i + "/" )
+				for r in result:
+					listFiles.append(r)
+			if isfile(path + i):
+				listFiles.append( prefix + i )
+		return listFiles;
+	except:
+		return []
 
 def getFilesList(path):
 	return _getFilesList(path, "");

@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>63453e4e-76e8-4077-838b-019e0a23e155</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>src\convert.py</StartupFile>
+    <StartupFile>src\main.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -13,7 +13,7 @@
     <Name>mlc</Name>
     <RootNamespace>mlc</RootNamespace>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments> -i ../../configs -o ../../Classes/mg -t False</CommandLineArguments>
+    <CommandLineArguments> -i $(SolutionDir)../configs -o $(SolutionDir)../../PythonServer/gen -t False -l py</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <IsWindowsApplication>False</IsWindowsApplication>
   </PropertyGroup>
@@ -55,16 +55,17 @@
     <Compile Include="src\WriterJava.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="src\WriterPython.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="config\" />
     <Folder Include="src\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="config\base.mlc" />
     <Content Include="config\commands.mlc" />
-    <Content Include="config\model.mlc" />
-    <Content Include="config\requests.mlc" />
+    <Content Include="config\core.mlc" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
