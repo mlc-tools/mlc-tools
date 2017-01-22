@@ -1,12 +1,17 @@
 import re
 from Writer import Writer
 from Function import Function
+from Class import Class
+from Object import Object
+import fileutils
+
 
 SERIALIZATION = 0
 DESERIALIZATION = 1
 
 class WriterPython(Writer):
 	def __init__(self, outDirectory, parser, generateTests, configsDirectory):
+		
 		self.loaded_functions = {}
 		self.load_functions(configsDirectory + 'python_external.mlc_py')
 
@@ -23,7 +28,60 @@ class WriterPython(Writer):
 		self.serialize_formats[DESERIALIZATION]['simple'].append( 'if "{0}" in dictionary: self.{0} = dictionary["{0}"]' )
 		self.serialize_formats[DESERIALIZATION]['simple'].append( 'self.{0} = dictionary["{0}"]' )
 
+		self.serialize_formats[SERIALIZATION]['list<simple>'] = []
+		self.serialize_formats[SERIALIZATION]['list<simple>'].append( '''
+		arr_{0} = []
+		for obj in self.{0}:
+			arr_{0}.append(obj)
+		dictionary['{0}'] = arr_{0}
+''' )
+		self.serialize_formats[SERIALIZATION]['list<simple>'].append( self.serialize_formats[SERIALIZATION]['list<simple>'][0] )
+		self.serialize_formats[DESERIALIZATION]['list<simple>'] = []
+		self.serialize_formats[DESERIALIZATION]['list<simple>'].append( '''
+		arr_{0} = dictionary['{0}']
+		for obj in arr_{0}:
+			self.{0}.append(obj)
+''' )
+		self.serialize_formats[DESERIALIZATION]['list<simple>'].append( self.serialize_formats[SERIALIZATION]['list<simple>'][0] )
+
+		self.serialize_formats[SERIALIZATION]['list<serialized>'] = []
+		self.serialize_formats[SERIALIZATION]['list<serialized>'].append( '''
+		arr_{0} = []
+		for obj in self.{0}:
+			dict = {3}
+			obj.serialize(dict)
+			arr_{0}.append(dict)
+		dictionary['{0}'] = arr_{0}
+''' )
+		self.serialize_formats[SERIALIZATION]['list<serialized>'].append( self.serialize_formats[SERIALIZATION]['list<serialized>'][0] )
+		self.serialize_formats[DESERIALIZATION]['list<serialized>'] = []
+		self.serialize_formats[DESERIALIZATION]['list<serialized>'].append( '''
+		arr_{0} = dictionary['{0}']
+		for dict in arr_{0}:
+			obj = {1}()
+			obj.deserialize(dict)
+			self.{0}.append(obj)
+''' )
+		self.serialize_formats[DESERIALIZATION]['list<serialized>'].append( self.serialize_formats[DESERIALIZATION]['list<serialized>'][0] )
+
+		self.serialize_formats[SERIALIZATION]['serialized'] = []
+		self.serialize_formats[SERIALIZATION]['serialized'].append( '''if self.{0} != None: 
+			dict = {3}
+			self.{0}.serialize(dict)
+			dictionary["{0}"] = dict
+''' )
+		self.serialize_formats[SERIALIZATION]['serialized'].append( self.serialize_formats[SERIALIZATION]['serialized'][0] )
+		self.serialize_formats[DESERIALIZATION]['serialized'] = []
+		self.serialize_formats[DESERIALIZATION]['serialized'].append( '''
+		if '{0}' in dictionary:
+			self.{0} = {1}()
+			self.{0}.deserialize(dictionary['{0}'])''' )
+		self.serialize_formats[DESERIALIZATION]['serialized'].append( self.serialize_formats[DESERIALIZATION]['serialized'][0] )
+
 		Writer.__init__(self, outDirectory, parser)
+
+		self.createFactory()
+		self.createRequestHandler()
 
 	def writeObject(self, object, tabs, flags):
 		out = ""
@@ -63,6 +121,13 @@ class {0}:
 			name += '(' + cls.behaviors[0].name + ')'
 			imports += 'from {0} import {0}'.format(cls.behaviors[0].name)
 			init_behavior = '\t\t{0}.__init__(self)'.format(cls.behaviors[0].name)
+		for obj in cls.members:
+			if self.parser._findClass(obj.type):
+				imports += '\nfrom {0} import {0}'.format(obj.type)
+			elif obj.type == 'list' or obj.type == 'map':
+				for arg in obj.template_args:
+					if isinstance(arg, Class):
+						imports += '\nfrom {0} import {0}'.format(arg.name)
 
 		out = pattern.format(name, initialize_list, functions, imports, init_behavior)
 		return {flags:out}
@@ -83,7 +148,7 @@ class {0}:
 			if type == "int": value = "0"
 			if type == "float": value = "0.f"
 			if type == "uint": value = "0"
-			if type == "bool": value = "false"
+			if type == "bool": value = "False"
 			if type == "list": value = "[]"
 			if type == "map": value = "{}"
 		
@@ -115,6 +180,10 @@ class {0}:
 	def createSerializationFunction(self, cls, serialize_type):
 		function = Function()
 		function.name = 'serialize' if serialize_type == SERIALIZATION else 'deserialize'
+		for func in cls.functions:
+			if func.name == function.name:
+				return
+
 		body = '(self, dictionary):\n'
 		if cls.behaviors:
 			body += '\t\t{0}.{1}(self, dictionary)\n'.format(cls.behaviors[0].name, function.name)
@@ -123,12 +192,12 @@ class {0}:
 			if obj.is_static:continue
 			if obj.is_const:continue
 
-			body += self._buildSerializeOperation(obj.name, obj.type, obj.initial_value, serialize_type)
+			body += self._buildSerializeOperation(obj.name, obj.type, obj.initial_value, serialize_type, obj.template_args)
 		body += '\t\treturn'
 		self.loaded_functions[cls.name + '.' + function.name] = body
 		cls.functions.append(function)
 	
-	def _buildSerializeOperation(self, obj_name, obj_type, obj_value, serialization_type):
+	def _buildSerializeOperation(self, obj_name, obj_type, obj_value, serialization_type, obj_template_args):
 		index = 0 
 		if obj_value == None:
 			index = 1
@@ -139,8 +208,104 @@ class {0}:
 		elif obj_type in self.simple_types:
 			type = 'simple'
 		else:
-			print 'not supported type', type
-			return ''
+			if len(obj_template_args) > 0:
+				if type == "map":
+					print 'not supported "map"'
+					exit(-1)
+					if len(obj_template_args) != 2:
+						print "map should have 2 arguments"
+						exit -1
+					if serialization_type == SERIALIZATION:
+						return self.buildMapSerialization(obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args)
+					if serialization_type == DESERIALIZATION:
+						return  self.buildMapDeserialization(obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args)
+				else:
+					arg = obj_template_args[0]
+					arg_type = arg.name if isinstance(arg, Class) else arg.type
+					if arg_type in self.simple_types:
+						type = "list<simple>"
+						obj_type = arg_type
+					elif arg.is_pointer:
+						print 'not supported "pointer_list"'
+						exit(-1)
+						type = "pointer_list"
+					else:
+						type = "list<serialized>"
+						obj_type = arg_type
+
 		fstr = self.serialize_formats[serialization_type][type][index]
-		str = fstr.format(obj_name, obj_type, obj_value)
+		str = fstr.format(obj_name, obj_type, obj_value, '{}')
 		return '\t\t' + str + '\n'
+
+	def createFactory(self):
+		pattern = '''
+import json
+{0}
+
+class Factory:
+	def __init__(self):
+		return
+
+	@staticmethod
+	def build(type):
+{1}
+		return None
+
+	@staticmethod
+	def create_command(string):
+		dictionary = json.loads(string)
+		type = dictionary["command"]["type"]
+		command = Factory.build(type)
+		if command != None:
+			command.deserialize(dictionary)
+		return command
+'''
+		line = '\t\tif type == "{0}": return {0}()\n'
+		line_import = 'from {0} import {0}\n'
+		creates = ''
+		imports = ''
+		for cls in self.parser.classes:
+			creates += line.format(cls.name)
+			imports += line_import.format(cls.name)
+		factory = pattern.format(imports, creates)
+		file = self.out_directory + 'Factory.py'
+		if fileutils.isFileChanges(file):
+			fileutils.write(file, factory)
+		self.created_files.append(file)
+
+	def createRequestHandler(self):
+		pattern = '''
+{0}
+
+class IRequestHandler:
+	def __init__(self):
+		self.response = None
+
+	def visit(self, ctx):
+		if ctx == None: return
+{1}		
+
+{2}	
+'''
+		line = '\t\telif ctx.__class__ == {0}: self.visit_{1}(ctx)\n'
+		line_import = 'from {0} import {0}\n'
+		line_visit = '''
+	def visit_{0}(self, ctx):
+		return
+'''
+		lines = ''
+		visits = ''
+		imports = ''
+		for cls in self.parser.classes:
+			if self.parser.isVisitor(cls):
+				func_name = cls.name
+				func_name = func_name[0].lower() + func_name[1:]
+
+				lines += line.format(cls.name, func_name)
+				imports += line_import.format(cls.name)
+				visits += line_visit.format(func_name)
+		factory = pattern.format(imports, lines, visits)
+		file = self.out_directory + 'IRequestHandler.py'
+		if fileutils.isFileChanges(file):
+			fileutils.write(file, factory)
+		self.created_files.append(file)

@@ -13,7 +13,7 @@
     <Name>mlc</Name>
     <RootNamespace>mlc</RootNamespace>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments> -i $(SolutionDir)../configs -o $(SolutionDir)../../PythonServer/gen -t False -l py</CommandLineArguments>
+    <CommandLineArguments> -i $(ProjectDir)../configs -o $(ProjectDir)../../PythonServer/gen -t False -l py</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <IsWindowsApplication>False</IsWindowsApplication>
   </PropertyGroup>
