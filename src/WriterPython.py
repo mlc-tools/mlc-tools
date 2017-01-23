@@ -94,6 +94,27 @@ class WriterPython(Writer):
 			self.{0}.deserialize(dictionary['{0}'])''' )
 		self.serialize_formats[DESERIALIZATION]['serialized'].append( self.serialize_formats[DESERIALIZATION]['serialized'][0] )
 
+		self.serialize_formats[SERIALIZATION]['pointer_list'] = []
+		self.serialize_formats[SERIALIZATION]['pointer_list'].append( 'print "field {0} not should have a initialize value"' )
+		self.serialize_formats[SERIALIZATION]['pointer_list'].append( '''
+		dictionary['{0}'] = []
+		arr = dictionary['{0}']
+		for t in self.{0}:
+			arr.append({3})
+			arr[-1][t.get_type()] = {3}
+			t.serialize(arr[-1][t.get_type()])  ''' )
+		self.serialize_formats[DESERIALIZATION]['pointer_list'] = []
+		self.serialize_formats[DESERIALIZATION]['pointer_list'].append( 'print "field {0} not should have a initialize value"' )
+		self.serialize_formats[DESERIALIZATION]['pointer_list'].append( '''
+		arr = dictionary['{0}']
+		size = len(arr)
+		for index in xrange(size):
+			for key, value in arr.iteritems():
+				obj = Factory.build( key )
+				self.{0}.append(obj)
+				self.{0}[-1].deserialize( arr[index][key] )
+				break ''' )
+
 		Writer.__init__(self, outDirectory, parser)
 
 		self.createFactory()
@@ -245,8 +266,6 @@ class {0}:
 						type = "list<simple>"
 						obj_type = arg_type
 					elif arg.is_pointer:
-						print 'not supported "pointer_list"'
-						exit(-1)
 						type = "pointer_list"
 					else:
 						type = "list<serialized>"
