@@ -28,6 +28,22 @@ class WriterPython(Writer):
 		self.serialize_formats[DESERIALIZATION]['simple'].append( 'if "{0}" in dictionary: self.{0} = dictionary["{0}"]' )
 		self.serialize_formats[DESERIALIZATION]['simple'].append( 'self.{0} = dictionary["{0}"]' )
 
+		self.serialize_formats[SERIALIZATION]['pointer'] = []
+		self.serialize_formats[SERIALIZATION]['pointer'].append( 'print "field {0} not should have a initialize value"' )
+		self.serialize_formats[SERIALIZATION]['pointer'].append( '''
+		if self.{0}:
+			dictionary['{0}'] = {3}
+			dictionary['{0}'][self.{0}.get_type()] = {3}
+			self.{0}.serialize(dictionary['{0}'][self.{0}.get_type()])''' )
+		self.serialize_formats[DESERIALIZATION]['pointer'] = []
+		self.serialize_formats[DESERIALIZATION]['pointer'].append( 'print "field {0} not should have a initialize value"' )
+		self.serialize_formats[DESERIALIZATION]['pointer'].append( '''
+		if '{0}' in dictionary:
+			for key, value in dictionary['{0}'].iteritems():
+				self.{0} = Factory.build( key );
+				self.{0}.deserialize( value ) 
+				break''')
+
 		self.serialize_formats[SERIALIZATION]['list<simple>'] = []
 		self.serialize_formats[SERIALIZATION]['list<simple>'].append( '''
 		arr_{0} = []
@@ -192,19 +208,22 @@ class {0}:
 			if obj.is_static:continue
 			if obj.is_const:continue
 
-			body += self._buildSerializeOperation(obj.name, obj.type, obj.initial_value, serialize_type, obj.template_args)
+			body += self._buildSerializeOperation(obj.name, obj.type, obj.initial_value, serialize_type, obj.template_args, obj.is_pointer)
 		body += '\t\treturn'
 		self.loaded_functions[cls.name + '.' + function.name] = body
 		cls.functions.append(function)
 	
-	def _buildSerializeOperation(self, obj_name, obj_type, obj_value, serialization_type, obj_template_args):
+	def _buildSerializeOperation(self, obj_name, obj_type, obj_value, serialization_type, obj_template_args, obj_is_pointer):
 		index = 0 
 		if obj_value == None:
 			index = 1
 			
 		type = obj_type
 		if obj_type not in self.simple_types and type != "list" and type != "map":
-			type = "serialized"
+			if obj_is_pointer:
+				type = "pointer"
+			else:
+				type = "serialized"
 		elif obj_type in self.simple_types:
 			type = 'simple'
 		else:
