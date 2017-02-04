@@ -667,7 +667,7 @@ class WriterCpp(Writer):
 					if flags == FLAG_CPP:
 						types[type] = 1
 					if flags == FLAG_HPP:
-						ftypes[type] = 1
+						types[type] = 1
 					type = "IntrusivePtr"
 				types[type] = 1
 
