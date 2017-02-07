@@ -58,7 +58,7 @@ class WriterPython(Writer):
 		for obj in arr_{0}:
 			{4}{0}.append(obj)
 ''' )
-		self.serialize_formats[DESERIALIZATION]['list<simple>'].append( self.serialize_formats[SERIALIZATION]['list<simple>'][0] )
+		self.serialize_formats[DESERIALIZATION]['list<simple>'].append( self.serialize_formats[DESERIALIZATION]['list<simple>'][0] )
 
 		self.serialize_formats[SERIALIZATION]['list<serialized>'] = []
 		self.serialize_formats[SERIALIZATION]['list<serialized>'].append( '''
