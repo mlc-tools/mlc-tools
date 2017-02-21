@@ -1,28 +1,19 @@
 class SerializedObject:serialized
 {
 	int _reference_counter = 1
-	function int retain()
-	{
-		return ++_reference_counter;
-	}
-	function int release()
-	{
-		auto c = --_reference_counter;
-		if( c == 0)
-		{
-			delete this;
-		}
-		return c;
-	}
 }
 
-class commands/Command<SerializedObject>
+class model/ModelCity<SerializedObject>
 {
-	int id:key;
-	function string getSerializedString():external:const;
-}
+	int id
+	int owner
+	int free_process_id = 0
+	map<int, BuildingSlot*> slots	
+	map<string, int> resources
+	map<int, Process*> processes
 
-class CommandSequence<Command>
-{
-	list<Command*> commands
+	function int calculate_produce_resource(ModelUser* user, string resource)
+	{
+
+	}
 }

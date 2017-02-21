@@ -2,6 +2,8 @@ import fileutils
 from arguments_parser import get_arg
 from Parser import Parser
 from WriterCpp import WriterCpp
+from WriterCppSerializatorJson import WriterCppSerializatorJson
+from WriterCppSerializatorXml import WriterCppSerializatorXml
 from WriterJava import WriterJava
 from WriterPython import WriterPython
 
@@ -37,7 +39,7 @@ print "MLC step5: create classes"
 if language == 'py':
 	writer = WriterPython(out_directory, parser, tests, configs_directory)
 if language == 'cpp':
-	writer = WriterCpp(out_directory, parser, tests)
+	writer = WriterCppSerializatorXml(out_directory, parser, tests)
 print "MLC step6: remove old files"
 writer.removeOld()
 print "MLC finished successful"
