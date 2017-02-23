@@ -57,7 +57,6 @@ class WriterCppSerializatorXml(WriterCpp):
 		self.serialize_formats[SERIALIZATION]['list<simple>'] = []
 		self.serialize_formats[SERIALIZATION]['list<simple>'].append( 'static_assert(0, "list "{0}" not should have a initialize value");' )
 		self.serialize_formats[SERIALIZATION]['list<simple>'].append( '''auto arr_{0} = xml.append_child("{0}");
-																		 auto index_{0} = 0;
 																		 for( auto& t : {0} )
 																		 {3}
 																			auto attr = arr_{0}.append_child("{5}").append_attribute("value");

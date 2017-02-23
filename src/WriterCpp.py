@@ -145,6 +145,7 @@ class WriterCpp(Writer):
 		constructor = self._createConstructorFunctionHpp(cls, 1)
 		destructor = self._createDestructorFunctionHpp(cls, tabs)
 		includes, forward_declarations = self._findIncludes(cls,FLAG_HPP)
+
 		self._currentClass = None
 
 		fstr = ""
@@ -182,6 +183,8 @@ class WriterCpp(Writer):
 		constructor = self._createConstructorFunctionCpp(cls, tabs)
 		destructor = self._createDestructorFunctionCpp(cls, tabs)
 		includes, f = self._findIncludes(cls,FLAG_CPP)
+		includes = self._findIncludesInFunctionOperation(cls, includes)
+
 		self._currentClass = None
 		if cls.type == "class":
 			fstr = "#include \"{0}.h\"\n#include \"Generics.h\"\n#include \"DataStorage.h\"{4}\n\nnamespace {3}\n__begin__{5}{6}\n{2}\n{7}\n{1}__end__"
@@ -598,6 +601,18 @@ class WriterCpp(Writer):
 		forward_declarations = "\n".join( forward_declarations )
 
 		return out, forward_declarations
+
+	def _findIncludesInFunctionOperation(self, cls, current_includes):
+		includes = current_includes
+		for function in cls.functions:
+			for operation in function.operations:
+				for type in self.parser.classes:
+					if (type.name) in operation:
+						a = '"{}.h"'.format(type.name)
+						b = '/{}.h"'.format(type.name)
+						if a not in includes and b not in includes:
+							includes += '\n#include {0}'.format(self.getIncludeFile(type.name))
+		return includes
 
 	def _createTests(self):
 		fstr = "#include \"TestSerialization.h\"\n{0}\n\nvoid TestSerialization::build()\n__begin__\n{1}\n__end__\n"

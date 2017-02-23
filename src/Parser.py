@@ -171,6 +171,9 @@ class Parser:
 		return is_visitor
 
 	def isFunctionOverride(self, cls, function):
+		if function.name == 'serialize' or function.name == 'deserialize':
+			return len(cls.behaviors) > 0
+
 		for c in cls.behaviors:
 			for f in c.functions:
 				if f.name == function.name and f.return_type == function.return_type and f.args == function.args:
