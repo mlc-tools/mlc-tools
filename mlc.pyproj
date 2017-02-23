@@ -13,7 +13,7 @@
     <Name>mlc</Name>
     <RootNamespace>mlc</RootNamespace>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments> -i $(ProjectDir)../configs -o $(ProjectDir)../Classes/mg -t False -l cpp</CommandLineArguments>
+    <CommandLineArguments> -i $(ProjectDir)../configs -o $(ProjectDir)../server/gen -t False -l py -f xml</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <IsWindowsApplication>False</IsWindowsApplication>
   </PropertyGroup>
@@ -59,6 +59,12 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="src\WriterJava.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="src\WriterPySerializationJson.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="src\WriterPySerializationXml.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="src\WriterPython.py">

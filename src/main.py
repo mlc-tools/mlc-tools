@@ -6,7 +6,8 @@ from WriterCppSerializatorJson import WriterCppSerializatorJson
 from WriterCppSerializatorXml import WriterCppSerializatorXml
 from WriterJava import WriterJava
 from WriterPython import WriterPython
-
+from WriterPySerializationJson import WriterPySerializationJson
+from WriterPySerializationXml import WriterPySerializationXml
 
 print "MLC step1: parce arguments"
 configs_directory = get_arg( "-i", "config" )
@@ -21,6 +22,7 @@ tests = get_arg( "-t", "False" )
 tests = tests == "True" or tests == "true" or tests == "yes" or tests == "y"
 
 language = get_arg( "-l", "cpp" )
+format = get_arg( "-f", "xml" )
 
 print "MLC step2: find config files"
 str = ""
@@ -37,9 +39,15 @@ parser.link()
 
 print "MLC step5: create classes"
 if language == 'py':
-	writer = WriterPython(out_directory, parser, tests, configs_directory)
+	if format == 'xml':
+		writer = WriterPySerializationXml(out_directory, parser, tests, configs_directory)
+	else:
+		writer = WriterPySerializationJson(out_directory, parser, tests, configs_directory)
 if language == 'cpp':
-	writer = WriterCppSerializatorXml(out_directory, parser, tests)
+	if format == 'xml':
+		writer = WriterCppSerializatorXml(out_directory, parser, tests)
+	else:
+		writer = WriterCppSerializatorJson(out_directory, parser, tests)
 print "MLC step6: remove old files"
 writer.removeOld()
 print "MLC finished successful"

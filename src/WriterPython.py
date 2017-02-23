@@ -15,132 +15,27 @@ class WriterPython(Writer):
 		self.loaded_functions = {}
 		self.load_functions(configsDirectory + 'python_external.mlc_py')
 
-		self.simple_types = ["int", "float", "bool", "string", "cc.point"]
-
-		self.serialize_formats = []
-		self.serialize_formats.append({})
-		self.serialize_formats.append({})
-		
-		self.serialize_formats[SERIALIZATION]['simple'] = []
-		self.serialize_formats[SERIALIZATION]['simple'].append( 'if {4}{0} != {2}: dictionary["{0}"] = {4}{0}' )
-		self.serialize_formats[SERIALIZATION]['simple'].append( 'dictionary["{0}"] = {4}{0}' )
-		self.serialize_formats[DESERIALIZATION]['simple'] = []
-		self.serialize_formats[DESERIALIZATION]['simple'].append( 'if "{0}" in dictionary: {4}{0} = dictionary["{0}"]' )
-		self.serialize_formats[DESERIALIZATION]['simple'].append( '{4}{0} = dictionary["{0}"]' )
-
-		self.serialize_formats[SERIALIZATION]['pointer'] = []
-		self.serialize_formats[SERIALIZATION]['pointer'].append( 'print "field {0} not should have a initialize value"' )
-		self.serialize_formats[SERIALIZATION]['pointer'].append( '''
-		if {4}{0}:
-			dictionary['{0}'] = {3}
-			dictionary['{0}'][{4}{0}.get_type()] = {3}
-			{4}{0}.serialize(dictionary['{0}'][{4}{0}.get_type()])''' )
-		self.serialize_formats[DESERIALIZATION]['pointer'] = []
-		self.serialize_formats[DESERIALIZATION]['pointer'].append( 'print "field {0} not should have a initialize value"' )
-		self.serialize_formats[DESERIALIZATION]['pointer'].append( '''
-		if '{0}' in dictionary:
-			for key, value in dictionary['{0}'].iteritems():
-				{4}{0} = Factory.Factory.build( key );
-				{4}{0}.deserialize( value ) 
-				break''')
-
-		self.serialize_formats[SERIALIZATION]['list<simple>'] = []
-		self.serialize_formats[SERIALIZATION]['list<simple>'].append( '''
-		arr_{0} = []
-		for obj in {4}{0}:
-			arr_{0}.append(obj)
-		dictionary['{0}'] = arr_{0}
-''' )
-		self.serialize_formats[SERIALIZATION]['list<simple>'].append( self.serialize_formats[SERIALIZATION]['list<simple>'][0] )
-		self.serialize_formats[DESERIALIZATION]['list<simple>'] = []
-		self.serialize_formats[DESERIALIZATION]['list<simple>'].append( '''
-		arr_{0} = dictionary['{0}']
-		for obj in arr_{0}:
-			{4}{0}.append(obj)
-''' )
-		self.serialize_formats[DESERIALIZATION]['list<simple>'].append( self.serialize_formats[DESERIALIZATION]['list<simple>'][0] )
-
-		self.serialize_formats[SERIALIZATION]['list<serialized>'] = []
-		self.serialize_formats[SERIALIZATION]['list<serialized>'].append( '''
-		arr_{0} = []
-		for obj in {4}{0}:
-			dict = {3}
-			obj.serialize(dict)
-			arr_{0}.append(dict)
-		dictionary['{0}'] = arr_{0}
-''' )
-		self.serialize_formats[SERIALIZATION]['list<serialized>'].append( self.serialize_formats[SERIALIZATION]['list<serialized>'][0] )
-		self.serialize_formats[DESERIALIZATION]['list<serialized>'] = []
-		self.serialize_formats[DESERIALIZATION]['list<serialized>'].append( '''
-		arr_{0} = dictionary['{0}']
-		for dict in arr_{0}:
-			obj = {1}()
-			obj.deserialize(dict)
-			{4}{0}.append(obj)
-''' )
-		self.serialize_formats[DESERIALIZATION]['list<serialized>'].append( self.serialize_formats[DESERIALIZATION]['list<serialized>'][0] )
-
-		self.serialize_formats[SERIALIZATION]['serialized'] = []
-		self.serialize_formats[SERIALIZATION]['serialized'].append( '''if {4}{0} != None: 
-			dict = {3}
-			{4}{0}.serialize(dict)
-			dictionary["{0}"] = dict
-''' )
-		self.serialize_formats[SERIALIZATION]['serialized'].append( self.serialize_formats[SERIALIZATION]['serialized'][0] )
-		self.serialize_formats[DESERIALIZATION]['serialized'] = []
-		self.serialize_formats[DESERIALIZATION]['serialized'].append( '''
-		if '{0}' in dictionary:
-			{4}{0} = {1}()
-			{4}{0}.deserialize(dictionary['{0}'])''' )
-		self.serialize_formats[DESERIALIZATION]['serialized'].append( self.serialize_formats[DESERIALIZATION]['serialized'][0] )
-
-		self.serialize_formats[SERIALIZATION]['pointer_list'] = []
-		self.serialize_formats[SERIALIZATION]['pointer_list'].append( 'print "field {0} not should have a initialize value"' )
-		self.serialize_formats[SERIALIZATION]['pointer_list'].append( '''
-		dictionary['{0}'] = []
-		arr = dictionary['{0}']
-		for t in {4}{0}:
-			arr.append({3})
-			arr[-1][t.get_type()] = {3}
-			t.serialize(arr[-1][t.get_type()])  ''' )
-		self.serialize_formats[DESERIALIZATION]['pointer_list'] = []
-		self.serialize_formats[DESERIALIZATION]['pointer_list'].append( 'print "field {0} not should have a initialize value"' )
-		self.serialize_formats[DESERIALIZATION]['pointer_list'].append( '''
-		arr = dictionary['{0}']
-		size = len(arr)
-		for index in xrange(size):
-			for key, value in arr[index].iteritems():
-				obj = Factory.Factory.build( key )
-				{4}{0}.append(obj)
-				{4}{0}[-1].deserialize( arr[index][key] )
-				break ''' )
+		self.create_serialization_patterns()
 
 		Writer.__init__(self, outDirectory, parser)
 
 		self.createFactory()
 		self.createRequestHandler()
 
+	def create_serialization_patterns(self):
+		pass
+
 	def writeObject(self, object, tabs, flags):
 		out = ""
 		return {flags:out}
+
+	def getPatternFile(self):
+		pass
 	
 	def writeClass(self, cls, tabs, flags):
 		out = ""
-		pattern = '''import json
-import Factory
-{3}
+		pattern = self.getPatternFile()
 
-class {0}:
-	def __init__(self):
-{4}
-{1}
-		return
-
-	def get_type(self):
-		return self.__type__
-
-{2}	
-'''
 		initialize_list = ''
 		for object in cls.members:
 			initialize_list += '\t\t' + self.writeObject(object) + '\n'
@@ -215,6 +110,8 @@ class {0}:
 			body = '\n'.join(body)
 			self.loaded_functions[name] =  body
 
+	def getSerialiationFunctionArgs(self):
+		pass
 	def createSerializationFunction(self, cls, serialize_type):
 		function = Function()
 		function.name = 'serialize' if serialize_type == SERIALIZATION else 'deserialize'
@@ -222,9 +119,9 @@ class {0}:
 			if func.name == function.name:
 				return
 
-		body = '(self, dictionary):\n'
+		body = self.getSerialiationFunctionArgs() + ':\n'
 		if cls.behaviors:
-			body += '\t\t{0}.{1}(self, dictionary)\n'.format(cls.behaviors[0].name, function.name)
+			body += ('\t\t{0}.{1}' + self.getSerialiationFunctionArgs() + '\n').format(cls.behaviors[0].name, function.name)
 		for obj in cls.members:
 			if obj.is_runtime:continue
 			if obj.is_static:continue
@@ -235,22 +132,18 @@ class {0}:
 		self.loaded_functions[cls.name + '.' + function.name] = body
 		cls.functions.append(function)
 	
+	def getPatternSerializationMap(self):
+		pass
+
+	def getPatternDeserializationMap(self):
+		pass
+
 	def buildMapSerialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args):
 		key = obj_template_args[0]
 		value = obj_template_args[1]
 		key_type = key.name if isinstance(key, Class) else key.type
 		value_type = value.name if isinstance(value, Class) else value.type
-		str = '''
-		dict_cach = dictionary
-		arr = []
-		dictionary['{0}'] = arr
-		for key, value in self.{0}.iteritems():
-			arr.append({3})
-			dictionary = arr[-1]
-{1}
-{2}
-		dictionary = dict_cach
-'''
+		str = self.getPatternSerializationMap()
 		_value_is_pointer = value.is_pointer
 		a0 = obj_name
 		a1 = self._buildSerializeOperation('key', key_type, None, SERIALIZATION, [], False, '')
@@ -272,17 +165,7 @@ class {0}:
 		value = obj_template_args[1]
 		key_type = key.name if isinstance(key, Class) else key.type
 		value_type = value.name if isinstance(value, Class) else value.type
-		str = '''
-		dict_cach = dictionary
-		arr = dictionary['{0}']
-		for dict in arr:
-			key = dict['key']
-			type = key
-			dictionary = dict
-{2}
-			self.{0}[type] = _value
-		dictionary = dict_cach
-'''
+		str = self.getPatternDeserializationMap()
 		_value_is_pointer = value.is_pointer
 		a0 = obj_name
 		a1 = self._buildSerializeOperation('key', key_type, None, DESERIALIZATION, [], False, '')
@@ -333,32 +216,13 @@ class {0}:
 						obj_type = arg_type
 
 		fstr = self.serialize_formats[serialization_type][type][index]
-		str = fstr.format(obj_name, obj_type, obj_value, '{}', owner)
+		str = fstr.format(obj_name, obj_type, obj_value, '{}', owner, obj_template_args[0].type if len(obj_template_args) > 0 else 'unknown_arg')
 		return '\t\t' + str + '\n'
 
+	def getPatternFactoryFile(self):
+		pass
 	def createFactory(self):
-		pattern = '''
-import json
-{0}
-
-class Factory:
-	def __init__(self):
-		return
-
-	@staticmethod
-	def build(type):
-{1}
-		return None
-
-	@staticmethod
-	def create_command(string):
-		dictionary = json.loads(string)
-		type = dictionary["command"]["type"]
-		command = Factory.build(type)
-		if command != None:
-			command.deserialize(dictionary)
-		return command
-'''
+		pattern = self.getPatternFactoryFile()
 		line = '\t\tif type == "{0}": return {0}.{0}()\n'
 		line_import = 'import {0}\n'
 		creates = ''
