@@ -90,7 +90,7 @@ class WriterCppSerializatorXml(WriterCpp):
 
 		self.serialize_formats[SERIALIZATION]['pointer_list'] = []
 		self.serialize_formats[SERIALIZATION]['pointer_list'].append( 'static_assert(0, "list "{0}" not should have a initialize value");' )
-		self.serialize_formats[SERIALIZATION]['pointer_list'].append( '''auto& arr_{0} = xml.append_child("{0}");
+		self.serialize_formats[SERIALIZATION]['pointer_list'].append( '''auto arr_{0} = xml.append_child("{0}");
 																		 for( auto& t : {0} )
 																		 {3}
 																			t->serialize(arr_{0}.append_child(t->getType().c_str())); 
