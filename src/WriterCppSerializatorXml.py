@@ -176,3 +176,28 @@ class WriterCppSerializatorXml(WriterCpp):
 		if value.is_pointer:
 			a4 = "IntrusivePtr<{}>".format(value_type)
 		return str.format( a0, a1, a2, a3, a4 )
+
+	def _buildSerializeOperationEnum(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args, serialization_type):
+		if serialization_type == SERIALIZATION:
+			return '::set(xml, "{0}", (std::string){0});'.format(obj_name)
+		else:
+			return '{0} = ::get<std::string>(xml, "{0}");'.format(obj_name)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

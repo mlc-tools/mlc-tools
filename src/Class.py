@@ -172,12 +172,6 @@ class Class(Object):
 			shift += 1
 		self.behaviors = []
 
-		value = Object()
-		value.initial_value = self.members[0].name;
-		value.name = "_value";
-		value.type = cast;
-		self.members.append( value )
-
 		def createFunction(type, name, args, const):
 			function = Function()
 			function.return_type = type;
@@ -209,6 +203,12 @@ class Class(Object):
 		function2.operations.append( "return *this;" )
 		function3.operations.append( "return \"\";" )
 		function4.operations.append( "return \"\";" )
+
+		value = Object()
+		value.initial_value = self.members[0].name;
+		value.name = "_value";
+		value.type = cast;
+		self.members.append( value )
 
 
 		

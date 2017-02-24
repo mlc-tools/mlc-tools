@@ -21,6 +21,7 @@ class WriterPython(Writer):
 		self.load_functions(configsDirectory + 'python_external.mlc_py')
 
 		self.create_serialization_patterns()
+		self.current_class = None
 
 		Writer.__init__(self, outDirectory, parser)
 
@@ -40,6 +41,13 @@ class WriterPython(Writer):
 	def writeClass(self, cls, tabs, flags):
 		out = ""
 		pattern = self.getPatternFile()
+		self.current_class = cls
+
+		if cls.type == 'enum':
+			for member in cls.members:
+				if member.initial_value != None and member.name == '_value':
+					member.initial_value = 'self.' + member.initial_value
+
 
 		initialize_list = ''
 		for object in cls.members:
@@ -68,6 +76,7 @@ class WriterPython(Writer):
 						imports += '\nfrom {0} import {0}'.format(arg.name)
 
 		out = pattern.format(name, initialize_list, functions, imports, init_behavior)
+		self.current_class = None
 		return {flags:out}
 	
 	def writeFunction(self, cls, function):
@@ -189,9 +198,12 @@ class WriterPython(Writer):
 		index = 0 
 		if obj_value == None:
 			index = 1
-			
+		
+
 		type = obj_type
-		if obj_type not in self.simple_types and type != "list" and type != "map":
+		if self.parser._findClass(type) and self.parser._findClass(type).type == 'enum':
+			type = 'simple'
+		elif obj_type not in self.simple_types and type != "list" and type != "map":
 			if obj_is_pointer:
 				type = "pointer"
 			else:

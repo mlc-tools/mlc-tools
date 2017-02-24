@@ -399,40 +399,45 @@ class WriterCpp(Writer):
 		type = obj.name if isinstance(obj, Class) else obj.type
 		return self._buildSerializeOperation(obj.name, type, obj.initial_value, obj.is_pointer, obj.template_args, serialization_type)
 
+	def _buildSerializeOperationEnum(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args, serialization_type):
+		pass
 	def _buildSerializeOperation(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args, serialization_type):
 		index = 0 
 		if obj_value == None:
 			index = 1
 			
 		type = obj_type
-		if obj_type not in self.simple_types and type != "list" and type != "map":
-			if obj_is_pointer:
-				type = "pointer"
-			else:
-				type = "serialized"
-		template_args = []
-		if len(obj_template_args) > 0:
-			if type == "map":
-				if len(obj_template_args) != 2:
-					print "map should have 2 arguments"
-					exit -1
-				if serialization_type == SERIALIZATION:
-					return self.buildMapSerialization(obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args)
-				if serialization_type == DESERIALIZATION:
-					return  self.buildMapDeserialization(obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args)
-			else:
-				arg = obj_template_args[0]
-				arg_type = arg.name if isinstance(arg, Class) else arg.type
-				template_args.append(convertType(arg_type))
-				if arg_type in self.simple_types:
-					type = "{0}<simple>".format( type )
-				elif arg.is_pointer:
-					type = "pointer_list"
+		if self.parser._findClass(type) and self.parser._findClass(type).type == 'enum':
+			str = self._buildSerializeOperationEnum(obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args, serialization_type)
+		else:
+			if obj_type not in self.simple_types and type != "list" and type != "map":
+				if obj_is_pointer:
+					type = "pointer"
 				else:
-					type = "{0}<serialized>".format( type )
+					type = "serialized"
+			template_args = []
+			if len(obj_template_args) > 0:
+				if type == "map":
+					if len(obj_template_args) != 2:
+						print "map should have 2 arguments"
+						exit -1
+					if serialization_type == SERIALIZATION:
+						return self.buildMapSerialization(obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args)
+					if serialization_type == DESERIALIZATION:
+						return  self.buildMapDeserialization(obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args)
+				else:
+					arg = obj_template_args[0]
+					arg_type = arg.name if isinstance(arg, Class) else arg.type
+					template_args.append(convertType(arg_type))
+					if arg_type in self.simple_types:
+						type = "{0}<simple>".format( type )
+					elif arg.is_pointer:
+						type = "pointer_list"
+					else:
+						type = "{0}<serialized>".format( type )
 
-		fstr = self.serialize_formats[serialization_type][type][index]
-		str = fstr.format(obj_name, convertType(obj_type), obj_value, "{", "}", *template_args)
+			fstr = self.serialize_formats[serialization_type][type][index]
+			str = fstr.format(obj_name, convertType(obj_type), obj_value, "{", "}", *template_args)
 		return str
 	
 	def buildMapSerialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args):
@@ -606,6 +611,8 @@ class WriterCpp(Writer):
 		includes = current_includes
 		for function in cls.functions:
 			for operation in function.operations:
+				if operation == None:
+					continue
 				for type in self.parser.classes:
 					if (type.name) in operation:
 						a = '"{}.h"'.format(type.name)
