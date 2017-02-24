@@ -9,6 +9,11 @@ import fileutils
 SERIALIZATION = 0
 DESERIALIZATION = 1
 
+def convertInitializeValue(value):
+	if value == 'true': return 'True'
+	if value == 'false': return 'False'
+	return value
+
 class WriterPython(Writer):
 	def __init__(self, outDirectory, parser, generateTests, configsDirectory):
 		
@@ -85,7 +90,7 @@ class WriterPython(Writer):
 			if type == "list": value = "[]"
 			if type == "map": value = "{}"
 		
-		out = 'self.{0} = {1}'.format(object.name, value)
+		out = 'self.{0} = {1}'.format(object.name, convertInitializeValue(value))
 		return out
 
 	def _getImports(self, cls):
@@ -127,7 +132,7 @@ class WriterPython(Writer):
 			if obj.is_static:continue
 			if obj.is_const:continue
 
-			body += self._buildSerializeOperation(obj.name, obj.type, obj.initial_value, serialize_type, obj.template_args, obj.is_pointer)
+			body += self._buildSerializeOperation(obj.name, obj.type, convertInitializeValue(obj.initial_value), serialize_type, obj.template_args, obj.is_pointer)
 		body += '\t\treturn'
 		self.loaded_functions[cls.name + '.' + function.name] = body
 		cls.functions.append(function)
