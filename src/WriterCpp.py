@@ -168,7 +168,7 @@ class WriterCpp(Writer):
 			fstr += "\n__begin__{5}" + O + F + "__end__;\n\n"
 
 		fstr = "namespace {0}\n__begin__{2}\n\n{1}__end__//namespace {0}".format( self._getNamespace(cls), fstr, forward_declarations )
-		fstr = "#ifndef __{0}_h__\n#define __{0}_h__\n{2}\n\n{1}\n\n#endif //#ifndef __{0}_h__".format( cls.name, fstr, includes )
+		fstr = "#ifndef __mg_{0}_h__\n#define __mg_{0}_h__\n{2}\n\n{1}\n\n#endif //#ifndef __{0}_h__".format( cls.name, fstr, includes )
 
 		out[FLAG_HPP] += fstr.format( "class", cls.name, behaviors, objects[FLAG_HPP], functions[FLAG_HPP], constructor, destructor);
 		out[FLAG_HPP] = re.sub("__begin__", "{", out[FLAG_HPP])
@@ -664,6 +664,8 @@ class WriterCpp(Writer):
 		types["Observer"] = '"Observer.h"'
 		if file in types:
 			return types[file]
+		if 'std::map' in file:
+			return '<map>'
 
 		cls = self.parser._findClass(file)
 		if cls and cls.name == file and self._currentClass.group != cls.group:

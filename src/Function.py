@@ -18,7 +18,20 @@ class Function:
 		k = line.find("function")
 		if k == 0:
 			line = line[k+8:].strip()
-		args = line[line.find("(")+1:line.find(")")].split(",")
+		args_s = line[line.find("(")+1:line.find(")")]
+		args = []
+		counter = 0
+		k = 0
+		i = 0
+		for ch in args_s:
+			if ch == '<': counter += 1
+			if ch == '>': counter -= 1
+			if counter == 0 and (ch == ',' or i == len(args_s)-1):
+				r = i if i < len(args_s)-1 else i+1
+				args.append(args_s[k:r])
+				k = i+1
+			i+=1
+
 		if args and args[0]:
 			for arg in args:
 				arg = arg.strip()
