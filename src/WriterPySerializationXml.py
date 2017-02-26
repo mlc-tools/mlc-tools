@@ -49,7 +49,7 @@ class WriterPySerializationXml(WriterPython):
 		self.serialize_formats[SERIALIZATION]['list<simple>'].append( '''
 		arr = ET.SubElement(xml, '{0}')
 		for obj in {4}{0}:
-			item = arr.append('{5}')
+			item = ET.SubElement(arr, 'item')
 			item.set('value', str(obj))''' )
 		self.serialize_formats[SERIALIZATION]['list<simple>'].append( self.serialize_formats[SERIALIZATION]['list<simple>'][0] )
 
