@@ -613,6 +613,8 @@ class WriterCpp(Writer):
 			for operation in function.operations:
 				if operation == None:
 					continue
+				if 'throw Exception' in operation: includes += '\n#include "Exception.h"'
+				if 'std::sqrt' in operation: includes += '\n#include <cmath>'
 				for type in self.parser.classes:
 					if (type.name) in operation:
 						a = '"{}.h"'.format(type.name)
