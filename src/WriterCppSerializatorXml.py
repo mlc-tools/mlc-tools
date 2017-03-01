@@ -28,10 +28,10 @@ class WriterCppSerializatorXml(WriterCpp):
 		self.serialize_formats[DESERIALIZATION]['simple'].append( '{0} = ::get<{1}>( xml, "{0}" );' )
 		
 		self.serialize_formats[SERIALIZATION]['serialized'] = []
-		self.serialize_formats[SERIALIZATION]['serialized'].append( 'static_assert(0, "field "{0}" not should have a initialize value");' )
+		self.serialize_formats[SERIALIZATION]['serialized'].append( '{0}.serialize(xml.append_child("{0}"));' )
 		self.serialize_formats[SERIALIZATION]['serialized'].append( '{0}.serialize(xml.append_child("{0}"));' )
 		self.serialize_formats[DESERIALIZATION]['serialized'] = []
-		self.serialize_formats[DESERIALIZATION]['serialized'].append( 'static_assert(0, "field "{0}" not should have a initialize value");' )
+		self.serialize_formats[DESERIALIZATION]['serialized'].append( '{0}.deserialize(xml.child("{0}"));' )
 		self.serialize_formats[DESERIALIZATION]['serialized'].append( '{0}.deserialize(xml.child("{0}"));' )
 		
 		self.serialize_formats[SERIALIZATION]['pointer'] = []
