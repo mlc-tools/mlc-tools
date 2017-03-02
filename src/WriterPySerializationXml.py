@@ -141,6 +141,15 @@ class Factory:
 	def build(type):
 {1}
 		return None
+
+	@staticmethod
+	def create_command(string):
+		root = ET.fromstring(string)
+		type = root.tag
+		command = Factory.build(type)
+		if command != None:
+			command.deserialize(root)
+		return command
 '''
 	def getPatternSerializationMap(self):
 		return '''
