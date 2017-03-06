@@ -11,6 +11,7 @@ class Function:
 		self.is_external = False
 		self.is_static = False
 		self.is_abstract = False
+		self.side = 'both'
 
 	def parse(self, line):
 		line = line.strip()
@@ -89,8 +90,12 @@ class Function:
 		self.is_abstract = self.is_abstract or ":abstract" in str
 		self.is_static = self.is_static or ":static" in str
 		self.is_const = self.is_const or ":const" in str
+		if ":server" in str: self.side = 'server'
+		if ":client" in str: self.side = 'client'
 		str = re.sub(":external", "", str)
 		str = re.sub(":static", "", str)
 		str = re.sub(":const", "", str)
 		str = re.sub(":abstract", "", str)
+		str = re.sub(":server", "", str)
+		str = re.sub(":client", "", str)
 		return str

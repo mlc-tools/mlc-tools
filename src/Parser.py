@@ -9,10 +9,11 @@ def throw_error( msg ):
 	exit(-1)
 
 class Parser:
-	def __init__(self):
+	def __init__(self, side):
 		self.classes=[]
 		self.objects=[]
 		self.functions=[]
+		self.side = side
 		return
 	
 	def parse(self, text):
@@ -77,7 +78,7 @@ class Parser:
 		body, header, text = self._findBody(text)
 		cls = Class()
 		cls.parse(header)
-		cls.parseBody( Parser(), body )
+		cls.parseBody( Parser(self.side), body )
 		if self._findClass(cls.name):
 			print "Error: duplicate classes [{}]".format(cls.name)
 			exit -1
@@ -89,7 +90,7 @@ class Parser:
 		cls = Class()
 		cls.type = "enum"
 		cls.parse(header)
-		cls.parseBody( Parser(), body )
+		cls.parseBody( Parser(self.side), body )
 		self.classes.append(cls)
 		return text
 

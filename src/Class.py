@@ -14,6 +14,7 @@ class Class(Object):
 		self.generate_set_function = False
 		self.type = "class"
 		self.group = ""
+		self.side = "both"
 
 	def parse(self, line):
 		str = line.strip()
@@ -52,10 +53,15 @@ class Class(Object):
 		self.is_serialized = self.is_serialized or ":serialized" in str
 		self.is_visitor = self.is_visitor or ":visitor" in str
 		self.generate_set_function = self.generate_set_function or ":set_function" in str
+		if ":server" in str: self.side = 'server'
+		if ":client" in str: self.side = 'client'
+
 		str = re.sub(":abstract", "", str)
 		str = re.sub(":serialized", "", str)
 		str = re.sub(":visitor", "", str)
 		str = re.sub(":set_function", "", str)
+		str = re.sub(":server", "", str)
+		str = re.sub(":client", "", str)
 		return str
 
 	def _generateSettersFunction(self):

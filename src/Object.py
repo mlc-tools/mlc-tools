@@ -17,6 +17,7 @@ class Object:
 		self.is_static = False
 		self.is_const = False
 		self.is_key = False
+		self.side = 'both'
 
 	#float value;
 	#float value = 0;
@@ -67,8 +68,12 @@ class Object:
 		self.is_static = self.is_static or ":static" in str
 		self.is_const = self.is_const or ":const" in str
 		self.is_key = self.is_key or ":key" in str
+		if ":server" in str: self.side = 'server'
+		if ":client" in str: self.side = 'client'
 		str = re.sub(":runtime", "", str)
 		str = re.sub(":const", "", str)
 		str = re.sub(":static", "", str)
 		str = re.sub(":key", "", str)
+		str = re.sub(":server", "", str)
+		str = re.sub(":client", "", str)
 		return str

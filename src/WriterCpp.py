@@ -75,6 +75,9 @@ class WriterCpp(Writer):
 
 	def writeObject(self, object, tabs, flags):
 		out = Writer.writeObject(self, object, tabs, flags)
+		if object.side != 'both' and object.side != self.parser.side:
+			return out
+
 		if flags == FLAG_HPP:
 			value = ""
 			args = []
@@ -125,6 +128,8 @@ class WriterCpp(Writer):
 
 	def writeClass(self, cls, tabs, flags):
 		out = {}
+		if cls.side != 'both' and cls.side != self.parser.side:
+			return out
 		cls = self.addMethods(cls);
 
 		if flags & FLAG_HPP:
@@ -253,6 +258,8 @@ class WriterCpp(Writer):
 		
 	def writeFunction(self, function, tabs, flags):
 		out = {}
+		if function.side != 'both' and function.side != self.parser.side:
+			return out
 		if flags & FLAG_HPP:
 			if not self._currentClass.is_abstract and not function.is_abstract:
 				fstr = "{3}{6}{0} {1}({2}){4}{5};\n"
@@ -304,19 +311,21 @@ class WriterCpp(Writer):
 
 		for cls in classes:
 			dict = self.writeClass(cls, tabs, FLAG_HPP)
-			filename = cls.name + ".h"
-			if cls.group:
-				filename = cls.group + "/" + filename
-			self.save( filename, dict[FLAG_HPP] )
-			out = self._add( out, dict )
+			if len(dict) > 0:
+				filename = cls.name + ".h"
+				if cls.group:
+					filename = cls.group + "/" + filename
+				self.save( filename, dict[FLAG_HPP] )
+				out = self._add( out, dict )
 		for cls in classes: 
 			if not cls.is_abstract:
 				dict = self.writeClass(cls, tabs, FLAG_CPP)
-				filename = cls.name + ".cpp"
-				if cls.group:
-					filename = cls.group + "/" + filename
-				self.save( filename, dict[FLAG_CPP] )
-				out = self._add( out, dict )
+				if len(dict) > 0:
+					filename = cls.name + ".cpp"
+					if cls.group:
+						filename = cls.group + "/" + filename
+					self.save( filename, dict[FLAG_CPP] )
+					out = self._add( out, dict )
 		return out
 
 	def writeFunctions(self, functions, tabs, flags):

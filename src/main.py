@@ -23,11 +23,12 @@ tests = tests == "True" or tests == "true" or tests == "yes" or tests == "y"
 
 language = get_arg( "-l", "cpp" )
 format = get_arg( "-f", "xml" )
+side = get_arg( "-side", "both" )
 
 print "MLC step2: find config files"
 str = ""
 files = fileutils.getFilesList( configs_directory )
-parser = Parser()
+parser = Parser(side)
 print "MLC step3: parsing"
 for file in files:
 	if file.find( ".mlc" ) == len(file)-4:
