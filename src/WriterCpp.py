@@ -198,6 +198,8 @@ class WriterCpp(Writer):
 		registration = "REGISTRATION_OBJECT( {0} );\n".format(cls.name)
 		for func in cls.functions:
 			if func.is_abstract: registration = ""
+		if not cls.is_serialized:
+			registration = ""
 		if cls.is_abstract: registration = ""
 		out[FLAG_CPP] += fstr.format( cls.name, functions[FLAG_CPP], constructor, self._getNamespace(cls), includes, objects[FLAG_CPP], registration, destructor )
 		out[FLAG_CPP] = re.sub("__begin__", "{", out[FLAG_CPP])
