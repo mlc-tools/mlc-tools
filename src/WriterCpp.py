@@ -235,7 +235,7 @@ class WriterCpp(Writer):
 				str1 = "\nstatic {0} {1}_key = 0;".format(obj.type, obj.name)
 				str2 = "\n{0} = ++{0}_key;".format(obj.name)
 				initialize2 += str1 + str2
-			elif obj.initial_value != None and not obj.is_static:
+			elif obj.initial_value != None and not obj.is_static and (obj.side == self.parser.side or obj.side=='both'):
 				fstr = "\n{2} {0}({1})"
 				s = ","
 				if initialize == "": 
