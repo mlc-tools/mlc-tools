@@ -402,6 +402,8 @@ class WriterCpp(Writer):
 		for obj in cls.members:
 			if obj.is_runtime or obj.is_static or obj.is_const:
 				continue
+			if obj.side != 'both' and obj.side != self.parser.side:
+				continue
 			str = self._buildSerializeObjectOperation(obj, serialization_type)
 			function.operations.append(str)
 		cls.functions.append(function)
@@ -477,6 +479,8 @@ class WriterCpp(Writer):
 		fbody_line = "result = result && {0} == rhs.{0};"
 		function.operations.append( "bool result = true;");
 		for m in cls.members:
+			if m.side != 'both' and m.side != self.parser.side:
+				continue
 			if m.is_static or m.is_const:
 				continue
 			function.operations.append( fbody_line.format(m.name) )
@@ -553,6 +557,8 @@ class WriterCpp(Writer):
 		for t in cls.behaviors:
 			types[t.name] = 1
 		for t in cls.members:
+			if t.side != 'both' and t.side != self.parser.side:
+				continue
 			type = t.type
 			type = re.sub( "const", "", type ).strip()
 			type = re.sub( "\*", "", type ).strip()
