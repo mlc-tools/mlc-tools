@@ -164,6 +164,7 @@ class Class(Object):
 		if len(self.behaviors) == 0:
 			self.behaviors.append("int")
 		cast = self.behaviors[0]
+		initial_values = []
 		for m in self.members:
 			m.name = m.type
 			m.type = cast
@@ -172,9 +173,11 @@ class Class(Object):
 			if m.initial_value == None:
 				if cast == "int":
 					m.initial_value = "(1 << {})".format( shift )
+					initial_values.append(1 << shift)
 				else:
 					#TODO
 					exit(-1)
+				
 			shift += 1
 		self.behaviors = []
 
@@ -200,11 +203,15 @@ class Class(Object):
 		function2 = createFunction("const {0}&".format(self.name), "operator =", [["value", "string"]], False)
 		function3 = createFunction("", "operator std::string", [], True)
 		function4 = createFunction("string", "str", [], True)
+		index = 0
 		for m in self.members:
 			function1.operations.append( re.sub("__e__","}", re.sub("__b__","{", "if( value == \"{0}\" ) __b__ _value = {0}; return; __e__;".format( m.name ) ) ) )
+			function1.operations.append( re.sub("__e__","}", re.sub("__b__","{", "if( value == \"{0}\" ) __b__ _value = {0}; return; __e__;".format( initial_values[index] ) ) ) )
 			function2.operations.append( re.sub("__e__","}", re.sub("__b__","{", "if( value == \"{0}\" ) __b__ _value = {0}; return *this; __e__;".format( m.name ) ) ) )
-			function3.operations.append( "if( _value == {0} ) return \"{0}\";".format( m.name ) )
-			function4.operations.append( "if( _value == {0} ) return \"{0}\";".format( m.name ) )
+			function2.operations.append( re.sub("__e__","}", re.sub("__b__","{", "if( value == \"{0}\" ) __b__ _value = {0}; return *this; __e__;".format( initial_values[index] ) ) ) )
+			function3.operations.append( 'if( _value == {0} ) return \"{0}\";'.format( m.name ) )
+			function4.operations.append( 'if( _value == {0} ) return \"{0}\";'.format( m.name ) )
+			index += 1
 		function1.operations.append( "_value = 0;" )
 		function2.operations.append( "return *this;" )
 		function3.operations.append( "return \"\";" )
