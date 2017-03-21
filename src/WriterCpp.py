@@ -688,6 +688,7 @@ class WriterCpp(Writer):
 		types["Json::Value"] = '"jsoncpp/json.h"'
 		types["pugi::xml_node"] = '"pugixml/pugixml.hpp"'
 		types["Observer"] = '"Observer.h"'
+		types["std::vector<int>"] = '<vector>'
 		if file in types:
 			return types[file]
 		if 'std::map' in file:
