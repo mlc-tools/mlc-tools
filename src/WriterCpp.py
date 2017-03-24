@@ -23,22 +23,18 @@ def random_float():
 	max = 0;
 	return random.randint(-max, max)
 
-def convertType(type):
-	types = {}
-	types["cc.point"] = "cocos2d::Point"
-	types["cc.point*"] = "cocos2d::Point*"
-	types["list"] = "std::vector"
-	types["map"] = "std::map"
-	types["set"] = "std::set"
-	types["string"] = "std::string"
-	types["Observer"] = "Observer<std::function<void()>>"
-	if type in types:
-		return types[type]
-	return type 
-
 def convertArgumentType(type):
 	if type == "string" or type == "std::string":
 		return "const std::string&"
+	return type
+
+
+def convertReturnType(parser, type):
+	if '*' in type:
+		print 'hello', type
+		t = re.sub('\*', '', type)
+		if parser._findClass(t):
+			return 'IntrusivePtr<{}>'.format(t)
 	return type
 
 def autoReplaces(text):
@@ -65,13 +61,28 @@ class WriterCpp(Writer):
 		self.create_serialization_patterns()
 		
 		self.tests = []
-		Writer.__init__(self, outDirectory, parser)
 		self._currentClass = None
+		Writer.__init__(self, outDirectory, parser)
 		if self.createTests:
 			self._createTests()
 		return
 	def create_serialization_patterns(self):
 		pass
+
+	def convertType(self, type):
+		types = {}
+		types["cc.point"] = "cocos2d::Point"
+		types["cc.point*"] = "cocos2d::Point*"
+		types["list"] = "std::vector"
+		types["map"] = "std::map"
+		types["set"] = "std::set"
+		types["string"] = "std::string"
+		types["Observer"] = "Observer<std::function<void()>>"
+		if type in types:
+			return types[type]
+		
+		return type 
+
 
 	def writeObject(self, object, tabs, flags):
 		out = Writer.writeObject(self, object, tabs, flags)
@@ -83,7 +94,7 @@ class WriterCpp(Writer):
 			args = []
 			for arg in object.template_args:
 				type = arg.name if isinstance(arg, Class) else arg.type
-				type = convertType(type)
+				type = self.convertType(type)
 				if arg.is_pointer:
 					type = "IntrusivePtr<{}>".format(type)
 				args.append(type)
@@ -96,7 +107,7 @@ class WriterCpp(Writer):
 					for b in cls.behaviors:
 						if b.name == "SerializedObject":
 							f = "IntrusivePtr<{}>"
-				type = f.format(convertType(type))
+				type = f.format(self.convertType(type))
 			modifiers = ""
 			if object.is_static:
 				modifiers += "static "
@@ -107,7 +118,7 @@ class WriterCpp(Writer):
 			else:
 				fstr = "{4}{3}{0} {1}"
 			fstr += ";\n"
-			out[flags] += fstr.format(convertType(type), object.name, args, modifiers, self.tabs(tabs))
+			out[flags] += fstr.format(self.convertType(type), object.name, args, modifiers, self.tabs(tabs))
 		if flags == FLAG_CPP:
 			if object.is_static:
 				if object.initial_value == None:
@@ -123,7 +134,7 @@ class WriterCpp(Writer):
 				modifier = ""
 				if object.is_const:
 					modifier = "const "
-				out[flags] += fstr.format(convertType(object.type), object.name, self._currentClass.name, object.initial_value, modifier)
+				out[flags] += fstr.format(self.convertType(object.type), object.name, self._currentClass.name, object.initial_value, modifier)
 		return out
 
 	def writeClass(self, cls, tabs, flags):
@@ -269,7 +280,7 @@ class WriterCpp(Writer):
 				fstr = "{3}{6}{0} {1}({2}){4}{5} = 0;\n"
 			args = []
 			for arg in function.args:
-				args.append(convertArgumentType(convertType(arg[1])) + " " + arg[0])
+				args.append(convertArgumentType(self.convertType(arg[1])) + " " + arg[0])
 			args = ", ".join(args)
 			modifier = "virtual "
 			if function.is_static:
@@ -283,7 +294,7 @@ class WriterCpp(Writer):
 			if function.is_const:
 				is_const = " const"
 
-			out[FLAG_HPP] = fstr.format( convertType(function.return_type), function.name, args, self.tabs(tabs), is_const, is_override, modifier )
+			out[FLAG_HPP] = fstr.format( convertReturnType(self.parser, self.convertType(function.return_type)), function.name, args, self.tabs(tabs), is_const, is_override, modifier )
 		if flags & FLAG_CPP and not function.is_external and not function.is_abstract:
 			is_const = ""
 			if function.is_const:
@@ -298,9 +309,9 @@ class WriterCpp(Writer):
 				body += line
 			args = []
 			for arg in function.args:
-				args.append(convertArgumentType(convertType(arg[1])) + " " + arg[0])
+				args.append(convertArgumentType(self.convertType(arg[1])) + " " + arg[0])
 			args = ", ".join(args)
-			out[FLAG_CPP] = fstr.format( convertType(function.return_type), function.name, args, body, self.tabs(tabs), self._currentClass.name, is_const )
+			out[FLAG_CPP] = fstr.format(convertReturnType(self.parser, self.convertType(function.return_type)), function.name, args, body, self.tabs(tabs), self._currentClass.name, is_const )
 			out[FLAG_CPP] = autoReplaces( out[FLAG_CPP] )
 
 		return out
@@ -441,7 +452,7 @@ class WriterCpp(Writer):
 				else:
 					arg = obj_template_args[0]
 					arg_type = arg.name if isinstance(arg, Class) else arg.type
-					template_args.append(convertType(arg_type))
+					template_args.append(self.convertType(arg_type))
 					if arg_type in self.simple_types:
 						type = "{0}<simple>".format( type )
 					elif arg.is_pointer:
@@ -450,7 +461,7 @@ class WriterCpp(Writer):
 						type = "{0}<serialized>".format( type )
 
 			fstr = self.serialize_formats[serialization_type][type][index]
-			str = fstr.format(obj_name, convertType(obj_type), obj_value, "{", "}", *template_args)
+			str = fstr.format(obj_name, self.convertType(obj_type), obj_value, "{", "}", *template_args)
 		return str
 	
 	def buildMapSerialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args):
@@ -581,6 +592,8 @@ class WriterCpp(Writer):
 				type = re.sub("const", "", t[1]).strip()
 				type = re.sub("\*", "", type).strip()
 				type = re.sub("&", "", type).strip()
+				if 'CommandBase' in type:
+					types['CommandBase'] = 1
 				if flags == FLAG_CPP or t[1] != type + "*":
 					types[type] = 1
 				if flags == FLAG_HPP and t[1] == type + "*":
@@ -600,7 +613,7 @@ class WriterCpp(Writer):
 		for t in ftypes:
 			if t == self._currentClass.name:
 				continue
-			type = convertType(t)
+			type = self.convertType(t)
 			if type.find( "::" ) == -1:
 				forward_declarations += "\nclass {0};".format( type )
 			else:
@@ -610,6 +623,8 @@ class WriterCpp(Writer):
 				str = "\nnamespace {1}\n__begin__\nclass {0};\n__end__".format( type, ns );
 				forward_declarations += str
 
+		if flags == FLAG_HPP:
+			out += '\n#include "IntrusivePtr.h"'
 		if flags == FLAG_CPP:
 			out += '\n#include "Factory.h"'
 			out += '\n#include <algorithm>'
@@ -683,12 +698,12 @@ class WriterCpp(Writer):
 		types["map"] = "<map>"
 		types["set"] = "<set>"
 		types["string"] = "<string>"
-		types["IntrusivePtr"] = '"IntrusivePtr.h"'
 		types["pugi::xml_node"] = '"pugixml/pugixml.hpp"'
 		types["Json::Value"] = '"jsoncpp/json.h"'
 		types["pugi::xml_node"] = '"pugixml/pugixml.hpp"'
 		types["Observer"] = '"Observer.h"'
 		types["std::vector<int>"] = '<vector>'
+		types['std::vector<intrusive_ptr<CommandBase>>'] = '<vector>'
 		if file in types:
 			return types[file]
 		if 'std::map' in file:
