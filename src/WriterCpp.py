@@ -31,7 +31,6 @@ def convertArgumentType(type):
 
 def convertReturnType(parser, type):
 	if '*' in type:
-		print 'hello', type
 		t = re.sub('\*', '', type)
 		if parser._findClass(t):
 			return 'IntrusivePtr<{}>'.format(t)
