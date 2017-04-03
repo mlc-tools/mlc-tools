@@ -1,6 +1,6 @@
 import sys
 
-def get_arg(name, default):
+def get_arg(name, default=''):
 	index = 0
 	for arg in sys.argv:
 		if arg == name and index +1 < len(sys.argv):
