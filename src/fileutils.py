@@ -1,6 +1,7 @@
 import os
 import hashlib
 from os.path import isfile, join, isdir
+import tempfile
 
 def _getFilesList(path, prefix):
 	try:
@@ -70,7 +71,7 @@ def write( path, buffer ):
 		open(path,"w").write(buffer)	
 	return rewrite
 			
-cacheFile = "bin/cache.tmp"
+cacheFile = tempfile.gettempdir() + "/bin/cache.tmp"
 def isFileChanges(file):
 	dict = loadDictFromFile(cacheFile)
 	if file in dict:
