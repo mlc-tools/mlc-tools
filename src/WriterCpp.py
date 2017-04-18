@@ -202,7 +202,7 @@ class WriterCpp(Writer):
 
 		self._currentClass = None
 		if cls.type == "class":
-			fstr = "#include \"{0}.h\"\n#include \"Generics.h\"\n#include \"DataStorage.h\"{4}\n\nnamespace {3}\n__begin__{5}{6}\n{2}\n{7}\n{1}__end__"
+			fstr = "#include \"{0}.h\"\n#include \"Generics.h\"{4}\n\nnamespace {3}\n__begin__{5}{6}\n{2}\n{7}\n{1}__end__"
 		else:
 			fstr = "#include \"{0}.h\"\n#include \"Generics.h\"{4}\n\nnamespace {3}\n__begin__\n{5}\n{2}{7}\n{1}__end__"
 		registration = "REGISTRATION_OBJECT( {0} );\n".format(cls.name)

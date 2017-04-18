@@ -30,3 +30,11 @@ class core/CommandBase<SerializedObject>
 	{
 	}
 }
+
+class Request:visitor
+{
+}
+
+class Response:visitor
+{
+}
