@@ -36,18 +36,6 @@ std::string getSerializedString(const mg::SerializedObject* object)
 
 namespace mg
 {
-	void CommandBase::serialize(pugi::xml_node xml) const
-	{
-		xml.set_name(getType().c_str());
-		if(current_time != 0 )
-			set(xml, "current_time", current_time);
-	}
-
-	void CommandBase::deserialize(const pugi::xml_node& xml)
-	{
-		user_id = xml.child("command").attribute("user_id").as_int();
-	}
-
 	std::string CommandBase::getSerializedString() const
 	{
 		return ::getSerializedString(this);
