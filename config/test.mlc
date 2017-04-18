@@ -1,0 +1,32 @@
+class SerializedObject:serialized
+{
+	int _reference_counter:runtime = 1
+	function int retain()
+	{
+		return ++_reference_counter;
+	}
+	function int release()
+	{
+		auto c = --_reference_counter;
+		if( c == 0)
+		{
+			delete this;
+		}
+		return c;
+	}
+}
+
+class core/CommandBase<SerializedObject>
+{
+	int user_id:key = 0
+	int current_time = 0
+	function string getSerializedString():external:const;
+	function void serialize(pugi::xml_node xml):external:const;
+	function void deserialize(const pugi::xml_node& xml):external;
+	function void accept(IVisitorRequest* visitor)
+	{
+	}
+	function void accept(IVisitorResponse* visitor)
+	{
+	}
+}

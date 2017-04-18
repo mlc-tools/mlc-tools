@@ -10,11 +10,11 @@ from WriterPySerializationJson import WriterPySerializationJson
 from WriterPySerializationXml import WriterPySerializationXml
 
 print "MLC step1: parce arguments"
-configs_directory = get_arg( "-i", "config" )
+configs_directory = get_arg( "-i", "../config" )
 if configs_directory[-1] != "/":
 	configs_directory += "/"
 	
-out_directory = get_arg( "-o", "out" )
+out_directory = get_arg( "-o", "../out" )
 if out_directory[-1] != "/":
 	out_directory += "/"
 
