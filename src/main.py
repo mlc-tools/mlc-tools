@@ -9,7 +9,9 @@ from WriterPython import WriterPython
 from WriterPySerializationJson import WriterPySerializationJson
 from WriterPySerializationXml import WriterPySerializationXml
 
-print "MLC step1: parce arguments"
+silent_mode = get_arg( "-silent", "no" )
+silent_mode = silent_mode == "True" or silent_mode == "true" or silent_mode == "yes" or silent_mode == "y"
+	
 configs_directory = get_arg( "-i", "config" )
 if configs_directory[-1] != "/":
 	configs_directory += "/"
@@ -25,20 +27,25 @@ language = get_arg( "-l", "cpp" )
 format = get_arg( "-f", "xml" )
 side = get_arg( "-side", "both" )
 
-print "MLC step2: find config files"
+if not silent_mode:
+	print "\tMLC started to1 side ({})".format(side)
+	print "MLC step1: read config files"
 str = ""
 files = fileutils.getFilesList( configs_directory )
 parser = Parser(side)
-print "MLC step3: parsing"
+if not silent_mode:
+	print "MLC step2: parsing"
 for file in files:
 	if file.find( ".mlc" ) == len(file)-4:
 		str = open(configs_directory + file,"r").read()
 		parser.parse(str)
 
-print "MLC step4: link "
+if not silent_mode:
+	print "MLC step3: linking "
 parser.link()
 
-print "MLC step5: create classes"
+if not silent_mode:
+	print "MLC step4: generate classes"
 if language == 'py':
 	if format == 'xml':
 		writer = WriterPySerializationXml(out_directory, parser, tests, configs_directory)
@@ -49,9 +56,13 @@ if language == 'cpp':
 		writer = WriterCppSerializatorXml(out_directory, parser, tests)
 	else:
 		writer = WriterCppSerializatorJson(out_directory, parser, tests)
-print "MLC step6: remove old files"
-writer.removeOld()
-print "MLC finished successful"
+if not silent_mode:
+	print "MLC step5: remove old files"
+writer.removeOld(silent_mode)
+if not silent_mode:
+	print "MLC finished successful"
+else:
+	print "mlc(lang: {}, side: {}) finished successful in silent mode".format(language, side)
 
 #parser = Parser()
 #parser.parse(str)
