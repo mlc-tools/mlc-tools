@@ -105,7 +105,7 @@ class WriterCppSerializatorXml(WriterCpp):
 																			{0}.back()->deserialize( child );
 																		{4}''' )
 
-		self.simple_types = ["int", "float", "bool", "string", "cc.point"]
+		self.simple_types = ["int", "float", "bool", "string"]
 		for i in range(2):
 			for type in self.simple_types:
 				self.serialize_formats[i][type] = []

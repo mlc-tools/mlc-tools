@@ -9,7 +9,6 @@ from WriterPython import WriterPython
 from WriterPySerializationJson import WriterPySerializationJson
 from WriterPySerializationXml import WriterPySerializationXml
 
-print "MLC step1: parce arguments"
 silent_mode = get_arg( "-silent", "no" )
 silent_mode = silent_mode == "True" or silent_mode == "true" or silent_mode == "yes" or silent_mode == "y"
 	
@@ -29,7 +28,7 @@ format = get_arg( "-f", "xml" )
 side = get_arg( "-side", "both" )
 
 if not silent_mode:
-	print "\tMLC started to1 side ({})".format(side)
+	print "\tMLC started to side ({})".format(side)
 	print "MLC step1: read config files"
 str = ""
 files = fileutils.getFilesList( configs_directory )

@@ -70,8 +70,6 @@ class WriterCpp(Writer):
 
 	def convertType(self, type):
 		types = {}
-		types["cc.point"] = "cocos2d::Point"
-		types["cc.point*"] = "cocos2d::Point*"
 		types["list"] = "std::vector"
 		types["map"] = "std::map"
 		types["set"] = "std::set"
@@ -535,8 +533,6 @@ class WriterCpp(Writer):
 			value = str(random_int())
 		if m.type == "bool":
 			value = str(random_bool())
-		if m.type == "cc.point":
-			value = "cocos2d::Point({0},{1})".format(random_float(), random_float())
 		if self.parser._findClass(m.type):
 			value = "{0}::{1}()".format(m.type,TEST_FUNCTION_CREATE)
 		elif m.type == "string":
@@ -692,7 +688,6 @@ class WriterCpp(Writer):
 
 	def getIncludeFile(self, file):
 		types = {}
-		types["cc.point"] = "\"cocos2d.h\""
 		types["list"] = "<vector>"
 		types["map"] = "<map>"
 		types["set"] = "<set>"

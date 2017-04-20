@@ -17,6 +17,7 @@ class Object:
 		self.is_static = False
 		self.is_const = False
 		self.is_key = False
+		self.link = ''
 		self.side = 'both'
 
 	#float value;
@@ -57,6 +58,18 @@ class Object:
 				arg = arg.strip()
 				self.template_args.append(arg)
 		self.is_pointer = self.check_pointer()
+		if self.type == 'link':
+			if len(self.template_args) != 1: 
+				print 'please check link. Usage: "link<data/folder/object> name"'
+				print '\t current size: [{}]'.format(len(self.template_args))
+				print '\t current args: [{}]'.format(self.template_args)
+				exit(-1)
+			self.link = self.template_args
+			self.type = 'string'
+			self.template_args = []
+			#self.is_pointer = True
+		
+
 
 	def check_pointer(self):
 		result = "*" in self.type
