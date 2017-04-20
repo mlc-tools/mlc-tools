@@ -68,13 +68,14 @@ class Writer:
 			msg = "create:" if not exist else "rewrited"
 			print msg, filename
 
-	def removeOld(self):
+	def removeOld(self, silent_mode):
 		if not fileutils.isdir(self.out_directory):
 			return
 		files = fileutils.getFilesList( self.out_directory )
 		for file in files:
 			if self.out_directory + file not in self.created_files:
-				print "remove", file
+				if silent_mode and not file.endswith('.pyc'):
+					print "remove", file
 				fileutils.remove(self.out_directory + file)
 
 		
