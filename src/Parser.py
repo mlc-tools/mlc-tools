@@ -241,6 +241,7 @@ class Parser:
 		if cls:
 			return cls
 		object = Object()
+		typeName = object._findModifiers(typeName)
 		object.type = typeName
 		object._parceType()
 		object.name = ""

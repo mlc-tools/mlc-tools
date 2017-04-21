@@ -149,14 +149,16 @@ class WriterCppSerializatorXml(WriterCpp):
 		for( auto pair : {0} )
 		__begin__
 			auto xml = map_{0}.append_child("pair");
-			auto& key = pair.first; {1}
-			auto& value = pair.second; {2}
+			auto& key = pair.first; 
+			auto& value = pair.second; 
+			{1}
+			{2}
 		__end__
 		'''
 		_value_is_pointer = value.is_pointer
 		a0 = obj_name
-		a1 = self._buildSerializeOperation("key", key_type, None, False, [], SERIALIZATION)
-		a2 = self._buildSerializeOperation("value", value_type, None, _value_is_pointer, [], SERIALIZATION)
+		a1 = self._buildSerializeOperation("key", key_type, None, key.is_pointer, [], SERIALIZATION, key.is_link)
+		a2 = self._buildSerializeOperation("value", value_type, None, _value_is_pointer, [], SERIALIZATION, value.is_link)
 		return str.format( a0, a1, a2)
 		#a1 = serialize key /simple, serialized
 		#a2 = serialize value /simple, serialized, pointer,
@@ -171,16 +173,24 @@ class WriterCppSerializatorXml(WriterCpp):
 		for( auto child : map_{0} )
 		__begin__
 			auto xml = child;
-			{3} key; {1}
-			{4} value; {2}
+			{3}{1}
+			{4} value; 
+			{2}
 			{0}[key] = value;
 		__end__
 		'''
+		if key.is_link:
+			key_str = 'const {}* key(nullptr);'.format(key_type)
+		elif key.is_pointer:
+			key_str = 'auto key = make_intrusive<{}>();'.format(key_type)
+		else:
+			key_str = '{} key;'.format(key_type)
+		
 		_value_is_pointer = value.is_pointer if isinstance(value, Object) else false
 		a0 = obj_name
-		a1 = self._buildSerializeOperation("key", key_type, None, False, [], DESERIALIZATION)
-		a2 = self._buildSerializeOperation("value", value_type, None, _value_is_pointer, [], DESERIALIZATION)
-		a3 = key_type
+		a1 = self._buildSerializeOperation("key", key_type, None, key.is_pointer, [], DESERIALIZATION, key.is_link)
+		a2 = self._buildSerializeOperation("value", value_type, None, _value_is_pointer, [], DESERIALIZATION, value.is_link)
+		a3 = key_str
 		a4 = value_type
 		if value.is_pointer:
 			a4 = "IntrusivePtr<{}>".format(value_type)

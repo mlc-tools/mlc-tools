@@ -92,8 +92,13 @@ class WriterCpp(Writer):
 			for arg in object.template_args:
 				type = arg.name if isinstance(arg, Class) else arg.type
 				type = self.convertType(type)
-				if arg.is_pointer:
-					type = "IntrusivePtr<{}>".format(type)
+				if arg.is_link:
+					type = 'const {}* '.format(type)
+				else:
+					if arg.is_pointer:
+						type = "IntrusivePtr<{}>".format(type)
+					if arg.is_const:
+						type = 'const ' + type
 				args.append(type)
 			args = ", ".join(args)
 			type = object.type
@@ -106,7 +111,7 @@ class WriterCpp(Writer):
 							if b.name == "SerializedObject":
 								f = "IntrusivePtr<{}>"
 				else:
-					f = "const {}*"
+					f = "{}*"
 
 				type = f.format(self.convertType(type))
 			modifiers = ""

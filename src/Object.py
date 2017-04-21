@@ -66,18 +66,32 @@ class Object:
 		return result
 
 	def _findModifiers(self, str):
-		self.is_runtime = self.is_runtime or ":runtime" in str
-		self.is_static = self.is_static or ":static" in str
-		self.is_const = self.is_const or ":const" in str
-		self.is_key = self.is_key or ":key" in str
-		self.is_link = self.is_link or ":link" in str
-		if ":server" in str: self.side = 'server'
-		if ":client" in str: self.side = 'client'
-		str = re.sub(":runtime", "", str)
-		str = re.sub(":const", "", str)
-		str = re.sub(":static", "", str)
-		str = re.sub(":key", "", str)
-		str = re.sub(":server", "", str)
-		str = re.sub(":client", "", str)
-		str = re.sub(":link", "", str)
-		return str
+		buffer = str
+		args = ''
+		l = buffer.find('<')
+		r = buffer.rfind('>')
+		if l != -1 and r != -1:
+			args = buffer[l:r+1]
+			buffer = buffer[0:l] + buffer[r+1:]
+
+		self.is_runtime = self.is_runtime or ":runtime" in buffer
+		self.is_static = self.is_static or ":static" in buffer
+		self.is_const = self.is_const or ":const" in buffer
+		self.is_key = self.is_key or ":key" in buffer
+		self.is_link = self.is_link or ":link" in buffer
+
+		self.is_const = self.is_const or self.is_link
+
+		if ":server" in buffer: self.side = 'server'
+		if ":client" in buffer: self.side = 'client'
+		buffer = re.sub(":runtime", "", buffer)
+		buffer = re.sub(":const", "", buffer)
+		buffer = re.sub(":static", "", buffer)
+		buffer = re.sub(":key", "", buffer)
+		buffer = re.sub(":server", "", buffer)
+		buffer = re.sub(":client", "", buffer)
+		buffer = re.sub(":link", "", buffer)
+		if args:
+			buffer = buffer[0:l] + args + buffer[l:]
+
+		return buffer
