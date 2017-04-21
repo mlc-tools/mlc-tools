@@ -218,6 +218,10 @@ class Parser:
 		function.return_type = "void"
 		function.args.append(["ctx", cls.name + "*"])
 		visitor.functions.append(function)
+
+		def sort(function):
+			return function.name
+		visitor.functions.sort(key=sort)
 		
 	def createGetTypeFunction(self, cls):
 		if not cls.is_abstract:

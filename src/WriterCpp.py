@@ -168,6 +168,13 @@ class WriterCpp(Writer):
 		destructor = self._createDestructorFunctionHpp(cls, tabs)
 		includes, forward_declarations = self._findIncludes(cls,FLAG_HPP)
 
+		includes = list(set(includes.split('\n')))
+		includes.sort()
+		includes = '\n'.join(includes)
+		forward_declarations = list(set(forward_declarations.split('\n')))
+		forward_declarations.sort()
+		forward_declarations = '\n'.join(forward_declarations)
+
 		self._currentClass = None
 
 		fstr = ""
@@ -206,6 +213,10 @@ class WriterCpp(Writer):
 		destructor = self._createDestructorFunctionCpp(cls, tabs)
 		includes, f = self._findIncludes(cls,FLAG_CPP)
 		includes = self._findIncludesInFunctionOperation(cls, includes)
+		
+		includes = list(set(includes.split('\n')))
+		includes.sort()
+		includes = '\n'.join(includes)
 
 		self._currentClass = None
 		if cls.type == "class":
@@ -654,6 +665,7 @@ class WriterCpp(Writer):
 					continue
 				if 'throw Exception' in operation: includes += '\n#include "Exception.h"'
 				if 'std::sqrt' in operation: includes += '\n#include <cmath>'
+				if 'get_data_storage()' in operation: includes += '\n#include "DataStorage.h"'
 				for type in self.parser.classes:
 					if (type.name) in operation:
 						a = '"{}.h"'.format(type.name)
