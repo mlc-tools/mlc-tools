@@ -98,12 +98,16 @@ class WriterCpp(Writer):
 			args = ", ".join(args)
 			type = object.type
 			if object.is_pointer:
-				f = "{}*"
-				cls = self.parser._findClass(object.type)
-				if cls:
-					for b in cls.behaviors:
-						if b.name == "SerializedObject":
-							f = "IntrusivePtr<{}>"
+				if not object.is_link:
+					f = "{}*"
+					cls = self.parser._findClass(object.type)
+					if cls:
+						for b in cls.behaviors:
+							if b.name == "SerializedObject":
+								f = "IntrusivePtr<{}>"
+				else:
+					f = "const {}*"
+
 				type = f.format(self.convertType(type))
 			modifiers = ""
 			if object.is_static:
@@ -418,24 +422,26 @@ class WriterCpp(Writer):
 
 	def _buildSerializeObjectOperation(self, obj, serialization_type):
 		type = obj.name if isinstance(obj, Class) else obj.type
-		return self._buildSerializeOperation(obj.name, type, obj.initial_value, obj.is_pointer, obj.template_args, serialization_type)
+		return self._buildSerializeOperation(obj.name, type, obj.initial_value, obj.is_pointer, obj.template_args, serialization_type, is_link = obj.is_link)
 
 	def _buildSerializeOperationEnum(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args, serialization_type):
 		pass
-	def _buildSerializeOperation(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args, serialization_type):
+	def _buildSerializeOperation(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args, serialization_type, is_link = False):
 		index = 0 
 		if obj_value == None:
 			index = 1
-			
+
 		type = obj_type
 		if self.parser._findClass(type) and self.parser._findClass(type).type == 'enum':
 			str = self._buildSerializeOperationEnum(obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args, serialization_type)
 		else:
 			if obj_type not in self.simple_types and type != "list" and type != "map":
-				if obj_is_pointer:
-					type = "pointer"
+				if is_link:
+					type = 'link'
+				elif obj_is_pointer:
+					type = 'pointer'
 				else:
-					type = "serialized"
+					type = 'serialized'
 			template_args = []
 			if len(obj_template_args) > 0:
 				if type == "map":
@@ -459,6 +465,7 @@ class WriterCpp(Writer):
 
 			fstr = self.serialize_formats[serialization_type][type][index]
 			str = fstr.format(obj_name, self.convertType(obj_type), obj_value, "{", "}", *template_args)
+
 		return str
 	
 	def buildMapSerialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args):

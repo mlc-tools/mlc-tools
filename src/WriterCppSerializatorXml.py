@@ -105,6 +105,15 @@ class WriterCppSerializatorXml(WriterCpp):
 																			{0}.back()->deserialize( child );
 																		{4}''' )
 
+		self.serialize_formats[SERIALIZATION]['link'] = []
+		self.serialize_formats[SERIALIZATION]['link'].append( 'static_assert(0, "link "{0}" not should have a initialize value");' )
+		self.serialize_formats[SERIALIZATION]['link'].append( '''::set(xml,"{0}",{0}->name);''' )
+		self.serialize_formats[DESERIALIZATION]['link'] = []
+		self.serialize_formats[DESERIALIZATION]['link'].append( 'static_assert(0, "link "{0}" not should have a initialize value");' )
+		self.serialize_formats[DESERIALIZATION]['link'].append( '''
+			auto name_{0} = ::get<std::string>( xml, "{0}" );
+			{0} = &get_data_storage().get<{1}>(name_{0});''' )
+
 		self.simple_types = ["int", "float", "bool", "string"]
 		for i in range(2):
 			for type in self.simple_types:
