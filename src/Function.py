@@ -37,13 +37,25 @@ class Function:
 			for arg in args:
 				arg = arg.strip()
 				def p(ch, arg):
-					if ch not in arg:
-						return False
-					if len(arg.split(ch)) != 2:
-						print "args pair not pair";
-						return False
-					type = (arg.split(ch)[0].strip() + ch).strip()
-					name = arg.split(ch)[1].strip()
+					# if ch not in arg:
+					# 	return False
+					# if len(arg.split(ch)) != 2:
+					# 	print "args pair not pair";
+					# 	return False
+
+					k = -1
+					counter = 0
+					for i, c in enumerate(arg):
+						if c == '<': counter += 1
+						if c == '>': counter -= 1
+						if counter == 0 and c == ch:
+							k = i
+							break
+					if k == -1:
+						return False;
+
+					type = (arg[:k].strip() + ch).strip()
+					name = arg[k+1:].strip()
 					self.args.append( [name, type] )
 					return True
 				if not (p("*",arg) or p("&",arg) or p(" ",arg)):

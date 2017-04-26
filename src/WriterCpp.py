@@ -607,15 +607,29 @@ class WriterCpp(Writer):
 
 		for f in cls.functions:
 			for t in f.args:
-				type = re.sub("const", "", t[1]).strip()
-				type = re.sub("\*", "", type).strip()
-				type = re.sub("&", "", type).strip()
-				if 'CommandBase' in type:
-					types['CommandBase'] = 1
-				if flags == FLAG_CPP or t[1] != type + "*":
-					types[type] = 1
-				if flags == FLAG_HPP and t[1] == type + "*":
-					ftypes[type] = 1
+				def checkType(t):
+					type = re.sub("const", "", t).strip()
+					type = re.sub("\*", "", type).strip()
+					type = re.sub("&", "", type).strip()
+					if 'IntrusivePtr' in type:
+						return
+					if 'CommandBase' in type:
+						types['CommandBase'] = 1
+					else:
+						if flags == FLAG_CPP or t != type + "*":
+							types[type] = 1
+						if flags == FLAG_HPP and t == type + "*":
+							ftypes[type] = 1
+					
+				checkType(t[1])
+				if '<' in t[1] and '>' in t[1]:
+					type = t[1]
+					k = type.find('<')+1
+					l = type.find('>')
+					args = type[k:l].strip().split(',')
+					for arg in args:
+						checkType(arg)
+
 
 			type = f.return_type
 			type = re.sub( "const", "", type ).strip()
