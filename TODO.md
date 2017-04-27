@@ -1,0 +1,2 @@
+- add example 'use link to static data'
+- added configs with 'static data'

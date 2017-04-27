@@ -112,7 +112,7 @@ class WriterCppSerializatorXml(WriterCpp):
 		self.serialize_formats[DESERIALIZATION]['link'].append( 'static_assert(0, "link "{0}" not should have a initialize value");' )
 		self.serialize_formats[DESERIALIZATION]['link'].append( '''
 			auto name_{0} = ::get<std::string>( xml, "{0}" );
-			{0} = &get_data_storage().get<{1}>(name_{0});''' )
+			{0} = get_data_storage().get<{1}>(name_{0});''' )
 
 		self.simple_types = ["int", "float", "bool", "string"]
 		for i in range(2):

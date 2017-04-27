@@ -7,13 +7,13 @@ class Writer:
 		self.buffers = {}
 		self.out_directory = outDirectory
 		self.created_files = []
-		
+
 		#self.buffers = self._add(self.buffers, self.writeObjects(parser.objects, 0, 0))
 		#self.buffers = self._add(self.buffers, self.writeFunctions(parser.functions, 0, 0))
 		self.buffers = self._add(self.buffers, self.writeClasses(parser.classes, 0, 0))
 
 		return
-	
+
 	def _add(self, inDict, toDict ):
 		for key in toDict:
 			if key in inDict:
@@ -26,19 +26,19 @@ class Writer:
 		out = ""
 		for i in range(tabs): out += "\t"
 		return out
-	
+
 	def writeObject(self, object, tabs, flags):
 		return {flags:""}
-	
+
 	def writeClass(self, cls, tabs, flags):
 		return {flags:""}
-	
+
 	def writeFunction(self, function, tabs, flags):
 		return {flags:""}
 
 	def writeObjects(self, objects, tabs, flags):
 		out = {flags:"\n"}
-		for object in objects: 
+		for object in objects:
 			out = self._add(out, self.writeObject(object, tabs, flags))
 		return out
 
@@ -68,19 +68,19 @@ class Writer:
 			msg = "create:" if not exist else "rewrited"
 			print msg, filename
 
-	def removeOld(self, silent_mode):
+	def removeOld(self):
 		if not fileutils.isdir(self.out_directory):
 			return
 		files = fileutils.getFilesList( self.out_directory )
 		for file in files:
 			if self.out_directory + file not in self.created_files:
-				if silent_mode and not file.endswith('.pyc'):
+				if not file.endswith('.pyc'):
 					print "remove", file
 				fileutils.remove(self.out_directory + file)
 
-		
+
 
 	def _getFilenameForClass(self, cls):
 		return cls.name
 
-		
+

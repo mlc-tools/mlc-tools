@@ -9,7 +9,7 @@ out directory - out/
 python library src directory - src/
 
 
-Confugured launch:
+Configured launch:
 
 python src/main.py -o out -i config -incremental yes -t no -side both -f xml
 Parameters:
@@ -17,5 +17,5 @@ Parameters:
 	-i - path to configs directory
 	-incremental - yes/no - rewrite/no rewrite not modified classes
 	-side - both/client/server - used for different code
-	-t - yes/no - generate tests (noot worked no :( )
+	-t - yes/no - generate tests (not worked no :( )
 	-f xml/json - serialization type
