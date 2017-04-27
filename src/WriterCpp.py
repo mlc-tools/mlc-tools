@@ -428,7 +428,7 @@ class WriterCpp(Writer):
 			function.operations.append(str)
 
 		for obj in cls.members:
-			if obj.is_runtime or obj.is_static or obj.is_const:
+			if obj.is_runtime or obj.is_static or (obj.is_const and not obj.is_link):
 				continue
 			if obj.side != 'both' and obj.side != self.parser.side:
 				continue
