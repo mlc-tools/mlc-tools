@@ -2,6 +2,7 @@ import re
 from Object import Object
 from Function import Function
 
+
 class Class(Object):
 	def __init__(self):
 		Object.__init__(self)
@@ -12,34 +13,34 @@ class Class(Object):
 		self.is_serialized = False
 		self.is_visitor = False
 		self.generate_set_function = False
-		self.type = "class"
-		self.group = ""
-		self.side = "both"
+		self.type = 'class'
+		self.group = ''
+		self.side = 'both'
 
 	def parse(self, line):
-		str = line.strip()
-		if self.type in str:
-		   str = str[len(self.type):]
-		str = self.find_modifiers(str)
-		type = self.type
-		self.type = ""
-		Object.parse(self, str)
+		line = line.strip()
+		if self.type in line:
+			line = line[len(self.type):]
+		line = self.find_modifiers(line)
+		type_ = self.type
+		self.type = ''
+		Object.parse(self, line)
 		self.name = self.type
-		self.type = type
+		self.type = type_
 		self.behaviors = self.template_args
 		self.template_args = []
-		if "/" in self.name:
-			k = self.name.rindex("/")
+		if '/' in self.name:
+			k = self.name.rindex('/')
 			self.group = self.name[0:k]
-			self.name = self.name[k+1:]
+			self.name = self.name[k + 1:]
 
 	def parseBody(self, parser, body):
 		parser.parse(body)
 		if len(parser.classes) > 0:
-			print "Not supported inbody classes"
-		self.members = parser.objects;
-		self.functions = parser.functions;
-		if self.type == "enum":
+			print 'Not supported inbody classes'
+		self.members = parser.objects
+		self.functions = parser.functions
+		if self.type == 'enum':
 			self.convertToEnum()
 		return
 
@@ -48,28 +49,28 @@ class Class(Object):
 			self._generateSettersFunction()
 			self._generateGettersFunction()
 
-	def find_modifiers(self, str):
-		self.is_abstract = self.is_abstract or ":abstract" in str
-		self.is_serialized = self.is_serialized or ":serialized" in str
-		self.is_visitor = self.is_visitor or ":visitor" in str
-		self.generate_set_function = self.generate_set_function or ":set_function" in str
-		if ":server" in str: self.side = 'server'
-		if ":client" in str: self.side = 'client'
+	def find_modifiers(self, string):
+		self.is_abstract = self.is_abstract or ':abstract' in string
+		self.is_serialized = self.is_serialized or ':serialized' in string
+		self.is_visitor = self.is_visitor or ':visitor' in string
+		self.generate_set_function = self.generate_set_function or ':set_function' in string
+		if ':server' in string: self.side = 'server'
+		if ':client' in string: self.side = 'client'
 
-		str = re.sub(":abstract", "", str)
-		str = re.sub(":serialized", "", str)
-		str = re.sub(":visitor", "", str)
-		str = re.sub(":set_function", "", str)
-		str = re.sub(":server", "", str)
-		str = re.sub(":client", "", str)
-		return str
+		string = re.sub(':abstract', '', string)
+		string = re.sub(':serialized', '', string)
+		string = re.sub(':visitor', '', string)
+		string = re.sub(':set_function', '', string)
+		string = re.sub(':server', '', string)
+		string = re.sub(':client', '', string)
+		return string
 
 	def _generateSettersFunction(self):
-		function = Function();
-		function.name = "set"
-		function.return_type = "void"
-		function.args.append(["name", "string"])
-		function.args.append(["value", "string"])
+		function = Function()
+		function.name = 'set'
+		function.return_type = 'void'
+		function.args.append(['name', 'string'])
+		function.args.append(['value', 'string'])
 
 		add_function = False
 		for i, member in enumerate(self.members):
@@ -81,14 +82,15 @@ class Class(Object):
 				continue
 			if member.is_const:
 				continue
-			supported_types = { "string":"std::string", "int":0, "float":0, "bool":0 }
+			supported_types = {'string': 'std::string', 'int': 0, 'float': 0, 'bool': 0}
 			if member.type in supported_types:
-				type = member.type
-				type = type if supported_types[type] == 0 else supported_types[type]
+				type_ = member.type
+				type_ = type_ if supported_types[type_] == 0 else supported_types[type_]
 				if i == 0:
-					op = 'if( name == "{0}" ) \n{2}\n{0} = strTo<{1}>(value);\n{3}'.format( member.name, type, '{', '}' )
+					op = 'if( name == "{0}" ) \n{2}\n{0} = strTo<{1}>(value);\n{3}'.format(member.name, type_, '{', '}')
 				else:
-					op = 'else if( name == "{0}" )\n{2}\n{0} = strTo<{1}>(value);\n{3}'.format( member.name, type, '{', '}' )
+					op = 'else if( name == "{0}" )\n{2}\n{0} = strTo<{1}>(value);\n{3}'.format(member.name, type_, '{',
+					                                                                           '}')
 				function.operations.append(op)
 				add_function = True
 
@@ -102,21 +104,20 @@ class Class(Object):
 					if equal:
 						override = True
 						if len(function.operations):
-							op = "else \n{1}\n{0}::set(name, value);\n{2}".format(cls.name, '{', '}')
+							op = 'else \n{1}\n{0}::set(name, value);\n{2}'.format(cls.name, '{', '}')
 						else:
-							op = "{0}::set(name, value);".format(cls.name)
+							op = '{0}::set(name, value);'.format(cls.name)
 						function.operations.append(op)
-						break;
+						break
 
 		if add_function or not override:
 			self.functions.append(function)
 
-
 	def _generateGettersFunction(self):
-		function = Function();
-		function.name = "get"
-		function.return_type = "string"
-		function.args.append(["name", "string"])
+		function = Function()
+		function.name = 'get'
+		function.return_type = 'string'
+		function.args.append(['name', 'string'])
 
 		add_function = False
 		for i, member in enumerate(self.members):
@@ -128,13 +129,13 @@ class Class(Object):
 				continue
 			if member.is_const:
 				continue
-			supported_types = [ "string", "int", "float", "bool" ]
+			supported_types = ['string', 'int', 'float', 'bool']
 			if member.type in supported_types:
-				type = member.type
+				type_ = member.type
 				if i == 0:
-					op = 'if( name == "{0}" ) \n{2}\n return toStr({0});\n{3}'.format( member.name, type, '{', '}' )
+					op = 'if( name == "{0}" ) \n{2}\n return toStr({0});\n{3}'.format(member.name, type_, '{', '}')
 				else:
-					op = 'else if( name == "{0}" ) \n{2}\n return toStr({0});\n{3}'.format( member.name, type, '{', '}' )
+					op = 'else if( name == "{0}" ) \n{2}\n return toStr({0});\n{3}'.format(member.name, type_, '{', '}')
 				function.operations.append(op)
 				add_function = True
 
@@ -148,13 +149,13 @@ class Class(Object):
 					if equal:
 						override = True
 						if len(function.operations):
-							op = "else \n{1}\n return {0}::get(name);\n{2}".format(cls.name, '{', '}')
+							op = 'else \n{1}\n return {0}::get(name);\n{2}'.format(cls.name, '{', '}')
 						else:
-							op = "return {0}::get(name, value);".format(cls.name)
+							op = 'return {0}::get(name, value);'.format(cls.name)
 						function.operations.append(op)
-						break;
+						break
 		if not override:
-			function.operations.append('return "";')
+			function.operations.append('return '';')
 
 		if add_function or not override:
 			self.functions.append(function)
@@ -162,7 +163,7 @@ class Class(Object):
 	def convertToEnum(self):
 		shift = 0
 		if len(self.behaviors) == 0:
-			self.behaviors.append("int")
+			self.behaviors.append('int')
 		cast = self.behaviors[0]
 		initial_values = []
 		for m in self.members:
@@ -170,58 +171,61 @@ class Class(Object):
 			m.type = cast
 			m.is_static = True
 			m.is_const = True
-			if m.initial_value == None:
-				if cast == "int":
-					m.initial_value = "(1 << {})".format( shift )
+			if m.initial_value is None:
+				if cast == 'int':
+					m.initial_value = '(1 << {})'.format(shift)
 					initial_values.append(1 << shift)
 				else:
-					#TODO
+					print 'Enum with cast to not "int" not supported now. Please contact me'
 					exit(-1)
-
 			shift += 1
 		self.behaviors = []
 
-		def createFunction(type, name, args, const):
+		def createFunction(type_, name, args, const):
 			function = Function()
-			function.return_type = type
+			function.return_type = type_
 			function.name = name
 			function.args = args
 			function.is_const = const
-			self.functions.append( function )
+			self.functions.append(function)
 			return function
 
-		createFunction("", self.name, [], False).operations = ["_value = {};".format(self.members[0].name)]
-		createFunction("", self.name, [["value",cast]], False).operations = ["_value = value;"]
-		createFunction("", self.name, [["rhs","const {0}&".format(self.name)]], False).operations = ["_value = rhs._value;"]
-		createFunction("", "operator int", [], True).operations = ["return _value;"]
-		createFunction("const {0}&".format(self.name), "operator =", [["rhs","const {0}&".format(self.name)]], False).operations = ["_value = rhs._value;", "return *this;"]
-		createFunction("bool", "operator ==", [["rhs","const {0}&".format(self.name)]], True).operations = ["return _value == rhs._value;"]
-		createFunction("bool", "operator ==", [["rhs","int"]], True).operations = ["return _value == rhs;"]
-		createFunction("bool", "operator <", [["rhs","const {0}&".format(self.name)]], True).operations = ["return _value < rhs._value;"]
+		createFunction('', self.name, [], False).operations = ['_value = {};'.format(self.members[0].name)]
+		createFunction('', self.name, [['value', cast]], False).operations = ['_value = value;']
+		createFunction('', self.name, [['rhs', 'const {0}&'.format(self.name)]], False).operations = [
+			'_value = rhs._value;']
+		createFunction('', 'operator int', [], True).operations = ['return _value;']
+		createFunction('const {0}&'.format(self.name), 'operator =', [['rhs', 'const {0}&'.format(self.name)]],
+		               False).operations = ['_value = rhs._value;', 'return *this;']
+		createFunction('bool', 'operator ==', [['rhs', 'const {0}&'.format(self.name)]], True).operations = [
+			'return _value == rhs._value;']
+		createFunction('bool', 'operator ==', [['rhs', 'int']], True).operations = ['return _value == rhs;']
+		createFunction('bool', 'operator <', [['rhs', 'const {0}&'.format(self.name)]], True).operations = [
+			'return _value < rhs._value;']
 
-		function1 = createFunction("", self.name, [["value", "string"]], False)
-		function2 = createFunction("const {0}&".format(self.name), "operator =", [["value", "string"]], False)
-		function3 = createFunction("", "operator std::string", [], True)
-		function4 = createFunction("string", "str", [], True)
+		function1 = createFunction('', self.name, [['value', 'string']], False)
+		function2 = createFunction('const {0}&'.format(self.name), 'operator =', [['value', 'string']], False)
+		function3 = createFunction('', 'operator std::string', [], True)
+		function4 = createFunction('string', 'str', [], True)
 		index = 0
 		for m in self.members:
-			function1.operations.append( re.sub("__e__","}", re.sub("__b__","{", "if( value == \"{0}\" ) __b__ _value = {0}; return; __e__;".format( m.name ) ) ) )
-			function1.operations.append( re.sub("__e__","}", re.sub("__b__","{", "if( value == \"{0}\" ) __b__ _value = {0}; return; __e__;".format( initial_values[index] ) ) ) )
-			function2.operations.append( re.sub("__e__","}", re.sub("__b__","{", "if( value == \"{0}\" ) __b__ _value = {0}; return *this; __e__;".format( m.name ) ) ) )
-			function2.operations.append( re.sub("__e__","}", re.sub("__b__","{", "if( value == \"{0}\" ) __b__ _value = {0}; return *this; __e__;".format( initial_values[index] ) ) ) )
-			function3.operations.append( 'if( _value == {0} ) return \"{0}\";'.format( m.name ) )
-			function4.operations.append( 'if( _value == {0} ) return \"{0}\";'.format( m.name ) )
+			function1.operations.append(re.sub('__e__', '}', re.sub('__b__', '{', 'if( value == "{0}" ) __b__ _value = {0}; return; __e__;'.format( m.name))))
+			function1.operations.append(re.sub('__e__', '}', re.sub('__b__', '{', 'if( value == "{0}" ) __b__ _value = {0}; return; __e__;'.format( initial_values[index]))))
+			function2.operations.append(re.sub('__e__', '}', re.sub('__b__', '{', 'if( value == "{0}" ) __b__ _value = {0}; return *this; __e__;'.format( m.name))))
+			function2.operations.append(re.sub('__e__', '}', re.sub('__b__', '{', 'if( value == "{0}" ) __b__ _value = {0}; return *this; __e__;'.format( initial_values[index]))))
+			function3.operations.append('if( _value == {0} ) return "{0}";'.format(m.name))
+			function4.operations.append('if( _value == {0} ) return "{0}";'.format(m.name))
 			index += 1
-		function1.operations.append( "_value = 0;" )
-		function2.operations.append( "return *this;" )
-		function3.operations.append( "return \"\";" )
-		function4.operations.append( "return \"\";" )
+		function1.operations.append('_value = 0;')
+		function2.operations.append('return *this;')
+		function3.operations.append('return "";')
+		function4.operations.append('return "";')
 
 		value = Object()
 		value.initial_value = self.members[0].name
-		value.name = "_value"
+		value.name = '_value'
 		value.type = cast
-		self.members.append( value )
+		self.members.append(value)
 
 	def addGetTypeFunction(self):
 		if not self.is_abstract:
@@ -239,6 +243,3 @@ class Class(Object):
 		function.is_const = True
 		function.operations.append('return {}::__type__;'.format(self.name))
 		self.functions.append(function)
-
-
-

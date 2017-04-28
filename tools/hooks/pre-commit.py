@@ -1,5 +1,6 @@
 import os
 from os.path import isdir
+import sys
 
 
 ROOT = ''
@@ -33,6 +34,8 @@ def _execute():
 
 
 if __name__ == '__main__':
+	if len(sys.argv) > 1:
+		ROOT = sys.argv[1]
 
 	print '--------------------------------------------------'
 	_generate()
