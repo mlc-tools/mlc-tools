@@ -23,10 +23,22 @@ class core/CommandBase<SerializedObject>
 	function string getSerializedString():external:const;
 }
 
-class Request:visitor
+class Request<SerializedObject>:visitor
+{
+}
+class RequestFoo<Request>
+{
+}
+class RequestBar<Request>
 {
 }
 
-class Response:visitor
+class Response<SerializedObject>:visitor
 {
+}
+
+enum TestEnum
+{
+    value1
+    value2
 }

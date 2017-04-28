@@ -1,10 +1,12 @@
 #include "core/CommandBase.h"
+#include "TestEnum.h"
 #include "IntrusivePtr.h"
+#include "tests/Visitor.h"
 #include <iostream>
 
 extern intrusive_ptr<mg::CommandBase> createCommand(const std::string& payload);
 
-int main()
+bool test_serialization()
 {
 	int test_user_id = 123;
 	int test_time = 1231235245;
@@ -22,7 +24,32 @@ int main()
 	result = result && deserialized->user_id == command->user_id;
 	result = result && deserialized->current_time == command->current_time;
 
-	std::cout << "Execute results = " << (result ? "Ok" : "Fail") << std::endl;
+	if(!result)
+	    std::cout << "Test serialization failed." << std::endl;
 
+	return result;
+}
+
+bool test_enum()
+{
+    mg::TestEnum foo;
+
+    bool result = foo.value1 != foo.value2;
+    result = result && foo.value1 == foo.value1;
+    result = result && foo.value2 == foo.value2;
+
+	if(!result)
+	    std::cout << "Test compare enum fields failed." << std::endl;
+	return result;
+}
+
+int main()
+{
+	auto result = true;
+	result = test_serialization() && result;
+	result = test_enum() && result;
+	result = test_visitor() && result;
+
+	std::cout << "Execute results = " << (result ? "Ok" : "Fail") << std::endl;
 	return result ? 0 : -1;
 }
