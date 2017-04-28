@@ -1,4 +1,4 @@
-Simple using:
+### Simple using: ###
 
 
 ```
@@ -14,14 +14,14 @@ Out directory - *out/*
 Python library src directory - *src/*
 
 
-Configured launch:
+### Configured launch: ###
 
 ```
 #!shell
 python src/main.py -o out -i config -incremental yes -t no -side both -f xml
 ```
 
-Parameters:
+**Parameters:**
 
 	**-o** - path to out directory
 
@@ -36,7 +36,7 @@ Parameters:
 	**-f** xml/json - serialization type
 
 
-Синтаксис:
+### Синтаксис: ###
 
 ```
 #!cpp
