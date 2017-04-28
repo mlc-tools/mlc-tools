@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.6.2)
 
-project(mlc)
+project(test_mlc)
 
 SET(ROOT ${CMAKE_SOURCE_DIR})
 

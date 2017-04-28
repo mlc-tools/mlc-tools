@@ -17,12 +17,12 @@ int main()
 
 	std::cout << "serialized string:" << std::endl;
 	std::cout << buffer << std::endl;
-	
+
 	auto result = true;
 	result = result && deserialized->user_id == command->user_id;
 	result = result && deserialized->current_time == command->current_time;
 
-	std::cout << "result = " << result << std::endl;
+	std::cout << "Execute results = " << (result ? "Ok" : "Fail") << std::endl;
 
-	return result;
+	return result ? 0 : -1;
 }
