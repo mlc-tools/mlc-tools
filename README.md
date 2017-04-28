@@ -1,8 +1,9 @@
 Simple using:
 
+'''
 cd src
 python main.py
-
+'''
 
 configs directory - configs/
 out directory - out/
