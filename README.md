@@ -1,29 +1,45 @@
 Simple using:
 
-'''
+
+```
+#!shell
 cd src
 python main.py
-'''
+```
 
-configs directory - configs/
-out directory - out/
-python library src directory - src/
+Configs directory - *configs/*
+
+Out directory - *out/*
+
+Python library src directory - *src/*
 
 
 Configured launch:
 
+```
+#!shell
 python src/main.py -o out -i config -incremental yes -t no -side both -f xml
+```
+
 Parameters:
-	-o - path to out directory
-	-i - path to configs directory
-	-incremental - yes/no - rewrite/no rewrite not modified classes
-	-side - both/client/server - used for different code
-	-t - yes/no - generate tests (not worked no :( )
-	-f xml/json - serialization type
+
+	**-o** - path to out directory
+
+	**-i** - path to configs directory
+
+	**-incremental** - yes/no - rewrite/no rewrite not modified classes
+
+	**-side** - both/client/server - used for different code
+
+	**-t** - yes/no - generate tests (not worked no :( )
+
+	**-f** xml/json - serialization type
 
 
 Синтаксис:
 
+```
+#!cpp
 class core/CommandBase<SerializedObject>
 {
 	int user_id:key = 0
@@ -34,6 +50,7 @@ class core/CommandBase<SerializedObject>
 	    return current_time;
 	}
 }
+```
 
 **class** - служебное слово, указывает, что начинается описание класса
 
@@ -63,12 +80,12 @@ class core/CommandBase<SerializedObject>
 
                         :const - модификатор указывает на константность метода
 
-**function int getCurrentType():const
-
+```
+#!cpp
+function int getCurrentType():const
 {
-
     return current_time;
-
-}**
+}
+```
 
 Функция с явным определением. Тело функций не подвергается изменению и в конечный класс помещается "как есть", за исключением простого форматирования.
