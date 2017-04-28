@@ -1,4 +1,6 @@
-/out
-/cmake
-*.pyc
+/simple_test/out
+/simple_test/build
 /.idea/
+
+*.pyc
+.DS_Store

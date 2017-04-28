@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.6.2)
 
 project(mlc)
 
-SET(ROOT ${CMAKE_SOURCE_DIR}/..)
+SET(ROOT ${CMAKE_SOURCE_DIR})
 
 include_directories(
 	${ROOT}/out/
@@ -12,7 +12,7 @@ include_directories(
 
 file(GLOB_RECURSE GENERATED ${ROOT}/out/*.cpp)
 file(GLOB_RECURSE EXTERNAL ${ROOT}/external/*.cpp)
-file(GLOB_RECURSE SRC ${ROOT}/simple_test/*.cpp)
+file(GLOB_RECURSE SRC ${ROOT}/main.cpp)
 
 add_definitions(-Wall -O2 -std=c++14)
 add_executable(${PROJECT_NAME} ${SRC} ${EXTERNAL} ${GENERATED})
