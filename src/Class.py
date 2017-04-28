@@ -20,7 +20,7 @@ class Class(Object):
 		str = line.strip()
 		if self.type in str:
 		   str = str[len(self.type):]
-		str = self._findModifiers(str)
+		str = self.find_modifiers(str)
 		type = self.type
 		self.type = ""
 		Object.parse(self, str)
@@ -48,7 +48,7 @@ class Class(Object):
 			self._generateSettersFunction()
 			self._generateGettersFunction()
 
-	def _findModifiers(self, str):
+	def find_modifiers(self, str):
 		self.is_abstract = self.is_abstract or ":abstract" in str
 		self.is_serialized = self.is_serialized or ":serialized" in str
 		self.is_visitor = self.is_visitor or ":visitor" in str
@@ -84,14 +84,14 @@ class Class(Object):
 			supported_types = { "string":"std::string", "int":0, "float":0, "bool":0 }
 			if member.type in supported_types:
 				type = member.type
-				type = type if supported_types[type] == 0 else supported_types[type] 
+				type = type if supported_types[type] == 0 else supported_types[type]
 				if i == 0:
 					op = 'if( name == "{0}" ) \n{2}\n{0} = strTo<{1}>(value);\n{3}'.format( member.name, type, '{', '}' )
 				else:
 					op = 'else if( name == "{0}" )\n{2}\n{0} = strTo<{1}>(value);\n{3}'.format( member.name, type, '{', '}' )
 				function.operations.append(op)
 				add_function = True
-		
+
 		override = False
 		if self.behaviors:
 			for cls in self.behaviors:
@@ -107,7 +107,7 @@ class Class(Object):
 							op = "{0}::set(name, value);".format(cls.name)
 						function.operations.append(op)
 						break;
-		
+
 		if add_function or not override:
 			self.functions.append(function)
 
@@ -137,7 +137,7 @@ class Class(Object):
 					op = 'else if( name == "{0}" ) \n{2}\n return toStr({0});\n{3}'.format( member.name, type, '{', '}' )
 				function.operations.append(op)
 				add_function = True
-		
+
 		override = False
 		if self.behaviors:
 			for cls in self.behaviors:
@@ -155,7 +155,7 @@ class Class(Object):
 						break;
 		if not override:
 			function.operations.append('return "";')
-		
+
 		if add_function or not override:
 			self.functions.append(function)
 
@@ -177,28 +177,28 @@ class Class(Object):
 				else:
 					#TODO
 					exit(-1)
-				
+
 			shift += 1
 		self.behaviors = []
 
 		def createFunction(type, name, args, const):
 			function = Function()
-			function.return_type = type;
-			function.name = name;
-			function.args = args;
-			function.is_const = const;
+			function.return_type = type
+			function.name = name
+			function.args = args
+			function.is_const = const
 			self.functions.append( function )
-			return function;
-		
-		function = createFunction("", self.name, [], False).operations = ["_value = {};".format(self.members[0].name)];
-		function = createFunction("", self.name, [["value",cast]], False).operations = ["_value = value;"];
-		function = createFunction("", self.name, [["rhs","const {0}&".format(self.name)]], False).operations = ["_value = rhs._value;"];
-		function = createFunction("", "operator int", [], True).operations = ["return _value;"];
-		function = createFunction("const {0}&".format(self.name), "operator =", [["rhs","const {0}&".format(self.name)]], False).operations = ["_value = rhs._value;", "return *this;"];
-		function = createFunction("bool", "operator ==", [["rhs","const {0}&".format(self.name)]], True).operations = ["return _value == rhs._value;"];
-		function = createFunction("bool", "operator ==", [["rhs","int"]], True).operations = ["return _value == rhs;"];
-		function = createFunction("bool", "operator <", [["rhs","const {0}&".format(self.name)]], True).operations = ["return _value < rhs._value;"];
-		
+			return function
+
+		createFunction("", self.name, [], False).operations = ["_value = {};".format(self.members[0].name)]
+		createFunction("", self.name, [["value",cast]], False).operations = ["_value = value;"]
+		createFunction("", self.name, [["rhs","const {0}&".format(self.name)]], False).operations = ["_value = rhs._value;"]
+		createFunction("", "operator int", [], True).operations = ["return _value;"]
+		createFunction("const {0}&".format(self.name), "operator =", [["rhs","const {0}&".format(self.name)]], False).operations = ["_value = rhs._value;", "return *this;"]
+		createFunction("bool", "operator ==", [["rhs","const {0}&".format(self.name)]], True).operations = ["return _value == rhs._value;"]
+		createFunction("bool", "operator ==", [["rhs","int"]], True).operations = ["return _value == rhs;"]
+		createFunction("bool", "operator <", [["rhs","const {0}&".format(self.name)]], True).operations = ["return _value < rhs._value;"]
+
 		function1 = createFunction("", self.name, [["value", "string"]], False)
 		function2 = createFunction("const {0}&".format(self.name), "operator =", [["value", "string"]], False)
 		function3 = createFunction("", "operator std::string", [], True)
@@ -218,11 +218,27 @@ class Class(Object):
 		function4.operations.append( "return \"\";" )
 
 		value = Object()
-		value.initial_value = self.members[0].name;
-		value.name = "_value";
-		value.type = cast;
+		value.initial_value = self.members[0].name
+		value.name = "_value"
+		value.type = cast
 		self.members.append( value )
 
+	def addGetTypeFunction(self):
+		if not self.is_abstract:
+			member = Object()
+			member.is_static = True
+			member.is_const = True
+			member.type = 'string'
+			member.name = '__type__'
+			member.initial_value = '"{}"'.format(self.name)
+			self.members.append(member)
 
-		
-		
+		function = Function()
+		function.name = 'getType'
+		function.return_type = 'string'
+		function.is_const = True
+		function.operations.append('return {}::__type__;'.format(self.name))
+		self.functions.append(function)
+
+
+

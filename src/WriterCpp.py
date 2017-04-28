@@ -32,7 +32,7 @@ def convertArgumentType(type):
 def convertReturnType(parser, type):
 	if '*' in type:
 		t = re.sub('\*', '', type)
-		if parser._findClass(t):
+		if parser.find_class(t):
 			return 'IntrusivePtr<{}>'.format(t)
 	return type
 
@@ -58,7 +58,7 @@ class WriterCpp(Writer):
 		self.serialize_formats.append({})
 		self.serialize_formats.append({})
 		self.create_serialization_patterns()
-		
+
 		self.tests = []
 		self._currentClass = None
 		Writer.__init__(self, outDirectory, parser)
@@ -77,8 +77,8 @@ class WriterCpp(Writer):
 		types["Observer"] = "Observer<std::function<void()>>"
 		if type in types:
 			return types[type]
-		
-		return type 
+
+		return type
 
 
 	def writeObject(self, object, tabs, flags):
@@ -105,7 +105,7 @@ class WriterCpp(Writer):
 			if object.is_pointer:
 				if not object.is_link:
 					f = "{}*"
-					cls = self.parser._findClass(object.type)
+					cls = self.parser.find_class(object.type)
 					if cls:
 						for b in cls.behaviors:
 							if b.name == "SerializedObject":
@@ -154,7 +154,7 @@ class WriterCpp(Writer):
 		if flags & FLAG_CPP:
 			out = Writer._add(self, out, self._writeClassCpp(cls, tabs))
 		return out
-	
+
 	def _writeClassHpp(self, cls, tabs):
 		out = Writer.writeClass(self, cls, tabs, FLAG_HPP)
 		self._currentClass = cls
@@ -178,11 +178,11 @@ class WriterCpp(Writer):
 		self._currentClass = None
 
 		fstr = ""
-		if len(cls.behaviors) > 0: 
+		if len(cls.behaviors) > 0:
 			fstr += "{0} {1} : {2}"
 		else:
 		    fstr += "{0} {1}"
-		if functions[FLAG_HPP].strip() == "": 
+		if functions[FLAG_HPP].strip() == "":
 			F = ""
 		else:
 		    F = "\n{4}"
@@ -213,7 +213,7 @@ class WriterCpp(Writer):
 		destructor = self._createDestructorFunctionCpp(cls, tabs)
 		includes, f = self._findIncludes(cls,FLAG_CPP)
 		includes = self._findIncludesInFunctionOperation(cls, includes)
-		
+
 		includes = list(set(includes.split('\n')))
 		includes.sort()
 		includes = '\n'.join(includes)
@@ -233,7 +233,7 @@ class WriterCpp(Writer):
 		out[FLAG_CPP] = re.sub("__begin__", "{", out[FLAG_CPP])
 		out[FLAG_CPP] = re.sub("__end__", "}", out[FLAG_CPP])
 		return out
-	
+
 	def _createConstructorFunctionHpp(self, cls, tabs):
 		if cls.type == "enum":
 			return ""
@@ -266,7 +266,7 @@ class WriterCpp(Writer):
 			elif obj.initial_value != None and not obj.is_static and (obj.side == self.parser.side or obj.side=='both'):
 				fstr = "\n{2} {0}({1})"
 				s = ","
-				if initialize == "": 
+				if initialize == "":
 					s = ":"
 				str = fstr.format(obj.name, obj.initial_value, s)
 				initialize += str
@@ -285,7 +285,7 @@ class WriterCpp(Writer):
 		str = re.sub("__begin__", "{", str)
 		str = re.sub("__end__", "}", str)
 		return str
-		
+
 	def writeFunction(self, function, tabs, flags):
 		out = {}
 		if function.side != 'both' and function.side != self.parser.side:
@@ -305,7 +305,7 @@ class WriterCpp(Writer):
 			if function.name == self._currentClass.name or function.name.find("operator ") == 0:
 				modifier = ""
 			is_override = ""
-			if self.parser.isFunctionOverride(self._currentClass, function):
+			if self.parser.is_function_override(self._currentClass, function):
 				is_override = " override"
 			is_const = ""
 			if function.is_const:
@@ -347,7 +347,7 @@ class WriterCpp(Writer):
 					filename = cls.group + "/" + filename
 				self.save( filename, dict[FLAG_HPP] )
 				out = self._add( out, dict )
-		for cls in classes: 
+		for cls in classes:
 			if not cls.is_abstract:
 				dict = self.writeClass(cls, tabs, FLAG_CPP)
 				if len(dict) > 0:
@@ -360,7 +360,7 @@ class WriterCpp(Writer):
 
 	def writeFunctions(self, functions, tabs, flags):
 		out = {FLAG_CPP : "", FLAG_HPP : ""}
-		for function in functions: 
+		for function in functions:
 			out = self._add( out, self.writeFunction(function, tabs, flags) )
 		return out
 
@@ -401,7 +401,7 @@ class WriterCpp(Writer):
 					break
 			if have == False:
 				self.addTests(cls)
-			
+
 		return cls
 
 	def getSerializationObjectArg(self, serialization_type):
@@ -443,12 +443,12 @@ class WriterCpp(Writer):
 	def _buildSerializeOperationEnum(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args, serialization_type):
 		pass
 	def _buildSerializeOperation(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args, serialization_type, is_link = False):
-		index = 0 
+		index = 0
 		if obj_value == None:
 			index = 1
 
 		type = obj_type
-		if self.parser._findClass(type) and self.parser._findClass(type).type == 'enum':
+		if self.parser.find_class(type) and self.parser.find_class(type).type == 'enum':
 			str = self._buildSerializeOperationEnum(obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args, serialization_type)
 		else:
 			if obj_type not in self.simple_types and type != "list" and type != "map":
@@ -483,15 +483,15 @@ class WriterCpp(Writer):
 			str = fstr.format(obj_name, self.convertType(obj_type), obj_value, "{", "}", *template_args)
 
 		return str
-	
+
 	def buildMapSerialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args):
 		pass
-	
-	def buildMapDeserialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args):	
+
+	def buildMapDeserialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args):
 		pass
 
 	def addAccept(self, cls):
-		visitor = self.parser.getVisitorType(cls)
+		visitor = self.parser.get_type_of_visitor(cls)
 		if visitor == cls.name:
 			return
 		function = Function()
@@ -525,7 +525,7 @@ class WriterCpp(Writer):
 		function.is_const = True
 		function.operations.append( "return !(*this == rhs);" )
 		cls.functions.append(function)
-		
+
 	def addTests(self, cls):
 		function = Function()
 		function.name = TEST_FUNCTION_CREATE
@@ -556,7 +556,7 @@ class WriterCpp(Writer):
 			value = str(random_int())
 		if m.type == "bool":
 			value = str(random_bool())
-		if self.parser._findClass(m.type):
+		if self.parser.find_class(m.type):
 			value = "{0}::{1}()".format(m.type,TEST_FUNCTION_CREATE)
 		elif m.type == "string":
 			value = "\"somestringvalue\""
@@ -582,7 +582,7 @@ class WriterCpp(Writer):
 
 		types = {}
 		ftypes = {}
-		
+
 		for t in cls.behaviors:
 			types[t.name] = 1
 		for t in cls.members:
@@ -620,7 +620,7 @@ class WriterCpp(Writer):
 							types[type] = 1
 						if flags == FLAG_HPP and t == type + "*":
 							ftypes[type] = 1
-					
+
 				checkType(t[1])
 				if '<' in t[1] and '>' in t[1]:
 					type = t[1]
@@ -641,7 +641,7 @@ class WriterCpp(Writer):
 			if t == self._currentClass.name: continue
 			if need_include(t):
 				out += fstr.format( self.getIncludeFile(t) )
-		
+
 		for t in ftypes:
 			if t == self._currentClass.name:
 				continue
@@ -660,11 +660,11 @@ class WriterCpp(Writer):
 		if flags == FLAG_CPP:
 			out += '\n#include "Factory.h"'
 			out += '\n#include <algorithm>'
-		
+
 		out = out.split("\n")
 		out.sort()
 		out = "\n".join( out )
-		
+
 		forward_declarations = forward_declarations.split("\n")
 		forward_declarations.sort()
 		forward_declarations = "\n".join( forward_declarations )
@@ -741,7 +741,7 @@ class WriterCpp(Writer):
 		if 'std::map' in file:
 			return '<map>'
 
-		cls = self.parser._findClass(file)
+		cls = self.parser.find_class(file)
 		if cls and cls.name == file and self._currentClass.group != cls.group:
 			back = ""
 			backs = len(self._currentClass.group.split("/")) if self._currentClass.group else 0

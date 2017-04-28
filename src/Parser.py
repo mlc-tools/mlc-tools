@@ -1,28 +1,69 @@
 from Object import Object
 from Class import Class
 from Function import Function
-from  WriterCpp import WriterCpp
-from  WriterJava import WriterJava
 
-def throw_error( msg ):
+
+def throw_error(msg):
 	print msg
 	exit(-1)
 
+
+def is_class(line):
+	return line.strip().find('class') == 0
+
+
+def is_functon(line):
+	return line.strip().find('function') == 0
+
+
+def is_enum(line):
+	return line.strip().find('enum') == 0
+
+
+def find_body(text):
+	text = text.strip()
+	body = ""
+	if text.find("\n") != -1:
+		header = text[0:text.find("\n")]
+	else:
+		header = text
+	if header.find(':external') == -1 and header.find(':abstract') == -1:
+		text = text[text.find("{"):]
+		counter = 0
+		index = 0
+		for ch in text:
+			index += 1
+			if counter == 0 and ch == '{':
+				counter += 1
+				continue
+			if ch == '{':
+				counter += 1
+			if ch == '}':
+				counter -= 1
+			if counter == 0:
+				text = text[index:]
+				break
+			body += ch
+	else:
+		text = text[len(header):].strip()
+	return body, header, text
+
+
 class Parser:
 	def __init__(self, side):
-		self.classes=[]
-		self.objects=[]
-		self.functions=[]
+		self.classes = []
+		self.objects = []
+		self.functions = []
 		self.side = side
 		return
-	
+
 	def parse(self, text):
 		text = text.strip()
 		l = text.find('/*')
 		while l != -1:
 			r = text.find('*/')
 			if r != -1:
-				text = text[:l] + text[r+2:]
+				text = text[:l] + text[r + 2:]
 			l = text.find('/*')
 		lines = text.split('\n')
 		for i, line in enumerate(lines):
@@ -31,147 +72,77 @@ class Parser:
 		text = '\n'.join(lines)
 		while len(text) > 0:
 			text = text.strip()
-			if self._is_class(text):
-				text = self._createClass(text)
-			elif self._is_enum(text):
-				text = self._createEnumClass(text)
-			elif self._is_functon(text):
-				text = self._createFunction(text)
+			if is_class(text):
+				text = self._create_class(text)
+			elif is_enum(text):
+				text = self._create_enum_class(text)
+			elif is_functon(text):
+				text = self._create_function(text)
 			else:
-				text = self._createDeclaration(text)
-	
-	def _is_class(self,line):
-		return line.strip().find("class") == 0
-	def _is_functon(self,line):
-		return line.strip().find("function") == 0
-	def _is_enum(self,line):
-		return line.strip().find("enum") == 0
-
-	def _findBody(self, text):
-		text = text.strip()
-		body = ""
-		if text.find("\n") != -1:
-			header = text[0:text.find("\n")]
-		else:
-			header = text
-		if header.find(":external") == -1 and header.find(":abstract") == -1:
-			text = text[text.find("{"):]
-			counter = 0
-			index = 0
-			for ch in text:
-				index += 1
-				if counter == 0 and ch == '{':
-					counter += 1
-					continue
-				if ch == '{':
-					counter += 1
-				if ch == '}':
-					counter -= 1
-				if counter == 0:
-					text = text[index:]
-					break
-				body += ch
-		else:
-			text = text[len(header):].strip()
-		return body, header, text
-	def _createClass(self, text):
-		body, header, text = self._findBody(text)
-		cls = Class()
-		cls.parse(header)
-		cls.parseBody( Parser(self.side), body )
-		if self._findClass(cls.name):
-			print "Error: duplicate classes [{}]".format(cls.name)
-			exit -1
-		self.classes.append(cls)
-		return text
-
-	def _createEnumClass(self, text):
-		body, header, text = self._findBody(text)
-		cls = Class()
-		cls.type = "enum"
-		cls.parse(header)
-		cls.parseBody( Parser(self.side), body )
-		self.classes.append(cls)
-		return text
-
-	def _createDeclaration(self, text):
-		lines = text.split("\n")
-		line = lines[0]
-		if len(lines) > 1:
-			text = text[text.find("\n")+1:]
-		else:
-			text = ""
-		obj = Object()
-		obj.parse(line)
-		self.objects.append(obj)
-		return text
-
-	def _createFunction(self, text):
-		body, header, text = self._findBody(text)
-		function = Function()
-		function.parse(header)
-		function.parseBody(body)
-		self.functions.append(function)
-		return text
-
-	def _findClass(self, name):
-		for cls in self.classes:
-			if cls.name == name:
-				return cls
-		return None
+				text = self._create_declaration(text)
 
 	def link(self):
 		for cls in self.classes:
-			if cls.type == "class":
-				self.createGetTypeFunction(cls);
+			if cls.type == 'class':
+				cls.addGetTypeFunction()
 
 		for cls in self.classes:
-			if cls.is_visitor and self.getVisitorType(cls) != cls.name:
-				if cls.name.find( "IVisitor" ) != 0:
-					self.createVisitor(cls)
+			if cls.is_visitor and self.get_type_of_visitor(cls) != cls.name:
+				if cls.name.find('IVisitor') != 0:
+					self.create_visitor_class(cls)
 
 		for cls in self.classes:
 			behaviors = []
 			for name in cls.behaviors:
-				c = self._findClass(name)
-				if c == None:
-					throw_error( "cannot find behavior class: {0}<{1}>".format(cls.name, name) );
-				behaviors.append( c )
+				c = self.find_class(name)
+				if c is None:
+					throw_error('cannot find behavior class: {0}<{1}>'.format(cls.name, name))
+				behaviors.append(c)
 			cls.behaviors = behaviors
 
 		for cls in self.classes:
-			cls.is_serialized = self.isSerialised(cls)
-			cls.is_visitor = self.isVisitor(cls)
-			if cls.is_visitor and cls.name != self.getVisitorType(cls):
-				self.appendVisitor(cls)
+			cls.is_serialized = self.is_serialised(cls)
+			cls.is_visitor = self.is_visitor(cls)
+			if cls.is_visitor and cls.name != self.get_type_of_visitor(cls):
+				self._append_visit_function(cls)
 
 		for cls in self.classes:
 			for member in cls.members:
 				args = []
 				for arg in member.template_args:
-					args.append( self.objectType(arg) )
+					args.append(self._get_object_type(arg))
 				member.template_args = args
-		
+
 		for cls in self.classes:
 			cls.onLinked()
 
-	def isSerialised(self, cls):
+	def _create_class(self, text):
+		body, header, text = find_body(text)
+		cls = Class()
+		cls.parse(header)
+		cls.parseBody(Parser(self.side), body)
+		if self.find_class(cls.name):
+			throw_error('Error: duplicate classes [{}]'.format(cls.name))
+		self.classes.append(cls)
+		return text
+
+	def is_serialised(self, cls):
 		if cls.is_serialized:
 			return True
-		is_seriazed = False
+		result = False
 		for c in cls.behaviors:
-			is_seriazed = is_seriazed or self.isSerialised(c)
-		return is_seriazed
+			result = result or self.is_serialised(c)
+		return result
 
-	def isVisitor(self, cls):
+	def is_visitor(self, cls):
 		if cls.is_visitor:
 			return True
-		is_visitor = False
+		result = False
 		for c in cls.behaviors:
-			is_visitor = is_visitor or self.isVisitor(c)
-		return is_visitor
+			result = result or self.is_visitor(c)
+		return result
 
-	def isFunctionOverride(self, cls, function):
+	def is_function_override(self, cls, function):
 		if function.name == 'serialize' or function.name == 'deserialize':
 			return len(cls.behaviors) > 0
 
@@ -181,72 +152,95 @@ class Parser:
 					return True
 		is_override = False
 		for c in cls.behaviors:
-			is_override = is_override or self.isFunctionOverride(c, function)
+			is_override = is_override or self.is_function_override(c, function)
 		return is_override
 
-	def getVisitorType(self, cls):
+	def get_type_of_visitor(self, cls):
 		if not cls.is_visitor:
 			return None
 
-		if cls.name.find( "IVisitor" ) == 0:
+		if cls.name.find('IVisitor') == 0:
 			return cls.name
 
 		for c in cls.behaviors:
 			if not isinstance(c, Class):
-				return "IVisitor" + cls.name
+				return 'IVisitor' + cls.name
 			if c.is_visitor:
-			    return self.getVisitorType(c)
-		return "IVisitor" + cls.name
+				return self.get_type_of_visitor(c)
+		return 'IVisitor' + cls.name
 
-	def createVisitor(self, cls):
-		visitorName = self.getVisitorType(cls)
-		visitor = self._findClass( visitorName )
-		if visitor == None:
+	def _append_visit_function(self, cls):
+		visitor_name = self.get_type_of_visitor(cls)
+		visitor = self.find_class(visitor_name)
+		function = Function()
+		function.name = 'visit'
+		function.return_type = 'void'
+		function.args.append(['ctx', cls.name + '*'])
+		visitor.functions.append(function)
+
+		def comparator(func):
+			return func.name
+		visitor.functions.sort(key=comparator)
+
+	def _get_object_type(self, type_name):
+		cls = self.find_class(type_name)
+		if cls:
+			return cls
+		obj = Object()
+		type_name = obj.find_modifiers(type_name)
+		obj.type = type_name
+		obj.parce_type()
+		obj.name = ""
+		return obj
+
+	def find_class(self, name):
+		for cls in self.classes:
+			if cls.name == name:
+				return cls
+		return None
+
+	def _create_enum_class(self, text):
+		body, header, text = find_body(text)
+		cls = Class()
+		cls.type = 'enum'
+		cls.parse(header)
+		cls.parseBody(Parser(self.side), body)
+		self.classes.append(cls)
+		return text
+
+	def create_visitor_class(self, cls):
+		visitor_name = self.get_type_of_visitor(cls)
+		visitor = self.find_class(visitor_name)
+		if visitor is None:
 			visitor = Class()
-			visitor.name = visitorName
+			visitor.name = visitor_name
 			visitor.group = cls.group
 			visitor.type = "class"
 			visitor.is_abstract = True
 			visitor.is_visitor = True
-			self.classes.append( visitor )
+			self.classes.append(visitor)
 
-	def appendVisitor(self, cls):
-		visitorName = self.getVisitorType(cls)
-		visitor = self._findClass( visitorName )
+	def _create_declaration(self, text):
+		lines = text.split("\n")
+		line = lines[0]
+		if len(lines) > 1:
+			text = text[text.find("\n") + 1:]
+		else:
+			text = ""
+		obj = Object()
+		obj.parse(line)
+		self.objects.append(obj)
+		return text
+
+	def _create_function(self, text):
+		body, header, text = find_body(text)
 		function = Function()
-		function.name = "visit"
-		function.return_type = "void"
-		function.args.append(["ctx", cls.name + "*"])
-		visitor.functions.append(function)
+		function.parse(header)
+		function.parseBody(body)
+		self.functions.append(function)
+		return text
 
-		def sort(function):
-			return function.name
-		visitor.functions.sort(key=sort)
-		
-	def createGetTypeFunction(self, cls):
-		if not cls.is_abstract:
-			member = Object()
-			member.is_static = True
-			member.is_const = True
-			member.type = "string"
-			member.name = "__type__"
-			member.initial_value = "\"{}\"".format(cls.name)
-			cls.members.append(member)
 
-		function = Function()
-		function.name = "getType"
-		function.return_type = "string"
-		function.is_const = True
-		function.operations.append( "return {}::__type__;".format(cls.name) )
-		cls.functions.append(function)
 
-	def objectType(self, typeName):
-		cls = self._findClass(typeName)	
-		if cls:
-			return cls
-		object = Object()
-		typeName = object._findModifiers(typeName)
-		object.type = typeName
-		object._parceType()
-		object.name = ""
-		return object
+
+

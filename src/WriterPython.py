@@ -16,7 +16,7 @@ def convertInitializeValue(value):
 
 class WriterPython(Writer):
 	def __init__(self, outDirectory, parser, generateTests, configsDirectory):
-		
+
 		self.loaded_functions = {}
 		self.load_functions(configsDirectory + 'python_external.mlc_py')
 
@@ -37,7 +37,7 @@ class WriterPython(Writer):
 
 	def getPatternFile(self):
 		pass
-	
+
 	def writeClass(self, cls, tabs, flags):
 		out = ""
 		pattern = self.getPatternFile()
@@ -68,7 +68,7 @@ class WriterPython(Writer):
 			imports += 'from {0} import {0}'.format(cls.behaviors[0].name)
 			init_behavior = '\t\t{0}.__init__(self)'.format(cls.behaviors[0].name)
 		for obj in cls.members:
-			if self.parser._findClass(obj.type):
+			if self.parser.find_class(obj.type):
 				imports += '\nfrom {0} import {0}'.format(obj.type)
 			elif obj.type == 'list' or obj.type == 'map':
 				for arg in obj.template_args:
@@ -78,7 +78,7 @@ class WriterPython(Writer):
 		out = pattern.format(name, initialize_list, functions, imports, init_behavior)
 		self.current_class = None
 		return {flags:out}
-	
+
 	def writeFunction(self, cls, function):
 		out = ""
 		key = cls.name + '.' + function.name
@@ -98,7 +98,7 @@ class WriterPython(Writer):
 			if type == "bool": value = "False"
 			if type == "list": value = "[]"
 			if type == "map": value = "{}"
-		
+
 		out = 'self.{0} = {1}'.format(object.name, convertInitializeValue(value))
 		return out
 
@@ -145,7 +145,7 @@ class WriterPython(Writer):
 		body += '\t\treturn'
 		self.loaded_functions[cls.name + '.' + function.name] = body
 		cls.functions.append(function)
-	
+
 	def getPatternSerializationMap(self):
 		pass
 
@@ -173,8 +173,8 @@ class WriterPython(Writer):
 		return str.format( a0, a1, a2, '{}')
 		#a1 = serialize key /simple, serialized
 		#a2 = serialize value /simple, serialized, pointer,
-	
-	def buildMapDeserialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args):	
+
+	def buildMapDeserialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args):
 		key = obj_template_args[0]
 		value = obj_template_args[1]
 		key_type = key.name if isinstance(key, Class) else key.type
@@ -195,13 +195,13 @@ class WriterPython(Writer):
 		return str.format( a0, a1, a2, '{}')
 
 	def _buildSerializeOperation(self, obj_name, obj_type, obj_value, serialization_type, obj_template_args, obj_is_pointer, owner = 'self.'):
-		index = 0 
+		index = 0
 		if obj_value == None:
 			index = 1
-		
+
 
 		type = obj_type
-		if self.parser._findClass(type) and self.parser._findClass(type).type == 'enum':
+		if self.parser.find_class(type) and self.parser.find_class(type).type == 'enum':
 			type = 'simple'
 		elif obj_type not in self.simple_types and type != "list" and type != "map":
 			if obj_is_pointer:
@@ -263,9 +263,9 @@ class IRequestHandler:
 
 	def visit(self, ctx):
 		if ctx == None: return
-{1}		
+{1}
 
-{2}	
+{2}
 '''
 		line = '\t\telif ctx.__class__ == {0}: self.visit_{1}(ctx)\n'
 		line_import = 'from {0} import {0}\n'
@@ -277,7 +277,7 @@ class IRequestHandler:
 		visits = ''
 		imports = ''
 		for cls in self.parser.classes:
-			if self.parser.isVisitor(cls):
+			if self.parser.is_visitor(cls):
 				func_name = cls.name
 				func_name = func_name[0].lower() + func_name[1:]
 

@@ -30,7 +30,7 @@ def validate_arg_side(side):
 
 def main():
 	configs_directory = get_directory('-i', '../config/')
-	out_directory = get_directory('-0', '../out/')
+	out_directory = get_directory('-o', '../out/')
 	tests = get_bool('-t', False)
 	language = get_arg('-l', 'cpp')
 	format = get_arg('-f', 'xml')

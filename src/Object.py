@@ -26,7 +26,7 @@ class Object:
 	#int value = 1 + 3;
 	def parse(self,line):
 		str = line.strip();
-		str = self._findModifiers(str)
+		str = self.find_modifiers(str)
 		str = re.sub(";", "", str)
 		str = re.sub(", ", ",", str)
 		str = re.sub(" ,", ",", str)
@@ -38,7 +38,7 @@ class Object:
 		args = str.split(" ")
 		for arg in args:
 			arg = arg.strip()
-			if  not arg: 
+			if  not arg:
 				continue
 			if not self.type:
 				self.type = arg
@@ -46,9 +46,9 @@ class Object:
 				self.name = arg
 		if expresion:
 			self.initial_value = expresion
-		self._parceType()
+		self.parce_type()
 
-	def _parceType(self):
+	def parce_type(self):
 		l = self.type.find("<")
 		r = self.type.rindex(">", l) if l != -1 else -1
 		if l > -1 and r > -1:
@@ -65,7 +65,7 @@ class Object:
 		self.type = re.sub("\*", "", self.type)
 		return result
 
-	def _findModifiers(self, str):
+	def find_modifiers(self, str):
 		buffer = str
 		args = ''
 		l = buffer.find('<')
