@@ -3,20 +3,20 @@ from Class import Class
 from Function import Function
 
 
-def throw_error(msg):
+def _throw_error(msg):
 	print msg
 	exit(-1)
 
 
-def is_class(line):
+def _is_class(line):
 	return line.strip().find('class') == 0
 
 
-def is_functon(line):
+def _is_functon(line):
 	return line.strip().find('function') == 0
 
 
-def is_enum(line):
+def _is_enum(line):
 	return line.strip().find('enum') == 0
 
 
@@ -72,11 +72,11 @@ class Parser:
 		text = '\n'.join(lines)
 		while len(text) > 0:
 			text = text.strip()
-			if is_class(text):
+			if _is_class(text):
 				text = self._create_class(text)
-			elif is_enum(text):
+			elif _is_enum(text):
 				text = self._create_enum_class(text)
-			elif is_functon(text):
+			elif _is_functon(text):
 				text = self._create_function(text)
 			else:
 				text = self._create_declaration(text)
@@ -96,7 +96,7 @@ class Parser:
 			for name in cls.behaviors:
 				c = self.find_class(name)
 				if c is None:
-					throw_error('cannot find behavior class: {0}<{1}>'.format(cls.name, name))
+					_throw_error('cannot find behavior class: {0}<{1}>'.format(cls.name, name))
 				behaviors.append(c)
 			cls.behaviors = behaviors
 
@@ -122,7 +122,7 @@ class Parser:
 		cls.parse(header)
 		cls.parseBody(Parser(self.side), body)
 		if self.find_class(cls.name):
-			throw_error('Error: duplicate classes [{}]'.format(cls.name))
+			_throw_error('Error: duplicate classes [{}]'.format(cls.name))
 		self.classes.append(cls)
 		return text
 
