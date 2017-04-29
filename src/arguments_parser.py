@@ -1,5 +1,6 @@
 import sys
 
+
 def get_arg(name, default=''):
 	index = 0
 	for arg in sys.argv:

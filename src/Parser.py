@@ -2,7 +2,6 @@ from Object import Object
 from Class import Class
 from Function import Function
 
-
 def _throw_error(msg):
 	print msg
 	exit(-1)
@@ -55,6 +54,7 @@ class Parser:
 		self.objects = []
 		self.functions = []
 		self.side = side
+		self.copyright_text = ''
 		return
 
 	def parse(self, text):
@@ -84,7 +84,7 @@ class Parser:
 	def link(self):
 		for cls in self.classes:
 			if cls.type == 'class':
-				cls.addGetTypeFunction()
+				cls.add_get_type_function()
 
 		for cls in self.classes:
 			if cls.is_visitor and self.get_type_of_visitor(cls) != cls.name:
@@ -114,13 +114,13 @@ class Parser:
 				member.template_args = args
 
 		for cls in self.classes:
-			cls.onLinked()
+			cls.on_linked()
 
 	def _create_class(self, text):
 		body, header, text = find_body(text)
 		cls = Class()
 		cls.parse(header)
-		cls.parseBody(Parser(self.side), body)
+		cls.parse_body(Parser(self.side), body)
 		if self.find_class(cls.name):
 			_throw_error('Error: duplicate classes [{}]'.format(cls.name))
 		self.classes.append(cls)
@@ -189,7 +189,7 @@ class Parser:
 		obj = Object()
 		type_name = obj.find_modifiers(type_name)
 		obj.type = type_name
-		obj.parce_type()
+		obj.parse_type()
 		obj.name = ""
 		return obj
 
@@ -204,7 +204,7 @@ class Parser:
 		cls = Class()
 		cls.type = 'enum'
 		cls.parse(header)
-		cls.parseBody(Parser(self.side), body)
+		cls.parse_body(Parser(self.side), body)
 		self.classes.append(cls)
 		return text
 
@@ -236,7 +236,7 @@ class Parser:
 		body, header, text = find_body(text)
 		function = Function()
 		function.parse(header)
-		function.parseBody(body)
+		function.parse_body(body)
 		self.functions.append(function)
 		return text
 

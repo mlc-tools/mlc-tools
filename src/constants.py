@@ -1,0 +1,6 @@
+
+
+CLASS_FUNCTION_GET_TYPE = 'get_type'
+CLASS_FUNCTION_GET_PROPERTY = 'get_property'
+CLASS_FUNCTION_SET_PROPERTY = 'set_property'
+

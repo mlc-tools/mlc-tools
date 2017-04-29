@@ -5,6 +5,7 @@ from WriterCppSerializatorJson import WriterCppSerializatorJson
 from WriterCppSerializatorXml import WriterCppSerializatorXml
 from WriterPySerializationJson import WriterPySerializationJson
 from WriterPySerializationXml import WriterPySerializationXml
+from Copyright import Copyright
 
 
 def validate_arg_language(language):
@@ -41,7 +42,8 @@ def main():
 	validate_arg_side(side)
 
 	parser = Parser(side)
-	files = fileutils.getFilesList(configs_directory)
+	parser.copyright_text = Copyright(configs_directory).text
+	files = fileutils.get_files_list(configs_directory)
 	for file in files:
 		if file.find('.mlc') == len(file) - 4:
 			text = open(configs_directory + file).read()
@@ -59,9 +61,10 @@ def main():
 			writer = WriterCppSerializatorXml(out_directory, parser, tests)
 		else:
 			writer = WriterCppSerializatorJson(out_directory, parser, tests)
+	writer.saveConfigFile(format)
 	writer.removeOld()
 
-	print 'mlc(lang: {}, side: {}) finished successful in silent mode'.format(language, side)
+	print 'mlc(lang: {}, side: {}) finished successful'.format(language, side)
 
 
 if __name__ == '__main__':

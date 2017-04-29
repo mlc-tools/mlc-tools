@@ -16,8 +16,8 @@ class WriterCppSerializatorXml(WriterCpp):
 		self.serialize_formats[SERIALIZATION]['simple'].append( 'if({0} != {2}) \n__begin__\n::set(xml,"{0}",{0});\n__end__' )
 		self.serialize_formats[SERIALIZATION]['simple'].append( '::set(xml,"{0}",{0});' )
 		self.serialize_formats[DESERIALIZATION]['simple'] = []
-		self.serialize_formats[DESERIALIZATION]['simple'].append( '''auto attr_{0} = xml.attribute("{0}"); 
-																	if(attr_{0}) 
+		self.serialize_formats[DESERIALIZATION]['simple'].append( '''auto attr_{0} = xml.attribute("{0}");
+																	if(attr_{0})
 																	{3}
 																		{0} = ::get<{1}>(attr_{0});
 																	{4}
@@ -26,21 +26,21 @@ class WriterCppSerializatorXml(WriterCpp):
 																		{0} = {2};
 																	{4}''' )
 		self.serialize_formats[DESERIALIZATION]['simple'].append( '{0} = ::get<{1}>( xml, "{0}" );' )
-		
+
 		self.serialize_formats[SERIALIZATION]['serialized'] = []
 		self.serialize_formats[SERIALIZATION]['serialized'].append( '{0}.serialize(xml.append_child("{0}"));' )
 		self.serialize_formats[SERIALIZATION]['serialized'].append( '{0}.serialize(xml.append_child("{0}"));' )
 		self.serialize_formats[DESERIALIZATION]['serialized'] = []
 		self.serialize_formats[DESERIALIZATION]['serialized'].append( '{0}.deserialize(xml.child("{0}"));' )
 		self.serialize_formats[DESERIALIZATION]['serialized'].append( '{0}.deserialize(xml.child("{0}"));' )
-		
+
 		self.serialize_formats[SERIALIZATION]['pointer'] = []
 		self.serialize_formats[SERIALIZATION]['pointer'].append( 'static_assert(0, "field "{0}" not should have a initialize value");' )
 		self.serialize_formats[SERIALIZATION]['pointer'].append( '''
 																	if({0})
 																	{3}
 																		auto child = xml.append_child("{0}");
-																		child.append_attribute("type").set_value({0}->getType().c_str());
+																		child.append_attribute("type").set_value({0}->get_type().c_str());
 																		{0}->serialize(child);
 																	{4}''' )
 		self.serialize_formats[DESERIALIZATION]['pointer'] = []
@@ -53,7 +53,7 @@ class WriterCppSerializatorXml(WriterCpp):
 																		{0} = Factory::shared().build<{1}>( type );
 																		{0}->deserialize(xml_{0});
 																	{4}''')
-		
+
 		self.serialize_formats[SERIALIZATION]['list<simple>'] = []
 		self.serialize_formats[SERIALIZATION]['list<simple>'].append( 'static_assert(0, "list "{0}" not should have a initialize value");' )
 		self.serialize_formats[SERIALIZATION]['list<simple>'].append( '''auto arr_{0} = xml.append_child("{0}");
@@ -70,13 +70,13 @@ class WriterCppSerializatorXml(WriterCpp):
 																			{0}.emplace_back();
 																			{0}.back() = get<{5}>(child, "value");
 																		{4}''' )
-		
+
 		self.serialize_formats[SERIALIZATION]['serialized_list'] = []
 		self.serialize_formats[SERIALIZATION]['serialized_list'].append( 'static_assert(0, "list "{0}" not should have a initialize value");' )
 		self.serialize_formats[SERIALIZATION]['serialized_list'].append( '''auto arr_{0} = xml.append_child("{0}");
 																		 for( auto& t : {0} )
 																		 {3}
-																		 	t.serialize(arr_{0}.append_child(t.getType().c_str())); 
+																		 	t.serialize(arr_{0}.append_child(t.get_type().c_str()));
 																		 {4}''' )
 		self.serialize_formats[DESERIALIZATION]['serialized_list'] = []
 		self.serialize_formats[DESERIALIZATION]['serialized_list'].append( 'static_assert(0, "list "{0}" not should have a initialize value");' )
@@ -92,7 +92,7 @@ class WriterCppSerializatorXml(WriterCpp):
 		self.serialize_formats[SERIALIZATION]['pointer_list'].append( '''auto arr_{0} = xml.append_child("{0}");
 																		 for( auto& t : {0} )
 																		 {3}
-																			t->serialize(arr_{0}.append_child(t->getType().c_str())); 
+																			t->serialize(arr_{0}.append_child(t->get_type().c_str()));
 																		 {4}''' )
 		self.serialize_formats[DESERIALIZATION]['pointer_list'] = []
 		self.serialize_formats[DESERIALIZATION]['pointer_list'].append( 'static_assert(0, "list "{0}" not should have a initialize value");' )
@@ -149,8 +149,8 @@ class WriterCppSerializatorXml(WriterCpp):
 		for( auto pair : {0} )
 		__begin__
 			auto xml = map_{0}.append_child("pair");
-			auto& key = pair.first; 
-			auto& value = pair.second; 
+			auto& key = pair.first;
+			auto& value = pair.second;
 			{1}
 			{2}
 		__end__
@@ -163,7 +163,7 @@ class WriterCppSerializatorXml(WriterCpp):
 		#a1 = serialize key /simple, serialized
 		#a2 = serialize value /simple, serialized, pointer,
 
-	def buildMapDeserialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args):	
+	def buildMapDeserialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args):
 		key = obj_template_args[0]
 		value = obj_template_args[1]
 		key_type = key.name if isinstance(key, Class) else key.type
@@ -174,7 +174,7 @@ class WriterCppSerializatorXml(WriterCpp):
 		__begin__
 			auto xml = child;
 			{3}{1}
-			{4} value; 
+			{4} value;
 			{2}
 			{0}[key] = value;
 		__end__
@@ -185,7 +185,7 @@ class WriterCppSerializatorXml(WriterCpp):
 			key_str = 'auto key = make_intrusive<{}>();'.format(key_type)
 		else:
 			key_str = '{} key;'.format(key_type)
-		
+
 		_value_is_pointer = value.is_pointer if isinstance(value, Object) else false
 		a0 = obj_name
 		a1 = self._buildSerializeOperation("key", key_type, None, key.is_pointer, [], DESERIALIZATION, key.is_link)

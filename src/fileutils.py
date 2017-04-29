@@ -3,77 +3,86 @@ import hashlib
 from os.path import isfile, join, isdir
 import tempfile
 
-def _getFilesList(path, prefix):
+
+def _get_files_list(path, prefix):
 	try:
 		list = os.listdir(path)
 		listFiles = []
 		for i in list:
 			if isdir(path + i):
-				result = _getFilesList( path + i + "/", prefix + i + "/" )
+				result = _get_files_list(path + i + '/', prefix + i + '/')
 				for r in result:
 					listFiles.append(r)
 			if isfile(path + i):
-				listFiles.append( prefix + i )
-		return listFiles;
-	except:
+				listFiles.append(prefix + i)
+		return listFiles
+	except IOError:
 		return []
 
-def getFilesList(path):
-	return _getFilesList(path, "");
 
-def createDirForFile(file):
-	dir = file;
+def get_files_list(path):
+	return _get_files_list(path, '')
+
+
+def create_dir_for_file(file):
+	dir = file
 	k = dir.rindex('/')
 	dir = dir[:k]
 	if not os.path.exists(dir):
 		os.makedirs(dir)
 
+
 def remove(file):
 	if os.path.exists(file):
 		os.remove(file)
 
-def loadDictFromFile(path):
-	dict = {}
-	try:
-		file = open(path,"r")
-		for line in file:
-			str = line.strip();
-			args = str.split(" ")
-			if len(args) == 2:
-				key = str.split(" ")[0]
-				value = str.split(" ")[1]
-				dict[key] = value
-		return dict
-	except:
-		return dict
-	return dict
 
-def saveDictToFile(path, dict):
+def load_dict(path):
+	dictionary = {}
 	try:
-		_dict = loadDictFromFile(path)
+		file = open(path)
+		for line in file:
+			str = line.strip()
+			args = str.split(' ')
+			if len(args) == 2:
+				key = str.split(' ')[0]
+				value = str.split(' ')[1]
+				dictionary[key] = value
+		return dictionary
+	except IOError:
+		return dictionary
+
+
+def save_dict(path, dict):
+	try:
+		dictionary = load_dict(path)
 		for key in dict:
-			_dict[key] = dict[key]
-		file = open(path,"w")
-		for key in _dict:
-			value = _dict[key]
-			str = key + " " + _dict[key] + "\n"
+			dictionary[key] = dict[key]
+		file = open(path, 'w')
+		for key in dictionary:
+			value = dictionary[key]
+			str = key + ' ' + dictionary[key] + "\n"
 			file.write(str)
-	except:
+	except IOError:
 		return False
 	return True
 
-def write( path, buffer ):
+
+def write(path, buffer):
 	rewrite = True
 	if os.path.exists(path):
-		rewrite = open(path).read() != buffer			
+		rewrite = open(path).read() != buffer
 	if rewrite:
-		createDirForFile( path )
-		open(path,"w").write(buffer)	
+		create_dir_for_file(path)
+		open(path, 'w').write(buffer)
 	return rewrite
-			
-cacheFile = tempfile.gettempdir() + "/bin/cache.tmp"
+
+
+_cache_file = tempfile.gettempdir() + '/bin/cache.tmp'
+
+
 def isFileChanges(file):
-	dict = loadDictFromFile(cacheFile)
+	dict = load_dict(_cache_file)
 	if file in dict:
 		cache = dict[file]
 
@@ -82,8 +91,9 @@ def isFileChanges(file):
 		return not cache == str(m.hexdigest())
 	return True
 
+
 def saveMd5ToCache(file):
-	createDirForFile(cacheFile)
+	create_dir_for_file(_cache_file)
 	m = hashlib.md5()
 	m.update(open(file).read())
-	saveDictToFile( cacheFile, {file:m.hexdigest()} )
+	save_dict(_cache_file, {file: m.hexdigest()})
