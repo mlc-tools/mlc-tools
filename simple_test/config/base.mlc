@@ -1,9 +1,14 @@
-class model/ModelCity<SerializedObject>
+class model/ModelBase<SerializedObject>:set_function:abstract
+{
+}
+
+class model/ModelCity<ModelBase>:set_function
 {
 	int id
 	int owner
 
 	function int some_function(string resource)
 	{
+	    return 0;
 	}
 }

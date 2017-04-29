@@ -1,6 +1,6 @@
 /******************************************************************************/
 /*
- * Copyright 2014-2015 Vladimir Tolmachev
+ * Copyright 2014-2017 Vladimir Tolmachev
  *
  * Author: Vladimir Tolmachev
  * Project: ml

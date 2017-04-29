@@ -1,3 +1,14 @@
+/******************************************************************************/
+/*
+* Copyright 2014-2017 Vladimir Tolmachev
+*
+* Author: Vladimir Tolmachev
+* Project: ml
+* e-mail: tolm_vl@hotmail.com
+* If you received the code is not the author, please contact me
+*/
+/******************************************************************************/
+
 #include "converters.h"
 #include <sstream>
 #include <stdio.h>
@@ -12,7 +23,7 @@ std::string intToStr(int value)
 	static char buffer[32];
 	buffer[0] = 0x0;
 	sprintf(buffer, "%d", value);
-	
+
 	return buffer;
 };
 

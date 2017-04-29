@@ -1,8 +1,23 @@
+/******************************************************************************/
+/*
+* Copyright 2014-2017 Vladimir Tolmachev
+*
+* Author: Vladimir Tolmachev
+* Project: ml
+* e-mail: tolm_vl@hotmail.com
+* If you received the code is not the author, please contact me
+*/
+/******************************************************************************/
+
 #include "core/CommandBase.h"
 #include "Factory.h"
 #include <sstream>
 #include "ml/Generics.h"
+#include "config.h"
 
+
+
+#if MG_SERIALIZE_FORMAT == MG_XML
 
 intrusive_ptr<mg::CommandBase> createCommand(const pugi::xml_node& xml)
 {
@@ -21,10 +36,10 @@ intrusive_ptr<mg::CommandBase> createCommand(const std::string& payload)
 	return createCommand(root);
 }
 
-std::string getSerializedString(const mg::SerializedObject* object) 
+std::string getSerializedString(const mg::SerializedObject* object)
 {
 	pugi::xml_document doc;
-	auto root = doc.append_child(object->getType().c_str());
+	auto root = doc.append_child(object->get_type().c_str());
 	object->serialize(root);
 
 	std::stringstream stream;
@@ -33,6 +48,39 @@ std::string getSerializedString(const mg::SerializedObject* object)
 	doc.save(writer);
 	return stream.str();
 }
+
+#elif MG_SERIALIZE_FORMAT == MG_JSON
+
+intrusive_ptr<mg::CommandBase> createCommand(const Json::Value& json)
+{
+	auto type = json.getMemberNames()[0];
+	auto command = Factory::shared().build<mg::CommandBase>(type);
+	if (command != nullptr)
+		command->deserialize(json[type]);
+	return command;
+}
+
+intrusive_ptr<mg::CommandBase> createCommand(const std::string& payload)
+{
+	Json::Value json;
+	Json::Reader reader;
+	reader.parse(payload, json);
+	return createCommand(json);
+}
+
+std::string getSerializedString(const mg::SerializedObject* object)
+{
+	Json::Value json;
+	object->serialize(json[object->get_type()]);
+
+	Json::StreamWriterBuilder wbuilder;
+	wbuilder["indentation"] = "";
+	auto string = Json::writeString(wbuilder, json);
+
+	return string;
+}
+
+#endif
 
 namespace mg
 {

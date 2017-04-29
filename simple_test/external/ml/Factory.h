@@ -1,3 +1,14 @@
+/******************************************************************************/
+/*
+* Copyright 2014-2017 Vladimir Tolmachev
+*
+* Author: Vladimir Tolmachev
+* Project: ml
+* e-mail: tolm_vl@hotmail.com
+* If you received the code is not the author, please contact me
+*/
+/******************************************************************************/
+
 #ifndef __CommandFactory_h__
 #define __CommandFactory_h__
 #include <string>
@@ -7,7 +18,7 @@
 #include "SerializedObject.h"
 #include <assert.h>
 
-#define REGISTRATION_OBJECT( T ) class registrator__##T {public: registrator__##T() { Factory::shared().registrationCommand<T>( T::__type__ ); } }___registrator__##T; 
+#define REGISTRATION_OBJECT( T ) class registrator__##T {public: registrator__##T() { Factory::shared().registrationCommand<T>( T::__type__ ); } }___registrator__##T;
 
 void throw_error( const std::string& message );
 
@@ -24,7 +35,7 @@ class Factory
 	template<class T>
 	class Object : public IObject
 	{
-	public: 
+	public:
 		virtual IntrusivePtr<mg::SerializedObject> build()
 		{
 			return dynamic_pointer_cast_intrusive<mg::SerializedObject>( make_intrusive<T>() );
