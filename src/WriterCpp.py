@@ -1,8 +1,6 @@
 import re
-import random
-import fileutils
 from Writer import Writer
-from Object import Object
+from Writer import add_dict
 from Class import Class
 from Function import Function
 
@@ -10,744 +8,693 @@ FLAG_HPP = 2
 FLAG_CPP = 4
 SERIALIZATION = 0
 DESERIALIZATION = 1
-TEST_FUNCTION_CREATE = "__create_instance__"
 
 
-def random_int():
-    max = 0;
-    return random.randint(-max, max)
-def random_bool():
-    max = 0;
-    return random.randint(0, max)
-def random_float():
-    max = 0;
-    return random.randint(-max, max)
-
-def convertArgumentType(type):
-    if type == "string" or type == "std::string":
-        return "const std::string&"
-    return type
+def _convert_argument_type(type_):
+    if type_ == 'string' or type_ == 'std::string':
+        return 'const std::string&'
+    return type_
 
 
-def convertReturnType(parser, type):
-    if '*' in type:
-        t = re.sub('\*', '', type)
+def convert_return_type(parser, type_):
+    if '*' in type_:
+        t = re.sub('\*', '', type_)
         if parser.find_class(t):
             return 'IntrusivePtr<{}>'.format(t)
-    return type
+    return type_
 
-def autoReplaces(text):
-    text = re.sub( "math.max", "std::max", text)
-    text = re.sub( "math.min", "std::min", text)
-    text = re.sub( "self.", "this->", text)
-    #text = re.sub( ".append", ".push_back", text)
-    text = re.sub( ".push_back_node", ".append_node", text)
-    text = re.sub( ".push_back_array", ".append_array", text)
-    return text
+
+def convert_type(type_):
+    types = dict()
+    types['list'] = 'std::vector'
+    types['map'] = 'std::map'
+    types['set'] = 'std::set'
+    types['string'] = 'std::string'
+    types['Observer'] = 'Observer<std::function<void()>>'
+    if type_ in types:
+        return types[type_]
+    return type_
+
+
+def get_include_file(parser, class_, filename):
+    types = dict()
+    types['list'] = '<vector>'
+    types['map'] = '<map>'
+    types['set'] = '<set>'
+    types['string'] = '<string>'
+    types['pugi::xml_node'] = '"pugixml/pugixml.hpp"'
+    types['Json::Value'] = '"jsoncpp/json.h"'
+    types['pugi::xml_node'] = '"pugixml/pugixml.hpp"'
+    types['Observer'] = '"Observer.h"'
+    types['std::vector<int>'] = '<vector>'
+    types['std::vector<intrusive_ptr<CommandBase>>'] = '<vector>'
+    if filename in types:
+        return types[filename]
+    if 'std::map' in filename:
+        return '<map>'
+
+    included_class = parser.find_class(filename)
+    if included_class and included_class.name == filename and class_.group != included_class.group:
+        back = ''
+        backs = len(class_.group.split('/')) if class_.group else 0
+        for i in range(backs):
+            back += '../'
+        f = '"{2}{1}/{0}.h"' if included_class.group else '"{2}{0}.h"'
+        return f.format(included_class.name, included_class.group, back)
+    return '"{0}.h"'.format(filename)
+
+
+def _create_constructor_function_hpp(class_):
+    if class_.type == 'enum':
+        return ''
+    pattern = class_.name + '()'
+    if class_.is_abstract:
+        pattern += '{}'
+    pattern += ';\n'
+    return pattern
+
+
+def _create_destructor_function_hpp(class_):
+    if class_.type == 'enum':
+        return ''
+    pattern = 'virtual ~{0}()'.format(class_.name)
+    if class_.is_abstract:
+        pattern += '{}'
+    pattern += ';\n'
+    return pattern
+
+
+def _create_constructor_function_cpp(parser, class_):
+    if class_.type == 'enum':
+        return ''
+    initialize = ''
+    initialize2 = ''
+    for obj in class_.members:
+        if obj.is_key:
+            str1 = '\nstatic {0} {1}_key = 0;'.format(obj.type, obj.name)
+            str2 = '\n{0} = ++{0}_key;'.format(obj.name)
+            initialize2 += str1 + str2
+        elif obj.initial_value and not obj.is_static and (obj.side == parser.side or obj.side == 'both'):
+            pattern = '\n{2} {0}({1})'
+            s = ','
+            if initialize == '':
+                s = ':'
+            string = pattern.format(obj.name, obj.initial_value, s)
+            initialize += string
+    
+    pattern = '{0}::{0}(){1}\n__begin__{2}\n\n__end__\n'
+    string = pattern.format(class_.name, initialize, initialize2)
+    string = re.sub('__begin__', '{', string)
+    string = re.sub('__end__', '}', string)
+    return string
+
+
+def _create_destructor_function_cpp(class_):
+    if class_.type == 'enum':
+        return ''
+    pattern = '{0}::~{0}()\n__begin__\n__end__\n'
+    string = pattern.format(class_.name)
+    string = re.sub('__begin__', '{', string)
+    string = re.sub('__end__', '}', string)
+    return string
+
+
+def _get_namespace():
+    return 'mg'
+
 
 class WriterCpp(Writer):
-    def __init__(self, outDirectory, parser, createTests):
-        #{0} - field name
-        #{1} - field type
-        #{2} - field initialize value
-        #{3} - {
-        #{4} - }
-        #{5}, {6}, ... - arguments of field type (list<int>)
-        self.createTests = createTests
-        self.serialize_formats = []
+    def __init__(self, out_directory, parser):
+        self.simple_types = list()
+        self.serialize_formats = list()
         self.serialize_formats.append({})
         self.serialize_formats.append({})
         self.create_serialization_patterns()
 
-        self.tests = []
         self._currentClass = None
-        Writer.__init__(self, outDirectory, parser)
-        if self.createTests:
-            self._createTests()
+        Writer.__init__(self, out_directory, parser)
         return
+    
     def create_serialization_patterns(self):
         pass
 
-    def convertType(self, type):
-        types = {}
-        types["list"] = "std::vector"
-        types["map"] = "std::map"
-        types["set"] = "std::set"
-        types["string"] = "std::string"
-        types["Observer"] = "Observer<std::function<void()>>"
-        if type in types:
-            return types[type]
-
-        return type
-
-
-    def writeObject(self, object, tabs, flags):
-        out = Writer.writeObject(self, object, tabs, flags)
-        if object.side != 'both' and object.side != self.parser.side:
+    def write_object(self, object_, flags):
+        out = Writer.write_object(self, object_, flags)
+        if object_.side != 'both' and object_.side != self.parser.side:
             return out
-
+        
         if flags == FLAG_HPP:
-            value = ""
-            args = []
-            for arg in object.template_args:
-                type = arg.name if isinstance(arg, Class) else arg.type
-                type = self.convertType(type)
+            args = list()
+            for arg in object_.template_args:
+                type_ = arg.name if isinstance(arg, Class) else arg.type
+                type_ = convert_type(type_)
                 if arg.is_link:
-                    type = 'const {}* '.format(type)
+                    type_ = 'const {}* '.format(type_)
                 else:
                     if arg.is_pointer:
-                        type = "IntrusivePtr<{}>".format(type)
+                        type_ = 'IntrusivePtr<{}>'.format(type_)
                     if arg.is_const:
-                        type = 'const ' + type
-                args.append(type)
-            args = ", ".join(args)
-            type = object.type
-            if object.is_pointer:
-                if not object.is_link:
-                    f = "{}*"
-                    cls = self.parser.find_class(object.type)
-                    if cls:
-                        for b in cls.behaviors:
-                            if b.name == "SerializedObject":
-                                f = "IntrusivePtr<{}>"
+                        type_ = 'const ' + type_
+                args.append(type_)
+            args = ', '.join(args)
+            type_ = object_.type
+            if object_.is_pointer:
+                if not object_.is_link:
+                    f = '{}*'
+                    class_ = self.parser.find_class(object_.type)
+                    if class_:
+                        for b in class_.behaviors:
+                            if b.name == 'SerializedObject':
+                                f = 'IntrusivePtr<{}>'
                 else:
-                    f = "{}*"
-
-                type = f.format(self.convertType(type))
-            modifiers = ""
-            if object.is_static:
-                modifiers += "static "
-            if object.is_const:
-                modifiers += "const ";
-            if len(object.template_args) > 0:
-                fstr = "{4}{3}{0}<{2}> {1}"
+                    f = '{}*'
+                
+                type_ = f.format(convert_type(type_))
+            modifiers = ''
+            if object_.is_static:
+                modifiers += 'static '
+            if object_.is_const:
+                modifiers += 'const '
+            if len(object_.template_args) > 0:
+                pattern = '{3}{0}<{2}> {1};\n'
             else:
-                fstr = "{4}{3}{0} {1}"
-            fstr += ";\n"
-            out[flags] += fstr.format(self.convertType(type), object.name, args, modifiers, self.tabs(tabs))
+                pattern = '{3}{0} {1};\n'
+            out[flags] += pattern.format(convert_type(type_), object_.name, args, modifiers)
         if flags == FLAG_CPP:
-            if object.is_static:
-                if object.initial_value == None:
-                    print "static object {} of class {} have not initial_value".format(object.name, self._currentClass.name)
+            if object_.is_static:
+                if object_.initial_value is None:
+                    print 'static object_ {} of class {} have not initial_value'.\
+                        format(object_.name, self._currentClass.name)
                     exit(-1)
-                if len(object.template_args) > 0:
-                    #TODO:
-                    print "#TODO: static object {} of class {} have template arguments".format(object.name, self._currentClass.name)
+                if len(object_.template_args) > 0:
+                    print '#TODO: static object_ {} of class {} have template arguments'.\
+                        format(object_.name, self._currentClass.name)
                     exit(-1)
-                value = ""
-                fstr = "{4}{0} {2}::{1} = {3}"
-                fstr += ";\n"
-                modifier = ""
-                if object.is_const:
-                    modifier = "const "
-                out[flags] += fstr.format(self.convertType(object.type), object.name, self._currentClass.name, object.initial_value, modifier)
+                pattern = '{4}{0} {2}::{1} = {3}'
+                pattern += ';\n'
+                modifier = ''
+                if object_.is_const:
+                    modifier = 'const '
+                out[flags] += pattern.format(
+                    convert_type(object_.type), object_.name,
+                    self._currentClass.name, object_.initial_value, modifier)
         return out
-
-    def writeClass(self, cls, tabs, flags):
-        out = {}
-        if cls.side != 'both' and cls.side != self.parser.side:
+    
+    def write_class(self, class_, flags):
+        out = dict()
+        if class_.side != 'both' and class_.side != self.parser.side:
             return out
-        cls = self.addMethods(cls);
-
+        class_ = self.add_methods(class_)
+        
         if flags & FLAG_HPP:
-            out = Writer._add(self, out, self._writeClassHpp(cls, tabs))
+            out = add_dict(out, self._write_class_hpp(class_))
         if flags & FLAG_CPP:
-            out = Writer._add(self, out, self._writeClassCpp(cls, tabs))
+            out = add_dict(out, self._write_class_cpp(class_))
         return out
-
-    def _writeClassHpp(self, cls, tabs):
-        out = Writer.writeClass(self, cls, tabs, FLAG_HPP)
-        self._currentClass = cls
-        behaviors = []
-        for c in cls.behaviors:
-            behaviors.append("public " + c.name)
-        behaviors = ", ".join(behaviors)
-        objects = self.writeObjects(cls.members, 1, FLAG_HPP)
-        functions = self.writeFunctions(cls.functions, 1, FLAG_HPP)
-        constructor = self._createConstructorFunctionHpp(cls, 1)
-        destructor = self._createDestructorFunctionHpp(cls, tabs)
-        includes, forward_declarations = self._findIncludes(cls,FLAG_HPP)
-
+    
+    def _write_class_hpp(self, class_):
+        out = Writer.write_class(self, class_, FLAG_HPP)
+        self._currentClass = class_
+        behaviors = list()
+        for c in class_.behaviors:
+            behaviors.append('public ' + c.name)
+        behaviors = ', '.join(behaviors)
+        objects = self.write_objects(class_.members, FLAG_HPP)
+        functions = self.write_functions(class_.functions, FLAG_HPP)
+        constructor = _create_constructor_function_hpp(class_)
+        destructor = _create_destructor_function_hpp(class_)
+        includes, forward_declarations = self._find_includes(class_, FLAG_HPP)
+        
         includes = list(set(includes.split('\n')))
         includes.sort()
         includes = '\n'.join(includes)
         forward_declarations = list(set(forward_declarations.split('\n')))
         forward_declarations.sort()
         forward_declarations = '\n'.join(forward_declarations)
-
+        
         self._currentClass = None
-
-        fstr = ""
-        if len(cls.behaviors) > 0:
-            fstr += "{0} {1} : {2}"
+        
+        pattern = ''
+        if len(class_.behaviors) > 0:
+            pattern += '{0} {1} : {2}'
         else:
-            fstr += "{0} {1}"
-        if functions[FLAG_HPP].strip() == "":
-            F = ""
+            pattern += '{0} {1}'
+        if functions[FLAG_HPP].strip() == '':
+            f = ''
         else:
-            F = "\n{4}"
-        if objects[FLAG_HPP].strip() == "":
-            O = ""
+            f = '\n{4}'
+        if objects[FLAG_HPP].strip() == '':
+            o = ''
         else:
-            O = "\npublic:{3}"
-
-        if cls.type != "enum":
-            fstr += "\n__begin__\npublic:\n{5}{6}" + F + O + "__end__;\n\n"
+            o = '\npublic:{3}'
+        
+        if class_.type != 'enum':
+            pattern += '\n__begin__\npublic:\n{5}{6}' + f + o + '__end__;\n\n'
         else:
-            fstr += "\n__begin__{5}" + O + F + "__end__;\n\n"
-
-        fstr = "namespace {0}\n__begin__{2}\n\n{1}__end__//namespace {0}".format( self._getNamespace(cls), fstr, forward_declarations )
-        fstr = "#ifndef __mg_{0}_h__\n#define __mg_{0}_h__\n{2}\n\n{1}\n\n#endif //#ifndef __{0}_h__".format( cls.name, fstr, includes )
-
-        out[FLAG_HPP] += fstr.format( "class", cls.name, behaviors, objects[FLAG_HPP], functions[FLAG_HPP], constructor, destructor);
-        out[FLAG_HPP] = re.sub("__begin__", "{", out[FLAG_HPP])
-        out[FLAG_HPP] = re.sub("__end__", "}", out[FLAG_HPP])
+            pattern += '\n__begin__{5}' + o + f + '__end__;\n\n'
+        
+        pattern = 'namespace {0}\n__begin__{2}\n\n{1}__end__//namespace {0}'.\
+            format(_get_namespace(), pattern, forward_declarations)
+        pattern = '#ifndef __mg_{0}_h__\n#define __mg_{0}_h__\n{2}\n\n{1}\n\n#endif //#ifndef __{0}_h__'.\
+            format(class_.name, pattern, includes)
+        
+        out[FLAG_HPP] += pattern.format('class', class_.name, behaviors, objects[FLAG_HPP],
+                                        functions[FLAG_HPP], constructor, destructor)
+        out[FLAG_HPP] = re.sub('__begin__', '{', out[FLAG_HPP])
+        out[FLAG_HPP] = re.sub('__end__', '}', out[FLAG_HPP])
         return out
-
-    def _writeClassCpp(self, cls, tabs):
-        out = Writer.writeClass(self, cls, tabs, FLAG_CPP)
-        self._currentClass = cls
-        objects = self.writeObjects(cls.members, 1, FLAG_CPP)
-        functions = self.writeFunctions(cls.functions, 0, FLAG_CPP)
-        constructor = self._createConstructorFunctionCpp(cls, tabs)
-        destructor = self._createDestructorFunctionCpp(cls, tabs)
-        includes, f = self._findIncludes(cls,FLAG_CPP)
-        includes = self._findIncludesInFunctionOperation(cls, includes)
-
+    
+    def _write_class_cpp(self, class_):
+        out = Writer.write_class(self, class_, FLAG_CPP)
+        self._currentClass = class_
+        objects = self.write_objects(class_.members, FLAG_CPP)
+        functions = self.write_functions(class_.functions, FLAG_CPP)
+        constructor = _create_constructor_function_cpp(self.parser, class_)
+        destructor = _create_destructor_function_cpp(class_)
+        includes, f = self._find_includes(class_, FLAG_CPP)
+        includes = self._find_includes_in_function_operation(class_, includes)
+        
         includes = list(set(includes.split('\n')))
         includes.sort()
         includes = '\n'.join(includes)
-
+        
         self._currentClass = None
-        if cls.type == "class":
-            fstr = "#include \"{0}.h\"\n#include \"Generics.h\"{4}\n\nnamespace {3}\n__begin__{5}{6}\n{2}\n{7}\n{1}__end__"
+        if class_.type == 'class':
+            pattern = '''#include "{0}.h"
+                         #include "Generics.h"{4}
+                         
+                         namespace {3}
+                         __begin__{5}{6}
+                         {2}
+                         {7}
+                         {1}__end__'''
         else:
-            fstr = "#include \"{0}.h\"\n#include \"Generics.h\"{4}\n\nnamespace {3}\n__begin__\n{5}\n{2}{7}\n{1}__end__"
-        registration = "REGISTRATION_OBJECT( {0} );\n".format(cls.name)
-        for func in cls.functions:
-            if func.is_abstract: registration = ""
-        if not cls.is_serialized:
-            registration = ""
-        if cls.is_abstract: registration = ""
-        out[FLAG_CPP] += fstr.format( cls.name, functions[FLAG_CPP], constructor, self._getNamespace(cls), includes, objects[FLAG_CPP], registration, destructor )
-        out[FLAG_CPP] = re.sub("__begin__", "{", out[FLAG_CPP])
-        out[FLAG_CPP] = re.sub("__end__", "}", out[FLAG_CPP])
+            pattern = '''#include "{0}.h"
+                         #include "Generics.h"{4}
+                         
+                         namespace {3}
+                         __begin__
+                         {5}
+                         {2}{7}
+                         {1}__end__'''
+        registration = 'REGISTRATION_OBJECT({0});\n'.format(class_.name)
+        for func in class_.functions:
+            if func.is_abstract:
+                registration = ''
+                break
+        if not class_.is_serialized:
+            registration = ''
+        if class_.is_abstract:
+            registration = ''
+        out[FLAG_CPP] += pattern.format(class_.name, functions[FLAG_CPP], constructor, _get_namespace(),
+                                        includes, objects[FLAG_CPP], registration, destructor)
+        out[FLAG_CPP] = re.sub('__begin__', '{', out[FLAG_CPP])
+        out[FLAG_CPP] = re.sub('__end__', '}', out[FLAG_CPP])
         return out
 
-    def _createConstructorFunctionHpp(self, cls, tabs):
-        if cls.type == "enum":
-            return ""
-        fstr = "{1}{0}()"
-        fstr = fstr.format( cls.name, self.tabs(tabs) )
-        if cls.is_abstract:
-            fstr += "{}"
-        fstr += ";\n"
-        return fstr
-    def _createDestructorFunctionHpp(self, cls, tabs):
-        if cls.type == "enum":
-            return ""
-        fstr = "{1}virtual ~{0}()"
-        fstr = fstr.format( cls.name, self.tabs(tabs) )
-        if cls.is_abstract:
-            fstr += "{}"
-        fstr += ";\n"
-        return fstr
-
-    def _createConstructorFunctionCpp(self, cls, tabs):
-        if cls.type == "enum":
-            return ""
-        initialize = ""
-        initialize2 = ""
-        for obj in cls.members:
-            if obj.is_key:
-                str1 = "\nstatic {0} {1}_key = 0;".format(obj.type, obj.name)
-                str2 = "\n{0} = ++{0}_key;".format(obj.name)
-                initialize2 += str1 + str2
-            elif obj.initial_value != None and not obj.is_static and (obj.side == self.parser.side or obj.side=='both'):
-                fstr = "\n{2} {0}({1})"
-                s = ","
-                if initialize == "":
-                    s = ":"
-                str = fstr.format(obj.name, obj.initial_value, s)
-                initialize += str
-
-        fstr = "{0}::{0}(){1}\n__begin__{2}\n{3}\n__end__\n"
-        str = fstr.format( cls.name, initialize, initialize2, self.tabs(tabs) )
-        str = re.sub("__begin__", "{", str)
-        str = re.sub("__end__", "}", str)
-        return str
-
-    def _createDestructorFunctionCpp(self, cls, tabs):
-        if cls.type == "enum":
-            return ""
-        fstr = "{0}::~{0}()\n__begin__\n__end__\n"
-        str = fstr.format( cls.name )
-        str = re.sub("__begin__", "{", str)
-        str = re.sub("__end__", "}", str)
-        return str
-
-    def writeFunction(self, function, tabs, flags):
-        out = {}
+    def write_function(self, function, flags):
+        out = dict()
         if function.side != 'both' and function.side != self.parser.side:
             return out
         if flags & FLAG_HPP:
             if not self._currentClass.is_abstract and not function.is_abstract:
-                fstr = "{3}{6}{0} {1}({2}){4}{5};\n"
+                fstr = '{5}{0} {1}({2}){3}{4};\n'
             else:
-                fstr = "{3}{6}{0} {1}({2}){4}{5} = 0;\n"
-            args = []
+                fstr = '{5}{0} {1}({2}){3}{4} = 0;\n'
+            args = list()
             for arg in function.args:
-                args.append(convertArgumentType(self.convertType(arg[1])) + " " + arg[0])
-            args = ", ".join(args)
-            modifier = "virtual "
+                args.append(_convert_argument_type(convert_type(arg[1])) + ' ' + arg[0])
+            args = ', '.join(args)
+            modifier = 'virtual '
             if function.is_static:
-                modifier = "static "
-            if function.name == self._currentClass.name or function.name.find("operator ") == 0:
-                modifier = ""
-            is_override = ""
+                modifier = 'static '
+            if function.name == self._currentClass.name or function.name.find('operator ') == 0:
+                modifier = ''
+            is_override = ''
             if self.parser.is_function_override(self._currentClass, function):
-                is_override = " override"
-            is_const = ""
+                is_override = ' override'
+            is_const = ''
             if function.is_const:
-                is_const = " const"
-
-            out[FLAG_HPP] = fstr.format( convertReturnType(self.parser, self.convertType(function.return_type)), function.name, args, self.tabs(tabs), is_const, is_override, modifier )
+                is_const = ' const'
+            
+            out[FLAG_HPP] = fstr.format(convert_return_type(self.parser, convert_type(function.return_type)),
+                                        function.name, args, is_const, is_override, modifier)
         if flags & FLAG_CPP and not function.is_external and not function.is_abstract:
-            is_const = ""
+            is_const = ''
             if function.is_const:
-                is_const = "const"
-            header = "{4}{0} {5}::{1}({2}) {6}\n"
-            body = "{4}__begin__{3}\n{4}__end__\n\n"
+                is_const = 'const'
+            header = '{0} {4}::{1}({2}) {5}\n'
+            body = '__begin__{3}\n__end__\n\n'
             fstr = header + body
-            body = ""
+            body = ''
             for operation in function.operations:
-                fline = "{0}"
-                line = "\n" + self.tabs(tabs+1) + fline.format(operation);
+                fline = '{0}'
+                line = '\n' + fline.format(operation)
                 body += line
-            args = []
+            args = list()
             for arg in function.args:
-                args.append(convertArgumentType(self.convertType(arg[1])) + " " + arg[0])
-            args = ", ".join(args)
-            out[FLAG_CPP] = fstr.format(convertReturnType(self.parser, self.convertType(function.return_type)), function.name, args, body, self.tabs(tabs), self._currentClass.name, is_const )
-            out[FLAG_CPP] = autoReplaces( out[FLAG_CPP] )
-
+                args.append(_convert_argument_type(convert_type(arg[1])) + ' ' + arg[0])
+            args = ', '.join(args)
+            out[FLAG_CPP] = fstr.format(convert_return_type(self.parser, convert_type(function.return_type)),
+                                        function.name, args, body, self._currentClass.name, is_const)
         return out
-
-    def writeClasses(self, classes, tabs, flags):
-        out = {FLAG_CPP : "", FLAG_HPP : ""}
-        for cls in classes:
-            if not cls.is_abstract:
-                self.tests.append(cls)
-
-        for cls in classes:
-            dict = self.writeClass(cls, tabs, FLAG_HPP)
-            if len(dict) > 0:
-                filename = cls.name + ".h"
-                if cls.group:
-                    filename = cls.group + "/" + filename
-                self.save( filename, dict[FLAG_HPP] )
-                out = self._add( out, dict )
-        for cls in classes:
-            if not cls.is_abstract:
-                dict = self.writeClass(cls, tabs, FLAG_CPP)
-                if len(dict) > 0:
-                    filename = cls.name + ".cpp"
-                    if cls.group:
-                        filename = cls.group + "/" + filename
-                    self.save( filename, dict[FLAG_CPP] )
-                    out = self._add( out, dict )
+    
+    def write_classes(self, classes, flags):
+        out = {FLAG_CPP: '', FLAG_HPP: ''}
+        
+        for class_ in classes:
+            dictionary = self.write_class(class_, FLAG_HPP)
+            if len(dictionary) > 0:
+                filename = class_.name + '.h'
+                if class_.group:
+                    filename = class_.group + '/' + filename
+                self.save_file(filename, dictionary[FLAG_HPP])
+                out = add_dict(out, dictionary)
+        for class_ in classes:
+            if not class_.is_abstract:
+                dictionary = self.write_class(class_, FLAG_CPP)
+                if len(dictionary) > 0:
+                    filename = class_.name + '.cpp'
+                    if class_.group:
+                        filename = class_.group + '/' + filename
+                    self.save_file(filename, dictionary[FLAG_CPP])
+                    out = add_dict(out, dictionary)
         return out
-
-    def writeFunctions(self, functions, tabs, flags):
-        out = {FLAG_CPP : "", FLAG_HPP : ""}
+    
+    def write_functions(self, functions, flags):
+        out = {FLAG_CPP: '', FLAG_HPP: ''}
         for function in functions:
-            out = self._add( out, self.writeFunction(function, tabs, flags) )
+            out = add_dict(out, self.write_function(function, flags))
         return out
 
-    def _getNamespace(self, cls):
-        return "mg"
-
-    def addMethods(self, cls):
-        if cls.is_serialized or cls.type == "enum":
+    def add_methods(self, class_):
+        if class_.is_serialized or class_.type == 'enum':
             have = False
-            for function in cls.functions:
-                if function.name == "serialize":
+            for function in class_.functions:
+                if function.name == 'serialize':
                     have = True
                     break
-            if have == False:
-                self.addSerialization(cls, SERIALIZATION)
-                self.addSerialization(cls, DESERIALIZATION)
-        if cls.is_visitor:
+            if not have:
+                self.add_serialization(class_, SERIALIZATION)
+                self.add_serialization(class_, DESERIALIZATION)
+        if class_.is_visitor:
             have = False
-            for function in cls.functions:
-                if function.name == "accept":
+            for function in class_.functions:
+                if function.name == 'accept':
                     have = True
                     break
-            if have == False:
-                self.addAccept(cls)
-        if not cls.is_abstract:
+            if not have:
+                self.add_accept_method(class_)
+        if not class_.is_abstract:
             have = False
-            for function in cls.functions:
-                if function.name == "operator ==":
+            for function in class_.functions:
+                if function.name == 'operator ==':
                     have = True
                     break
-            if have == False:
-                self.addEquals(cls)
-        if self.createTests and not cls.is_abstract:
-            have = False
-            for function in cls.functions:
-                if function.name == TEST_FUNCTION_CREATE:
-                    have = True
-                    break
-            if have == False:
-                self.addTests(cls)
-
-        return cls
-
-    def getSerializationObjectArg(self, serialization_type):
+            if not have:
+                self.add_equal_methods(class_)
+        return class_
+    
+    def get_serialization_object_arg(self, serialization_type):
         pass
-
-    def getBehaviorCallFormat(self):
+    
+    def get_behavior_call_format(self):
         pass
-
-    def addSerialization(self, cls, serialization_type):
+    
+    def add_serialization(self, class_, serialization_type):
         function = Function()
         if serialization_type == SERIALIZATION:
             function.is_const = True
-            function.name = "serialize"
-            function.args.append(self.getSerializationObjectArg(serialization_type))
+            function.name = 'serialize'
+            function.args.append(self.get_serialization_object_arg(serialization_type))
         if serialization_type == DESERIALIZATION:
-            function.name = "deserialize"
-            function.args.append(self.getSerializationObjectArg(serialization_type))
-        function.return_type = "void"
-
-        for behabior in cls.behaviors:
+            function.name = 'deserialize'
+            function.args.append(self.get_serialization_object_arg(serialization_type))
+        function.return_type = 'void'
+        
+        for behabior in class_.behaviors:
             if not behabior.is_serialized or behabior.is_abstract:
                 continue
-            str = self.getBehaviorCallFormat().format( behabior.name, function.name )
-            function.operations.append(str)
-
-        for obj in cls.members:
+            operation = self.get_behavior_call_format().format(behabior.name, function.name)
+            function.operations.append(operation)
+        
+        for obj in class_.members:
             if obj.is_runtime or obj.is_static or (obj.is_const and not obj.is_link):
                 continue
             if obj.side != 'both' and obj.side != self.parser.side:
                 continue
-            str = self._buildSerializeObjectOperation(obj, serialization_type)
-            function.operations.append(str)
-        cls.functions.append(function)
-
-    def _buildSerializeObjectOperation(self, obj, serialization_type):
-        type = obj.name if isinstance(obj, Class) else obj.type
-        return self._buildSerializeOperation(obj.name, type, obj.initial_value, obj.is_pointer, obj.template_args, serialization_type, is_link = obj.is_link)
-
-    def _buildSerializeOperationEnum(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args, serialization_type):
+            operation = self._build_serialize_object_operation(obj, serialization_type)
+            function.operations.append(operation)
+        class_.functions.append(function)
+    
+    def _build_serialize_object_operation(self, obj, serialization_type):
+        type_ = obj.name if isinstance(obj, Class) else obj.type
+        return self._build_serialize_operation(obj.name, type_, obj.initial_value, obj.is_pointer, obj.template_args,
+                                               serialization_type, is_link=obj.is_link)
+    
+    def _build_serialize_operation_enum(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args,
+                                        serialization_type):
         pass
-    def _buildSerializeOperation(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args, serialization_type, is_link = False):
+    
+    def _build_serialize_operation(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args,
+                                   serialization_type, is_link=False):
         index = 0
-        if obj_value == None:
+        if obj_value is None:
             index = 1
-
-        type = obj_type
-        if self.parser.find_class(type) and self.parser.find_class(type).type == 'enum':
-            str = self._buildSerializeOperationEnum(obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args, serialization_type)
+        
+        type_ = obj_type
+        if self.parser.find_class(type_) and self.parser.find_class(type_).type == 'enum':
+            print 'serialize enum'
+            string = self._build_serialize_operation_enum(obj_name, obj_type, obj_value,
+                                                          obj_is_pointer, obj_template_args, serialization_type)
         else:
-            if obj_type not in self.simple_types and type != "list" and type != "map":
+            if obj_type not in self.simple_types and type_ != 'list' and type_ != 'map':
                 if is_link:
-                    type = 'link'
+                    type_ = 'link'
                 elif obj_is_pointer:
-                    type = 'pointer'
+                    type_ = 'pointer'
                 else:
-                    type = 'serialized'
-            template_args = []
+                    type_ = 'serialized'
+            template_args = list()
             if len(obj_template_args) > 0:
-                if type == "map":
+                if type_ == 'map':
                     if len(obj_template_args) != 2:
-                        print "map should have 2 arguments"
-                        exit -1
+                        print 'map should have 2 arguments'
+                        exit(-1)
                     if serialization_type == SERIALIZATION:
-                        return self.buildMapSerialization(obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args)
+                        return self.build_map_serialization(obj_name, obj_type, obj_value,
+                                                            obj_is_pointer, obj_template_args)
                     if serialization_type == DESERIALIZATION:
-                        return    self.buildMapDeserialization(obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args)
+                        return self.build_map_deserialization(obj_name, obj_type, obj_value,
+                                                              obj_is_pointer, obj_template_args)
                 else:
                     arg = obj_template_args[0]
                     arg_type = arg.name if isinstance(arg, Class) else arg.type
-                    template_args.append(self.convertType(arg_type))
+                    template_args.append(convert_type(arg_type))
                     if arg_type in self.simple_types:
-                        type = "{0}<simple>".format( type )
+                        type_ = '{0}<simple>'.format(type_)
                     elif arg.is_pointer:
-                        type = "pointer_list"
+                        type_ = 'pointer_list'
                     else:
-                        type = "{0}<serialized>".format( type )
-
-            fstr = self.serialize_formats[serialization_type][type][index]
-            str = fstr.format(obj_name, self.convertType(obj_type), obj_value, "{", "}", *template_args)
-
-        return str
-
-    def buildMapSerialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args):
+                        type_ = '{0}<serialized>'.format(type_)
+            pattern = self.serialize_formats[serialization_type][type_][index]
+            string = pattern.format(obj_name, convert_type(obj_type), obj_value, '{', '}', *template_args)
+        return string
+    
+    def build_map_serialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args):
         pass
-
-    def buildMapDeserialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args):
+    
+    def build_map_deserialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args):
         pass
-
-    def addAccept(self, cls):
-        visitor = self.parser.get_type_of_visitor(cls)
-        if visitor == cls.name:
+    
+    def add_accept_method(self, class_):
+        visitor = self.parser.get_type_of_visitor(class_)
+        if visitor == class_.name:
             return
         function = Function()
-        function.name = "accept"
-        function.return_type = "void"
-        function.args.append(["visitor", visitor + "*"])
-        function.operations.append("visitor->visit( this );")
-        cls.functions.append(function)
-
-    def addEquals(self, cls):
+        function.name = 'accept'
+        function.return_type = 'void'
+        function.args.append(['visitor', visitor + '*'])
+        function.operations.append('visitor->visit( this );')
+        class_.functions.append(function)
+    
+    def add_equal_methods(self, class_):
         function = Function()
-        function.name = "operator =="
-        function.return_type = "bool"
-        function.args.append(["rhs", "const " + cls.name + "&"])
+        function.name = 'operator =='
+        function.return_type = 'bool'
+        function.args.append(['rhs', 'const ' + class_.name + '&'])
         function.is_const = True
-        fbody_line = "result = result && {0} == rhs.{0};"
-        function.operations.append( "bool result = true;");
-        for m in cls.members:
+        fbody_line = 'result = result && {0} == rhs.{0};'
+        function.operations.append('bool result = true;')
+        for m in class_.members:
             if m.side != 'both' and m.side != self.parser.side:
                 continue
             if m.is_static or m.is_const:
                 continue
-            function.operations.append( fbody_line.format(m.name) )
-        function.operations.append( "return result;");
-        cls.functions.append(function)
-
+            function.operations.append(fbody_line.format(m.name))
+        function.operations.append('return result;')
+        class_.functions.append(function)
+        
         function = Function()
-        function.name = "operator !="
-        function.return_type = "bool"
-        function.args.append(["rhs", "const " + cls.name + "&"])
+        function.name = 'operator !='
+        function.return_type = 'bool'
+        function.args.append(['rhs', 'const ' + class_.name + '&'])
         function.is_const = True
-        function.operations.append( "return !(*this == rhs);" )
-        cls.functions.append(function)
-
-    def addTests(self, cls):
-        function = Function()
-        function.name = TEST_FUNCTION_CREATE
-        function.return_type = cls.name
-        function.is_static = True
-
-        fbody_line = "instance.{0} = {1};"
-        function.operations.append( "{0} instance;".format(cls.name) );
-        for m in cls.members:
-            value = self._getTestValue(m)
-            if value == None:
-                continue
-            if m.is_const or m.is_static:
-                continue
-            str = fbody_line.format(m.name, value)
-            function.operations.append( str )
-        function.operations.append( "return instance;");
-
-        cls.functions.append(function)
-
-    def _getTestValue(self, m):
-        value = ""
-        if m.is_runtime:
-            return None
-        if m.type == "list" or m.type == "map" or m.type == "set":
-            return None
-        if m.type == "int" or m.type == "float":
-            value = str(random_int())
-        if m.type == "bool":
-            value = str(random_bool())
-        if self.parser.find_class(m.type):
-            value = "{0}::{1}()".format(m.type,TEST_FUNCTION_CREATE)
-        elif m.type == "string":
-            value = "\"somestringvalue\""
-        if value == "":
-            value = "0"
-        return value
-
-    def _findIncludes(self, cls, flags):
-        out = ""
-        forward_declarations = ""
-
-        fstr = "\n#include {0}"
-
-        def need_include(type):
-            if type == "":
+        function.operations.append('return !(*this == rhs);')
+        class_.functions.append(function)
+    
+    def _find_includes(self, class_, flags):
+        out = ''
+        forward_declarations = ''
+        
+        pattern = '\n#include {0}'
+        
+        def need_include(typename):
+            if typename == '':
                 return False
-            types = []
-            types.append( "int" )
-            types.append( "float" )
-            types.append( "bool" )
-            types.append( "void" )
-            return not type in types
-
-        types = {}
-        ftypes = {}
-
-        for t in cls.behaviors:
-            types[t.name] = 1
-        for t in cls.members:
+            types = list()
+            types.append('int')
+            types.append('float')
+            types.append('bool')
+            types.append('void')
+            return typename not in types
+        
+        include_types = dict()
+        forward_types = dict()
+        
+        for t in class_.behaviors:
+            include_types[t.name] = 1
+        for t in class_.members:
             if t.side != 'both' and t.side != self.parser.side:
                 continue
-            type = t.type
-            type = re.sub( "const", "", type ).strip()
-            type = re.sub( "\*", "", type ).strip()
-            type = re.sub( "&", "", type ).strip()
-            types[type] = 1
+            type_ = t.type
+            type_ = re.sub('const', '', type_).strip()
+            type_ = re.sub('\*', '', type_).strip()
+            type_ = re.sub('&', '', type_).strip()
+            include_types[type_] = 1
             if t.is_pointer:
-                types["IntrusivePtr"] = 1
+                include_types['IntrusivePtr'] = 1
             for arg in t.template_args:
-                type = arg.name if isinstance(arg, Class) else arg.type
+                type_ = arg.name if isinstance(arg, Class) else arg.type
                 if arg.is_pointer:
                     if flags == FLAG_CPP:
-                        types[type] = 1
+                        include_types[type_] = 1
                     if flags == FLAG_HPP:
-                        types[type] = 1
-                    type = "IntrusivePtr"
-                types[type] = 1
-
-        for f in cls.functions:
+                        include_types[type_] = 1
+                    type_ = 'IntrusivePtr'
+                include_types[type_] = 1
+        
+        for f in class_.functions:
             for t in f.args:
-                def checkType(t):
-                    type = re.sub("const", "", t).strip()
-                    type = re.sub("\*", "", type).strip()
-                    type = re.sub("&", "", type).strip()
-                    if 'IntrusivePtr' in type:
+                def checkType(type_string):
+                    typename = re.sub('const', '', type_string).strip()
+                    typename = re.sub('\*', '', typename).strip()
+                    typename = re.sub('&', '', typename).strip()
+                    if 'IntrusivePtr' in typename:
                         return
-                    if 'CommandBase' in type:
-                        types['CommandBase'] = 1
+                    if 'CommandBase' in typename:
+                        include_types['CommandBase'] = 1
                     else:
-                        if flags == FLAG_CPP or t != type + "*":
-                            types[type] = 1
-                        if flags == FLAG_HPP and t == type + "*":
-                            ftypes[type] = 1
-
+                        if flags == FLAG_CPP or type_string != typename + '*':
+                            include_types[typename] = 1
+                        if flags == FLAG_HPP and type_string == typename + '*':
+                            forward_types[typename] = 1
+                
                 checkType(t[1])
                 if '<' in t[1] and '>' in t[1]:
-                    type = t[1]
-                    k = type.find('<')+1
-                    l = type.find('>')
-                    args = type[k:l].strip().split(',')
+                    type_ = t[1]
+                    k = type_.find('<') + 1
+                    l = type_.find('>')
+                    args = type_[k:l].strip().split(',')
                     for arg in args:
                         checkType(arg)
-
-
-            type = f.return_type
-            type = re.sub( "const", "", type ).strip()
-            type = re.sub( "\*", "", type ).strip()
-            type = re.sub( "&", "", type ).strip()
-            types[type] = 1
-
-        for t in types:
-            if t == self._currentClass.name: continue
-            if need_include(t):
-                out += fstr.format( self.getIncludeFile(t) )
-
-        for t in ftypes:
+            
+            type_ = f.return_type
+            type_ = re.sub('const', '', type_).strip()
+            type_ = re.sub('\*', '', type_).strip()
+            type_ = re.sub('&', '', type_).strip()
+            include_types[type_] = 1
+        
+        for t in include_types:
             if t == self._currentClass.name:
                 continue
-            type = self.convertType(t)
-            if type.find( "::" ) == -1:
-                forward_declarations += "\nclass {0};".format( type )
-            else:
+            if need_include(t):
+                out += pattern.format(get_include_file(self.parser, self._currentClass, t))
+        
+        for t in forward_types:
+            if t == self._currentClass.name:
                 continue
-                ns = type[0:type.find( "::" )]
-                type = type[type.find( "::" )+2:]
-                str = "\nnamespace {1}\n__begin__\nclass {0};\n__end__".format( type, ns );
-                forward_declarations += str
-
+            type_ = convert_type(t)
+            if type_.find('::') == -1:
+                forward_declarations += '\nclass {0};'.format(type_)
+            # else:
+            #     continue
+            #     ns = type[0:type.find('::')]
+            #     type = type[type.find('::') + 2:]
+            #     str = '\nnamespace {1}\n__begin__\nclass {0};\n__end__'.format(type, ns)
+            #     forward_declarations += str
+        
         if flags == FLAG_HPP:
             out += '\n#include "IntrusivePtr.h"'
         if flags == FLAG_CPP:
             out += '\n#include "Factory.h"'
             out += '\n#include <algorithm>'
-
-        out = out.split("\n")
+        
+        out = out.split('\n')
         out.sort()
-        out = "\n".join( out )
-
-        forward_declarations = forward_declarations.split("\n")
+        out = '\n'.join(out)
+        
+        forward_declarations = forward_declarations.split('\n')
         forward_declarations.sort()
-        forward_declarations = "\n".join( forward_declarations )
-
+        forward_declarations = '\n'.join(forward_declarations)
+        
         return out, forward_declarations
-
-    def _findIncludesInFunctionOperation(self, cls, current_includes):
+    
+    def _find_includes_in_function_operation(self, class_, current_includes):
         includes = current_includes
-        for function in cls.functions:
+        for function in class_.functions:
             for operation in function.operations:
-                if operation == None:
+                if operation is None:
                     continue
-                if 'throw Exception' in operation: includes += '\n#include "Exception.h"'
-                if 'std::sqrt' in operation: includes += '\n#include <cmath>'
-                if 'get_data_storage()' in operation: includes += '\n#include "DataStorage.h"'
-                for type in self.parser.classes:
-                    if (type.name) in operation:
-                        a = '"{}.h"'.format(type.name)
-                        b = '/{}.h"'.format(type.name)
+                if 'throw Exception' in operation:
+                    includes += '\n#include "Exception.h"'
+                if 'std::sqrt' in operation:
+                    includes += '\n#include <cmath>'
+                if 'get_data_storage()' in operation:
+                    includes += '\n#include "DataStorage.h"'
+                    
+                for type_ in self.parser.classes:
+                    if type_.name in operation:
+                        a = '"{}.h"'.format(type_.name)
+                        b = '"{}.h"'.format(type_.name)
                         if a not in includes and b not in includes:
-                            includes += '\n#include {0}'.format(self.getIncludeFile(type.name))
+                            includes += '\n#include {0}'.\
+                                format(get_include_file(self.parser, self._currentClass, type_.name))
         return includes
-
-    def _createTests(self):
-        fstr = "#include \"TestSerialization.h\"\n{0}\n\nvoid TestSerialization::build()\n__begin__\n{1}\n__end__\n"
-        includes = ""
-        tests = ""
-        for cls in self.tests:
-            finc = "#include \"../../../out/{}.cpp\"\n".format(cls.name)
-            ftst = "_tests.push_back( new TestT<mg::{}> );\n".format(cls.name)
-            includes += finc
-            if self.createTests:
-                tests += ftst
-        fstr = fstr.format( includes, tests )
-        fstr = re.sub("__begin__", "{", fstr)
-        fstr = re.sub("__end__", "}", fstr)
-        fileutils.write("tests/cpp/TestCpp/TestSerialization.cpp", fstr)
-
-    def prepareFile(self, body):
+    
+    def prepare_file(self, body):
         tabs = 0
         lines = body.split('\n')
-        body = []
-        ch = ''
+        body = list()
+        
+        def get_tabs(count):
+            out = ''
+            for i in xrange(count):
+                out += '\t'
+            return out
+        
         for line in lines:
             line = line.strip()
-
-            if line and line[0] == "}":
-                tabs-=1
-            if "public:" in line:
+            
+            if line and line[0] == '}':
                 tabs -= 1
-            line = self.tabs(tabs) + line
-            if "public:" in line:
+            if 'public:' in line:
+                tabs -= 1
+            line = get_tabs(tabs) + line
+            if 'public:' in line:
                 tabs += 1
-            if line.strip() and line.strip()[0] == "{":
-                tabs+=1
+            if line.strip() and line.strip()[0] == '{':
+                tabs += 1
             body.append(line)
-        body = ('\n').join(body)
+        body = '\n'.join(body)
         return body
-
-    def getIncludeFile(self, file):
-        types = {}
-        types["list"] = "<vector>"
-        types["map"] = "<map>"
-        types["set"] = "<set>"
-        types["string"] = "<string>"
-        types["pugi::xml_node"] = '"pugixml/pugixml.hpp"'
-        types["Json::Value"] = '"jsoncpp/json.h"'
-        types["pugi::xml_node"] = '"pugixml/pugixml.hpp"'
-        types["Observer"] = '"Observer.h"'
-        types["std::vector<int>"] = '<vector>'
-        types['std::vector<intrusive_ptr<CommandBase>>'] = '<vector>'
-        if file in types:
-            return types[file]
-        if 'std::map' in file:
-            return '<map>'
-
-        cls = self.parser.find_class(file)
-        if cls and cls.name == file and self._currentClass.group != cls.group:
-            back = ""
-            backs = len(self._currentClass.group.split("/")) if self._currentClass.group else 0
-            for i in range(backs):
-                back += "../"
-            f = '"{2}{1}/{0}.h"' if cls.group else '"{2}{0}.h"'
-            return f.format(cls.name, cls.group, back)
-        return '"{0}.h"'.format(file)
-

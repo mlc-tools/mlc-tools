@@ -3,6 +3,7 @@ from Object import Object
 from Function import Function
 import constants
 
+
 class Class(Object):
     def __init__(self):
         Object.__init__(self)
@@ -16,7 +17,7 @@ class Class(Object):
         self.type = 'class'
         self.group = ''
         self.side = 'both'
-
+    
     def parse(self, line):
         line = line.strip()
         if self.type in line:
@@ -33,7 +34,7 @@ class Class(Object):
             k = self.name.rindex('/')
             self.group = self.name[0:k]
             self.name = self.name[k + 1:]
-
+    
     def parse_body(self, parser, body):
         parser.parse(body)
         if len(parser.classes) > 0:
@@ -43,12 +44,12 @@ class Class(Object):
         if self.type == 'enum':
             self._convert_to_enum()
         return
-
+    
     def on_linked(self):
         if self.generate_set_function:
             self._generate_setters_function()
             self._generate_getters_function()
-
+    
     def find_modifiers(self, string):
         self.is_abstract = self.is_abstract or ':abstract' in string
         self.is_serialized = self.is_serialized or ':serialized' in string
@@ -58,7 +59,7 @@ class Class(Object):
             self.side = 'server'
         if ':client' in string:
             self.side = 'client'
-
+        
         string = re.sub(':abstract', '', string)
         string = re.sub(':serialized', '', string)
         string = re.sub(':visitor', '', string)
@@ -66,14 +67,14 @@ class Class(Object):
         string = re.sub(':server', '', string)
         string = re.sub(':client', '', string)
         return string
-
+    
     def _generate_setters_function(self):
         function = Function()
         function.name = constants.CLASS_FUNCTION_SET_PROPERTY
         function.return_type = 'void'
         function.args.append(['name', 'string'])
         function.args.append(['value', 'string'])
-
+        
         add_function = False
         for i, member in enumerate(self.members):
             if member.is_pointer:
@@ -93,7 +94,7 @@ class Class(Object):
                     op = 'else ' + op
                 function.operations.append(op.format(member.name, type_, '{', '}'))
                 add_function = True
-
+        
         override = False
         if self.behaviors:
             for class_ in self.behaviors:
@@ -109,18 +110,19 @@ class Class(Object):
                             op = 'else \n{1}\n{0}::{3}(name, value);\n{2}'
                         else:
                             op = '{0}::{3}(name, value);'
-                        function.operations.append(op.format(class_.name, '{', '}', constants.CLASS_FUNCTION_SET_PROPERTY))
+                        function.operations.append(
+                            op.format(class_.name, '{', '}', constants.CLASS_FUNCTION_SET_PROPERTY))
                         break
-
+        
         if add_function or not override:
             self.functions.append(function)
-
+    
     def _generate_getters_function(self):
         function = Function()
         function.name = constants.CLASS_FUNCTION_GET_PROPERTY
         function.return_type = 'string'
         function.args.append(['name', 'string'])
-
+        
         add_function = False
         for i, member in enumerate(self.members):
             if member.is_pointer:
@@ -139,7 +141,7 @@ class Class(Object):
                     getter = 'else ' + getter
                 function.operations.append(getter.format(member.name, type_, '{', '}'))
                 add_function = True
-
+        
         parent_class = ''
         if self.behaviors:
             for class_ in self.behaviors:
@@ -152,19 +154,19 @@ class Class(Object):
                     if equal:
                         parent_class = class_.name
                         break
-
-        op = ''
+        
         if not parent_class:
             op = 'return "";'
         elif function.operations:
-            op = 'else \n{1}\n return {0}::{3}(name);\n{2}'.format(parent_class, '{', '}', constants.CLASS_FUNCTION_GET_PROPERTY)
+            op = 'else \n{1}\n return {0}::{3}(name);\n{2}'.\
+                format(parent_class, '{', '}', constants.CLASS_FUNCTION_GET_PROPERTY)
         else:
             op = 'return {0}::{1}(name, value);'.format(parent_class, constants.CLASS_FUNCTION_GET_PROPERTY)
         function.operations.append(op)
-
+        
         if add_function or not parent_class:
             self.functions.append(function)
-
+    
     def _convert_to_enum(self):
         shift = 0
         if len(self.behaviors) == 0:
@@ -185,7 +187,7 @@ class Class(Object):
                     exit(-1)
             shift += 1
         self.behaviors = []
-
+        
         def add_function(type_, name, args, const):
             function = Function()
             function.return_type = type_
@@ -194,52 +196,52 @@ class Class(Object):
             function.is_const = const
             self.functions.append(function)
             return function
-
+        
         add_function(
             '',
             self.name,
             [],
-            False).\
+            False). \
             operations = ['_value = {};'.format(self.members[0].name)]
         add_function(
             '',
             self.name,
             [['value', cast]],
-            False).\
+            False). \
             operations = ['_value = value;']
         add_function(
             '',
             self.name,
             [['rhs', 'const {0}&'.format(self.name)]],
-            False).\
+            False). \
             operations = ['_value = rhs._value;']
         add_function(
             '',
             'operator int',
             [],
-            True).\
+            True). \
             operations = ['return _value;']
         add_function(
             'const {0}&'.format(self.name),
             'operator =',
             [['rhs', 'const {0}&'.format(self.name)]],
-            False).\
+            False). \
             operations = ['_value = rhs._value;', 'return *this;']
         add_function(
             'bool',
             'operator ==',
             [['rhs', 'const {0}&'.format(self.name)]],
-            True).\
+            True). \
             operations = ['return _value == rhs._value;']
         add_function(
             'bool',
             'operator ==',
             [['rhs', 'int']],
-            True).\
+            True). \
             operations = ['return _value == rhs;']
-        add_function('bool', 'operator <', [['rhs', 'const {0}&'.format(self.name)]], True).\
+        add_function('bool', 'operator <', [['rhs', 'const {0}&'.format(self.name)]], True). \
             operations = ['return _value < rhs._value;']
-
+        
         function1 = add_function('', self.name, [['value', 'string']], False)
         function2 = add_function('const {0}&'.format(self.name), 'operator =', [['value', 'string']], False)
         function3 = add_function('', 'operator std::string', [], True)
@@ -247,9 +249,12 @@ class Class(Object):
         index = 0
         for m in self.members:
             function1.operations.append('if(value == "{0}") {1}_value = {0}; return; {2};'.format(m.name, '{', '}'))
-            function1.operations.append('if(value == "{0}") {1}_value = {0}; return; {2};'.format(values[index], '{', '}'))
-            function2.operations.append('if(value == "{0}") {1}_value = {0}; return *this; {2};'.format(m.name, '{', '}'))
-            function2.operations.append('if(value == "{0}") {1}_value = {0}; return *this; {2};'.format(values[index], '{', '}'))
+            function1.operations.append(
+                'if(value == "{0}") {1}_value = {0}; return; {2};'.format(values[index], '{', '}'))
+            function2.operations.append(
+                'if(value == "{0}") {1}_value = {0}; return *this; {2};'.format(m.name, '{', '}'))
+            function2.operations.append(
+                'if(value == "{0}") {1}_value = {0}; return *this; {2};'.format(values[index], '{', '}'))
             function3.operations.append('if(_value == {0}) return "{0}";'.format(m.name))
             function4.operations.append('if(_value == {0}) return "{0}";'.format(m.name))
             index += 1
@@ -257,13 +262,13 @@ class Class(Object):
         function2.operations.append('return *this;')
         function3.operations.append('return "";')
         function4.operations.append('return "";')
-
+        
         value = Object()
         value.initial_value = self.members[0].name
         value.name = '_value'
         value.type = cast
         self.members.append(value)
-
+    
     def add_get_type_function(self):
         if not self.is_abstract:
             member = Object()
@@ -273,7 +278,7 @@ class Class(Object):
             member.name = '__type__'
             member.initial_value = '"{}"'.format(self.name)
             self.members.append(member)
-
+        
         function = Function()
         function.name = constants.CLASS_FUNCTION_GET_TYPE
         function.return_type = 'string'

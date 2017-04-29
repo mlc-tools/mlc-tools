@@ -1,142 +1,194 @@
 from WriterCpp import WriterCpp
-from WriterCpp import SERIALIZATION
-from WriterCpp import DESERIALIZATION
-from WriterCpp import FLAG_HPP
-from WriterCpp import FLAG_CPP
+from WriterCpp import SERIALIZATION as S
+from WriterCpp import DESERIALIZATION as D
 from Object import Object
 from Class import Class
 
 
 class WriterCppSerializatorJson(WriterCpp):
-    def __init__(self, outDirectory, parser, createTests):
-        WriterCpp.__init__(self, outDirectory, parser, createTests)
+    def __init__(self, out_directory, parser):
+        WriterCpp.__init__(self, out_directory, parser)
 
     def create_serialization_patterns(self):
-        self.serialize_formats[SERIALIZATION]['simple'] = []
-        self.serialize_formats[SERIALIZATION]['simple'].append( 'if({0} != {2}) \n__begin__\n::set(json,"{0}",{0});\n__end__' )
-        self.serialize_formats[SERIALIZATION]['simple'].append( '::set(json,"{0}",{0});' )
-        self.serialize_formats[DESERIALIZATION]['simple'] = []
-        self.serialize_formats[DESERIALIZATION]['simple'].append( 'if(json.isMember("{0}")) \n __begin__\n{0} = ::get<{1}>( json["{0}"] );\n__end__\nelse \n__begin__\n{0} = {2};\n__end__' )
-        self.serialize_formats[DESERIALIZATION]['simple'].append( '{0} = ::get<{1}>( json["{0}"] );' )
+        self.serialize_formats[S]['simple'] = []
+        self.serialize_formats[S]['simple'].append('if({0} != {2}) \n{3}\n::set(json,"{0}",{0});\n{4}')
+        self.serialize_formats[S]['simple'].append('::set(json,"{0}",{0});')
+        self.serialize_formats[D]['simple'] = []
+        self.serialize_formats[D]['simple'].append('''if(json.isMember("{0}"))
+            {3}
+                {0} = ::get<{1}>(json["{0}"]);
+            {4}
+            else
+            {3}
+                {0} = {2};
+            {4}''')
+        self.serialize_formats[D]['simple'].append('{0} = ::get<{1}>(json["{0}"]);')
 
-        self.serialize_formats[SERIALIZATION]['serialized'] = []
-        self.serialize_formats[SERIALIZATION]['serialized'].append( 'static_assert(0, "field "{0}" not should have a initialize value");' )
-        self.serialize_formats[SERIALIZATION]['serialized'].append( '{0}.serialize(json["{0}"]);' )
-        self.serialize_formats[DESERIALIZATION]['serialized'] = []
-        self.serialize_formats[DESERIALIZATION]['serialized'].append( 'static_assert(0, "field "{0}" not should have a initialize value");' )
-        self.serialize_formats[DESERIALIZATION]['serialized'].append( '{0}.deserialize(json["{0}"]);' )
+        self.serialize_formats[S]['serialized'] = []
+        self.serialize_formats[S]['serialized'].append(
+            'static_assert(0, "field "{0}" not should have a initialize value");'
+        )
+        self.serialize_formats[S]['serialized'].append('{0}.serialize(json["{0}"]);')
+        self.serialize_formats[D]['serialized'] = []
+        self.serialize_formats[D]['serialized'].append(
+            'static_assert(0, "field "{0}" not should have a initialize value");'
+        )
+        self.serialize_formats[D]['serialized'].append('{0}.deserialize(json["{0}"]);')
 
-        self.serialize_formats[SERIALIZATION]['pointer'] = []
-        self.serialize_formats[SERIALIZATION]['pointer'].append( 'static_assert(0, "field "{0}" not should have a initialize value");' )
-        self.serialize_formats[SERIALIZATION]['pointer'].append( '''
-                                                                    if({0})
-                                                                    {3}
-                                                                        {0}->serialize(json["{0}"][{0}->get_type()]);
-                                                                    {4}''' )
-        self.serialize_formats[DESERIALIZATION]['pointer'] = []
-        self.serialize_formats[DESERIALIZATION]['pointer'].append( 'static_assert(0, "field "{0}" not should have a initialize value");' )
-        self.serialize_formats[DESERIALIZATION]['pointer'].append( '''
-                                                                    if(json.isMember("{0}"))
-                                                                    {3}
-                                                                        auto type_{0} = json["{0}"].getMemberNames()[0];
-                                                                        {0} = Factory::shared().build<{1}>( type_{0} );
-                                                                        {0}->deserialize(json["{0}"][type_{0}]);
-                                                                    {4}''')
+        self.serialize_formats[S]['pointer'] = []
+        self.serialize_formats[S]['pointer'].append(
+            'static_assert(0, "field "{0}" not should have a initialize value");'
+        )
+        self.serialize_formats[S]['pointer'].append('''
+            if({0})
+            {3}
+                {0}->serialize(json["{0}"][{0}->get_type()]);
+            {4}''')
+        self.serialize_formats[D]['pointer'] = []
+        self.serialize_formats[D]['pointer'].append(
+            'static_assert(0, "field "{0}" not should have a initialize value");'
+        )
+        self.serialize_formats[D]['pointer'].append('''
+            if(json.isMember("{0}"))
+            {3}
+                auto type_{0} = json["{0}"].getMemberNames()[0];
+                {0} = Factory::shared().build<{1}>(type_{0});
+                {0}->deserialize(json["{0}"][type_{0}]);
+            {4}''')
 
-        self.serialize_formats[SERIALIZATION]['list<simple>'] = []
-        self.serialize_formats[SERIALIZATION]['list<simple>'].append( 'static_assert(0, "list "{0}" not should have a initialize value");' )
-        self.serialize_formats[SERIALIZATION]['list<simple>'].append( '{3}\nauto& arr_{0} = json["{0}"];\nsize_t i=0;\nfor( auto& t : {0} )\n::set(arr_{0}[i++], t);\n{4}' )
-        self.serialize_formats[DESERIALIZATION]['list<simple>'] = []
-        self.serialize_formats[DESERIALIZATION]['list<simple>'].append( 'static_assert(0, "list "{0}" not should have a initialize value");' )
-        self.serialize_formats[DESERIALIZATION]['list<simple>'].append( 'auto& arr_{0} = json["{0}"];\nfor( size_t i = 0; i < arr_{0}.size(); ++i )\n{3}\n{0}.emplace_back();\n{0}.back() = ::get<{5}>(arr_{0}[i]);\n{4};' )
+        self.serialize_formats[S]['list<simple>'] = []
+        self.serialize_formats[S]['list<simple>'].append(
+            'static_assert(0, "list "{0}" not should have a initialize value");'
+        )
+        self.serialize_formats[S]['list<simple>'].append('''
+            {3}
+                auto& arr_{0} = json["{0}"];
+                size_t i=0;
+                for(auto& t : {0})
+                ::set(arr_{0}[i++], t);
+            {4}''')
+        self.serialize_formats[D]['list<simple>'] = []
+        self.serialize_formats[D]['list<simple>'].append(
+            'static_assert(0, "list "{0}" not should have a initialize value");'
+        )
+        self.serialize_formats[D]['list<simple>'].append('''
+            auto& arr_{0} = json["{0}"];
+            for(size_t i = 0; i < arr_{0}.size(); ++i)
+            {3}
+                {0}.emplace_back();
+                {0}.back() = ::get<{5}>(arr_{0}[i]);
+            {4};
+            ''')
 
-        self.serialize_formats[SERIALIZATION]['serialized_list'] = []
-        self.serialize_formats[SERIALIZATION]['serialized_list'].append( 'static_assert(0, "list "{0}" not should have a initialize value");' )
-        self.serialize_formats[SERIALIZATION]['serialized_list'].append( '{3}\nauto& arr_{0} = json["{0}"];\nsize_t i=0;\nfor( auto& t : {0} )\n{3}\nt.serialize(arr_{0}[i++]);\n{4}\n{4}' )
-        self.serialize_formats[DESERIALIZATION]['serialized_list'] = []
-        self.serialize_formats[DESERIALIZATION]['serialized_list'].append( 'static_assert(0, "list "{0}" not should have a initialize value");' )
-        self.serialize_formats[DESERIALIZATION]['serialized_list'].append( 'auto& arr_{0} = json["{0}"];\nfor( size_t i = 0; i < arr_{0}.size(); ++i )\n{3}\n{0}.emplace_back();\n{0}.back().deserialize(arr_{0}[i]);\n{4}' )
+        self.serialize_formats[S]['serialized_list'] = []
+        self.serialize_formats[S]['serialized_list'].append(
+            'static_assert(0, "list "{0}" not should have a initialize value");'
+        )
+        self.serialize_formats[S]['serialized_list'].append('''
+            {3}
+                auto& arr_{0} = json["{0}"];
+                size_t i=0;
+                for(auto& t : {0})
+                {3}
+                    t.serialize(arr_{0}[i++]);
+                {4}
+            {4}''')
+        self.serialize_formats[D]['serialized_list'] = []
+        self.serialize_formats[D]['serialized_list'].append(
+            'static_assert(0, "list "{0}" not should have a initialize value");'
+        )
+        self.serialize_formats[D]['serialized_list'].append('''
+            auto& arr_{0} = json["{0}"];
+            for(size_t i = 0; i < arr_{0}.size(); ++i)
+            {3}
+                {0}.emplace_back();
+                {0}.back().deserialize(arr_{0}[i]);
+            {4}''')
 
-        self.serialize_formats[SERIALIZATION]['pointer_list'] = []
-        self.serialize_formats[SERIALIZATION]['pointer_list'].append( 'static_assert(0, "list "{0}" not should have a initialize value");' )
-        self.serialize_formats[SERIALIZATION]['pointer_list'].append( '''auto& arr_{0} = json["{0}"];
-                                                                         for( auto& t : {0} )
-                                                                         {3}
-                                                                            auto index = arr_{0}.size();
-                                                                             t->serialize(arr_{0}[index][t->get_type()]);
-                                                                         {4}''' )
-        self.serialize_formats[DESERIALIZATION]['pointer_list'] = []
-        self.serialize_formats[DESERIALIZATION]['pointer_list'].append( 'static_assert(0, "list "{0}" not should have a initialize value");' )
-        self.serialize_formats[DESERIALIZATION]['pointer_list'].append( '''auto& arr_{0} = json["{0}"];
-                                                                        auto size_{0} = arr_{0}.size();
-                                                                        for( size_t i = 0; i < size_{0}; ++i )
-                                                                        {3}
-                                                                            assert( arr_{0}[i].size() == 1 );
-                                                                            auto type = arr_{0}[i].getMemberNames()[0];
-                                                                            auto obj = Factory::shared().build<{5}>( type );
-                                                                            {0}.emplace_back(obj);
-                                                                            {0}.back()->deserialize( arr_{0}[i][type] );
-                                                                        {4}''' )
+        self.serialize_formats[S]['pointer_list'] = []
+        self.serialize_formats[S]['pointer_list'].append(
+            'static_assert(0, "list "{0}" not should have a initialize value");'
+        )
+        self.serialize_formats[S]['pointer_list'].append('''
+            auto& arr_{0} = json["{0}"];
+            for(auto& t : {0})
+            {3}
+                auto index = arr_{0}.size();
+                t->serialize(arr_{0}[index][t->get_type()]);
+            {4}''')
+        self.serialize_formats[D]['pointer_list'] = []
+        self.serialize_formats[D]['pointer_list'].append(
+            'static_assert(0, "list "{0}" not should have a initialize value");'
+        )
+        self.serialize_formats[D]['pointer_list'].append('''
+            auto& arr_{0} = json["{0}"];
+            auto size_{0} = arr_{0}.size();
+            for(size_t i = 0; i < size_{0}; ++i)
+            {3}
+                assert(arr_{0}[i].size() == 1);
+                auto type = arr_{0}[i].getMemberNames()[0];
+                auto obj = Factory::shared().build<{5}>(type);
+                {0}.emplace_back(obj);
+                {0}.back()->deserialize(arr_{0}[i][type]);
+            {4}''')
 
-        self.simple_types = ["int", "float", "bool", "string", "cc.point"]
+        self.simple_types = ["int", "float", "bool", "string"]
         for i in range(2):
-            for type in self.simple_types:
-                self.serialize_formats[i][type] = []
-                self.serialize_formats[i][type].append( self.serialize_formats[i]["simple"][0] )
-                self.serialize_formats[i][type].append( self.serialize_formats[i]["simple"][1] )
-                list_type = "list<{0}>".format(type)
+            for type_ in self.simple_types:
+                self.serialize_formats[i][type_] = []
+                self.serialize_formats[i][type_].append(self.serialize_formats[i]["simple"][0])
+                self.serialize_formats[i][type_].append(self.serialize_formats[i]["simple"][1])
+                list_type = "list<{0}>".format(type_)
                 self.serialize_formats[i][list_type] = []
-                self.serialize_formats[i][list_type].append( self.serialize_formats[i]["list<simple>"][0] )
-                self.serialize_formats[i][list_type].append( self.serialize_formats[i]["list<simple>"][1] )
+                self.serialize_formats[i][list_type].append(self.serialize_formats[i]["list<simple>"][0])
+                self.serialize_formats[i][list_type].append(self.serialize_formats[i]["list<simple>"][1])
 
             self.serialize_formats[i]["list<serialized>"] = []
-            self.serialize_formats[i]["list<serialized>"].append( self.serialize_formats[i]["serialized_list"][0] )
-            self.serialize_formats[i]["list<serialized>"].append( self.serialize_formats[i]["serialized_list"][1] )
+            self.serialize_formats[i]["list<serialized>"].append(self.serialize_formats[i]["serialized_list"][0])
+            self.serialize_formats[i]["list<serialized>"].append(self.serialize_formats[i]["serialized_list"][1])
 
-    def getSerializationObjectArg(self, serialization_type):
-        if serialization_type == SERIALIZATION:
-            return ["json","Json::Value&"]
-        if serialization_type == DESERIALIZATION:
+    def get_serialization_object_arg(self, serialization_type):
+        if serialization_type == S:
+            return ["json", "Json::Value&"]
+        if serialization_type == D:
             return ["json", "const Json::Value&"]
         return ["", ""]
 
-    def getBehaviorCallFormat(self):
+    def get_behavior_call_format(self):
         return "{0}::{1}(json);"
 
-    def buildMapSerialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args):
+    def build_map_serialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args):
         key = obj_template_args[0]
         value = obj_template_args[1]
         key_type = key.name if isinstance(key, Class) else key.type
         value_type = value.name if isinstance(value, Class) else value.type
-        str = '''
+        string = '''
         auto& map_{0} = json["{0}"];
-        for( auto pair : {0} )
-        __begin__
+        for(auto pair : {0})
+        {5}
             auto& json = map_{0}[map_{0}.size()];
 
             auto& key = pair.first; {1}
 
             auto& value = pair.second; {2}
-        __end__
+        {4}
         '''
         _value_is_pointer = value.is_pointer
         a0 = obj_name
-        a1 = self._buildSerializeOperation("key", key_type, None, False, [], SERIALIZATION)
-        a2 = self._buildSerializeOperation("value", value_type, None, _value_is_pointer, [], SERIALIZATION)
-        return str.format( a0, a1, a2)
-        #a1 = serialize key /simple, serialized
-        #a2 = serialize value /simple, serialized, pointer,
+        a1 = self._build_serialize_operation("key", key_type, None, False, [], S)
+        a2 = self._build_serialize_operation("value", value_type, None, _value_is_pointer, [], S)
+        return string.format(a0, a1, a2, '{', '}')
 
-    def buildMapDeserialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args):
+    def build_map_deserialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args):
         key = obj_template_args[0]
         value = obj_template_args[1]
         key_type = key.name if isinstance(key, Class) else key.type
         value_type = value.name if isinstance(value, Class) else value.type
-        str = '''
+        string = '''
         auto& map_{0} = json["{0}"];
         auto size_{0}= map_{0}.size();
-        for( size_t i = 0; i < size_{0}; ++i )
-        __begin__
+        for(size_t i = 0; i < size_{0}; ++i)
+        {5}
             auto& json = map_{0}[i];
 
             {3} key; {1}
@@ -144,14 +196,14 @@ class WriterCppSerializatorJson(WriterCpp):
             {4} value; {2}
 
             {0}[key] = value;
-        __end__
+        {6}
         '''
-        _value_is_pointer = value.is_pointer if isinstance(value, Object) else false
+        _value_is_pointer = value.is_pointer if isinstance(value, Object) else False
         a0 = obj_name
-        a1 = self._buildSerializeOperation("key", key_type, None, False, [], DESERIALIZATION)
-        a2 = self._buildSerializeOperation("value", value_type, None, _value_is_pointer, [], DESERIALIZATION)
+        a1 = self._build_serialize_operation("key", key_type, None, False, [], D)
+        a2 = self._build_serialize_operation("value", value_type, None, _value_is_pointer, [], D)
         a3 = key_type
         a4 = value_type
         if value.is_pointer:
             a4 = "IntrusivePtr<{}>".format(value_type)
-        return str.format( a0, a1, a2, a3, a4 )
+        return string.format(a0, a1, a2, a3, a4, '{', '}')

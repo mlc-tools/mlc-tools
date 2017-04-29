@@ -1,6 +1,15 @@
 import fileutils
 
 
+def add_dict(inDict, toDict):
+    for key in toDict:
+        if key in inDict:
+            inDict[key] += toDict[key]
+        else:
+            inDict[key] = toDict[key]
+    return inDict
+
+
 class Writer:
     def __init__(self, outDirectory, parser):
         self.parser = parser
@@ -8,83 +17,67 @@ class Writer:
         self.out_directory = outDirectory
         self.created_files = []
 
-        self.buffers = self._add(self.buffers, self.writeClasses(parser.classes, 0, 0))
+        self.buffers = add_dict(self.buffers, self.write_classes(parser.classes, 0))
         return
 
-    def _add(self, inDict, toDict ):
-        for key in toDict:
-            if key in inDict:
-                inDict[key] += toDict[key]
-            else:
-                inDict[key] = toDict[key]
-        return inDict
+    def write_object(self, object_, flags):
+        return {flags: ""}
 
-    def tabs(self, tabs):
-        out = ""
-        for i in range(tabs): out += "\t"
+    def write_class(self, class_, flags):
+        return {flags: ""}
+
+    def write_function(self, function, flags):
+        return {flags: ""}
+
+    def write_objects(self, objects, flags):
+        out = {flags: '\n'}
+        for object_ in objects:
+            out = add_dict(out, self.write_object(object_, flags))
         return out
 
-    def writeObject(self, object, tabs, flags):
-        return {flags:""}
-
-    def writeClass(self, cls, tabs, flags):
-        return {flags:""}
-
-    def writeFunction(self, function, tabs, flags):
-        return {flags:""}
-
-    def writeObjects(self, objects, tabs, flags):
-        out = {flags:"\n"}
-        for object in objects:
-            out = self._add(out, self.writeObject(object, tabs, flags))
+    def write_classes(self, classes, flags):
+        out = {flags: '\n'}
+        for class_ in classes:
+            dictionary = self.write_class(class_, flags)
+            self.save_file(self._get_filename_of_class(class_), dictionary[flags])
+            out = add_dict(out, dictionary)
         return out
 
-    def writeClasses(self, classes, tabs, flags):
-        out = {flags:"\n"}
-        for cls in classes:
-            dict = self.writeClass(cls, tabs, flags)
-            self.save( self._getFilenameForClass(cls), dict[flags] )
-            out = self._add( out, dict )
-        return out
-
-    def writeFunctions(self, functions, tabs, flags):
+    def write_functions(self, functions, flags):
         out = ''
-        for function in functions: out += self.tabs(tabs) + self.writeFunction(function, tabs, flags)
+        for function in functions:
+            out += self.write_function(function, flags)
         return out
 
-    def prepareFile(self, body):
+    def prepare_file(self, body):
         return body
 
-    def save(self, filename, string):
-        string = self.parser.copyright_text + self.prepareFile(string)
+    def save_file(self, filename, string):
+        string = self.parser.copyright_text + self.prepare_file(string)
         filename = self.out_directory + filename
         self.created_files.append(filename)
         exist = fileutils.isfile(filename)
-        writed = fileutils.write(filename, string)
-        if writed:
+        if fileutils.write(filename, string):
             msg = 'create:' if not exist else 'rewrited'
             print msg, filename
 
-    def removeOld(self):
+    def remove_non_actual_files(self):
         if not fileutils.isdir(self.out_directory):
             return
         files = fileutils.get_files_list(self.out_directory)
-        for file in files:
-            if self.out_directory + file not in self.created_files:
-                if not file.endswith('.pyc'):
-                    print 'remove', file
-                fileutils.remove(self.out_directory + file)
+        for filename in files:
+            if self.out_directory + filename not in self.created_files:
+                if not filename.endswith('.pyc'):
+                    print 'remove', filename
+                fileutils.remove(self.out_directory + filename)
 
-    def saveConfigFile(self, format):
+    def save_config_file(self, content):
         pattern = '#ifndef __mg_Config_h__\n#define __mg_Config_h__\n\n{}\n\n#endif //#ifndef __mg_Config_h__'
-        configs = []
+        configs = list()
         configs.append('#define MG_JSON 1')
         configs.append('#define MG_XML 2')
-        configs.append('\n#define MG_SERIALIZE_FORMAT MG_' + format.upper())
-        configs = '\n'.join(configs)
-        self.save('config.h', pattern.format(configs))
+        configs.append('\n#define MG_SERIALIZE_FORMAT MG_' + content.upper())
+        self.save_file('config.h', pattern.format('\n'.join(configs)))
 
-    def _getFilenameForClass(self, cls):
-        return cls.name
-
-
+    def _get_filename_of_class(self, class_):
+        return class_.name

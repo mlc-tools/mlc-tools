@@ -15,7 +15,7 @@ def convertInitializeValue(value):
     return value
 
 class WriterPython(Writer):
-    def __init__(self, outDirectory, parser, generateTests, configsDirectory):
+    def __init__(self, outDirectory, parser, configsDirectory):
 
         self.loaded_functions = {}
         self.load_functions(configsDirectory + 'python_external.mlc_py')
@@ -31,14 +31,14 @@ class WriterPython(Writer):
     def create_serialization_patterns(self):
         pass
 
-    def writeObject(self, object, tabs, flags):
+    def write_object(self, object, tabs, flags):
         out = ""
         return {flags:out}
 
     def getPatternFile(self):
         pass
 
-    def writeClass(self, cls, tabs, flags):
+    def write_class(self, cls, tabs, flags):
         out = ""
         pattern = self.getPatternFile()
         self.current_class = cls
@@ -51,13 +51,13 @@ class WriterPython(Writer):
 
         initialize_list = ''
         for object in cls.members:
-            initialize_list += '\t\t' + self.writeObject(object) + '\n'
+            initialize_list += '\t\t' + self.write_object(object) + '\n'
 
         self.createSerializationFunction(cls,SERIALIZATION)
         self.createSerializationFunction(cls,DESERIALIZATION)
         functions = ''
         for function in cls.functions:
-            f = self.writeFunction(cls, function)
+            f = self.write_function(cls, function)
             functions += f
 
         imports = ''
@@ -79,7 +79,7 @@ class WriterPython(Writer):
         self.current_class = None
         return {flags:out}
 
-    def writeFunction(self, cls, function):
+    def write_function(self, cls, function):
         out = ""
         key = cls.name + '.' + function.name
         if key in self.loaded_functions:
@@ -105,7 +105,7 @@ class WriterPython(Writer):
     def _getImports(self, cls):
         return ""
 
-    def _getFilenameForClass(self, cls):
+    def _get_filename_of_class(self, cls):
         return cls.name + ".py"
 
     def load_functions(self, path):
@@ -249,7 +249,7 @@ class WriterPython(Writer):
             imports += line_import.format(cls.name)
         factory = pattern.format(imports, creates)
         file = self.out_directory + 'Factory.py'
-        if fileutils.isFileChanges(file):
+        if fileutils.file_has_changes(file):
             fileutils.write(file, factory)
         self.created_files.append(file)
 
@@ -286,7 +286,7 @@ class IRequestHandler:
                 visits += line_visit.format(func_name)
         factory = pattern.format(imports, lines, visits)
         file = self.out_directory + 'IRequestHandler.py'
-        if fileutils.isFileChanges(file):
+        if fileutils.file_has_changes(file):
             fileutils.write(file, factory)
         self.created_files.append(file)
 

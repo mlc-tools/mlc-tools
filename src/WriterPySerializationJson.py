@@ -6,8 +6,8 @@ from Class import Class
 
 
 class WriterPySerializationJson(WriterPython):
-    def __init__(self, outDirectory, parser, generateTests, configsDirectory):
-        WriterPython.__init__(self, outDirectory, parser, generateTests, configsDirectory)
+    def __init__(self, outDirectory, parser, configsDirectory):
+        WriterPython.__init__(self, outDirectory, parser, configsDirectory)
 
     def create_serialization_patterns(self):
         self.simple_types = ["int", "float", "bool", "string", "cc.point"]
@@ -36,7 +36,7 @@ class WriterPySerializationJson(WriterPython):
         if '{0}' in dictionary:
             for key, value in dictionary['{0}'].iteritems():
                 {4}{0} = Factory.Factory.build( key );
-                {4}{0}.deserialize( value ) 
+                {4}{0}.deserialize( value )
                 break''')
 
         self.serialize_formats[SERIALIZATION]['list<simple>'] = []
@@ -76,7 +76,7 @@ class WriterPySerializationJson(WriterPython):
         self.serialize_formats[DESERIALIZATION]['list<serialized>'].append( self.serialize_formats[DESERIALIZATION]['list<serialized>'][0] )
 
         self.serialize_formats[SERIALIZATION]['serialized'] = []
-        self.serialize_formats[SERIALIZATION]['serialized'].append( '''if {4}{0} != None: 
+        self.serialize_formats[SERIALIZATION]['serialized'].append( '''if {4}{0} != None:
             dict = {3}
             {4}{0}.serialize(dict)
             dictionary["{0}"] = dict
@@ -127,7 +127,7 @@ class {0}:
     def get_type(self):
         return self.__type__
 
-{2}    
+{2}
 '''
     def getPatternFactoryFile(self):
         return '''import json
@@ -162,7 +162,7 @@ class Factory:
 {1}
 {2}
         dictionary = dict_cach
-'''    
+'''
 
     def getPatternDeserializationMap(self):
         return '''

@@ -31,8 +31,6 @@ python src/main.py -o out -i config -incremental yes -t no -side both -f xml
 
 	**-side** - both/client/server - used for different code
 
-	**-t** - yes/no - generate tests (not worked no :( )
-
 	**-f** xml/json - serialization type
 
 

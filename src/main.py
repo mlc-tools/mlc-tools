@@ -2,7 +2,7 @@ import fileutils
 from arguments_parser import get_arg, get_bool, get_directory
 from Parser import Parser
 from WriterCppSerializatorJson import WriterCppSerializatorJson
-from WriterCppSerializatorXml import WriterCppSerializatorXml
+from WriterCppSerializationXml import WriterCppSerializationXml
 from WriterPySerializationJson import WriterPySerializationJson
 from WriterPySerializationXml import WriterPySerializationXml
 from Copyright import Copyright
@@ -32,13 +32,12 @@ def validate_arg_side(side):
 def main():
     configs_directory = get_directory('-i', '../config/')
     out_directory = get_directory('-o', '../out/')
-    tests = get_bool('-t', False)
     language = get_arg('-l', 'cpp')
-    format = get_arg('-f', 'xml')
+    serialize_format = get_arg('-f', 'xml')
     side = get_arg('-side', 'both')
 
     validate_arg_language(language)
-    validate_arg_format(format)
+    validate_arg_format(serialize_format)
     validate_arg_side(side)
 
     parser = Parser(side)
@@ -52,19 +51,19 @@ def main():
 
     writer = None
     if language == 'py':
-        if format == 'xml':
-            writer = WriterPySerializationXml(out_directory, parser, tests, configs_directory)
+        if serialize_format == 'xml':
+            writer = WriterPySerializationXml(out_directory, parser, configs_directory)
         else:
-            writer = WriterPySerializationJson(out_directory, parser, tests, configs_directory)
+            writer = WriterPySerializationJson(out_directory, parser, configs_directory)
     elif language == 'cpp':
-        if format == 'xml':
-            writer = WriterCppSerializatorXml(out_directory, parser, tests)
+        if serialize_format == 'xml':
+            writer = WriterCppSerializationXml(out_directory, parser)
         else:
-            writer = WriterCppSerializatorJson(out_directory, parser, tests)
-    writer.saveConfigFile(format)
-    writer.removeOld()
+            writer = WriterCppSerializatorJson(out_directory, parser)
+    writer.save_config_file(serialize_format)
+    writer.remove_non_actual_files()
 
-    print 'mlc(lang: {}, side: {}) finished successful'.format(language, side)
+    print 'mlc(lang: {}, format: {} side: {}) finished successful'.format(language, serialize_format, side)
 
 
 if __name__ == '__main__':

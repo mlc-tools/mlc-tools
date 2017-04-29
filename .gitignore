@@ -1,5 +1,5 @@
-/simple_test/out
-/simple_test/build
+/simple_test/generated/
+/simple_test/build/
 /.idea/
 
 *.pyc

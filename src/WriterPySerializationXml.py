@@ -6,8 +6,8 @@ from Class import Class
 
 
 class WriterPySerializationXml(WriterPython):
-    def __init__(self, outDirectory, parser, generateTests, configsDirectory):
-        WriterPython.__init__(self, outDirectory, parser, generateTests, configsDirectory)
+    def __init__(self, outDirectory, parser, configsDirectory):
+        WriterPython.__init__(self, outDirectory, parser, configsDirectory)
 
     def create_serialization_patterns(self):
         self.simple_types = ["int", "float", "bool", "string", "cc.point"]
@@ -79,7 +79,7 @@ class WriterPySerializationXml(WriterPython):
 
         self.serialize_formats[SERIALIZATION]['serialized'] = []
         self.serialize_formats[SERIALIZATION]['serialized'].append( '''
-        if {4}{0} != None: 
+        if {4}{0} != None:
             xml_child = ET.SubElement(xml, '{0}')
             {4}{0}.serialize(xml_child)''' )
         self.serialize_formats[SERIALIZATION]['serialized'].append( self.serialize_formats[SERIALIZATION]['serialized'][0] )
@@ -127,7 +127,7 @@ class {0}:
     def get_type(self):
         return self.__type__
 
-{2}    
+{2}
 '''
     def getPatternFactoryFile(self):
         return '''import xml.etree.ElementTree as ET
@@ -160,7 +160,7 @@ class Factory:
 {1}
 {2}
         xml = xml_cache
-'''    
+'''
 
     def getPatternDeserializationMap(self):
         return '''

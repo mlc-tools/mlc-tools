@@ -11,7 +11,10 @@
  * Copyright (C) 2003, by Kristen Wegner (kristen@tima.net)
  */
 
-#pragma warning( disable: 4275 )
+#if _MSC_VER
+#	pragma warning( disable: 4275 )
+#endif
+
 #ifndef PUGIXML_VERSION
 // Define version macro; evaluates to major * 100 + minor so that it's safe to use in less-than comparisons
 #	define PUGIXML_VERSION 120
