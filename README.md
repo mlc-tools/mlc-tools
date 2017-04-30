@@ -25,15 +25,15 @@ python src/main.py -o out -i config -incremental yes -t no -side both -f xml
 
 **Parameters:**
 
-	**-o** - path to out directory
+	-o - path to out directory
 
-	**-i** - path to configs directory
+	-i - path to configs directory
 
-	**-incremental** - yes/no - rewrite/no rewrite not modified classes
+	-incremental - yes/no - rewrite/no rewrite not modified classes
 
-	**-side** - both/client/server - used for different code
+	-side - both/client/server - used for different code
 
-	**-f** xml/json - serialization type
+	-f xml/json - serialization type
 
 
 ### Синтаксис: ###
