@@ -113,7 +113,7 @@ class WriterPySerializationJson(WriterPython):
     def getSerialiationFunctionArgs(self):
         return '(self, dictionary)'
 
-    def getPatternFile(self):
+    def get_pattern_file(self):
         return '''import json
 import Factory
 {3}

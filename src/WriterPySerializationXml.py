@@ -110,11 +110,25 @@ class WriterPySerializationXml(WriterPython):
             obj.deserialize(xml_item)
             {4}{0}.append(obj)''' )
 
+        self.serialize_formats[SERIALIZATION]['link'] = []
+        self.serialize_formats[SERIALIZATION]['link'].append('')
+        self.serialize_formats[SERIALIZATION]['link'].append('''
+        if isinstance({4}{0}, {1}):
+            xml.set("{0}", {4}{0}.name)
+        else:
+            xml.set("{0}", {4}{0})
+        ''')
+        self.serialize_formats[DESERIALIZATION]['link'] = []
+        self.serialize_formats[DESERIALIZATION]['link'].append('')
+        self.serialize_formats[DESERIALIZATION]['link'].append('''name_{0} = xml.get("{0}")
+        {4}{0} = get_data_storage().get{1}(name_{0})''')
+
     def getSerialiationFunctionArgs(self):
         return '(self, xml)'
 
-    def getPatternFile(self):
-        return '''import Factory
+    def get_pattern_file(self):
+        return '''
+
 import xml.etree.ElementTree as ET
 {3}
 

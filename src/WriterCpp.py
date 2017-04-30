@@ -464,7 +464,6 @@ class WriterCpp(Writer):
         
         type_ = obj_type
         if self.parser.find_class(type_) and self.parser.find_class(type_).type == 'enum':
-            print 'serialize enum'
             string = self._build_serialize_operation_enum(obj_name, obj_type, obj_value,
                                                           obj_is_pointer, obj_template_args, serialization_type)
         else:
