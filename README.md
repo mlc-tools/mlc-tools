@@ -1,5 +1,4 @@
-# AppVeyor [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/bitbucket/volodardev/tools-mlc?branch=master&svg=true&retina=true)](https://ci.appveyor.com/api/projects/status/bitbucket/volodardev/tools-mlc?branch=master&svg=true&retina=true)
-
+[![Build status](https://ci.appveyor.com/api/projects/status/t5sp7poff0ygygw5/branch/master?svg=true)](https://ci.appveyor.com/project/Volodar/tools-mlc/branch/master)
 
 ### Simple using: ###
 
