@@ -25,7 +25,7 @@ SOURCE_GROUP("jsoncpp" FILES ${JSONCPP})
 SOURCE_GROUP("pugixml" FILES ${PUGIXML})
 SOURCE_GROUP("tests" FILES ${SRC})
 
-add_definitions(-w -O2 -std=c++14)
+add_definitions(-w -std=c++14)
 
 include_directories(
 	${ROOT}/generated/${TYPE}/
@@ -33,6 +33,5 @@ include_directories(
 	${ROOT}/external/
 	${ROOT}/external/ml
 )
-#add_executable(${PROJECT_NAME} ${SRC} ${ML} ${PUGIXML} ${JSONCPP} ${GENERATED})
-add_executable(${PROJECT_NAME} ${SRC} ${ML})
+add_executable(${PROJECT_NAME} ${SRC} ${ML} ${PUGIXML} ${JSONCPP} ${GENERATED})
 target_link_libraries(${PROJECT_NAME})
