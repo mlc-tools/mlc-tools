@@ -25,7 +25,7 @@ SOURCE_GROUP("jsoncpp" FILES ${JSONCPP})
 SOURCE_GROUP("pugixml" FILES ${PUGIXML})
 SOURCE_GROUP("tests" FILES ${SRC})
 
-add_definitions(-Wall -O2 -std=c++14)
+add_definitions(-w -std=c++14)
 
 include_directories(
 	${ROOT}/generated/${TYPE}/
