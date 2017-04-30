@@ -1,4 +1,4 @@
-# AppVeyor [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/ii6edcqb9agfa5ak?svg=true)](https://ci.appveyor.com/api/projects/status/ii6edcqb9agfa5ak?svg=true)
+# AppVeyor [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/ii6edcqb9agfa5ak/branch/master?svg=true)](https://ci.appveyor.com/api/projects/status/branch/master/ii6edcqb9agfa5ak?svg=true)
 
 ### Simple using: ###
 
