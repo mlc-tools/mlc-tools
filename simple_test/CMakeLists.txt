@@ -33,5 +33,6 @@ include_directories(
 	${ROOT}/external/
 	${ROOT}/external/ml
 )
+
 add_executable(${PROJECT_NAME} ${SRC} ${ML} ${PUGIXML} ${JSONCPP} ${GENERATED})
 target_link_libraries(${PROJECT_NAME})
