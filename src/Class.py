@@ -2,6 +2,7 @@ import re
 from Object import Object
 from Function import Function
 import constants
+from constants import Modifier
 
 
 class Class(Object):
@@ -51,21 +52,21 @@ class Class(Object):
             self._generate_getters_function()
     
     def find_modifiers(self, string):
-        self.is_abstract = self.is_abstract or ':abstract' in string
-        self.is_serialized = self.is_serialized or ':serialized' in string
-        self.is_visitor = self.is_visitor or ':visitor' in string
-        self.generate_set_function = self.generate_set_function or ':set_function' in string
-        if ':server' in string:
+        self.is_abstract = self.is_abstract or Modifier.abstract in string
+        self.is_serialized = self.is_serialized or Modifier.serialized in string
+        self.is_visitor = self.is_visitor or Modifier.visitor in string
+        self.generate_set_function = self.generate_set_function or Modifier.set_function in string
+        if Modifier.side_server in string:
             self.side = 'server'
-        if ':client' in string:
+        if Modifier.side_client in string:
             self.side = 'client'
         
-        string = re.sub(':abstract', '', string)
-        string = re.sub(':serialized', '', string)
-        string = re.sub(':visitor', '', string)
-        string = re.sub(':set_function', '', string)
-        string = re.sub(':server', '', string)
-        string = re.sub(':client', '', string)
+        string = re.sub(Modifier.side_server, '', string)
+        string = re.sub(Modifier.side_client, '', string)
+        string = re.sub(Modifier.abstract, '', string)
+        string = re.sub(Modifier.serialized, '', string)
+        string = re.sub(Modifier.visitor, '', string)
+        string = re.sub(Modifier.set_function, '', string)
         return string
     
     def _generate_setters_function(self):

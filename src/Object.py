@@ -1,4 +1,5 @@
 import re
+from constants import Modifier
 
 
 class Object:
@@ -55,34 +56,34 @@ class Object:
         self.type = re.sub('\*', '', self.type)
         return result
 
-    def find_modifiers(self, line):
+    def find_modifiers(self, string):
         args = ''
-        l = line.find('<')
-        r = line.rfind('>')
+        l = string.find('<')
+        r = string.rfind('>')
         if l != -1 and r != -1:
-            args = line[l:r + 1]
-            line = line[0:l] + line[r + 1:]
+            args = string[l:r + 1]
+            string = string[0:l] + string[r + 1:]
 
-        self.is_runtime = self.is_runtime or ':runtime' in line
-        self.is_static = self.is_static or ':static' in line
-        self.is_const = self.is_const or ':const' in line
-        self.is_key = self.is_key or ':key' in line
-        self.is_link = self.is_link or ':link' in line
-
+        if Modifier.side_server in string:
+            self.side = Modifier.side_server
+        if Modifier.side_client in string:
+            self.side = Modifier.side_client
+        self.is_runtime = self.is_runtime or Modifier.runtime in string
+        self.is_static = self.is_static or Modifier.static in string
+        self.is_key = self.is_key or Modifier.key in string
+        self.is_link = self.is_link or Modifier.link in string
+        self.is_const = self.is_const or Modifier.const in string
         self.is_const = self.is_const or self.is_link
 
-        if ':server' in line:
-            self.side = 'server'
-        if ':client' in line:
-            self.side = 'client'
-        line = re.sub(':runtime', '', line)
-        line = re.sub(':const', '', line)
-        line = re.sub(':static', '', line)
-        line = re.sub(':key', '', line)
-        line = re.sub(':server', '', line)
-        line = re.sub(':client', '', line)
-        line = re.sub(':link', '', line)
-        if args:
-            line = line[0:l] + args + line[l:]
+        string = re.sub(Modifier.side_server, '', string)
+        string = re.sub(Modifier.side_client, '', string)
+        string = re.sub(Modifier.runtime, '', string)
+        string = re.sub(Modifier.const, '', string)
+        string = re.sub(Modifier.static, '', string)
+        string = re.sub(Modifier.key, '', string)
+        string = re.sub(Modifier.link, '', string)
 
-        return line
+        if args:
+            string = string[0:l] + args + string[l:]
+
+        return string

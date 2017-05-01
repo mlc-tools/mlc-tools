@@ -1,5 +1,5 @@
 import re
-from Object import Object
+from constants import Modifier
 
 
 class Function:
@@ -26,8 +26,10 @@ class Function:
         k = 0
         i = 0
         for ch in args_s:
-            if ch == '<': counter += 1
-            if ch == '>': counter -= 1
+            if ch == '<':
+                counter += 1
+            if ch == '>':
+                counter -= 1
             if counter == 0 and (ch == ',' or i == len(args_s) - 1):
                 r = i if i < len(args_s) - 1 else i + 1
                 args.append(args_s[k:r])
@@ -38,21 +40,23 @@ class Function:
             for arg in args:
                 arg = arg.strip()
 
-                def p(ch, arg):
-                    k = -1
+                def p(char, string):
+                    index = -1
                     counter = 0
-                    for i, c in enumerate(arg):
-                        if c == '<': counter += 1
-                        if c == '>': counter -= 1
-                        if counter == 0 and c == ch:
-                            k = i
+                    for i, c in enumerate(string):
+                        if c == '<':
+                            counter += 1
+                        if c == '>':
+                            counter -= 1
+                        if counter == 0 and c == char:
+                            index = i
                             break
-                    if k == -1:
+                    if index == -1:
                         return False
 
-                    type = (arg[:k].strip() + ch).strip()
-                    name = arg[k + 1:].strip()
-                    self.args.append([name, type])
+                    type_ = (string[:index].strip() + char).strip()
+                    name = string[index + 1:].strip()
+                    self.args.append([name, type_])
                     return True
 
                 if not (p('*', arg) or p('&', arg) or p(' ', arg)):
@@ -95,17 +99,20 @@ class Function:
         self.operations = [operation for operation in operations if operation]
         return
 
-    def _find_modifiers(self, str):
-        self.is_external = self.is_external or ':external' in str
-        self.is_abstract = self.is_abstract or ':abstract' in str
-        self.is_static = self.is_static or ':static' in str
-        self.is_const = self.is_const or ':const' in str
-        if ':server' in str: self.side = 'server'
-        if ':client' in str: self.side = 'client'
-        str = re.sub(':external', '', str)
-        str = re.sub(':static', '', str)
-        str = re.sub(':const', '', str)
-        str = re.sub(':abstract', '', str)
-        str = re.sub(':server', '', str)
-        str = re.sub(':client', '', str)
-        return str
+    def _find_modifiers(self, string):
+        if Modifier.side_server in string:
+            self.side = Modifier.side_server
+        if Modifier.side_client in string:
+            self.side = Modifier.side_client
+        self.is_external = self.is_external or Modifier.external in string
+        self.is_abstract = self.is_abstract or Modifier.abstract in string
+        self.is_static = self.is_static or Modifier.static in string
+        self.is_const = self.is_const or Modifier.const in string
+
+        string = re.sub(Modifier.side_server, '', string)
+        string = re.sub(Modifier.side_client, '', string)
+        string = re.sub(Modifier.external, '', string)
+        string = re.sub(Modifier.static, '', string)
+        string = re.sub(Modifier.const, '', string)
+        string = re.sub(Modifier.abstract, '', string)
+        return string
