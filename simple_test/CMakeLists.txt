@@ -26,6 +26,9 @@ SOURCE_GROUP("pugixml" FILES ${PUGIXML})
 SOURCE_GROUP("tests" FILES ${SRC})
 
 add_definitions(-w -std=c++14)
+add_definitions(-DSERVER=1)
+add_definitions(-DCLIENT=2)
+add_definitions(-DBUILD_SIDE=${BUILD_SIDE})
 
 include_directories(
 	${ROOT}/generated/${TYPE}/

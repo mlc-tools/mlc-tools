@@ -12,9 +12,29 @@
 #include "TestEnum.h"
 #include "IntrusivePtr.h"
 #include "tests/Visitor.h"
+#include "tests/Side.h"
 #include <iostream>
 
+
 extern intrusive_ptr<mg::CommandBase> createCommand(const std::string& payload);
+
+
+bool test_serialization();
+bool test_enum();
+
+
+int main()
+{
+	auto result = true;
+	result = test_serialization() && result;
+	result = test_enum() && result;
+	result = test_visitor() && result;
+	result = test_side() && result;
+
+	std::cout << "Execute results = " << (result ? "Ok" : "Fail") << std::endl;
+	return result ? 0 : -1;
+}
+
 
 bool test_serialization()
 {
@@ -51,15 +71,4 @@ bool test_enum()
 	if(!result)
 	    std::cout << "Test compare enum fields failed." << std::endl;
 	return result;
-}
-
-int main()
-{
-	auto result = true;
-	result = test_serialization() && result;
-	result = test_enum() && result;
-	result = test_visitor() && result;
-
-	std::cout << "Execute results = " << (result ? "Ok" : "Fail") << std::endl;
-	return result ? 0 : -1;
 }

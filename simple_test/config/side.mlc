@@ -1,0 +1,28 @@
+class SideTestBase<SerializedObject>
+{
+}
+
+class SideTestServer<SerializedObject>:server
+{
+    int value = 0
+}
+
+class SideTestClient<SerializedObject>:client
+{
+    int value = 0
+}
+
+class SideTestCommon<SerializedObject>
+{
+    string server_value:server = "server"
+    string client_value:client = "client"
+
+    function string get_value():server
+    {
+        return server_value;
+    }
+    function string get_value():client
+    {
+        return client_value;
+    }
+}

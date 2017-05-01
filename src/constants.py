@@ -20,5 +20,7 @@ class Modifier:
     key = ':key'
     link = ':link'
 
-    side_client = ':client'
-    side_server = ':server'
+    client = ':client'
+    server = ':server'
+    side_client = 'client'
+    side_server = 'server'

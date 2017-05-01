@@ -56,13 +56,13 @@ class Class(Object):
         self.is_serialized = self.is_serialized or Modifier.serialized in string
         self.is_visitor = self.is_visitor or Modifier.visitor in string
         self.generate_set_function = self.generate_set_function or Modifier.set_function in string
-        if Modifier.side_server in string:
-            self.side = 'server'
-        if Modifier.side_client in string:
-            self.side = 'client'
+        if Modifier.server in string:
+            self.side = Modifier.side_server
+        if Modifier.client in string:
+            self.side = Modifier.side_client
         
-        string = re.sub(Modifier.side_server, '', string)
-        string = re.sub(Modifier.side_client, '', string)
+        string = re.sub(Modifier.server, '', string)
+        string = re.sub(Modifier.client, '', string)
         string = re.sub(Modifier.abstract, '', string)
         string = re.sub(Modifier.serialized, '', string)
         string = re.sub(Modifier.visitor, '', string)

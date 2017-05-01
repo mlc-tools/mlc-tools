@@ -64,9 +64,9 @@ class Object:
             args = string[l:r + 1]
             string = string[0:l] + string[r + 1:]
 
-        if Modifier.side_server in string:
+        if Modifier.server in string:
             self.side = Modifier.side_server
-        if Modifier.side_client in string:
+        if Modifier.client in string:
             self.side = Modifier.side_client
         self.is_runtime = self.is_runtime or Modifier.runtime in string
         self.is_static = self.is_static or Modifier.static in string
@@ -75,8 +75,8 @@ class Object:
         self.is_const = self.is_const or Modifier.const in string
         self.is_const = self.is_const or self.is_link
 
-        string = re.sub(Modifier.side_server, '', string)
-        string = re.sub(Modifier.side_client, '', string)
+        string = re.sub(Modifier.server, '', string)
+        string = re.sub(Modifier.client, '', string)
         string = re.sub(Modifier.runtime, '', string)
         string = re.sub(Modifier.const, '', string)
         string = re.sub(Modifier.static, '', string)

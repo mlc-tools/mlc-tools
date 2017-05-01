@@ -100,17 +100,17 @@ class Function:
         return
 
     def _find_modifiers(self, string):
-        if Modifier.side_server in string:
+        if Modifier.server in string:
             self.side = Modifier.side_server
-        if Modifier.side_client in string:
+        if Modifier.client in string:
             self.side = Modifier.side_client
         self.is_external = self.is_external or Modifier.external in string
         self.is_abstract = self.is_abstract or Modifier.abstract in string
         self.is_static = self.is_static or Modifier.static in string
         self.is_const = self.is_const or Modifier.const in string
 
-        string = re.sub(Modifier.side_server, '', string)
-        string = re.sub(Modifier.side_client, '', string)
+        string = re.sub(Modifier.server, '', string)
+        string = re.sub(Modifier.client, '', string)
         string = re.sub(Modifier.external, '', string)
         string = re.sub(Modifier.static, '', string)
         string = re.sub(Modifier.const, '', string)
