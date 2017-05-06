@@ -76,10 +76,10 @@ class WriterPython(Writer):
                         
         
         out = pattern.format(name, initialize_list, functions, imports, init_behavior)
-        for line in out.split('\n'):
-            if 'get_data_storage()' in line:
-                out = 'from DataStorage import get_data_storage\n' + out
-                break
+        # for line in out.split('\n'):
+        #     if 'get_data_storage()' in line:
+        #         out = 'from DataStorage import get_data_storage\n' + out
+        #         break
         # for line in out.split('\n'):
         #     if 'Factory.' in line:
         #         out = 'import Factory\n' + out
@@ -101,7 +101,7 @@ class WriterPython(Writer):
             type = object.type
             if type == "string": value = '""'
             if type == "int": value = "0"
-            if type == "float": value = "0.f"
+            if type == "float": value = "0"
             if type == "uint": value = "0"
             if type == "bool": value = "False"
             if type == "list": value = "[]"
@@ -246,7 +246,9 @@ class WriterPython(Writer):
                 else:
                     arg = obj_template_args[0]
                     arg_type = arg.name if isinstance(arg, Class) else arg.type
-                    if arg_type in self.simple_types:
+                    if arg.is_link:
+                        type = 'list<link>'
+                    elif arg_type in self.simple_types:
                         type = "list<simple>"
                         obj_type = arg_type
                     elif arg.is_pointer:

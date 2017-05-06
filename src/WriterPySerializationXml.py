@@ -123,6 +123,19 @@ class WriterPySerializationXml(WriterPython):
         self.serialize_formats[DESERIALIZATION]['link'].append('''name_{0} = xml.get("{0}")
         {4}{0} = get_data_storage().get{1}(name_{0})''')
 
+        self.serialize_formats[SERIALIZATION]['list<link>'] = []
+        self.serialize_formats[SERIALIZATION]['list<link>'].append('')
+        self.serialize_formats[SERIALIZATION]['list<link>'].append('''arr_{0} = ET.SubElement(xml, '{0}')
+        for t in {4}{0}:
+            item = ET.SubElement(arr_{0}, 'item')
+            item.set("value", t.name)''')
+        self.serialize_formats[DESERIALIZATION]['list<link>'] = []
+        self.serialize_formats[DESERIALIZATION]['list<link>'].append('')
+        self.serialize_formats[DESERIALIZATION]['list<link>'].append('''from DataStorage import DataStorage
+        arr_{0} = xml.find('{0}')
+        data = get_data_storage().get{1}(name_{0}.get('value'))
+        {4}{0}.append(data)''')
+
     def getSerialiationFunctionArgs(self):
         return '(self, xml)'
 

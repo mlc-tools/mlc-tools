@@ -490,7 +490,9 @@ class WriterCpp(Writer):
                     arg = obj_template_args[0]
                     arg_type = arg.name if isinstance(arg, Class) else arg.type
                     template_args.append(convert_type(arg_type))
-                    if arg_type in self.simple_types:
+                    if arg.is_link:
+                        type_ = 'list<link>'
+                    elif arg_type in self.simple_types:
                         type_ = '{0}<simple>'.format(type_)
                     elif arg.is_pointer:
                         type_ = 'pointer_list'
