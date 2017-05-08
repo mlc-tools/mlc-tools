@@ -140,8 +140,8 @@ class WriterCppSerializationXml(WriterCpp):
         self.serialize_formats[D]['list<link>'].append('''auto arr_{0} = xml.child("{0}");
             for(auto child : arr_{0})
             {3}
-                name = ::get<std::string>(child, "value");
-                {0}.push_back(get_data_storage().get<{5}>(name));
+                auto data_name = ::get<std::string>(child, "value");
+                {0}.push_back(get_data_storage().get<{5}>(data_name));
             {4}''')
 
         self.simple_types = ["int", "float", "bool", "string"]
