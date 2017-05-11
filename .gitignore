@@ -4,5 +4,6 @@
 
 *.pyc
 .DS_Store
+*.pyproj
 
 simple_test/mlc_tools_test.xcodeproj
