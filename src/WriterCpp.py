@@ -223,7 +223,7 @@ class WriterCpp(Writer):
         functions = self.write_functions(class_.functions, FLAG_HPP)
         constructor = _create_constructor_function_hpp(class_)
         destructor = _create_destructor_function_hpp(class_)
-        includes, forward_declarations = self._find_includes(class_, FLAG_HPP)
+        includes, forward_declarations, forward_declarations_out = self._find_includes(class_, FLAG_HPP)
         
         includes = list(set(includes.split('\n')))
         includes.sort()
@@ -253,8 +253,8 @@ class WriterCpp(Writer):
         else:
             pattern += '\n__begin__{5}' + o + f + '__end__;\n\n'
         
-        pattern = 'namespace {0}\n__begin__{2}\n\n{1}__end__//namespace {0}'.\
-            format(_get_namespace(), pattern, forward_declarations)
+        pattern = '{3}\nnamespace {0}\n__begin__{2}\n\n{1}__end__//namespace {0}'.\
+            format(_get_namespace(), pattern, forward_declarations, forward_declarations_out)
         pattern = '#ifndef __mg_{0}_h__\n#define __mg_{0}_h__\n{2}\n\n{1}\n\n#endif //#ifndef __{0}_h__'.\
             format(class_.name, pattern, includes)
         
@@ -271,7 +271,7 @@ class WriterCpp(Writer):
         functions = self.write_functions(class_.functions, FLAG_CPP)
         constructor = _create_constructor_function_cpp(self.parser, class_)
         destructor = _create_destructor_function_cpp(class_)
-        includes, f = self._find_includes(class_, FLAG_CPP)
+        includes, f, f_out = self._find_includes(class_, FLAG_CPP)
         includes = self._find_includes_in_function_operation(class_, includes)
         
         includes = list(set(includes.split('\n')))
@@ -632,12 +632,24 @@ class WriterCpp(Writer):
             if need_include(t):
                 out += pattern.format(get_include_file(self.parser, self._currentClass, t))
         
+        forward_declarations_out = ''
         for t in forward_types:
             if t == self._currentClass.name:
                 continue
             type_ = convert_type(t)
-            if type_.find('::') == -1 and need_include(t):
-                forward_declarations += '\nclass {0};'.format(type_)
+            if need_include(t):
+                if type_.find('::') == -1:
+                    forward_declarations += '\nclass {0};'.format(type_)
+                else:
+                    k = type_.index('::')
+                    ns = type_[0:k]
+                    type_ns = type_[k+2:]
+                    if ns == 'mg':
+                        forward_declarations += '\nclass {0};'.format(type_ns)
+                    else:
+                        forward_declarations_out += '\nnamespace {}\n__begin__\nclass {};\n__end__'.format(ns, type_ns)
+
+
             # else:
             #     continue
             #     ns = type[0:type.find('::')]
@@ -659,7 +671,7 @@ class WriterCpp(Writer):
         forward_declarations.sort()
         forward_declarations = '\n'.join(forward_declarations)
         
-        return out, forward_declarations
+        return out, forward_declarations, forward_declarations_out
     
     def _find_includes_in_function_operation(self, class_, current_includes):
         includes = current_includes
