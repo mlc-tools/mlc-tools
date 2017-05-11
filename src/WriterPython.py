@@ -150,10 +150,8 @@ class WriterPython(Writer):
         if cls.behaviors:
             body += ('        {0}.{1}' + self.getSerialiationFunctionArgs() + '\n').format(cls.behaviors[0].name,
                                                                                        function.name)
-        if serialize_type == SERIALIZATION:
-            body += '        from DataStorage import get_data_storage\n'
-        else:
-            body += '        import Factory\n'
+        body += '        import Factory\n'
+        body += '        from DataStorage import get_data_storage\n'
         for obj in cls.members:
             if obj.is_runtime: continue
             if obj.is_static: continue
