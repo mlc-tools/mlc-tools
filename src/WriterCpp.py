@@ -588,6 +588,9 @@ class WriterCpp(Writer):
         for f in class_.functions:
             for t in f.args:
                 def checkType(type_string):
+                    is_pointer_ = '*' in type_string
+                    is_ref_ = '&' in type_string
+
                     typename = re.sub('const', '', type_string).strip()
                     typename = re.sub('\*', '', typename).strip()
                     typename = re.sub('&', '', typename).strip()
@@ -596,10 +599,17 @@ class WriterCpp(Writer):
                     if 'CommandBase' in typename:
                         include_types['CommandBase'] = 1
                     else:
-                        if flags == FLAG_CPP or type_string != typename + '*':
+                        # if flags == FLAG_CPP or type_string != typename + '*':
+                        #     include_types[typename] = 1
+                        # if flags == FLAG_HPP and type_string == typename + '*':
+                        #     forward_types[typename] = 1
+                        if flags == FLAG_CPP:
                             include_types[typename] = 1
-                        if flags == FLAG_HPP and type_string == typename + '*':
-                            forward_types[typename] = 1
+                        if flags == FLAG_HPP:
+                            if is_pointer_ or is_ref_:
+                                forward_types[typename] = 1
+                            else:
+                                include_types[typename] = 1
                 
                 checkType(t[1])
                 if '<' in t[1] and '>' in t[1]:
@@ -626,7 +636,7 @@ class WriterCpp(Writer):
             if t == self._currentClass.name:
                 continue
             type_ = convert_type(t)
-            if type_.find('::') == -1:
+            if type_.find('::') == -1 and need_include(t):
                 forward_declarations += '\nclass {0};'.format(type_)
             # else:
             #     continue
