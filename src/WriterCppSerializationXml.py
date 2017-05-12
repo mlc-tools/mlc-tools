@@ -3,6 +3,7 @@ from WriterCpp import SERIALIZATION as S
 from WriterCpp import DESERIALIZATION as D
 from Object import Object
 from Class import Class
+from DataStorageCreators import DataStorageCppXml
 
 
 class WriterCppSerializationXml(WriterCpp):
@@ -237,3 +238,6 @@ class WriterCppSerializationXml(WriterCpp):
             return '::set(xml, "{0}", (std::string){0});'.format(obj_name)
         else:
             return '{0} = ::get<std::string>(xml, "{0}");'.format(obj_name)
+
+    def create_data_storage_class(self, name, classes):
+        return DataStorageCppXml(name, classes)

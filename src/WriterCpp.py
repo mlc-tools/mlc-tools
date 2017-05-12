@@ -3,6 +3,8 @@ from Writer import Writer
 from Writer import add_dict
 from Class import Class
 from Function import Function
+import constants
+import fileutils
 
 FLAG_HPP = 2
 FLAG_CPP = 4
@@ -48,6 +50,7 @@ def get_include_file(parser, class_, filename):
     types['Observer'] = '"Observer.h"'
     types['std::vector<int>'] = '<vector>'
     types['std::vector<intrusive_ptr<CommandBase>>'] = '<vector>'
+    types['std::istream'] = '<istream>'
     if filename in types:
         return types[filename]
     if 'std::map' in filename:
@@ -298,10 +301,16 @@ class WriterCpp(Writer):
                          {2}{7}
                          {1}__end__'''
         registration = 'REGISTRATION_OBJECT({0});\n'.format(class_.name)
+        has_get_type = False
         for func in class_.functions:
             if func.is_abstract:
                 registration = ''
                 break
+            if func.name == constants.CLASS_FUNCTION_GET_TYPE:
+                has_get_type = True
+        if not has_get_type:
+            registration = ''
+
         if not class_.is_serialized:
             registration = ''
         if class_.is_abstract:
@@ -328,7 +337,7 @@ class WriterCpp(Writer):
             modifier = 'virtual '
             if function.is_static:
                 modifier = 'static '
-            if function.name == self._currentClass.name or function.name.find('operator ') == 0:
+            if function.name == self._currentClass.name or function.name.find('operator ') == 0 or function.is_template:
                 modifier = ''
             is_override = ''
             if self.parser.is_function_override(self._currentClass, function):
@@ -620,11 +629,12 @@ class WriterCpp(Writer):
                     for arg in args:
                         checkType(arg)
             
-            type_ = f.return_type
-            type_ = re.sub('const', '', type_).strip()
-            type_ = re.sub('\*', '', type_).strip()
-            type_ = re.sub('&', '', type_).strip()
-            include_types[type_] = 1
+            if not f.is_template:
+                type_ = f.return_type
+                type_ = re.sub('const', '', type_).strip()
+                type_ = re.sub('\*', '', type_).strip()
+                type_ = re.sub('&', '', type_).strip()
+                include_types[type_] = 1
         
         for t in include_types:
             if t == self._currentClass.name:
@@ -646,7 +656,7 @@ class WriterCpp(Writer):
                     type_ns = type_[k+2:]
                     if ns == 'mg':
                         forward_declarations += '\nclass {0};'.format(type_ns)
-                    else:
+                    elif not ns == 'std':
                         forward_declarations_out += '\nnamespace {}\n__begin__\nclass {};\n__end__'.format(ns, type_ns)
 
 
@@ -721,3 +731,28 @@ class WriterCpp(Writer):
             body.append(line)
         body = '\n'.join(body)
         return body
+
+    def create_data_storage_class(self, name, classes):
+        pass
+
+    def create_data_storage(self):
+        storage = self.create_data_storage_class('DataStorage', self.parser.classes)
+        getter_h = storage.get_header_getter()
+        getters_cpp = storage.get_source_getters(self.parser.classes)
+
+        storage.functions.append(getter_h);
+        header = self.write_class(storage, FLAG_HPP)[FLAG_HPP]
+        del storage.functions[storage.functions.index(getter_h)]
+
+        storage.functions.extend(getters_cpp)
+        source = self.write_class(storage, FLAG_CPP)[FLAG_CPP]
+
+        header = self.prepare_file(header)
+        file = self.out_directory + '{}.h'.format(storage.name)
+        fileutils.write(file, header)
+        self.created_files.append(file)
+
+        source = self.prepare_file(source)
+        file = self.out_directory + '{}.cpp'.format(storage.name)
+        fileutils.write(file, source)
+        self.created_files.append(file)

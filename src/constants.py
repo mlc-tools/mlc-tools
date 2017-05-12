@@ -19,6 +19,7 @@ class Modifier:
     runtime = ':runtime'
     key = ':key'
     link = ':link'
+    storage = ":storage"
 
     client = ':client'
     server = ':server'

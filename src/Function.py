@@ -12,6 +12,7 @@ class Function:
         self.is_external = False
         self.is_static = False
         self.is_abstract = False
+        self.is_template = False
         self.side = 'both'
 
     def parse(self, line):

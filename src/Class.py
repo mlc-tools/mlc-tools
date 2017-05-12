@@ -14,6 +14,7 @@ class Class(Object):
         self.is_abstract = False
         self.is_serialized = False
         self.is_visitor = False
+        self.is_storage = False
         self.generate_set_function = False
         self.type = 'class'
         self.group = ''
@@ -55,6 +56,7 @@ class Class(Object):
         self.is_abstract = self.is_abstract or Modifier.abstract in string
         self.is_serialized = self.is_serialized or Modifier.serialized in string
         self.is_visitor = self.is_visitor or Modifier.visitor in string
+        self.is_storage = self.is_storage or Modifier.storage in string
         self.generate_set_function = self.generate_set_function or Modifier.set_function in string
         if Modifier.server in string:
             self.side = Modifier.side_server
@@ -66,6 +68,7 @@ class Class(Object):
         string = re.sub(Modifier.abstract, '', string)
         string = re.sub(Modifier.serialized, '', string)
         string = re.sub(Modifier.visitor, '', string)
+        string = re.sub(Modifier.storage, '', string)
         string = re.sub(Modifier.set_function, '', string)
         return string
     

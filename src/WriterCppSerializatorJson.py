@@ -3,7 +3,7 @@ from WriterCpp import SERIALIZATION as S
 from WriterCpp import DESERIALIZATION as D
 from Object import Object
 from Class import Class
-
+from DataStorageCreators import DataStorageCppJson
 
 class WriterCppSerializatorJson(WriterCpp):
     def __init__(self, out_directory, parser):
@@ -165,7 +165,7 @@ class WriterCppSerializatorJson(WriterCpp):
         string = '''
         auto& map_{0} = json["{0}"];
         for(auto pair : {0})
-        {5}
+        {3}
             auto& json = map_{0}[map_{0}.size()];
 
             auto& key = pair.first; {1}
@@ -207,3 +207,6 @@ class WriterCppSerializatorJson(WriterCpp):
         if value.is_pointer:
             a4 = "IntrusivePtr<{}>".format(value_type)
         return string.format(a0, a1, a2, a3, a4, '{', '}')
+
+    def create_data_storage_class(self, name, classes):
+        return DataStorageCppJson(name, classes)
