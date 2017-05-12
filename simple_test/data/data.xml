@@ -1,0 +1,11 @@
+<data>
+	<unit name="unitname1" >
+		<visual  icon="some_image" name="some_locale_key">
+		</visual>
+	</unit>
+
+	<unit name="unitname2" >
+		<visual name="some_locale_key" icon="some_image">
+		</visual>
+	</unit>
+</data>

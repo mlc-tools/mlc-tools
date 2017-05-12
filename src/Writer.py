@@ -18,7 +18,6 @@ class Writer:
         self.created_files = []
 
         self.buffers = add_dict(self.buffers, self.write_classes(parser.classes, 0))
-        self.create_data_storage()
         return
 
     def write_object(self, object_, flags):

@@ -14,7 +14,8 @@
 #include "tests/Visitor.h"
 #include "tests/Side.h"
 #include <iostream>
-
+#include "DataStorage.h"
+#include <fstream>
 
 extern intrusive_ptr<mg::CommandBase> createCommand(const std::string& payload);
 
@@ -25,6 +26,13 @@ bool test_enum();
 
 int main()
 {
+	std::fstream stream("../assets/data.xml", std::ios::in);
+	std::string str((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
+	mg::DataStorage::shared().initialize(str);
+
+	auto unit = mg::DataStorage::shared().get<mg::DataUnit>("unitname1");
+	assert(unit != nullptr);
+
 	auto result = true;
 	result = test_serialization() && result;
 	result = test_enum() && result;

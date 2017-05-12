@@ -1,6 +1,7 @@
 import fileutils
 from arguments_parser import get_arg, get_bool, get_directory
 from Parser import Parser
+from DataParser import DataParser
 from WriterCppSerializatorJson import WriterCppSerializatorJson
 from WriterCppSerializationXml import WriterCppSerializationXml
 from WriterPySerializationJson import WriterPySerializationJson
@@ -30,6 +31,8 @@ def validate_arg_side(side):
 
 
 def main():
+    data_directory = get_directory('-data', '')
+    out_data_directory = get_directory('-data_out', '')
     configs_directory = get_directory('-i', '../config/')
     out_directory = get_directory('-o', '../out/')
     language = get_arg('-l', 'cpp')
@@ -61,8 +64,17 @@ def main():
         else:
             writer = WriterCppSerializatorJson(out_directory, parser)
     writer.save_config_file(serialize_format)
-    writer.remove_non_actual_files()
 
+    if data_directory:
+        classes = []
+        for class_ in parser.classes:
+            if class_.is_storage:
+                classes.append(class_)
+        data_parser = DataParser(classes, data_directory)
+        data_file = data_parser.flush(out_data_directory)
+        writer.create_data_storage(data_file)
+
+    writer.remove_non_actual_files()
     print 'mlc(lang: {}, format: {} side: {}) finished successful'.format(language, serialize_format, side)
 
 

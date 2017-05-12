@@ -1,0 +1,10 @@
+class data/DataUnit<SerializedObject>:storage
+{
+	string name
+	VisualUnit visual
+}
+class data/VisualUnit<SerializedObject>
+{
+	string name
+	string icon
+}
