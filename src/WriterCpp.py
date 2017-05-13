@@ -41,6 +41,7 @@ def convert_type(type_):
 def get_include_file(parser, class_, filename):
     types = dict()
     types['list'] = '<vector>'
+    types['vector'] = '<vector>'
     types['map'] = '<map>'
     types['set'] = '<set>'
     types['string'] = '<string>'
@@ -636,12 +637,6 @@ class WriterCpp(Writer):
                 type_ = re.sub('&', '', type_).strip()
                 include_types[type_] = 1
         
-        for t in include_types:
-            if t == self._currentClass.name:
-                continue
-            if need_include(t):
-                out += pattern.format(get_include_file(self.parser, self._currentClass, t))
-        
         forward_declarations_out = ''
         for t in forward_types:
             if t == self._currentClass.name:
@@ -658,7 +653,17 @@ class WriterCpp(Writer):
                         forward_declarations += '\nclass {0};'.format(type_ns)
                     elif not ns == 'std':
                         forward_declarations_out += '\nnamespace {}\n__begin__\nclass {};\n__end__'.format(ns, type_ns)
+                    elif ns == 'std':
+                        if '<' in type_ns:
+                           type_ns = type_ns[0:type_ns.index('<')]
+                        include_types[type_ns] = 1
 
+        for t in include_types:
+            if t == self._currentClass.name:
+                continue
+            if need_include(t):
+                out += pattern.format(get_include_file(self.parser, self._currentClass, t))
+        
 
             # else:
             #     continue
