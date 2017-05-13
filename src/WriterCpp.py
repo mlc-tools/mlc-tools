@@ -693,7 +693,7 @@ class WriterCpp(Writer):
                     includes += '\n#include "Exception.h"'
                 if 'std::sqrt' in operation:
                     includes += '\n#include <cmath>'
-                if 'get_data_storage()' in operation:
+                if 'DataStorage::shared()' in operation:
                     includes += '\n#include "DataStorage.h"'
                     
                 for type_ in self.parser.classes:

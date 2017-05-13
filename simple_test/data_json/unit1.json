@@ -4,6 +4,7 @@
 		"visual": {
 			"name": "some_locale_key",
 			"icon": "some_image"
-		}
+		},
+		"link_to_data" : "unitname2"
 	}
 }

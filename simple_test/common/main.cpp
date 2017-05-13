@@ -13,6 +13,7 @@
 #include "IntrusivePtr.h"
 #include "tests/Visitor.h"
 #include "tests/Side.h"
+#include "tests/Data.h"
 #include <iostream>
 #include "DataStorage.h"
 #include <fstream>
@@ -24,8 +25,7 @@ extern intrusive_ptr<mg::CommandBase> createCommand(const std::string& payload);
 bool test_serialization();
 bool test_enum();
 
-
-int main()
+void initialize_data_storage()
 {
 #if MG_SERIALIZE_FORMAT == MG_JSON
 	std::fstream stream("../assets/data.json", std::ios::in);
@@ -33,17 +33,22 @@ int main()
 #if MG_SERIALIZE_FORMAT == MG_XML
 	std::fstream stream("../assets/data.xml", std::ios::in);
 #endif
+
 	std::string str((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
 	mg::DataStorage::shared().initialize(str);
+}
 
-	auto unit = mg::DataStorage::shared().get<mg::DataUnit>("unitname1");
-	assert(unit != nullptr);
-
+int main()
+{
 	auto result = true;
+
+	initialize_data_storage();
+
 	result = test_serialization() && result;
 	result = test_enum() && result;
 	result = test_visitor() && result;
 	result = test_side() && result;
+	result = test_data() && result;
 
 	std::cout << "Execute results = " << (result ? "Ok" : "Fail") << std::endl;
 	return result ? 0 : -1;

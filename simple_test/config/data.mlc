@@ -2,6 +2,7 @@ class data/DataUnit<SerializedObject>:storage
 {
 	string name
 	VisualUnit visual
+	DataUnit*:link link_to_data
 }
 class data/VisualUnit<SerializedObject>
 {

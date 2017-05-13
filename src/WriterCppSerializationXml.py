@@ -122,7 +122,7 @@ class WriterCppSerializationXml(WriterCpp):
         self.serialize_formats[D]['link'] = []
         self.serialize_formats[D]['link'].append('static_assert(0, "link "{0}" not should have a initialize value");')
         self.serialize_formats[D]['link'].append('''auto name_{0} = ::get<std::string>(xml, "{0}");
-            {0} = get_data_storage().get<{1}>(name_{0});''')
+            {0} = DataStorage::shared().get<{1}>(name_{0});''')
 
         self.serialize_formats[S]['list<link>'] = []
         self.serialize_formats[S]['list<link>'].append(
@@ -142,7 +142,7 @@ class WriterCppSerializationXml(WriterCpp):
             for(auto child : arr_{0})
             {3}
                 auto data_name = ::get<std::string>(child, "value");
-                {0}.push_back(get_data_storage().get<{5}>(data_name));
+                {0}.push_back(DataStorage::shared().get<{5}>(data_name));
             {4}''')
 
         self.simple_types = ["int", "float", "bool", "string"]

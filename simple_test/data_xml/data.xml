@@ -1,10 +1,10 @@
 <data>
-	<unit name="unitname1" >
+	<unit name="unitname1" link_to_data="unitname2">
 		<visual  icon="some_image" name="some_locale_key">
 		</visual>
 	</unit>
 
-	<unit name="unitname2" >
+	<unit name="unitname2" link_to_data="unitname1">
 		<visual name="some_locale_key" icon="some_image">
 		</visual>
 	</unit>

@@ -132,6 +132,13 @@ class WriterCppSerializatorJson(WriterCpp):
                 {0}.back()->deserialize(arr_{0}[i][type]);
             {4}''')
 
+        self.serialize_formats[S]['link'] = []
+        self.serialize_formats[S]['link'].append('')
+        self.serialize_formats[S]['link'].append('::set(json,"{0}",{0}->name);')
+        self.serialize_formats[D]['link'] = []
+        self.serialize_formats[D]['link'].append('')
+        self.serialize_formats[D]['link'].append('{0} = DataStorage::shared().get<{1}>(::get<std::string>(json["{0}"]));')
+
         self.simple_types = ["int", "float", "bool", "string"]
         for i in range(2):
             for type_ in self.simple_types:
