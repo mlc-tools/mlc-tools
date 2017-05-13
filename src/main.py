@@ -70,9 +70,9 @@ def main():
         for class_ in parser.classes:
             if class_.is_storage:
                 classes.append(class_)
-        data_parser = DataParser(classes, data_directory)
+        data_parser = DataParser(classes, serialize_format, data_directory)
         data_file = data_parser.flush(out_data_directory)
-        writer.create_data_storage(data_file)
+        writer.create_data_storage()
 
     writer.remove_non_actual_files()
     print 'mlc(lang: {}, format: {} side: {}) finished successful'.format(language, serialize_format, side)

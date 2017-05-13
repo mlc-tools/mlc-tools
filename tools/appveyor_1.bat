@@ -1,4 +1,4 @@
-python src/main.py -i simple_test/config -o simple_test/generated/xml -f xml -l cpp -side server
+python src/main.py -i simple_test/config -o simple_test/generated/xml -f xml -l cpp -side server -data simple_test/data_xml -data_out simple_test/assets
 cd simple_test
 mkdir build
 cd build 

@@ -1,4 +1,4 @@
-python src/main.py -i simple_test/config -o simple_test/generated/json -f json -l cpp -side client
+python src/main.py -i simple_test/config -o simple_test/generated/json -f json -l cpp -side client -data simple_test/data_json -data_out simple_test/assets
 cd simple_test
 mkdir build
 cd build 

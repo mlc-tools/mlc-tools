@@ -1,0 +1,9 @@
+{
+	"unit": {
+		"name": "unitname1",
+		"visual": {
+			"name": "some_locale_key",
+			"icon": "some_image"
+		}
+	}
+}

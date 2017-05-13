@@ -16,6 +16,7 @@
 #include <iostream>
 #include "DataStorage.h"
 #include <fstream>
+#include "config.h"
 
 extern intrusive_ptr<mg::CommandBase> createCommand(const std::string& payload);
 
@@ -26,7 +27,12 @@ bool test_enum();
 
 int main()
 {
+#if MG_SERIALIZE_FORMAT == MG_JSON
+	std::fstream stream("../assets/data.json", std::ios::in);
+#endif
+#if MG_SERIALIZE_FORMAT == MG_XML
 	std::fstream stream("../assets/data.xml", std::ios::in);
+#endif
 	std::string str((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
 	mg::DataStorage::shared().initialize(str);
 

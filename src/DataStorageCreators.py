@@ -30,7 +30,7 @@ def get_member_name(name):
 
 class DataStorageCpp(Class):
     
-    def __init__(self, name, classes, data_file):
+    def __init__(self, name, classes):
         Class.__init__(self)
 
         self.name = name
@@ -103,8 +103,8 @@ class DataStorageCpp(Class):
 
 class DataStorageCppXml(DataStorageCpp):
 
-    def __init__(self, name, classes, data_file):
-        DataStorageCpp.__init__(self, name, classes, data_file)
+    def __init__(self, name, classes):
+        DataStorageCpp.__init__(self, name, classes)
 
     def add_initialize_function_operations(self, function):
         function.operations.append('assert(!{});'.format('_loaded'))
@@ -116,8 +116,8 @@ class DataStorageCppXml(DataStorageCpp):
 
 class DataStorageCppJson(DataStorageCpp):
 
-    def __init__(self, name, classes, data_file):
-        DataStorageCpp.__init__(self, name, classes, data_file)
+    def __init__(self, name, classes):
+        DataStorageCpp.__init__(self, name, classes)
 
     def add_initialize_function_operations(self, function):
         function.operations.append('assert(!{});'.format('_loaded'))
