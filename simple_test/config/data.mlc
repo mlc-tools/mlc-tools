@@ -4,6 +4,7 @@ class data/DataUnit<SerializedObject>:storage
 	VisualUnit visual
 	DataUnit*:link link_to_data
 	list<DataUnit*:link> all_units
+	map<DataUnit*:link, int> map_units
 }
 class data/VisualUnit<SerializedObject>
 {

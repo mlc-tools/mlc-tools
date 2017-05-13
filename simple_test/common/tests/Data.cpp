@@ -50,6 +50,30 @@ bool test_list_links()
 	return result;
 }
 
+bool test_map_links()
+{
+	bool result = true;
+
+	auto unit1 = mg::DataStorage::shared().get<mg::DataUnit>("unitname1");
+	auto unit2 = mg::DataStorage::shared().get<mg::DataUnit>("unitname2");
+
+	result = result && unit1->map_units.size() == 2;
+	result = result && unit2->map_units.size() == 2;
+
+	for (auto pair : unit1->map_units)
+	{
+		result = result && (pair.first== unit1 || pair.first == unit2);
+		result = result && (pair.second == 1 || pair.second == 2);
+	}
+	for (auto pair : unit2->map_units)
+	{
+		result = result && (pair.first == unit1 || pair.first == unit2);
+		result = result && (pair.second == 1 || pair.second == 2);
+	}
+
+	return result;
+}
+
 bool test_data()
 {
     bool result = true;
@@ -57,6 +81,7 @@ bool test_data()
 	result = test_units() && result;
 	result = test_links() && result;
 	result = test_list_links() && result;
+	result = test_map_links() && result;
 
     return result;
 }

@@ -204,8 +204,8 @@ class WriterCppSerializatorJson(WriterCpp):
         '''
         _value_is_pointer = value.is_pointer
         a0 = obj_name
-        a1 = self._build_serialize_operation("key", key_type, None, False, [], S)
-        a2 = self._build_serialize_operation("value", value_type, None, _value_is_pointer, [], S)
+        a1 = self._build_serialize_operation("key", key_type, None, False, [], S, key.is_link)
+        a2 = self._build_serialize_operation("value", value_type, None, _value_is_pointer, [], S, value.is_link)
         return string.format(a0, a1, a2, '{', '}')
 
     def build_map_deserialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args):
@@ -227,11 +227,18 @@ class WriterCppSerializatorJson(WriterCpp):
             {0}[key] = value;
         {6}
         '''
+        if key.is_link:
+            key_str = 'const {}* key(nullptr);'.format(key_type)
+        elif key.is_pointer:
+            key_str = 'auto key = make_intrusive<{}>();'.format(key_type)
+        else:
+            key_str = '{} key;'.format(key_type)
+
         _value_is_pointer = value.is_pointer if isinstance(value, Object) else False
         a0 = obj_name
-        a1 = self._build_serialize_operation("key", key_type, None, False, [], D)
-        a2 = self._build_serialize_operation("value", value_type, None, _value_is_pointer, [], D)
-        a3 = key_type
+        a1 = self._build_serialize_operation("key", key_type, None, False, [], D, key.is_link)
+        a2 = self._build_serialize_operation("value", value_type, None, _value_is_pointer, [], D, value.is_link)
+        a3 = key_str
         a4 = value_type
         if value.is_pointer:
             a4 = "IntrusivePtr<{}>".format(value_type)

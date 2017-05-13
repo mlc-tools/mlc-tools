@@ -8,6 +8,10 @@
 		"link_to_data" : "unitname2",
 		"all_units" : [
 			"unitname1", "unitname2"
+		],
+		"map_units" : [
+			{ "key": "unitname1", "value" : 1},
+			{ "key": "unitname2", "value" : 2}
 		]
 	}
 }
