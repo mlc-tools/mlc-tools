@@ -29,12 +29,34 @@ bool test_links()
 	return result;
 }
 
+bool test_list_links()
+{
+	bool result = true;
+
+	auto unit1 = mg::DataStorage::shared().get<mg::DataUnit>("unitname1");
+	auto unit2 = mg::DataStorage::shared().get<mg::DataUnit>("unitname2");
+
+	result = result && unit1->all_units.size() == 2;
+	result = result && unit2->all_units.size() == 2;
+	for (auto unit : unit1->all_units)
+	{
+		result = result && (unit == unit1 || unit == unit2);
+	}
+	for (auto unit : unit2->all_units)
+	{
+		result = result && (unit == unit1 || unit == unit2);
+	}
+
+	return result;
+}
+
 bool test_data()
 {
     bool result = true;
 
 	result = test_units() && result;
 	result = test_links() && result;
+	result = test_list_links() && result;
 
     return result;
 }

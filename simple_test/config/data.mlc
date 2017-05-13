@@ -3,6 +3,7 @@ class data/DataUnit<SerializedObject>:storage
 	string name
 	VisualUnit visual
 	DataUnit*:link link_to_data
+	list<DataUnit*:link> all_units
 }
 class data/VisualUnit<SerializedObject>
 {

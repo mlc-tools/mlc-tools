@@ -5,6 +5,9 @@
 			"name": "some_locale_key_2",
 			"icon": "some_image_2"
 		},
-		"link_to_data" : "unitname1"
+		"link_to_data" : "unitname1",
+		"all_units" : [
+			"unitname2", "unitname1"
+		]
 	}
 }
