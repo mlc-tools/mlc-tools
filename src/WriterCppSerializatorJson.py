@@ -245,4 +245,4 @@ class WriterCppSerializatorJson(WriterCpp):
         return string.format(a0, a1, a2, a3, a4, '{', '}')
 
     def create_data_storage_class(self, name, classes):
-        return DataStorageCppJson(name, classes)
+        return DataStorageCppJson(name, classes, self.parser)

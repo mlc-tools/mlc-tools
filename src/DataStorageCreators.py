@@ -3,11 +3,32 @@ from Object import Object
 from Function import Function
 import constants
 
-def get_member_name(name):
-    name = name.lower()
-    if name.find('data') == 0:
+# DataNameFoo -> name_foo
+def get_data_name(name):
+    if name.find('Data') == 0:
         name = name[4:]
-        
+    name_ = ''
+    for i, ch in enumerate(name):
+        if ch.isupper() and i > 0:
+            name_ += '_'
+        name_ += ch.lower()
+    return name_
+
+#name_foo - > DataNameFoo
+def get_class_name_from_data_name(name):
+    upper = True
+    name_ = ''
+    for ch in name:
+        if ch == '_':
+            upper = True
+            continue
+        name_ += ch if not upper else ch.upper()
+        upper = False
+    return 'Data' + name_
+
+# city -> cities
+# unit -> units
+def get_data_list_name(name):
     last = name[-1]
     if last in 'y':
         if last in 'a,e,i,o,u,y':
@@ -24,14 +45,14 @@ def get_member_name(name):
         name += 'es'
     else:
         name += 's'
-
     return name
 
 
 class DataStorageCpp(Class):
     
-    def __init__(self, name, classes):
+    def __init__(self, name, classes, parser):
         Class.__init__(self)
+        self.parser = parser
 
         self.name = name
         self.is_serialized = True
@@ -39,10 +60,10 @@ class DataStorageCpp(Class):
         string_obj = Object()
         string_obj.type = 'string'
         for class_ in classes:
-            if class_.is_storage:
+            if class_.is_storage and (class_.side == parser.side or class_.side == 'both'):
                 object = Object()
                 object.type = 'map'
-                object.name = get_member_name(class_.name)
+                object.name = get_data_list_name(get_data_name(class_.name))
                 object.template_args.append(string_obj)
                 object.template_args.append(class_)
                 self.members.append(object)
@@ -89,22 +110,23 @@ class DataStorageCpp(Class):
         string_obj.type = 'string'
         getters = []
         for class_ in classes:
-            if class_.is_storage:
+            if class_.is_storage and (class_.side == self.parser.side or class_.side == 'both'):
                 getter = Function()
                 getter.is_template = True
                 getter.is_const = True
                 getter.name = 'get'
                 getter.args.append(['name', 'string'])
                 getter.return_type = 'template <> const {}*'.format(class_.name)
-                getter.operations.append('return _loaded ? &{0}.at(name) : &const_cast<{1}*>(this)->{0}[name];'.format(get_member_name(class_.name), self.name))
+                name = get_data_list_name(get_data_name(class_.name))
+                getter.operations.append('return _loaded ? &{0}.at(name) : &const_cast<{1}*>(this)->{0}[name];'.format(name, self.name))
                 getters.append(getter)
         return getters
 
 
 class DataStorageCppXml(DataStorageCpp):
 
-    def __init__(self, name, classes):
-        DataStorageCpp.__init__(self, name, classes)
+    def __init__(self, name, classes, parser):
+        DataStorageCpp.__init__(self, name, classes, parser)
 
     def add_initialize_function_operations(self, function):
         function.operations.append('assert(!{});'.format('_loaded'))
@@ -116,8 +138,8 @@ class DataStorageCppXml(DataStorageCpp):
 
 class DataStorageCppJson(DataStorageCpp):
 
-    def __init__(self, name, classes):
-        DataStorageCpp.__init__(self, name, classes)
+    def __init__(self, name, classes, parser):
+        DataStorageCpp.__init__(self, name, classes, parser)
 
     def add_initialize_function_operations(self, function):
         function.operations.append('assert(!{});'.format('_loaded'))

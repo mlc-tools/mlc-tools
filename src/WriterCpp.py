@@ -56,7 +56,13 @@ def get_include_file(parser, class_, filename):
         return types[filename]
     if 'std::map' in filename:
         return '<map>'
-
+    if filename == 'DataStorage':
+        back = ''
+        backs = len(class_.group.split('/')) if class_.group else 0
+        for i in range(backs):
+            back += '../'
+        return '"' + back + filename + '.h"'
+        
     included_class = parser.find_class(filename)
     if included_class and included_class.name == filename and class_.group != included_class.group:
         back = ''
@@ -699,8 +705,8 @@ class WriterCpp(Writer):
                 if 'std::sqrt' in operation:
                     includes += '\n#include <cmath>'
                 if 'DataStorage::shared()' in operation:
-                    includes += '\n#include "DataStorage.h"'
-                    
+                    includes += '\n#include {}'.\
+                        format(get_include_file(self.parser, self._currentClass, 'DataStorage'))                    
                 for type_ in self.parser.classes:
                     if type_.name in operation:
                         a = '"{}.h"'.format(type_.name)

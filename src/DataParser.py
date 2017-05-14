@@ -2,19 +2,20 @@ import xml.etree.ElementTree as ET
 import fileutils
 import xml.etree.ElementTree as ET
 import xml.dom.minidom
-from DataStorageCreators import get_member_name
+from DataStorageCreators import *
 import json
 
 class DataParser:
     def __init__(self, classes, format, data_directory):
         self.objects = {}
         self.format = format
+        self.classes = classes
         
         if self.format == 'xml':
             self._parse_xml(data_directory)
         elif self.format == 'json':
             self._parse_json(data_directory)
-        self._validate(classes)
+        self._validate()
 
     def flush(self, out_data_directory):
         buffer = ''
@@ -31,10 +32,18 @@ class DataParser:
             file = data_directory + file
             tree = ET.parse(file)
             root = tree.getroot()
-            for object in root:
+
+            def add(object):
                 if object.tag not in self.objects:
                     self.objects[object.tag] = []
+                self._validate_type(object.tag, file)
                 self.objects[object.tag].append(object)
+
+            if root.tag == 'data':
+                for object in root:
+                    add(object)
+            else:
+                add(root)
 
     def _parse_json(self, data_directory):
         files = fileutils.get_files_list(data_directory)
@@ -43,29 +52,29 @@ class DataParser:
             root = json.loads(open(file).read())
             for key in root:
                 name = key;
+                self._validate_type(key, file)
                 if name not in self.objects:
                     self.objects[name] = []
                 self.objects[name].append(root)
 
-            
-
-    def _validate(self, classes):
-        for type in self.objects:
-            class_name = 'Data' + type[0].upper() + type[1:]
-            valid = False
-            for class_ in classes:
-                if class_.name == class_name:
-                    valid = class_.is_storage
-                    break
-            if not valid:
-                print 'Unknown data type [{}]->[{}]. please check configuration'.format(type, class_name)
-                exit(-1)
+    def _validate(self):
         pass
+
+    def _validate_type(self, type, file = ''):
+        class_name = get_class_name_from_data_name(type)
+        valid = False
+        for class_ in self.classes:
+            if class_.name == class_name:
+                valid = class_.is_storage
+                break
+        if not valid:
+            print 'Unknown data type [{}]->[{}]. please check configuration. File: [{}]'.format(type, class_name, file)
+            exit(-1)
 
     def _flush_xml(self, out_data_directory):
         root = ET.Element('data')
         for type in self.objects:
-            name = get_member_name(type)
+            name = get_data_list_name(get_data_name(type))
             node = ET.SubElement(root, name)
             for object in self.objects[type]:
                 pair = ET.SubElement(node, 'pair')
@@ -86,7 +95,7 @@ class DataParser:
     def _flush_json(self, out_data_directory):
         dict_ = {}
         for key in self.objects:
-            name = get_member_name(key)
+            name = get_data_list_name(get_data_name(key))
             dict_[name] = []
             for object in self.objects[key]:
                 dict_obj = {}

@@ -240,4 +240,4 @@ class WriterCppSerializationXml(WriterCpp):
             return '{0} = ::get<std::string>(xml, "{0}");'.format(obj_name)
 
     def create_data_storage_class(self, name, classes):
-        return DataStorageCppXml(name, classes)
+        return DataStorageCppXml(name, classes, self.parser)

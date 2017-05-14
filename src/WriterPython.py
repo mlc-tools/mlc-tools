@@ -316,9 +316,9 @@ class IRequestHandler:
         self.created_files.append(file)
 
     def create_data_storage(self):
-        pattern = '''from Data import Data
+        pattern = '''
         
-class DataStorage(Data):
+class DataStorage():
     def __init__(self):
         pass
     def getDataBuilding(self, name):
