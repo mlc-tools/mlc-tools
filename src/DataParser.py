@@ -29,6 +29,8 @@ class DataParser:
     def _parse_xml(self, data_directory):
         files = fileutils.get_files_list(data_directory)
         for file in files:
+            if not file.endswith('.xml'):
+                continue
             file = data_directory + file
             tree = ET.parse(file)
             root = tree.getroot()
@@ -48,6 +50,8 @@ class DataParser:
     def _parse_json(self, data_directory):
         files = fileutils.get_files_list(data_directory)
         for file in files:
+            if not file.endswith('.json'):
+                continue
             file = data_directory + file
             root = json.loads(open(file).read())
             for key in root:
