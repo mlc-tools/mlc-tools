@@ -84,7 +84,7 @@ class DataParser:
 
         buffer = ET.tostring(root);
         xml_ = xml.dom.minidom.parseString(buffer)
-        buffer = xml_.toprettyxml()
+        buffer = xml_.toprettyxml(encoding='utf-8')
         lines = buffer.split('\n')
         buffer = ''
         for line in lines:
