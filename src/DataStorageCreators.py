@@ -129,7 +129,6 @@ class DataStorageCppXml(DataStorageCpp):
         DataStorageCpp.__init__(self, name, classes, parser)
 
     def add_initialize_function_operations(self, function):
-        function.operations.append('assert(!{});'.format('_loaded'))
         function.operations.append('pugi::xml_document doc;')
         function.operations.append('doc.load(buffer.c_str());')
         function.operations.append('const_cast<{}*>(this)->deserialize(doc.root().first_child());'.format(self.name))
@@ -142,7 +141,6 @@ class DataStorageCppJson(DataStorageCpp):
         DataStorageCpp.__init__(self, name, classes, parser)
 
     def add_initialize_function_operations(self, function):
-        function.operations.append('assert(!{});'.format('_loaded'))
         function.operations.append('Json::Value json;')
         function.operations.append('Json::Reader reader;')
         function.operations.append('reader.parse(buffer, json);')
