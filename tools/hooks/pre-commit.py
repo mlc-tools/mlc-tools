@@ -7,8 +7,8 @@ ROOT = ''
 
 
 def _generate():
-    result = os.system('python {0}src/main.py -i {0}simple_test/config -o {0}simple_test/generated/xml -f xml -l cpp -side client'.format(ROOT))
-    result = os.system('python {0}src/main.py -i {0}simple_test/config -o {0}simple_test/generated/json -f json -l cpp -side server'.format(ROOT)) and result
+    result = os.system('python {0}src/main.py -i {0}simple_test/config -o {0}simple_test/generated/xml -f xml -l cpp -side client -data {0}simple_test/data_xml -data_out {0}simple_test/assets'.format(ROOT))
+    result = os.system('python {0}src/main.py -i {0}simple_test/config -o {0}simple_test/generated/json -f json -l cpp -side server -data {0}simple_test/data_json -data_out {0}simple_test/assets'.format(ROOT)) and result
     if result != 0:
         print 'Test: Generation fail'
         exit(-1)
