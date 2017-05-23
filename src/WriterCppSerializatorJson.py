@@ -216,7 +216,7 @@ class WriterCppSerializatorJson(WriterCpp):
         string = '''
         auto& map_{0} = json["{0}"];
         auto size_{0}= map_{0}.size();
-        for(size_t i = 0; i < size_{0}; ++i)
+        for(unsigned int i = 0; i < size_{0}; ++i)
         {5}
             auto& json = map_{0}[i];
 
