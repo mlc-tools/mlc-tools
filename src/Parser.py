@@ -240,7 +240,82 @@ class Parser:
         self.functions.append(function)
         return text
 
+    def parse_serialize_protocol(self, path):
+        lines = open(path).readlines()
 
+        simple_types = ["int", "float", "bool", "string"]
+        supported_types = []
+        supported_types.extend(simple_types)
+        supported_types.append('serialized')
+        supported_types.append('pointer')
+        supported_types.append('serialized_list')
+        supported_types.append('pointer_list')
+        supported_types.append('link')
+        supported_types.append('list<link>')
+        supported_types.append('serialized')
+        for type_ in simple_types:
+            list_type = "list<{0}>".format(type_)
+            supported_types.append(list_type)
+
+        serialize_formats = list()
+        serialize_formats.append({})
+        serialize_formats.append({})
+        for x in xrange(2):
+            for type_ in supported_types:
+                simple = type_ in simple_types
+                p0 = self._load_protocol(lines, x, type_, True if simple else None)
+                p1 = p0 if not simple else self._load_protocol(lines, x, type_, False)
+                serialize_formats[x][type_] = []
+                serialize_formats[x][type_].extend([p0, p1])
+        return serialize_formats
+
+    def _load_protocol(self, lines, serialize_type, type, initial_value=None):
+        stypes = ['serialize', 'deserialize']
+        sinit = ['with default value', 'without default value']
+        in_type = False
+        in_serialize = False
+        in_initial_value = initial_value is None
+        pattern = []
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+            if not in_type and line.startswith('#'):
+                types = line[1:].split(',')
+                for type_ in types:
+                    in_type = in_type or (type == type_.strip())
+                continue
+            if in_type and line.startswith('#' + stypes[serialize_type]):
+                in_serialize = True
+                continue
+            if in_type and in_serialize and not in_initial_value and line.startswith('#' + sinit[0 if initial_value else 1]):
+                in_initial_value = True
+                continue
+            if in_type and in_serialize and in_initial_value:
+                if line.startswith('#'):
+                    break
+                pattern.append(line)
+        def_ = pattern
+        pattern = '\n'.join(pattern)
+        pattern = pattern.replace('{', '__begin__')
+        pattern = pattern.replace('}', '__end__')
+        pattern = pattern.replace('$(FIELD)', '{0}')
+        pattern = pattern.replace('$(TYPE)', '{1}')
+        pattern = pattern.replace('$(DEFAULT_VALUE)', '{2}')
+        pattern = pattern.replace('$(ARG_0)', '{5}')
+        pattern = pattern.replace('$(ARG_1)', '{6}')
+        if not pattern:
+            print 'cannot find pattern for args:'
+            print type, stypes[serialize_type], initial_value
+            print 'in_type', in_type
+            print 'in_serialize', in_serialize
+            print 'in_initial_value', in_initial_value
+            print def_
+            exit(-1)
+        # print '-- ', type, in_type, '------'
+        # print pattern
+        # print '--------'
+        return pattern
 
 
 

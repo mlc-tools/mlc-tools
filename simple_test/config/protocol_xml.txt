@@ -1,0 +1,121 @@
+
+#int, bool, float, string
+#serialize:
+#with default value:
+if($(FIELD) != $(DEFAULT_VALUE))
+{
+	::set(xml,"$(FIELD)", $(FIELD));
+}
+#without default value:
+::set(xml,"$(FIELD)", $(FIELD));
+
+#deserialize:
+#with default value:
+auto attr_$(FIELD) = xml.attribute("$(FIELD)");
+if(attr_$(FIELD))
+{
+	$(FIELD) = ::get<$(TYPE)>(attr_$(FIELD));
+}
+#without default value:
+$(FIELD) = ::get<$(TYPE)>(xml.attribute("$(FIELD)"));
+
+
+#serialized
+#serialize:
+$(FIELD).serialize(xml.append_child("$(FIELD)"));
+#deserialize:
+$(FIELD).deserialize(xml.child("$(FIELD)"));
+
+
+#pointer
+#serialize
+if($(FIELD))
+{
+    auto child = xml.append_child("$(FIELD)");
+    child.append_attribute("type").set_value($(FIELD)->get_type().c_str());
+    $(FIELD)->serialize(child);
+}
+#deserialize:
+auto xml_$(FIELD) = xml.child("$(FIELD)");
+if(xml_$(FIELD))
+{
+    std::string type = xml_$(FIELD).attribute("type").as_string();
+    $(FIELD) = Factory::shared().build<$(TYPE)>(type);
+    $(FIELD)->deserialize(xml_$(FIELD));
+}
+
+
+#list<int>, list<bool>, list<float>, list<string>
+#serialize:
+auto arr_$(FIELD) = xml.append_child("$(FIELD)");
+for(auto& t : $(FIELD))
+{
+	auto attr = arr_$(FIELD).append_child("$(ARG_0)").append_attribute("value");
+	set(attr, t);
+}
+#deserialize:
+auto arr_$(FIELD) = xml.child("$(FIELD)");
+for(auto child : arr_$(FIELD))
+{
+    $(FIELD).emplace_back();
+    $(FIELD).back() = ::get<$(ARG_0)>(child, "value");
+}
+
+
+#serialized_list
+#serialize:
+auto arr_$(FIELD) = xml.append_child("$(FIELD)");
+for(auto& t : $(FIELD))
+{
+    t.serialize(arr_$(FIELD).append_child(t.get_type().c_str()));
+}
+#deserialize:
+auto arr_$(FIELD) = xml.child("$(FIELD)");
+for(auto child : arr_$(FIELD))
+{
+    $(FIELD).emplace_back();
+    $(FIELD).back().deserialize(child);
+}
+
+
+#pointer_list
+#serialize:
+for(auto& t : $(FIELD))
+auto arr_$(FIELD) = xml.append_child("$(FIELD)");
+{
+    t->serialize(arr_$(FIELD).append_child(t->get_type().c_str()));
+}
+#deserialize:
+auto arr_$(FIELD) = xml.child("$(FIELD)");
+for(auto child : arr_$(FIELD))
+{
+    auto type = child.name();
+    auto obj = Factory::shared().build<$(ARG_0)>(type);
+    $(FIELD).emplace_back(obj);
+    $(FIELD).back()->deserialize(child);
+}
+
+
+#link
+#serialize:
+::set(xml,"$(FIELD)",$(FIELD)->name);
+#deserialize:
+auto name_$(FIELD) = ::get<std::string>(xml, "$(FIELD)");
+$(FIELD) = DataStorage::shared().get<$(TYPE)>(name_$(FIELD));	
+
+
+#list<link>
+#serialize:
+auto arr_$(FIELD) = xml.append_child("$(FIELD)");
+for(auto& t : $(FIELD))
+{
+	auto attr = arr_$(FIELD).append_child("$(ARG_0)").append_attribute("value");
+	set(attr, t->name);
+}
+#deserialize:
+auto arr_$(FIELD) = xml.child("$(FIELD)");
+for(auto child : arr_$(FIELD))
+{
+    auto data_name = ::get<std::string>(child, "value");
+    $(FIELD).push_back(DataStorage::shared().get<$(ARG_0)>(data_name));
+}

@@ -135,6 +135,7 @@ def _get_namespace():
 
 class WriterCpp(Writer):
     def __init__(self, out_directory, parser):
+        self.parser = parser
         self.simple_types = list()
         self.serialize_formats = list()
         self.serialize_formats.append({})

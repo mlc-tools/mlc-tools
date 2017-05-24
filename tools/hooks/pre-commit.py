@@ -29,7 +29,7 @@ def _make():
 
 def _execute():
     result = os.system('cd {}simple_test/build; ./test_mlc_xml'.format(ROOT))
-    result = os.system('cd {}simple_test/build; ./test_mlc_json'.format(ROOT))
+    result = os.system('cd {}simple_test/build; ./test_mlc_json'.format(ROOT)) and result
     if result != 0:
         print 'Test: Execute fail'
         exit(-1)
