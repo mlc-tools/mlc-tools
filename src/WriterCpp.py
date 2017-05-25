@@ -510,7 +510,7 @@ class WriterCpp(Writer):
                     if arg.is_link:
                         type_ = 'list<link>'
                     elif arg_type in self.simple_types:
-                        type_ = '{0}<simple>'.format(type_)
+                        type_ = '{0}<{1}>'.format(type_, arg_type)
                     elif arg.is_pointer:
                         type_ = 'pointer_list'
                     else:

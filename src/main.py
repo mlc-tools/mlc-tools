@@ -44,6 +44,7 @@ def main():
     validate_arg_side(side)
 
     parser = Parser(side)
+    parser.set_configs_directory(configs_directory)
     parser.copyright_text = Copyright(configs_directory).text
     files = fileutils.get_files_list(configs_directory)
     for file in files:

@@ -17,7 +17,7 @@ def convertInitializeValue(value):
 
 class WriterPython(Writer):
     def __init__(self, outDirectory, parser, configsDirectory):
-        
+        self.parser = parser
         self.loaded_functions = {}
         self.load_functions(configsDirectory + 'python_external.mlc_py')
         
@@ -219,7 +219,7 @@ class WriterPython(Writer):
         
         type = obj_type
         if self.parser.find_class(type) and self.parser.find_class(type).type == 'enum':
-            type = 'simple'
+            type = 'string'
         elif obj_type not in self.simple_types and type != "list" and type != "map":
             if is_link:
                 type = 'link'
@@ -228,7 +228,7 @@ class WriterPython(Writer):
             else:
                 type = "serialized"
         elif obj_type in self.simple_types:
-            type = 'simple'
+            type = obj_type
         else:
             if len(obj_template_args) > 0:
                 if type == "map":
@@ -247,7 +247,7 @@ class WriterPython(Writer):
                     if arg.is_link:
                         type = 'list<link>'
                     elif arg_type in self.simple_types:
-                        type = "list<simple>"
+                        type = "list<{}>".format(arg_type)
                         obj_type = arg_type
                     elif arg.is_pointer:
                         type = "pointer_list"

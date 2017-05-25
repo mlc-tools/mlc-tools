@@ -63,7 +63,7 @@ for(size_t i = 0; i < arr_$(FIELD).size(); ++i)
 };
 
 
-#serialized_list
+#list<serialized>
 #serialize:
 {
     auto& arr_$(FIELD) = json["$(FIELD)"];

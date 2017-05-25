@@ -1,0 +1,109 @@
+# $(0) = obj_name
+# $(1) = obj_type
+# $(2) = obj_value
+# ??? {3} = '{}'
+# $(4) = owner
+# $(5) = obj_template_args[0].type if len(obj_template_args) > 0 else 'unknown_arg'
+
+#int, bool, float, string
+#serialize:
+#with default value:
+if $(OWNER)$(FIELD) != $(DEFAULT_VALUE): xml.set("$(FIELD)", str($(OWNER)$(FIELD)))
+#without default value:
+xml.set("$(FIELD)", str($(OWNER)$(FIELD)))
+#deserialize:
+#with default value:
+$(OWNER)$(FIELD) = xml.get("$(FIELD)", default=$(DEFAULT_VALUE))
+#without default value:
+$(OWNER)$(FIELD) = xml.get("$(FIELD)")
+
+#pointer
+#serialize:
+if $(OWNER)$(FIELD) != None:
+            xml_pointer = ET.SubElement(xml, '$(FIELD)')
+            xml_pointer.set('type', str($(TYPE)))
+            $(OWNER)$(FIELD).serialize(xml_pointer) 
+#deserialize:
+xml_pointer = xml.find('$(FIELD)')
+        if xml_pointer != None:
+            type = xml_pointer.get('type')
+            $(OWNER)$(FIELD) = Factory.Factory.build(type);
+            $(OWNER)$(FIELD).deserialize(xml_pointer) 
+
+
+#list<int>, list<bool>, list<float>, list<string>
+#serialize:
+arr = ET.SubElement(xml, '$(FIELD)')
+        for obj in $(OWNER)$(FIELD):
+            item = ET.SubElement(arr, 'item')
+            item.set('i', str(obj))
+#deserialize:
+arr = xml.find('$(FIELD)')
+        for obj in arr:
+            $(OWNER)$(FIELD).append(obj.get('i'))
+
+
+#list<serialized>
+#serialize:
+arr = ET.SubElement(xml, '$(FIELD)')
+        for obj in $(OWNER)$(FIELD):
+            item = ET.SubElement(arr, 'item')
+            obj.serialize(item)
+#deserialize:
+arr = xml.find('$(FIELD)')
+        for xml_child in arr:
+            obj = $(TYPE)()
+            obj.deserialize(xml_child)
+            $(OWNER)$(FIELD).append(obj)
+
+
+#serialized
+#serialize:
+if $(OWNER)$(FIELD) != None:
+            xml_child = ET.SubElement(xml, '$(FIELD)')
+            $(OWNER)$(FIELD).serialize(xml_child)
+#deserialize:
+xml_child = xml.find('$(FIELD)')
+        if(xml_child != None):
+            $(OWNER)$(FIELD) = $(TYPE)()
+            $(OWNER)$(FIELD).deserialize(xml_child)
+
+
+#pointer_list
+#serialize:
+arr = ET.SubElement(xml, '$(FIELD)')
+        for t in $(OWNER)$(FIELD):
+            item = ET.SubElement(arr, t.get_type())
+            t.serialize(item)
+#deserialize:
+arr = xml.find('$(FIELD)')
+        for xml_item in arr:
+            type = xml_item.tag
+            obj = Factory.Factory.build(type)
+            obj.deserialize(xml_item)
+            $(OWNER)$(FIELD).append(obj)
+
+#link
+#serialize:
+if isinstance($(OWNER)$(FIELD), $(TYPE)):
+            xml.set("$(FIELD)", $(OWNER)$(FIELD).name)
+        else:
+            xml.set("$(FIELD)", $(OWNER)$(FIELD))
+#deserialize:
+name_$(FIELD) = xml.get("$(FIELD)")
+        $(OWNER)$(FIELD) = get_data_storage().get$(TYPE)(name_$(FIELD))
+
+#list<link>
+#serialize:
+arr_$(FIELD) = ET.SubElement(xml, '$(FIELD)')
+        for t in $(OWNER)$(FIELD):
+            item = ET.SubElement(arr_$(FIELD), 'item')
+            item.set("value", t.name)
+#deserialize:
+from DataStorage import DataStorage
+        arr_$(FIELD) = xml.find('$(FIELD)')
+        data = get_data_storage().get$(TYPE)(name_$(FIELD).get('value'))
+        $(OWNER)$(FIELD).append(data)
+
+
+

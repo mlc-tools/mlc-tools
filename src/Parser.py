@@ -57,6 +57,9 @@ class Parser:
         self.copyright_text = ''
         return
 
+    def set_configs_directory(self, path):
+        self.configs_root = path
+
     def parse(self, text):
         text = text.strip()
         l = text.find('/*')
@@ -241,14 +244,14 @@ class Parser:
         return text
 
     def parse_serialize_protocol(self, path):
-        lines = open(path).readlines()
+        lines = open(self.configs_root + path).readlines()
 
         simple_types = ["int", "float", "bool", "string"]
         supported_types = []
         supported_types.extend(simple_types)
         supported_types.append('serialized')
         supported_types.append('pointer')
-        supported_types.append('serialized_list')
+        supported_types.append('list<serialized>')
         supported_types.append('pointer_list')
         supported_types.append('link')
         supported_types.append('list<link>')
@@ -276,8 +279,10 @@ class Parser:
         in_serialize = False
         in_initial_value = initial_value is None
         pattern = []
-        for line in lines:
-            line = line.strip()
+        for oline in lines:
+            if oline.endswith('\n'):
+                oline = oline[0:-1]
+            line = oline.strip()
             if not line:
                 continue
             if not in_type and line.startswith('#'):
@@ -294,7 +299,7 @@ class Parser:
             if in_type and in_serialize and in_initial_value:
                 if line.startswith('#'):
                     break
-                pattern.append(line)
+                pattern.append(oline)
         def_ = pattern
         pattern = '\n'.join(pattern)
         pattern = pattern.replace('{', '__begin__')
@@ -302,6 +307,7 @@ class Parser:
         pattern = pattern.replace('$(FIELD)', '{0}')
         pattern = pattern.replace('$(TYPE)', '{1}')
         pattern = pattern.replace('$(DEFAULT_VALUE)', '{2}')
+        pattern = pattern.replace('$(OWNER)', '{4}')
         pattern = pattern.replace('$(ARG_0)', '{5}')
         pattern = pattern.replace('$(ARG_1)', '{6}')
         if not pattern:

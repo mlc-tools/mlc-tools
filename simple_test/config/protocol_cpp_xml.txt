@@ -1,0 +1,203 @@
+
+#int
+#serialize:
+#with default value:
+if($(FIELD) != $(DEFAULT_VALUE))
+{
+    xml.append_attribute("$(FIELD)").set_value($(FIELD));
+}
+#without default value:
+xml.append_attribute("$(FIELD)").set_value($(FIELD));
+
+#deserialize:
+#with default value:
+$(FIELD) = xml.attribute("$(FIELD)").as_int($(DEFAULT_VALUE));
+#without default value:
+$(FIELD) = xml.attribute("$(FIELD)").as_int();
+
+
+#bool
+#serialize:
+#with default value:
+if($(FIELD) != $(DEFAULT_VALUE))
+{
+    xml.append_attribute("$(FIELD)").set_value($(FIELD));
+}
+#without default value:
+xml.append_attribute("$(FIELD)").set_value($(FIELD));
+
+#deserialize:
+#with default value:
+$(FIELD) = xml.attribute("$(FIELD)").as_bool($(DEFAULT_VALUE));
+#without default value:
+$(FIELD) = xml.attribute("$(FIELD)").as_bool();
+
+
+#float
+#serialize:
+#with default value:
+if($(FIELD) != $(DEFAULT_VALUE))
+{
+    xml.append_attribute("$(FIELD)").set_value($(FIELD));
+}
+#without default value:
+xml.append_attribute("$(FIELD)").set_value($(FIELD));
+
+#deserialize:
+#with default value:
+$(FIELD) = xml.attribute("$(FIELD)").as_float($(DEFAULT_VALUE));
+#without default value:
+$(FIELD) = xml.attribute("$(FIELD)").as_float();
+
+
+#string
+#serialize:
+#with default value:
+if($(FIELD) != $(DEFAULT_VALUE))
+{
+    xml.append_attribute("$(FIELD)").set_value($(FIELD).c_str());
+}
+#without default value:
+xml.append_attribute("$(FIELD)").set_value($(FIELD).c_str());
+
+#deserialize:
+#with default value:
+$(FIELD) = xml.attribute("$(FIELD)").as_string($(DEFAULT_VALUE));
+#without default value:
+$(FIELD) = xml.attribute("$(FIELD)").as_string();
+
+
+#serialized
+#serialize:
+$(FIELD).serialize(xml.append_child("$(FIELD)"));
+#deserialize:
+$(FIELD).deserialize(xml.child("$(FIELD)"));
+
+
+#pointer
+#serialize
+if($(FIELD))
+{
+    auto child = xml.append_child("$(FIELD)");
+    child.append_attribute("type").set_value($(FIELD)->get_type().c_str());
+    $(FIELD)->serialize(child);
+}
+#deserialize:
+auto xml_$(FIELD) = xml.child("$(FIELD)");
+if(xml_$(FIELD))
+{
+    std::string type = xml_$(FIELD).attribute("type").as_string();
+    $(FIELD) = Factory::shared().build<$(TYPE)>(type);
+    $(FIELD)->deserialize(xml_$(FIELD));
+}
+
+
+#list<int>
+#serialize:
+auto arr_$(FIELD) = xml.append_child("$(FIELD)");
+for(auto& t : $(FIELD))
+{
+    arr_$(FIELD).append_child("int").append_attribute("i").set_value(t);
+}
+#deserialize:
+auto arr_$(FIELD) = xml.child("$(FIELD)");
+for(auto& child : arr_$(FIELD))
+{
+    $(FIELD).push_back(child.attribute("i").as_int());
+}
+
+#list<bool>
+#serialize:
+auto arr_$(FIELD) = xml.append_child("$(FIELD)");
+for(auto& t : $(FIELD))
+{
+    arr_$(FIELD).append_child("bool").append_attribute("i").set_value(t);
+}
+#deserialize:
+auto arr_$(FIELD) = xml.child("$(FIELD)");
+for(auto& child : arr_$(FIELD))
+{
+    $(FIELD).push_back(child.attribute("i").as_bool());
+}
+#list<float>
+#serialize:
+auto arr_$(FIELD) = xml.append_child("$(FIELD)");
+for(auto& t : $(FIELD))
+{
+    arr_$(FIELD).append_child("float").append_attribute("i").set_value(t);
+}
+#deserialize:
+auto arr_$(FIELD) = xml.child("$(FIELD)");
+for(auto& child : arr_$(FIELD))
+{
+    $(FIELD).push_back(child.attribute("i").as_float());
+}
+#list<string>
+#serialize:
+auto arr_$(FIELD) = xml.append_child("$(FIELD)");
+for(auto& t : $(FIELD))
+{
+    arr_$(FIELD).append_child("str").append_attribute("i").set_value(t.c_str());
+}
+#deserialize:
+auto arr_$(FIELD) = xml.child("$(FIELD)");
+for(auto& child : arr_$(FIELD))
+{
+    $(FIELD).push_back(child.attribute("i").as_string(""));
+}
+
+#list<serialized>
+#serialize:
+auto arr_$(FIELD) = xml.append_child("$(FIELD)");
+for(auto& t : $(FIELD))
+{
+    t.serialize(arr_$(FIELD).append_child("item"));
+}
+#deserialize:
+auto arr_$(FIELD) = xml.child("$(FIELD)");
+for(auto child : arr_$(FIELD))
+{
+    $(FIELD).emplace_back();
+    $(FIELD).back().deserialize(child);
+}
+
+
+#pointer_list
+#serialize:
+auto arr_$(FIELD) = xml.append_child("$(FIELD)");
+for(auto& t : $(FIELD))
+{
+    t->serialize(arr_$(FIELD).append_child(t->get_type().c_str()));
+}
+#deserialize:
+auto arr_$(FIELD) = xml.child("$(FIELD)");
+for(auto child : arr_$(FIELD))
+{
+    auto type = child.name();
+    $(FIELD).push_back(Factory::shared().build<$(ARG_0)>(type));
+    $(FIELD).back()->deserialize(child);
+}
+
+
+#link
+#serialize:
+xml.append_attribute("$(FIELD)").set_value($(FIELD)->name.c_str());
+#deserialize:
+auto name_$(FIELD) = xml.attribute("$(FIELD)").as_string();
+$(FIELD) = DataStorage::shared().get<$(TYPE)>(name_$(FIELD));	
+
+
+#list<link>
+#serialize:
+auto arr_$(FIELD) = xml.append_child("$(FIELD)");
+for(auto& t : $(FIELD))
+{
+    arr_$(FIELD).append_child("data").append_attribute("i").set_value(t->name.c_str());
+}
+#deserialize:
+auto arr_$(FIELD) = xml.child("$(FIELD)");
+for(auto& child : arr_$(FIELD))
+{
+    auto name = child.attribute("i").as_string("");
+    $(FIELD).push_back(DataStorage::shared().get<$(ARG_0)>(name));
+}

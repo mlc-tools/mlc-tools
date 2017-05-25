@@ -12,7 +12,7 @@ class WriterCppSerializationXml(WriterCpp):
 
     def create_serialization_patterns(self):
         self.simple_types = ["int", "float", "bool", "string"]
-        self.serialize_formats = self.parser.parse_serialize_protocol('simple_test/config/protocol_xml.txt')
+        self.serialize_formats = self.parser.parse_serialize_protocol('protocol_cpp_xml.txt')
 
     def get_serialization_object_arg(self, serialization_type):
         if serialization_type == S:
