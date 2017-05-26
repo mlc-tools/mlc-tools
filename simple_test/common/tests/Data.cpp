@@ -1,5 +1,6 @@
 #include "Data.h"
 #include "DataStorage.h"
+#include <iostream>
 
 bool test_units()
 {
@@ -100,6 +101,11 @@ bool test_data()
 	result = test_list_links() && result;
 	result = test_map_links() && result;
 	result = test_enums() && result;
+
+	if(!result)
+	    std::cout << "Test data failed." << std::endl;
+    else
+        std::cout << "Test data success." << std::endl;
 
     return result;
 }

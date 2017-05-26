@@ -9,8 +9,6 @@ bool test_common()
     auto base = make_intrusive<mg::SideTestBase>();
     auto common = make_intrusive<mg::SideTestCommon>();
 
-    std::cout << "Test side: common get_value = " << common->get_value() << std::endl;
-
     result = result && base != nullptr;
     result = result && common != nullptr;
     return result;

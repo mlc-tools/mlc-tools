@@ -35,7 +35,6 @@ $(FIELD).deserialize(json["$(FIELD)"]);
 if($(FIELD))
 {
     $(FIELD)->serialize(json["$(FIELD)"][$(FIELD)->get_type()]);
-}(FIELD)->serialize(child);
 }
 #deserialize:
 if(json.isMember("$(FIELD)"))
@@ -46,36 +45,50 @@ if(json.isMember("$(FIELD)"))
 }
 
 
-#list<int>, list<bool>, list<float>, list<string>
+#list<bool>
 #serialize:
+auto& arr_$(FIELD) = json["$(FIELD)"];
+int i_$(FIELD)=0;
+for(const auto& t : $(FIELD))
 {
-    auto& arr_$(FIELD) = json["$(FIELD)"];
-    size_t i=0;
-    for(auto& t : $(FIELD))
-    ::set(arr_$(FIELD)[i++], t);
+    arr_$(FIELD)[i_$(FIELD)++] = Json::Value(t);
 }
 #deserialize:
 auto& arr_$(FIELD) = json["$(FIELD)"];
-for(size_t i = 0; i < arr_$(FIELD).size(); ++i)
+for(int i = 0; i < arr_$(FIELD).size(); ++i)
 {
     $(FIELD).emplace_back();
     $(FIELD).back() = ::get<$(ARG_0)>(arr_$(FIELD)[i]);
-};
+}
+
+#list<int>, list<float>, list<string>
+#serialize:
+auto& arr_$(FIELD) = json["$(FIELD)"];
+int i_$(FIELD)=0;
+for(const auto& t : $(FIELD))
+{
+    ::set(arr_$(FIELD)[i_$(FIELD)++], t);
+}
+#deserialize:
+auto& arr_$(FIELD) = json["$(FIELD)"];
+for(int i = 0; i < arr_$(FIELD).size(); ++i)
+{
+    $(FIELD).emplace_back();
+    $(FIELD).back() = ::get<$(ARG_0)>(arr_$(FIELD)[i]);
+}
 
 
 #list<serialized>
 #serialize:
+auto& arr_$(FIELD) = json["$(FIELD)"];
+int i_$(FIELD)=0;
+for(auto& t : $(FIELD))
 {
-    auto& arr_$(FIELD) = json["$(FIELD)"];
-    size_t i=0;
-    for(auto& t : $(FIELD))
-    {
-        t.serialize(arr_$(FIELD)[i++]);
-    }
+    t.serialize(arr_$(FIELD)[i_$(FIELD)++]);
 }
 #deserialize:
 auto& arr_$(FIELD) = json["$(FIELD)"];
-for(size_t i = 0; i < arr_$(FIELD).size(); ++i)
+for(int i = 0; i < arr_$(FIELD).size(); ++i)
 {
     $(FIELD).emplace_back();
     $(FIELD).back().deserialize(arr_$(FIELD)[i]);
@@ -93,7 +106,7 @@ for(auto& t : $(FIELD))
 #deserialize:
 auto& arr_$(FIELD) = json["$(FIELD)"];
 auto size_$(FIELD) = arr_$(FIELD).size();
-for(size_t i = 0; i < size_$(FIELD); ++i)
+for(int i = 0; i < size_$(FIELD); ++i)
 {
     auto type = arr_$(FIELD)[i].getMemberNames()[0];
     auto obj = Factory::shared().build<$(ARG_0)>(type);

@@ -95,13 +95,13 @@ if(xml_$(FIELD))
 #list<int>
 #serialize:
 auto arr_$(FIELD) = xml.append_child("$(FIELD)");
-for(auto& t : $(FIELD))
+for(auto t : $(FIELD))
 {
     arr_$(FIELD).append_child("int").append_attribute("value").set_value(t);
 }
 #deserialize:
 auto arr_$(FIELD) = xml.child("$(FIELD)");
-for(auto& child : arr_$(FIELD))
+for(const auto& child : arr_$(FIELD))
 {
     $(FIELD).push_back(child.attribute("value").as_int());
 }
@@ -109,39 +109,39 @@ for(auto& child : arr_$(FIELD))
 #list<bool>
 #serialize:
 auto arr_$(FIELD) = xml.append_child("$(FIELD)");
-for(auto& t : $(FIELD))
+for(auto t : $(FIELD))
 {
     arr_$(FIELD).append_child("bool").append_attribute("value").set_value(t);
 }
 #deserialize:
 auto arr_$(FIELD) = xml.child("$(FIELD)");
-for(auto& child : arr_$(FIELD))
+for(const auto& child : arr_$(FIELD))
 {
     $(FIELD).push_back(child.attribute("value").as_bool());
 }
 #list<float>
 #serialize:
 auto arr_$(FIELD) = xml.append_child("$(FIELD)");
-for(auto& t : $(FIELD))
+for(auto t : $(FIELD))
 {
     arr_$(FIELD).append_child("float").append_attribute("value").set_value(t);
 }
 #deserialize:
 auto arr_$(FIELD) = xml.child("$(FIELD)");
-for(auto& child : arr_$(FIELD))
+for(const auto& child : arr_$(FIELD))
 {
     $(FIELD).push_back(child.attribute("value").as_float());
 }
 #list<string>
 #serialize:
 auto arr_$(FIELD) = xml.append_child("$(FIELD)");
-for(auto& t : $(FIELD))
+for(const auto& t : $(FIELD))
 {
     arr_$(FIELD).append_child("str").append_attribute("value").set_value(t.c_str());
 }
 #deserialize:
 auto arr_$(FIELD) = xml.child("$(FIELD)");
-for(auto& child : arr_$(FIELD))
+for(const auto& child : arr_$(FIELD))
 {
     $(FIELD).push_back(child.attribute("value").as_string(""));
 }

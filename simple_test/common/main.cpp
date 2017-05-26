@@ -75,6 +75,8 @@ bool test_serialization()
 
 	if(!result)
 	    std::cout << "Test serialization failed." << std::endl;
+	else
+		std::cout << "Test serialization success." << std::endl;
 
 	return result;
 }
@@ -89,5 +91,7 @@ bool test_enum()
 
 	if(!result)
 	    std::cout << "Test compare enum fields failed." << std::endl;
+	else
+		std::cout << "Test compare enum fields success." << std::endl;
 	return result;
 }

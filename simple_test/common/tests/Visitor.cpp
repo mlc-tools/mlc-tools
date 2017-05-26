@@ -97,5 +97,7 @@ bool test_visitor()
 
     if(!result)
 	    std::cout << "Test visitor failed." << std::endl;
+    else
+        std::cout << "Test visitor success." << std::endl;
     return result;
 }
