@@ -14,6 +14,7 @@
 #include "tests/Visitor.h"
 #include "tests/Side.h"
 #include "tests/Data.h"
+#include "tests/TestSerializeAllTypes.h"
 #include <iostream>
 #include "DataStorage.h"
 #include <fstream>
@@ -49,6 +50,8 @@ int main()
 	result = test_visitor() && result;
 	result = test_side() && result;
 	result = test_data() && result;
+	//TODO: result = test_all_types() && result;
+
 
 	std::cout << "Execute results = " << (result ? "Ok" : "Fail") << std::endl;
 	return result ? 0 : -1;

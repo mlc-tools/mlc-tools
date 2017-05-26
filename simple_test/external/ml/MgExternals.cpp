@@ -49,6 +49,13 @@ std::string getSerializedString(const mg::SerializedObject* object)
 	return stream.str();
 }
 
+void deserialize(mg::SerializedObject* object, const std::string& payload)
+{
+	pugi::xml_document doc;
+	doc.load(payload.c_str());
+	object->deserialize(doc.root().first_child());
+}
+
 #elif MG_SERIALIZE_FORMAT == MG_JSON
 
 intrusive_ptr<mg::CommandBase> createCommand(const Json::Value& json)
@@ -80,6 +87,13 @@ std::string getSerializedString(const mg::SerializedObject* object)
 	return string;
 }
 
+void deserialize(mg::SerializedObject* object, const std::string& payload)
+{
+	Json::Value json;
+	Json::Reader reader;
+	reader.parse(payload, json);
+	object->deserialize(json);
+}
 #endif
 
 namespace mg

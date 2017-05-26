@@ -23,6 +23,37 @@ class core/CommandBase<SerializedObject>
 	function string getSerializedString():external:const;
 }
 
+class AllTypes<SerializedObject>
+{
+	//simple
+	int int_value0 = 0
+	int int_value1
+	float float_value0 = 0
+	float float_value1
+	bool bool_value0 = true
+	bool bool_value1
+	string str_value0 = ""
+	string str_value1
+	list<int> int_list
+	list<float> float_list
+	list<bool> bool_list
+	list<string> string_list
+	map<int, string> int_string_map
+	map<float, string> float_string_map
+	map<bool, string> bool_string_map
+	map<string, string> string_string_map
+	map<string, int> string_int_map
+	map<string, float> string_float_map
+	map<string, bool> string_bool_map
+
+	SerializedObject object
+	SerializedObject* object_ptr = 0
+	list<SerializedObject> object_list
+	list<SerializedObject*> object_ptr_list
+	map<string, SerializedObject> object_map
+	map<string, SerializedObject*> object_ptr_map
+}
+
 class Request<SerializedObject>:visitor
 {
 }
