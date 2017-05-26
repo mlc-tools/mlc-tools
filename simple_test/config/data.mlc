@@ -1,6 +1,14 @@
+enum UnitType
+{
+    attack
+    defend
+    support
+}
+
 class data/DataUnit<SerializedObject>:storage
 {
 	string name
+	UnitType unit_type
 	VisualUnit visual
 	DataUnit*:link link_to_data
 	list<DataUnit*:link> all_units

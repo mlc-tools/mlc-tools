@@ -1,6 +1,7 @@
 {
 	"unit": {
 		"name": "unitname2",
+		"unit_type": "defend",
 		"visual": {
 			"name": "some_locale_key_2",
 			"icon": "some_image_2"

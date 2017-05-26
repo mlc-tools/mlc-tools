@@ -2,7 +2,7 @@
 #int, bool, float, string
 #serialize:
 #with default value:
-if($(FIELD) != $(DEFAULT_VALUE)) 
+if($(FIELD) != $(DEFAULT_VALUE))
 {
     ::set(json,"$(FIELD)",$(FIELD));
 }
@@ -125,3 +125,35 @@ for(auto item : arr_$(FIELD))
     auto data = DataStorage::shared().get<$(ARG_0)>(name);
     $(FIELD).push_back(data);
 }
+
+
+#map
+#serialize:
+auto& map_$(FIELD) = json["$(FIELD)"];
+for(auto& pair : $(FIELD))
+{
+    auto& json = map_$(FIELD)[map_$(FIELD).size()];
+    auto& key = pair.first;
+    auto& value = pair.second;
+    $(KEY_SERIALIZE)
+    $(VALUE_SERIALIZE)
+}
+#deserialize:
+auto& map_$(FIELD) = json["$(FIELD)"];
+auto size_$(FIELD)= map_$(FIELD).size();
+for(unsigned int i = 0; i < size_$(FIELD); ++i)
+{
+    auto& json = map_$(FIELD)[i];
+    $(KEY);
+    $(VALUE_TYPE) value;
+    $(VALUE_SERIALIZE)
+    $(KEY_SERIALIZE)
+    $(FIELD)[key] = value;
+}
+
+
+#enum
+#serialize:
+::set(json, "$(FIELD)", $(FIELD).str());
+#deserialize:
+$(FIELD) = ::get<std::string>(json["$(FIELD)"]);

@@ -29,6 +29,23 @@ bool test_links()
 	return result;
 }
 
+bool test_enums()
+{
+	bool result = true;
+
+	auto unit1 = mg::DataStorage::shared().get<mg::DataUnit>("unitname1");
+	auto unit2 = mg::DataStorage::shared().get<mg::DataUnit>("unitname2");
+
+	result = result && unit1->unit_type == mg::UnitType::attack;
+	result = result && unit1->unit_type != mg::UnitType::defend;
+	result = result && unit1->unit_type != mg::UnitType::support;
+	
+	result = result && unit2->unit_type == mg::UnitType::defend;
+	result = result && unit2->unit_type != mg::UnitType::attack;
+	result = result && unit2->unit_type != mg::UnitType::support;
+	return result;
+}
+
 bool test_list_links()
 {
 	bool result = true;
@@ -82,6 +99,7 @@ bool test_data()
 	result = test_links() && result;
 	result = test_list_links() && result;
 	result = test_map_links() && result;
+	result = test_enums() && result;
 
     return result;
 }

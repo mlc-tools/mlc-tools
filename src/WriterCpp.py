@@ -2,6 +2,7 @@ import re
 from Writer import Writer
 from Writer import add_dict
 from Class import Class
+from Object import Object
 from Function import Function
 import constants
 import fileutils
@@ -471,7 +472,7 @@ class WriterCpp(Writer):
     
     def _build_serialize_operation_enum(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args,
                                         serialization_type):
-        pass
+        return self.serialize_formats[serialization_type]['enum'][0].format(obj_name)
     
     def _build_serialize_operation(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args,
                                    serialization_type, is_link=False):
@@ -520,10 +521,39 @@ class WriterCpp(Writer):
         return string
     
     def build_map_serialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args):
-        pass
-    
+        key = obj_template_args[0]
+        value = obj_template_args[1]
+        key_type = key.name if isinstance(key, Class) else key.type
+        value_type = value.name if isinstance(value, Class) else value.type
+        pattern = self.serialize_formats[SERIALIZATION]['map'][0]
+        _value_is_pointer = value.is_pointer
+        a0 = obj_name
+        a1 = self._build_serialize_operation('key', key_type, None, key.is_pointer, [], SERIALIZATION, key.is_link)
+        a2 = self._build_serialize_operation('value', value_type, None, _value_is_pointer, [], SERIALIZATION, value.is_link)
+        return pattern.format(a0, a1, a2)
+
     def build_map_deserialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args):
-        pass
+        key = obj_template_args[0]
+        value = obj_template_args[1]
+        key_type = key.name if isinstance(key, Class) else key.type
+        value_type = value.name if isinstance(value, Class) else value.type
+        pattern = self.serialize_formats[DESERIALIZATION]['map'][0]
+        if key.is_link:
+            key_str = 'const {}* key(nullptr);'.format(key_type)
+        elif key.is_pointer:
+            key_str = 'auto key = make_intrusive<{}>();'.format(key_type)
+        else:
+            key_str = '{} key;'.format(key_type)
+
+        _value_is_pointer = value.is_pointer if isinstance(value, Object) else False
+        a0 = obj_name
+        a1 = self._build_serialize_operation('key', key_type, None, key.is_pointer, [], DESERIALIZATION, key.is_link)
+        a2 = self._build_serialize_operation('value', value_type, None, _value_is_pointer, [], DESERIALIZATION, value.is_link)
+        a3 = key_str
+        a4 = value_type
+        if value.is_pointer:
+            a4 = 'IntrusivePtr<{}>'.format(value_type)
+        return pattern.format(a0, a1, a2, a3, a4)
     
     def add_accept_method(self, class_):
         visitor = self.parser.get_type_of_visitor(class_)
@@ -707,7 +737,7 @@ class WriterCpp(Writer):
                     includes += '\n#include <cmath>'
                 if 'DataStorage::shared()' in operation:
                     includes += '\n#include {}'.\
-                        format(get_include_file(self.parser, self._currentClass, 'DataStorage'))                    
+                        format(get_include_file(self.parser, self._currentClass, 'DataStorage'))
                 for type_ in self.parser.classes:
                     if type_.name in operation:
                         a = '"{}.h"'.format(type_.name)
@@ -752,7 +782,7 @@ class WriterCpp(Writer):
         getter_h = storage.get_header_getter()
         getters_cpp = storage.get_source_getters(self.parser.classes)
 
-        storage.functions.append(getter_h);
+        storage.functions.append(getter_h)
         header = self.write_class(storage, FLAG_HPP)[FLAG_HPP]
         del storage.functions[storage.functions.index(getter_h)]
 

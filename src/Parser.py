@@ -256,6 +256,8 @@ class Parser:
         supported_types.append('link')
         supported_types.append('list<link>')
         supported_types.append('serialized')
+        supported_types.append('map')
+        supported_types.append('enum')
         for type_ in simple_types:
             list_type = "list<{0}>".format(type_)
             supported_types.append(list_type)
@@ -302,6 +304,7 @@ class Parser:
                 pattern.append(oline)
         def_ = pattern
         pattern = '\n'.join(pattern)
+        # standard serialize
         pattern = pattern.replace('{', '__begin__')
         pattern = pattern.replace('}', '__end__')
         pattern = pattern.replace('$(FIELD)', '{0}')
@@ -310,6 +313,12 @@ class Parser:
         pattern = pattern.replace('$(OWNER)', '{4}')
         pattern = pattern.replace('$(ARG_0)', '{5}')
         pattern = pattern.replace('$(ARG_1)', '{6}')
+        # for map<key, value>
+        pattern = pattern.replace('$(KEY_SERIALIZE)', '{1}')
+        pattern = pattern.replace('$(VALUE_SERIALIZE)', '{2}')
+        pattern = pattern.replace('$(KEY)', '{3}')
+        pattern = pattern.replace('$(VALUE_TYPE)', '{4}')
+        
         if not pattern:
             print 'cannot find pattern for args:'
             print type, stypes[serialize_type], initial_value

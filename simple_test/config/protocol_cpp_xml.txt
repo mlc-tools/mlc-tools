@@ -97,13 +97,13 @@ if(xml_$(FIELD))
 auto arr_$(FIELD) = xml.append_child("$(FIELD)");
 for(auto& t : $(FIELD))
 {
-    arr_$(FIELD).append_child("int").append_attribute("i").set_value(t);
+    arr_$(FIELD).append_child("int").append_attribute("value").set_value(t);
 }
 #deserialize:
 auto arr_$(FIELD) = xml.child("$(FIELD)");
 for(auto& child : arr_$(FIELD))
 {
-    $(FIELD).push_back(child.attribute("i").as_int());
+    $(FIELD).push_back(child.attribute("value").as_int());
 }
 
 #list<bool>
@@ -111,39 +111,39 @@ for(auto& child : arr_$(FIELD))
 auto arr_$(FIELD) = xml.append_child("$(FIELD)");
 for(auto& t : $(FIELD))
 {
-    arr_$(FIELD).append_child("bool").append_attribute("i").set_value(t);
+    arr_$(FIELD).append_child("bool").append_attribute("value").set_value(t);
 }
 #deserialize:
 auto arr_$(FIELD) = xml.child("$(FIELD)");
 for(auto& child : arr_$(FIELD))
 {
-    $(FIELD).push_back(child.attribute("i").as_bool());
+    $(FIELD).push_back(child.attribute("value").as_bool());
 }
 #list<float>
 #serialize:
 auto arr_$(FIELD) = xml.append_child("$(FIELD)");
 for(auto& t : $(FIELD))
 {
-    arr_$(FIELD).append_child("float").append_attribute("i").set_value(t);
+    arr_$(FIELD).append_child("float").append_attribute("value").set_value(t);
 }
 #deserialize:
 auto arr_$(FIELD) = xml.child("$(FIELD)");
 for(auto& child : arr_$(FIELD))
 {
-    $(FIELD).push_back(child.attribute("i").as_float());
+    $(FIELD).push_back(child.attribute("value").as_float());
 }
 #list<string>
 #serialize:
 auto arr_$(FIELD) = xml.append_child("$(FIELD)");
 for(auto& t : $(FIELD))
 {
-    arr_$(FIELD).append_child("str").append_attribute("i").set_value(t.c_str());
+    arr_$(FIELD).append_child("str").append_attribute("value").set_value(t.c_str());
 }
 #deserialize:
 auto arr_$(FIELD) = xml.child("$(FIELD)");
 for(auto& child : arr_$(FIELD))
 {
-    $(FIELD).push_back(child.attribute("i").as_string(""));
+    $(FIELD).push_back(child.attribute("value").as_string(""));
 }
 
 #list<serialized>
@@ -184,7 +184,7 @@ for(auto child : arr_$(FIELD))
 xml.append_attribute("$(FIELD)").set_value($(FIELD)->name.c_str());
 #deserialize:
 auto name_$(FIELD) = xml.attribute("$(FIELD)").as_string();
-$(FIELD) = DataStorage::shared().get<$(TYPE)>(name_$(FIELD));	
+$(FIELD) = DataStorage::shared().get<$(TYPE)>(name_$(FIELD));
 
 
 #list<link>
@@ -192,12 +192,41 @@ $(FIELD) = DataStorage::shared().get<$(TYPE)>(name_$(FIELD));
 auto arr_$(FIELD) = xml.append_child("$(FIELD)");
 for(auto& t : $(FIELD))
 {
-    arr_$(FIELD).append_child("data").append_attribute("i").set_value(t->name.c_str());
+    arr_$(FIELD).append_child("data").append_attribute("value").set_value(t->name.c_str());
 }
 #deserialize:
 auto arr_$(FIELD) = xml.child("$(FIELD)");
 for(auto& child : arr_$(FIELD))
 {
-    auto name = child.attribute("i").as_string("");
+    auto name = child.attribute("value").as_string("");
     $(FIELD).push_back(DataStorage::shared().get<$(ARG_0)>(name));
 }
+
+#map
+#serialize:
+auto map_$(FIELD) = xml.append_child("$(FIELD)");
+for(auto& pair : $(FIELD))
+{
+    auto xml = map_$(FIELD).append_child("pair");
+    auto& key = pair.first;
+    auto& value = pair.second;
+    $(KEY_SERIALIZE)
+    $(VALUE_SERIALIZE)
+}
+#deserialize:
+auto map_$(FIELD) = xml.child("$(FIELD)");
+for(auto child : map_$(FIELD))
+{
+    auto xml = child;
+    $(KEY)
+    $(VALUE_TYPE) value;
+    $(KEY_SERIALIZE)
+    $(VALUE_SERIALIZE)
+    $(FIELD)[key] = value;
+}
+
+#enum
+#serialize:
+xml.append_attribute("$(FIELD)").set_value($(FIELD).str().c_str());
+#deserialize:
+$(FIELD) = std::string(xml.attribute("$(FIELD)").as_string(""));

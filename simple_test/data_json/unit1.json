@@ -1,6 +1,7 @@
 {
 	"unit": {
 		"name": "unitname1",
+		"unit_type": "attack",
 		"visual": {
 			"name": "some_locale_key",
 			"icon": "some_image"
