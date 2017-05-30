@@ -43,8 +43,8 @@ build_script:
     - cd simple_test
     - mkdir build
     - cd build
-    - cmake .. -DBUILD_XML=ON -DBUILD_JSON=OFF -DBUILD_SIDE=SERVER
-    - cmake --build
+    - cmake .. -DBUILD_XML=ON -DBUILD_JSON=OFF -DBUILD_SIDE=SERVER %CMAKE_CONFIGURE_FLAGS%
+    - cmake --build . %CMAKE_BUILD_FLAGS%
 
 test_script:
     # скрипт тестирования проекта:
