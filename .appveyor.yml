@@ -22,8 +22,6 @@ configuration:
 
 environment:
     matrix:
-        - TOOLCHAIN: msvc10
-        - TOOLCHAIN: msvc12
         - TOOLCHAIN: msvc14
 
 install:
