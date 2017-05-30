@@ -11,14 +11,17 @@ def add_dict(inDict, toDict):
 
 
 class Writer:
-    def __init__(self, outDirectory, parser):
-        self.parser = parser
-        self.buffers = {}
-        self.out_directory = outDirectory
-        self.created_files = []
 
-        self.buffers = add_dict(self.buffers, self.write_classes(parser.classes, 0))
-        return
+    def __init__(self, parser, serialize_format):
+        self.parser = parser
+        self.created_files = []
+        self.simple_types = parser.simple_types
+        self.serialize_format = serialize_format
+        self.serialize_protocol = self.parser.serialize_protocol
+        self.files = {}
+
+    def generate(self):
+        self.write_classes(self.parser.classes, 0)
 
     def write_object(self, object_, flags):
         return {flags: ""}
@@ -36,12 +39,10 @@ class Writer:
         return out
 
     def write_classes(self, classes, flags):
-        out = {flags: '\n'}
         for class_ in classes:
             dictionary = self.write_class(class_, flags)
-            self.save_file(self._get_filename_of_class(class_), dictionary[flags])
-            out = add_dict(out, dictionary)
-        return out
+            filepath = self._get_filename_of_class(class_)
+            self.files[filepath] = dictionary[flags]
 
     def write_functions(self, functions, flags):
         out = ''
@@ -71,12 +72,17 @@ class Writer:
                     print 'remove', filename
                 fileutils.remove(self.out_directory + filename)
 
-    def save_config_file(self, content):
+    def save_generated_classes(self, out_directory):
+        self.out_directory = out_directory
+        for file in self.files:
+            self.save_file(file, self.files[file])
+
+    def save_config_file(self):
         pattern = '#ifndef __mg_Config_h__\n#define __mg_Config_h__\n\n{}\n\n#endif //#ifndef __mg_Config_h__'
         configs = list()
         configs.append('#define MG_JSON 1')
         configs.append('#define MG_XML 2')
-        configs.append('\n#define MG_SERIALIZE_FORMAT MG_' + content.upper())
+        configs.append('\n#define MG_SERIALIZE_FORMAT MG_' + self.serialize_format.upper())
         self.save_file('config.h', pattern.format('\n'.join(configs)))
 
     def _get_filename_of_class(self, class_):

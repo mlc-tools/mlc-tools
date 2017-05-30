@@ -2,8 +2,7 @@ import fileutils
 import argparse
 from Parser import Parser
 from DataParser import DataParser
-from WriterCppSerializatorJson import WriterCppSerializatorJson
-from WriterCppSerializationXml import WriterCppSerializationXml
+from WriterCpp import WriterCpp
 from WriterPySerializationJson import WriterPySerializationJson
 from WriterPySerializationXml import WriterPySerializationXml
 from Copyright import Copyright
@@ -39,12 +38,16 @@ def main():
     parser.add_argument('-side', type=str, help='For different side generation - use both. server. client. Default: both', required=False, default='both')
     parser.add_argument('-data', type=str, help='Path to data configs', required=False, default='')
     parser.add_argument('-data_out', type=str, help='Out Path for data', required=False, default='')
+    parser.add_argument('-protocols', type=str,
+                        help='Path to file with serialization protocols. Default: empty, used default protocol',
+                        required=False, default='')
     args = parser.parse_args()
 
     configs_directory = fileutils.normalize_path(args.i)
     out_directory = fileutils.normalize_path(args.o)
     data_directory = fileutils.normalize_path(args.data)
     out_data_directory = fileutils.normalize_path(args.data_out)
+    path_to_protocols = fileutils.normalize_path(args.protocols, False)
     language = args.l
     serialize_format = args.f
     side = args.side
@@ -55,26 +58,28 @@ def main():
 
     parser = Parser(side)
     parser.set_configs_directory(configs_directory)
-    parser.copyright_text = Copyright(configs_directory).text
     files = fileutils.get_files_list(configs_directory)
     for file in files:
         if file.find('.mlc') == len(file) - 4:
             text = open(configs_directory + file).read()
             parser.parse(text)
     parser.link()
+    parser.copyright_text = Copyright(configs_directory).text
+    if path_to_protocols:
+        parser.parse_serialize_protocol(path_to_protocols)
+    else:
+        parser.load_default_serialize_protocol(language, serialize_format)
 
     writer = None
-    if language == 'py':
-        if serialize_format == 'xml':
-            writer = WriterPySerializationXml(out_directory, parser, configs_directory)
-        else:
-            writer = WriterPySerializationJson(out_directory, parser, configs_directory)
-    elif language == 'cpp':
-        if serialize_format == 'xml':
-            writer = WriterCppSerializationXml(out_directory, parser)
-        else:
-            writer = WriterCppSerializatorJson(out_directory, parser)
-    writer.save_config_file(serialize_format)
+    if language == 'cpp':
+        writer = WriterCpp(parser, serialize_format)
+    elif language == 'py' and serialize_format == 'xml':
+        writer = WriterPySerializationXml(parser, serialize_format)
+    elif language == 'py' and serialize_format == 'json':
+        writer = WriterPySerializationJson(parser, serialize_format)
+    writer.generate()
+    writer.save_generated_classes(out_directory)
+    writer.save_config_file()
 
     if data_directory:
         classes = []

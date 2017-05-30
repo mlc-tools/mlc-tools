@@ -1,6 +1,8 @@
 from Object import Object
 from Class import Class
 from Function import Function
+from protocols import protocols
+
 
 def _throw_error(msg):
     print msg
@@ -49,12 +51,14 @@ def find_body(text):
 
 
 class Parser:
+
     def __init__(self, side):
         self.classes = []
         self.objects = []
         self.functions = []
         self.side = side
         self.copyright_text = ''
+        self.simple_types = ["int", "float", "bool", "string"]
         return
 
     def set_configs_directory(self, path):
@@ -244,11 +248,18 @@ class Parser:
         return text
 
     def parse_serialize_protocol(self, path):
-        lines = open(self.configs_root + path).readlines()
+        buffer = open(self.configs_root + path).read()
+        self._parse_serialize_protocol(buffer)
 
-        simple_types = ["int", "float", "bool", "string"]
+    def load_default_serialize_protocol(self, language, serialize_format):
+        buffer = protocols[language][serialize_format]
+        self._parse_serialize_protocol(buffer)
+        pass
+
+    def _parse_serialize_protocol(self, buffer):
+        lines = buffer.split('\n')
         supported_types = []
-        supported_types.extend(simple_types)
+        supported_types.extend(self.simple_types)
         supported_types.append('serialized')
         supported_types.append('pointer')
         supported_types.append('list<serialized>')
@@ -258,21 +269,21 @@ class Parser:
         supported_types.append('serialized')
         supported_types.append('map')
         supported_types.append('enum')
-        for type_ in simple_types:
+        for type_ in self.simple_types:
             list_type = "list<{0}>".format(type_)
             supported_types.append(list_type)
 
-        serialize_formats = list()
-        serialize_formats.append({})
-        serialize_formats.append({})
+        serialize_protocol = list()
+        serialize_protocol.append({})
+        serialize_protocol.append({})
         for x in xrange(2):
             for type_ in supported_types:
-                simple = type_ in simple_types
+                simple = type_ in self.simple_types
                 p0 = self._load_protocol(lines, x, type_, True if simple else None)
                 p1 = p0 if not simple else self._load_protocol(lines, x, type_, False)
-                serialize_formats[x][type_] = []
-                serialize_formats[x][type_].extend([p0, p1])
-        return serialize_formats
+                serialize_protocol[x][type_] = []
+                serialize_protocol[x][type_].extend([p0, p1])
+        self.serialize_protocol = serialize_protocol
 
     def _load_protocol(self, lines, serialize_type, type, initial_value=None):
         stypes = ['serialize', 'deserialize']
@@ -318,7 +329,7 @@ class Parser:
         pattern = pattern.replace('$(VALUE_SERIALIZE)', '{2}')
         pattern = pattern.replace('$(KEY)', '{3}')
         pattern = pattern.replace('$(VALUE_TYPE)', '{4}')
-        
+
         if not pattern:
             print 'cannot find pattern for args:'
             print type, stypes[serialize_type], initial_value
@@ -331,6 +342,3 @@ class Parser:
         # print pattern
         # print '--------'
         return pattern
-
-
-
