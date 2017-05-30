@@ -48,7 +48,7 @@ build_script:
 
 test_script:
     # скрипт тестирования проекта:
-    - "%CONFIGURATION%/test_mlc_xml.exe"
+    - start "%CONFIGURATION%/test_mlc_xml.exe"
 
 # artifacts:
 #     - path: <local-package-path>
