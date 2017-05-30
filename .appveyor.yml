@@ -44,7 +44,7 @@ build_script:
     - dir
     - mkdir build
     - cd build
-    - cmake .. -DBUILD_XML=ON -DBUILD_JSON=OFF -DBUILD_SIDE=SERVER %CMAKE_CONFIGURE_FLAGS%
+    - cmake .. %CMAKE_CONFIGURE_FLAGS% -DBUILD_XML=ON -DBUILD_JSON=OFF -DBUILD_SIDE=SERVER 
     - cmake --build . %CMAKE_BUILD_FLAGS%
 
 test_script:
