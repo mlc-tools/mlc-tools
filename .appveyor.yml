@@ -49,6 +49,7 @@ build_script:
 
 test_script:
     # скрипт тестирования проекта:
+    - dir
     - test_mlc_xml.exe
 
 # artifacts:
