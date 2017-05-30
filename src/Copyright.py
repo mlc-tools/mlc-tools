@@ -2,6 +2,7 @@ from os.path import isfile
 
 
 class Copyright:
+
     def __init__(self, configs_path):
         self.text = ''
 

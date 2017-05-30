@@ -1,16 +1,17 @@
 import xml.etree.ElementTree as ET
 import fileutils
-import xml.etree.ElementTree as ET
 import xml.dom.minidom
 from DataStorageCreators import *
 import json
 
+
 class DataParser:
+
     def __init__(self, classes, format, data_directory):
         self.objects = {}
         self.format = format
         self.classes = classes
-        
+
         if self.format == 'xml':
             self._parse_xml(data_directory)
         elif self.format == 'json':
@@ -55,7 +56,7 @@ class DataParser:
             file = data_directory + file
             root = json.loads(open(file).read())
             for key in root:
-                name = key;
+                name = key
                 self._validate_type(key, file)
                 if name not in self.objects:
                     self.objects[name] = []
@@ -64,7 +65,7 @@ class DataParser:
     def _validate(self):
         pass
 
-    def _validate_type(self, type, file = ''):
+    def _validate_type(self, type, file=''):
         class_name = get_class_name_from_data_name(type)
         valid = False
         for class_ in self.classes:
@@ -86,7 +87,7 @@ class DataParser:
                 object.tag = 'value'
                 pair.append(object)
 
-        buffer = ET.tostring(root);
+        buffer = ET.tostring(root)
         xml_ = xml.dom.minidom.parseString(buffer)
         buffer = xml_.toprettyxml(encoding='utf-8')
         lines = buffer.split('\n')
@@ -108,5 +109,3 @@ class DataParser:
                     dict_obj['value'] = object[obj]
                 dict_[name].append(dict_obj)
         return json.dumps(dict_, indent=2)
-
-        

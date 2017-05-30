@@ -1,10 +1,10 @@
 from Class import Class
 from Object import Object
 from Function import Function
-import constants
 
-# DataNameFoo -> name_foo
+
 def get_data_name(name):
+    # DataNameFoo -> name_foo
     if name.find('Data') == 0:
         name = name[4:]
     name_ = ''
@@ -14,8 +14,9 @@ def get_data_name(name):
         name_ += ch.lower()
     return name_
 
-#name_foo - > DataNameFoo
+
 def get_class_name_from_data_name(name):
+    # name_foo - > DataNameFoo
     upper = True
     name_ = ''
     for ch in name:
@@ -26,9 +27,10 @@ def get_class_name_from_data_name(name):
         upper = False
     return 'Data' + name_
 
-# city -> cities
-# unit -> units
+
 def get_data_list_name(name):
+    # city -> cities
+    # unit -> units
     last = name[-1]
     if last in 'y':
         if last in 'a,e,i,o,u,y':
@@ -49,7 +51,7 @@ def get_data_list_name(name):
 
 
 class DataStorageCpp(Class):
-    
+
     def __init__(self, name, classes, parser):
         Class.__init__(self)
         self.parser = parser
@@ -83,7 +85,7 @@ class DataStorageCpp(Class):
         function.operations.append('static {} instance;'.format(self.name))
         function.operations.append('return instance;')
         self.functions.append(function)
-        
+
         function = Function()
         function.name = 'initialize'
         function.return_type = 'void'
@@ -91,10 +93,9 @@ class DataStorageCpp(Class):
         function.args.append(['buffer', 'string'])
         self.add_initialize_function_operations(function)
         self.functions.append(function)
-    
+
     def add_initialize_function_operations(self, function):
         pass
-
 
     def get_header_getter(self):
         function = Function()

@@ -3,6 +3,7 @@ from constants import Modifier
 
 
 class Function:
+
     def __init__(self):
         self.operations = []
         self.return_type = ''
@@ -97,7 +98,7 @@ class Function:
                 operation = ''
                 continue
         operations.append(operation.strip())
-        self.operations = [operation for operation in operations if operation]
+        self.operations = [o for o in operations if o]
         return
 
     def _find_modifiers(self, string):
