@@ -29,10 +29,10 @@ bool test_enum();
 void initialize_data_storage()
 {
 #if MG_SERIALIZE_FORMAT == MG_JSON
-	std::fstream stream("../assets/data.json", std::ios::in);
+	std::fstream stream("../../assets/data.json", std::ios::in);
 #endif
 #if MG_SERIALIZE_FORMAT == MG_XML
-	std::fstream stream("../assets/data.xml", std::ios::in);
+	std::fstream stream("../../assets/data.xml", std::ios::in);
 #endif
 
 	std::string str((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
