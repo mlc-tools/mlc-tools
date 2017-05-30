@@ -18,8 +18,7 @@ platform:
     - x86
 
 configuration:
-    # ... и в дебажной, и в релизной конфигурациях ...
-    # - Debug
+    - Debug
     - Release
 
 environment:
@@ -49,7 +48,7 @@ build_script:
 
 test_script:
     # скрипт тестирования проекта:
-    - "Release/test_mlc_xml.exe"
+    - "%CONFIGURATION%/test_mlc_xml.exe"
 
 # artifacts:
 #     - path: <local-package-path>
