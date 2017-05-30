@@ -329,6 +329,8 @@ class Parser:
         pattern = pattern.replace('$(VALUE_SERIALIZE)', '{2}')
         pattern = pattern.replace('$(KEY)', '{3}')
         pattern = pattern.replace('$(VALUE_TYPE)', '{4}')
+        # for python:
+        pattern = pattern.replace('$(__begin____end__)', '{3}')
 
         if not pattern:
             print 'cannot find pattern for args:'

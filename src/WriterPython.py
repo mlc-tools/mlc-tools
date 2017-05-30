@@ -1,7 +1,6 @@
 from Writer import Writer
 from Function import Function
 from Class import Class
-import fileutils
 
 SERIALIZATION = 0
 DESERIALIZATION = 1
@@ -29,15 +28,9 @@ class WriterPython(Writer):
         self.createRequestHandler()
         # self.create_data_storage()
 
-    def create_serialization_patterns(self):
-        pass
-
-    def get_pattern_file(self):
-        pass
-
     def write_class(self, cls, flags):
         out = ""
-        pattern = self.get_pattern_file()
+        pattern = self.getPatternFile()
         self.current_class = cls
 
         if cls.type == 'enum':
@@ -142,7 +135,9 @@ class WriterPython(Writer):
             self.loaded_functions[name] = body
 
     def getSerialiationFunctionArgs(self):
-        return ''
+        if self.serialize_format == 'xml':
+            return '(self, xml)'
+        return '(self, dictionary)'
 
     def createSerializationFunction(self, cls, serialize_type):
         function = Function()
@@ -175,7 +170,15 @@ class WriterPython(Writer):
         return self.serialize_protocol[SERIALIZATION]['map'][0]
 
     def getPatternDeserializationMap(self):
-        return self.serialize_protocol[SERIALIZATION]['map'][0]
+        return self.serialize_protocol[DESERIALIZATION]['map'][0]
+
+    def getPatternFile(self):
+        global _pattern_file
+        return _pattern_file[self.serialize_format]
+
+    def getPatternFactoryFile(self):
+        global _factory
+        return _factory[self.serialize_format]
 
     def buildMapSerialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args):
         key = obj_template_args[0]
@@ -268,9 +271,6 @@ class WriterPython(Writer):
                           obj_template_args[0].type if len(obj_template_args) > 0 else 'unknown_arg')
         return '        ' + str + '\n'
 
-    def getPatternFactoryFile(self):
-        pass
-
     def createFactory(self):
         pattern = self.getPatternFactoryFile()
         line = '        if type == "{0}": return {0}.{0}()\n'
@@ -281,10 +281,7 @@ class WriterPython(Writer):
             creates += line.format(cls.name)
             imports += line_import.format(cls.name)
         factory = pattern.format(imports, creates)
-        file = self.out_directory + 'Factory.py'
-        if fileutils.file_has_changes(file):
-            fileutils.write(file, factory)
-        self.created_files.append(file)
+        self.save_file('Factory.py', factory)
 
     def createRequestHandler(self):
         pattern = '''
@@ -295,16 +292,16 @@ class IRequestHandler:
         self.response = None
 
     def visit(self, ctx):
-        if ctx == None: return
+        if ctx == None:
+            return
 {1}
-
 {2}
 '''
         line = '        elif ctx.__class__ == {0}: self.visit_{1}(ctx)\n'
         line_import = 'from {0} import {0}\n'
         line_visit = '''
     def visit_{0}(self, ctx):
-        return
+        pass
 '''
         lines = ''
         visits = ''
@@ -318,16 +315,11 @@ class IRequestHandler:
                 imports += line_import.format(cls.name)
                 visits += line_visit.format(func_name)
         factory = pattern.format(imports, lines, visits)
-        file = self.out_directory + 'IRequestHandler.py'
-        if fileutils.file_has_changes(file):
-            fileutils.write(file, factory)
-        self.created_files.append(file)
+        self.save_file('IRequestHandler.py', factory)
 
     def create_data_storage(self):
         pattern = '''
 class DataStorage():
-    def __init__(self):
-        pass
     def getDataBuilding(self, name):
         import DataBuilding
         data = DataBuilding.DataBuilding()
@@ -347,7 +339,52 @@ class DataStorage():
 def get_data_storage():
     return DataStorage()
 '''
-        file = self.out_directory + 'DataStorage.py'
-        if fileutils.file_has_changes(file):
-            fileutils.write(file, pattern)
-        self.created_files.append(file)
+        self.save_file('DataStorage.py', pattern)
+
+
+_factory = {}
+_factory['xml'] = '''import xml.etree.ElementTree as ET
+{0}
+class Factory:
+    @staticmethod
+    def build(type):
+{1}
+        return None
+    @staticmethod
+    def create_command(string):
+        root = ET.fromstring(string)
+        type = root.tag
+        command = Factory.build(type)
+        if command != None:
+            command.deserialize(root)
+        return command'''
+
+_factory['json'] = '''import json
+{0}
+class Factory:
+    @staticmethod
+    def build(type):
+{1}
+        return None
+    @staticmethod
+    def create_command(string):
+        dictionary = json.loads(string)
+        type = dictionary["command"]["type"]
+        command = Factory.build(type)
+        if command != None:
+            command.deserialize(dictionary)
+        return command'''
+
+_pattern_file = {}
+_pattern_file['xml'] = '''import xml.etree.ElementTree as ET
+{3}\nclass {0}:
+    def __init__(self):\n{4}\n{1}\n        pass
+    def get_type(self):\n        return self.__type__
+{2}'''
+
+_pattern_file['json'] = '''import json
+{3}
+class {0}:
+    def __init__(self):\n{4}\n{1}\n        pass
+    def get_type(self):\n        return self.__type__
+{2}'''

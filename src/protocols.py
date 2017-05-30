@@ -544,6 +544,141 @@ $(OWNER)$(FIELD) = xml.get("$(FIELD)")
 '''
 
 py_json = '''
+#int, bool, float, string
+#serialize:
+#with default value:
+if $(OWNER)$(FIELD) != $(DEFAULT_VALUE): dictionary["$(FIELD)"] = $(OWNER)$(FIELD)
+#without default value:
+dictionary["$(FIELD)"] = $(OWNER)$(FIELD)
+#deserialize
+#with default value:
+if "$(FIELD)" in dictionary: $(OWNER)$(FIELD) = dictionary["$(FIELD)"]
+#without default value:
+$(OWNER)$(FIELD) = dictionary["$(FIELD)"]
+
+
+#pointer
+#serialize
+if $(OWNER)$(FIELD):
+            dictionary['$(FIELD)'] = $({})
+            dictionary['$(FIELD)'][$(OWNER)$(FIELD).get_type()] = $({})
+            $(OWNER)$(FIELD).serialize(dictionary['$(FIELD)'][$(OWNER)$(FIELD).get_type()])
+#deserialize
+if '$(FIELD)' in dictionary:
+            for key, value in dictionary['$(FIELD)'].iteritems():
+                $(OWNER)$(FIELD) = Factory.Factory.build(key);
+                $(OWNER)$(FIELD).deserialize(value)
+                break
+
+#list<int>, list<float>, list<bool>, list<string>
+#serialize
+arr_$(FIELD) = []
+        for obj in $(OWNER)$(FIELD):
+            arr_$(FIELD).append(obj)
+        dictionary['$(FIELD)'] = arr_$(FIELD)
+#deserialize
+arr_$(FIELD) = dictionary['$(FIELD)']
+        for obj in arr_$(FIELD):
+            $(OWNER)$(FIELD).append(obj)
+
+#list<serialized>
+#serialize
+arr_$(FIELD) = []
+        for obj in $(OWNER)$(FIELD):
+            dict = $({})
+            obj.serialize(dict)
+            arr_$(FIELD).append(dict)
+        dictionary['$(FIELD)'] = arr_$(FIELD)
+#deserialize
+arr_$(FIELD) = dictionary['$(FIELD)']
+        for dict in arr_$(FIELD):
+            obj = $(TYPE)()
+            obj.deserialize(dict)
+            $(OWNER)$(FIELD).append(obj)
+
+#serialized
+#serialize
+if $(OWNER)$(FIELD) != None:
+            dict = $({})
+            $(OWNER)$(FIELD).serialize(dict)
+            dictionary["$(FIELD)"] = dict
+#deserialize
+if '$(FIELD)' in dictionary:
+            $(OWNER)$(FIELD) = $(TYPE)()
+            $(OWNER)$(FIELD).deserialize(dictionary['$(FIELD)'])
+
+#pointer_list
+#serialize
+dictionary['$(FIELD)'] = []
+        arr = dictionary['$(FIELD)']
+        for t in $(OWNER)$(FIELD):
+            arr.append($({}))
+            arr[-1][t.get_type()] = $({})
+            t.serialize(arr[-1][t.get_type()])
+#deserialize
+arr = dictionary['$(FIELD)']
+        size = len(arr)
+        for index in xrange(size):
+            for key, value in arr[index].iteritems():
+                obj = Factory.Factory.build(key)
+                $(OWNER)$(FIELD).append(obj)
+                $(OWNER)$(FIELD)[-1].deserialize(arr[index][key])
+                break
+
+
+#link
+#serialize:
+if isinstance($(OWNER)$(FIELD), $(TYPE)):
+            dictionary['$(FIELD)'] = $(OWNER)$(FIELD).name
+        else:
+            dictionary['$(FIELD)'] = $(OWNER)$(FIELD)
+#deserialize:
+name = dictionary["$(FIELD)"]
+        $(OWNER)$(FIELD) = get_data_storage().get$(TYPE)(name)
+
+
+#list<link>
+#serialize:
+dictionary['$(FIELD)'] = []
+        arr = dictionary['$(FIELD)']
+        for t in $(OWNER)$(FIELD):
+            arr.append(t.name)
+#deserialize:
+from DataStorage import DataStorage
+        arr = dictionary['$(FIELD)']
+        for name in arr:
+            data = get_data_storage().get$(TYPE)(name)
+            $(OWNER)$(FIELD).append(data)
+
+
+#map
+#serialize
+        dict_cach = dictionary
+        arr = []
+        dictionary['$(FIELD)'] = arr
+        for key, value in $(OWNER)$(FIELD).iteritems():
+            arr.append($({}))
+            dictionary = arr[-1]
+$(KEY_SERIALIZE)
+$(VALUE_SERIALIZE)
+        dictionary = dict_cach
+#deserialize
+        dict_cach = dictionary
+        arr = dictionary['$(FIELD)']
+        for dict in arr:
+            key = dict['key']
+            type = key
+            dictionary = dict
+$(VALUE_SERIALIZE)
+            $(OWNER)$(FIELD)[type] = _value
+        dictionary = dict_cach
+
+
+#enum
+#serialize:
+dictionary["$(FIELD)"] = $(OWNER)$(FIELD)
+#deserialize
+$(OWNER)$(FIELD) = dictionary["$(FIELD)"]
 '''
 
 protocols = {}

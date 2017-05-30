@@ -3,8 +3,7 @@ import argparse
 from Parser import Parser
 from DataParser import DataParser
 from WriterCpp import WriterCpp
-from WriterPySerializationJson import WriterPySerializationJson
-from WriterPySerializationXml import WriterPySerializationXml
+from WriterPython import WriterPython
 from Copyright import Copyright
 
 
@@ -73,10 +72,8 @@ def main():
     writer = None
     if language == 'cpp':
         writer = WriterCpp(parser, serialize_format)
-    elif language == 'py' and serialize_format == 'xml':
-        writer = WriterPySerializationXml(parser, serialize_format)
-    elif language == 'py' and serialize_format == 'json':
-        writer = WriterPySerializationJson(parser, serialize_format)
+    elif language == 'py':
+        writer = WriterPython(parser, serialize_format)
     writer.generate()
     writer.save_generated_classes(out_directory)
     writer.save_config_file()
