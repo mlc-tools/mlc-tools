@@ -37,6 +37,13 @@ def remove(filename):
         os.remove(filename)
 
 
+def normalize_path(path, append_slash=True):
+    path = path.replace('\\', '/')
+    if append_slash and path and path[-1] != '/':
+        path += '/'
+    return path
+
+
 def load_dict(path):
     dictionary = {}
     try:

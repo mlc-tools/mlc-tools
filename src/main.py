@@ -1,5 +1,5 @@
 import fileutils
-from arguments_parser import get_arg, get_bool, get_directory
+import argparse
 from Parser import Parser
 from DataParser import DataParser
 from WriterCppSerializatorJson import WriterCppSerializatorJson
@@ -31,13 +31,23 @@ def validate_arg_side(side):
 
 
 def main():
-    data_directory = get_directory('-data', '')
-    out_data_directory = get_directory('-data_out', '')
-    configs_directory = get_directory('-i', '../config/')
-    out_directory = get_directory('-o', '../out/')
-    language = get_arg('-l', 'cpp')
-    serialize_format = get_arg('-f', 'xml')
-    side = get_arg('-side', 'both')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i',  type=str, help='Path to classes configs', required=False, default='../config/')
+    parser.add_argument('-o', type=str, help='Out Path for classes', required=False, default='../out/')
+    parser.add_argument('-l', type=str, help='Used language. Supported cpp, py. Default: cpp', required=False, default='cpp')
+    parser.add_argument('-f', type=str, help='Used serialized format. Supported xml, json. Default: xml', required=False, default='xml')
+    parser.add_argument('-side', type=str, help='For different side generation - use both. server. client. Default: both', required=False, default='both')
+    parser.add_argument('-data', type=str, help='Path to data configs', required=False, default='')
+    parser.add_argument('-data_out', type=str, help='Out Path for data', required=False, default='')
+    args = parser.parse_args()
+
+    configs_directory = fileutils.normalize_path(args.i)
+    out_directory = fileutils.normalize_path(args.o)
+    data_directory = fileutils.normalize_path(args.data)
+    out_data_directory = fileutils.normalize_path(args.data_out)
+    language = args.l
+    serialize_format = args.f
+    side = args.side
 
     validate_arg_language(language)
     validate_arg_format(serialize_format)
@@ -72,7 +82,7 @@ def main():
             if class_.is_storage:
                 classes.append(class_)
         data_parser = DataParser(classes, serialize_format, data_directory)
-        data_file = data_parser.flush(out_data_directory)
+        data_parser.flush(out_data_directory)
     writer.create_data_storage()
 
     writer.remove_non_actual_files()

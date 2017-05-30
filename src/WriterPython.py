@@ -326,6 +326,16 @@ class DataStorage():
         data = DataBuilding.DataBuilding()
         data.name = name
         return data
+    def getDataResource(self, name):
+        import DataResource
+        data = DataResource.DataResource()
+        data.name = name
+        return data
+    def getDataLocale(self, name):
+        import DataLocale
+        data = DataLocale.DataLocale()
+        data.name = name
+        return data
         
 def get_data_storage():
     return DataStorage()
