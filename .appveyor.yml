@@ -48,7 +48,6 @@ build_script:
 
 test_script:
     # скрипт тестирования проекта:
-    - cd simple_test/build
     - Release/test_mlc_xml.exe
 
 # artifacts:
