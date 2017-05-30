@@ -30,6 +30,7 @@ environment:
         - TOOLCHAIN: msvc14
 
 install:
+    - del "c:\Program Files (x86)\MSBuild\14.0\Microsoft.Common.targets\ImportAfter\Xamarin.Common.targets"
     # скрипт настройки среды и установки зависимостей:
     # - call ci\appveyor\set-env.bat %TOOLCHAIN% %PLATFORM%
 
@@ -48,7 +49,7 @@ build_script:
 
 test_script:
     # скрипт тестирования проекта:
-    - Release/test_mlc_xml.exe
+    - "Release/test_mlc_xml.exe"
 
 # artifacts:
 #     - path: <local-package-path>
