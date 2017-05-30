@@ -46,8 +46,8 @@ build_script:
     - cd build
     - cmake .. %CMAKE_CONFIGURE_FLAGS% -DBUILD_XML=ON -DBUILD_JSON=OFF -DBUILD_SIDE=SERVER 
     #- cmake --build . %CMAKE_BUILD_FLAGS%
-    - parallel: true                  # enable MSBuild parallel builds
-    - project: test_mlc_xml.sln      # path to Visual Studio solution or project
+    - MSBuild test_mlc_xml.sln /p:Configuration=%CONFIGURATION% /p:Platform=win32
+
 
 
 test_script:
