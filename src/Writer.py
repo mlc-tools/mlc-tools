@@ -78,12 +78,7 @@ class Writer:
             self.save_file(file, self.files[file])
 
     def save_config_file(self):
-        pattern = '#ifndef __mg_Config_h__\n#define __mg_Config_h__\n\n{}\n\n#endif //#ifndef __mg_Config_h__'
-        configs = list()
-        configs.append('#define MG_JSON 1')
-        configs.append('#define MG_XML 2')
-        configs.append('\n#define MG_SERIALIZE_FORMAT MG_' + self.serialize_format.upper())
-        self.save_file('config.h', pattern.format('\n'.join(configs)))
+        pass
 
     def _get_filename_of_class(self, class_):
         return class_.name

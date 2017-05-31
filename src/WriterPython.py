@@ -271,6 +271,12 @@ class WriterPython(Writer):
                           obj_template_args[0].type if len(obj_template_args) > 0 else 'unknown_arg')
         return '        ' + str + '\n'
 
+    def save_config_file(self):
+        buffer = 'MG_XML = 2\nMG_JSON = 1\n'
+        buffer += 'MG_SERIALIZE_FORMAT = MG_' + self.serialize_format.upper()
+        buffer += '\n'
+        self.save_file('config.py', buffer)
+
     def createFactory(self):
         pattern = self.getPatternFactoryFile()
         line = '        if type == "{0}": return {0}.{0}()\n'
