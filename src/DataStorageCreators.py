@@ -50,7 +50,7 @@ def get_data_list_name(name):
     return name
 
 
-class DataStorageCpp(Class):
+class DataStorage(Class):
 
     def __init__(self, name, classes, parser):
         Class.__init__(self)
@@ -77,14 +77,7 @@ class DataStorageCpp(Class):
         loaded.initial_value = 'false'
         self.members.append(loaded)
 
-        function = Function()
-        function.name = 'shared'
-        function.args.append(['', ''])
-        function.return_type = 'const {}&'.format(self.name)
-        function.is_static = True
-        function.operations.append('static {} instance;'.format(self.name))
-        function.operations.append('return instance;')
-        self.functions.append(function)
+        self.create_shared_method()
 
         function = Function()
         function.name = 'initialize'
@@ -93,9 +86,32 @@ class DataStorageCpp(Class):
         function.args.append(['buffer', 'string'])
         self.add_initialize_function_operations(function)
         self.functions.append(function)
+        self.create_getters(classes)
 
     def add_initialize_function_operations(self, function):
         pass
+
+    def create_shared_method(self):
+        pass
+
+    def create_getters(self, classes):
+        pass
+
+
+class DataStorageCpp(DataStorage):
+
+    def __init__(self, *args):
+        DataStorage.__init__(self, *args)
+
+    def create_shared_method(self):
+        function = Function()
+        function.name = 'shared'
+        function.args.append(['', ''])
+        function.return_type = 'const {}&'.format(self.name)
+        function.is_static = True
+        function.operations.append('static {} instance;'.format(self.name))
+        function.operations.append('return instance;')
+        self.functions.append(function)
 
     def get_header_getter(self):
         function = Function()
@@ -124,10 +140,66 @@ class DataStorageCpp(Class):
         return getters
 
 
+class DataStoragePython(DataStorage):
+
+    def __init__(self, *args):
+        DataStorage.__init__(self, *args)
+
+        self.create_deserialize()
+
+        object = Object()
+        object.type = self.name
+        object.name = '__instance'
+        object.is_static = True
+        self.members.append(object)
+
+    def create_deserialize(self):
+        function = Function()
+        function.name = 'deserialize'
+        function.args.append(['xml', ''])
+        for member in self.members:
+            if member.type != 'map':
+                continue
+            pattern = '''
+        map = xml.find('{0}')
+        for xml_child in map:
+            key = xml_child.get('key')
+            xml_value = xml_child.find('value')
+            if key not in self.{0}:
+                self.{0}[key] = DataUnit()
+            self.{0}[key].deserialize(xml_value)'''
+            function.operations.append(pattern.format(member.name, member.template_args[1].name))
+
+        self.functions.append(function)
+
+    def create_shared_method(self):
+        function = Function()
+        function.name = 'shared'
+        function.args.append(['', ''])
+        function.return_type = self.name
+        function.is_static = True
+        function.operations.append('if not {}.__instance:'.format(self.name))
+        function.operations.append('    {0}.__instance = {0}()'.format(self.name))
+        function.operations.append('return {}.__instance'.format(self.name))
+        self.functions.append(function)
+
+    def create_getters(self, classes):
+        for class_ in classes:
+            if class_.is_storage and (class_.side == self.parser.side or class_.side == 'both'):
+                map_name = get_data_list_name(get_data_name(class_.name))
+                function = Function()
+                function.name = 'get' + class_.name
+                function.args.append(['name', ''])
+                function.operations.append('if not self._loaded and name not in self.{}:'.format(map_name))
+                function.operations.append('    self.{}[name] = {}()'.format(map_name, class_.name))
+                function.operations.append('return self.{}[name]'.format(map_name))
+                self.functions.append(function)
+
+
 class DataStorageCppXml(DataStorageCpp):
 
-    def __init__(self, name, classes, parser):
-        DataStorageCpp.__init__(self, name, classes, parser)
+    def __init__(self, *args):
+        DataStorageCpp.__init__(self, *args)
 
     def add_initialize_function_operations(self, function):
         function.operations.append('pugi::xml_document doc;')
@@ -138,8 +210,8 @@ class DataStorageCppXml(DataStorageCpp):
 
 class DataStorageCppJson(DataStorageCpp):
 
-    def __init__(self, name, classes, parser):
-        DataStorageCpp.__init__(self, name, classes, parser)
+    def __init__(self, *args):
+        DataStorageCpp.__init__(self, *args)
 
     def add_initialize_function_operations(self, function):
         function.operations.append('Json::Value json;')
@@ -147,3 +219,22 @@ class DataStorageCppJson(DataStorageCpp):
         function.operations.append('reader.parse(buffer, json);')
         function.operations.append('const_cast<{}*>(this)->deserialize(json);'.format(self.name))
         function.operations.append('const_cast<{}*>(this)->_loaded = true;'.format(self.name))
+
+
+class DataStoragePythonXml(DataStoragePython):
+    """docstring for DataStoragePythonXml"""
+
+    def __init__(self, *args):
+        DataStoragePython.__init__(self, *args)
+
+    def add_initialize_function_operations(self, function):
+        function.operations.append('root = ET.fromstring(buffer)')
+        function.operations.append('self.deserialize(root)')
+        function.operations.append('self._loaded = True')
+
+
+class DataStoragePythonJson(DataStoragePython):
+    """docstring for DataStoragePythonXml"""
+
+    def __init__(self, *args):
+        DataStoragePython.__init__(self, *args)

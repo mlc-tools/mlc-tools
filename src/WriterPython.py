@@ -1,6 +1,8 @@
 from Writer import Writer
 from Function import Function
 from Class import Class
+from DataStorageCreators import DataStoragePythonXml
+from DataStorageCreators import DataStoragePythonJson
 
 SERIALIZATION = 0
 DESERIALIZATION = 1
@@ -29,8 +31,9 @@ class WriterPython(Writer):
         # self.create_data_storage()
 
     def write_class(self, cls, flags):
+        global _pattern_file
         out = ""
-        pattern = self.getPatternFile()
+        pattern = _pattern_file[self.serialize_format]
         self.current_class = cls
 
         if cls.type == 'enum':
@@ -39,8 +42,12 @@ class WriterPython(Writer):
                     member.initial_value = 'self.' + member.initial_value
 
         initialize_list = ''
+        static_list = ''
         for object in cls.members:
-            initialize_list += '        ' + self.write_object(object) + '\n'
+            if not object.is_static:
+                initialize_list += '        ' + self.write_object(object) + '\n'
+            else:
+                static_list += '    ' + self.write_object(object) + '\n'
 
         self.createSerializationFunction(cls, SERIALIZATION)
         self.createSerializationFunction(cls, DESERIALIZATION)
@@ -58,15 +65,16 @@ class WriterPython(Writer):
             init_behavior = '        {0}.__init__(self)'.format(cls.behaviors[0].name)
         for obj in cls.members:
             if self.parser.find_class(obj.type):
-                imports += '\nfrom {0} import {0}'.format(obj.type)
+                if obj.type != cls.name:
+                    imports += '\nfrom {0} import {0}'.format(obj.type)
             elif obj.type == 'list' or obj.type == 'map':
                 for arg in obj.template_args:
-                    if isinstance(arg, Class):
+                    if isinstance(arg, Class) and arg.name != cls.name:
                         imports += '\nfrom {0} import {0}'.format(arg.name)
-                    elif self.parser.find_class(arg.type):
+                    elif self.parser.find_class(arg.type) and arg.type != cls.name:
                         imports += '\nfrom {0} import {0}'.format(arg.type)
 
-        out = pattern.format(name, initialize_list, functions, imports, init_behavior)
+        out = pattern.format(name, initialize_list, functions, imports, init_behavior, static_list)
         # for line in out.split('\n'):
         #     if 'get_data_storage()' in line:
         #         out = 'from DataStorage import get_data_storage\n' + out
@@ -79,16 +87,32 @@ class WriterPython(Writer):
         return {flags: out}
 
     def write_function(self, cls, function):
-        out = ""
+        out = ''
         key = cls.name + '.' + function.name
         if key in self.loaded_functions:
             body = self.loaded_functions[key]
             out += '    def {0}{1}\n\n'.format(function.name, body)
+            return out
+        if cls.name == 'DataStorage':
+            args = ['self'] if not function.is_static else []
+            for arg in function.args:
+                args.append(arg[0])
+            args = ', '.join(args)
+            if function.is_static:
+                out = '    @staticmethod\n'
+            out += '    def {}({}):\n'.format(function.name, args)
+            body = ''
+            for op in function.operations:
+                body += '        ' + op + '\n'
+            if not body:
+                body = '        pass\n'
+
+            out += body
         return out
 
     def write_object(self, object):
         value = object.initial_value
-        if value is None:
+        if value is None and not object.is_pointer:
             type = object.type
             if type == "string":
                 value = '""'
@@ -105,7 +129,11 @@ class WriterPython(Writer):
             if type == "map":
                 value = "{}"
 
-        out = 'self.{0} = {1}'.format(object.name, convertInitializeValue(value))
+        if object.is_static:
+            out = '{0} = {1}'
+        else:
+            out = 'self.{0} = {1}'
+        out = out.format(object.name, convertInitializeValue(value))
         return out
 
     def _getImports(self, cls):
@@ -146,12 +174,10 @@ class WriterPython(Writer):
             if func.name == function.name:
                 return
 
-        body = self.getSerialiationFunctionArgs() + ':\n'
+        body = self.getSerialiationFunctionArgs() + ':\n$(import)'
         if cls.behaviors:
             body += ('        {0}.{1}' + self.getSerialiationFunctionArgs() + '\n').format(cls.behaviors[0].name,
                                                                                            function.name)
-        body += '        import Factory\n'
-        body += '        from DataStorage import get_data_storage\n'
         for obj in cls.members:
             if obj.is_runtime:
                 continue
@@ -162,56 +188,30 @@ class WriterPython(Writer):
 
             body += self._buildSerializeOperation(obj.name, obj.type, convertInitializeValue(obj.initial_value),
                                                   serialize_type, obj.template_args, obj.is_pointer, 'self.', obj.is_link)
+        use_factory = 'Factory.build' in body
+        use_data_storage = 'DataStorage.shared()' in body
+        imports = ''
+        if serialize_type == DESERIALIZATION:
+            if use_factory:
+                imports += '        from Factory import Factory\n'
+            if use_data_storage:
+                imports = '        from DataStorage import DataStorage\n'
+        body = body.replace('$(import)', imports)
+
         body += '        return'
         self.loaded_functions[cls.name + '.' + function.name] = body
         cls.functions.append(function)
 
-    def getPatternSerializationMap(self):
-        return self.serialize_protocol[SERIALIZATION]['map'][0]
-
-    def getPatternDeserializationMap(self):
-        return self.serialize_protocol[DESERIALIZATION]['map'][0]
-
-    def getPatternFile(self):
-        global _pattern_file
-        return _pattern_file[self.serialize_format]
-
-    def getPatternFactoryFile(self):
-        global _factory
-        return _factory[self.serialize_format]
-
-    def buildMapSerialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args):
+    def buildMapSerialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args, serialization_type):
         key = obj_template_args[0]
         value = obj_template_args[1]
         key_type = key.name if isinstance(key, Class) else key.type
         value_type = value.name if isinstance(value, Class) else value.type
-        str = self.getPatternSerializationMap()
+        str = self.serialize_protocol[serialization_type]['map'][0]
         _value_is_pointer = value.is_pointer
         a0 = obj_name
-        a1 = self._buildSerializeOperation('key', key_type, None, SERIALIZATION, [], False, '', key.is_link)
-        a2 = self._buildSerializeOperation("value", value_type, None, SERIALIZATION, [], _value_is_pointer, '', False)
-        a1 = a1.split('\n')
-        for index, a in enumerate(a1):
-            a1[index] = '    ' + a
-        a1 = '\n'.join(a1)
-        a2 = a2.split('\n')
-        for index, a in enumerate(a2):
-            a2[index] = '    ' + a
-        a2 = '\n'.join(a2)
-        return str.format(a0, a1, a2, '{}', 'self.') + '\n'
-        # a1 = serialize key /simple, serialized
-        # a2 = serialize value /simple, serialized, pointer,
-
-    def buildMapDeserialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args):
-        key = obj_template_args[0]
-        value = obj_template_args[1]
-        key_type = key.name if isinstance(key, Class) else key.type
-        value_type = value.name if isinstance(value, Class) else value.type
-        str = self.getPatternDeserializationMap()
-        _value_is_pointer = value.is_pointer
-        a0 = obj_name
-        a1 = self._buildSerializeOperation('key', key_type, None, DESERIALIZATION, [], False, '', key.is_link)
-        a2 = self._buildSerializeOperation("value", value_type, None, DESERIALIZATION, [], _value_is_pointer, '_', False)
+        a1 = self._buildSerializeOperation('key', key_type, None, serialization_type, [], False, '', key.is_link)
+        a2 = self._buildSerializeOperation("value", value_type, None, serialization_type, [], _value_is_pointer, '', False)
         a1 = a1.split('\n')
         for index, a in enumerate(a1):
             a1[index] = '    ' + a
@@ -246,12 +246,8 @@ class WriterPython(Writer):
                     if len(obj_template_args) != 2:
                         print "map should have 2 arguments"
                         exit - 1
-                    if serialization_type == SERIALIZATION:
-                        return self.buildMapSerialization(obj_name, obj_type, obj_value, obj_is_pointer,
-                                                          obj_template_args)
-                    if serialization_type == DESERIALIZATION:
-                        return self.buildMapDeserialization(obj_name, obj_type, obj_value, obj_is_pointer,
-                                                            obj_template_args)
+                    return self.buildMapSerialization(obj_name, obj_type, obj_value, obj_is_pointer,
+                                                      obj_template_args, serialization_type)
                 else:
                     arg = obj_template_args[0]
                     arg_type = arg.name if isinstance(arg, Class) else arg.type
@@ -278,7 +274,8 @@ class WriterPython(Writer):
         self.save_file('config.py', buffer)
 
     def createFactory(self):
-        pattern = self.getPatternFactoryFile()
+        global _factory
+        pattern = _factory[self.serialize_format]
         line = '        if type == "{0}": return {0}.{0}()\n'
         line_import = 'import {0}\n'
         creates = ''
@@ -290,25 +287,10 @@ class WriterPython(Writer):
         self.save_file('Factory.py', factory)
 
     def createRequestHandler(self):
-        pattern = '''
-{0}
-
-class IRequestHandler:
-    def __init__(self):
-        self.response = None
-
-    def visit(self, ctx):
-        if ctx == None:
-            return
-{1}
-{2}
-'''
+        pattern = _pattern_request
         line = '        elif ctx.__class__ == {0}: self.visit_{1}(ctx)\n'
         line_import = 'from {0} import {0}\n'
-        line_visit = '''
-    def visit_{0}(self, ctx):
-        pass
-'''
+        line_visit = '''\n    def visit_{0}(self, ctx):\n        pass\n'''
         lines = ''
         visits = ''
         imports = ''
@@ -323,48 +305,76 @@ class IRequestHandler:
         factory = pattern.format(imports, lines, visits)
         self.save_file('IRequestHandler.py', factory)
 
+#     def create_data_storage(self):
+#         pattern = '''
+# class DataStorage():
+#     def getDataBuilding(self, name):
+#         import DataBuilding
+#         data = DataBuilding.DataBuilding()
+#         data.name = name
+#         return data
+#     def getDataResource(self, name):
+#         import DataResource
+#         data = DataResource.DataResource()
+#         data.name = name
+#         return data
+#     def getDataLocale(self, name):
+#         import DataLocale
+#         data = DataLocale.DataLocale()
+#         data.name = name
+#         return data
+
+# def get_data_storage():
+#     return DataStorage()
+# '''
+#         self.save_file('DataStorage.py', pattern)
+
+    def create_data_storage_class(self, name, classes):
+        if self.serialize_format == 'xml':
+            return DataStoragePythonXml(name, classes, self.parser)
+        else:
+            return DataStoragePythonJson(name, classes, self.parser)
+
     def prepare_file(self, text):
         lines = text.split('\n')
         result = []
         tabs = False
+        is_static = False
         for line in lines:
             if not line.split():
                 continue
             if not line.startswith('    ') and tabs:
                 result.extend(['', ''])
-            elif line.startswith('class ') or line.startswith('def '):
-                result.extend(['', ''])
-            elif line.strip().startswith('def '):
+            elif line.startswith('    @'):
+                is_static = True
                 result.extend([''])
+                result.append(line)
+                continue
+            elif not is_static:
+                if line.startswith('class ') or line.startswith('def '):
+                    result.extend(['', ''])
+                elif line.strip().startswith('def '):
+                    result.extend([''])
             result.append(line)
             if line.startswith('    '):
                 tabs = True
+            is_static = False
         result.append('')
         return '\n'.join(result)
+
     def create_data_storage(self):
-        pattern = '''
-class DataStorage():
-    def getDataBuilding(self, name):
-        import DataBuilding
-        data = DataBuilding.DataBuilding()
-        data.name = name
-        return data
-    def getDataResource(self, name):
-        import DataResource
-        data = DataResource.DataResource()
-        data.name = name
-        return data
-    def getDataLocale(self, name):
-        import DataLocale
-        data = DataLocale.DataLocale()
-        data.name = name
-        return data
+        storage = self.create_data_storage_class('DataStorage', self.parser.classes)
 
-def get_data_storage():
-    return DataStorage()
-'''
-        self.save_file('DataStorage.py', pattern)
+        # for function in storage.functions:
+        #     if function.name == 'shared':
+        #         args = '():\n'
+        #         body = '\n'.join(function.operations)
+        #         self.loaded_functions[storage.name + '.' + function.name] = args + body
+        #         break
 
+        content = self.write_class(storage, 0)[0]
+        content = self.prepare_file(content)
+        self.save_file(storage.name + '.py', content)
 
 _factory = {}
 _factory['xml'] = '''import xml.etree.ElementTree as ET
@@ -402,6 +412,7 @@ class Factory:
 _pattern_file = {}
 _pattern_file['xml'] = '''import xml.etree.ElementTree as ET
 {3}\nclass {0}:
+{5}
     def __init__(self):\n{4}\n{1}\n        pass
     def get_type(self):\n        return self.__type__
 {2}'''
@@ -409,6 +420,13 @@ _pattern_file['xml'] = '''import xml.etree.ElementTree as ET
 _pattern_file['json'] = '''import json
 {3}
 class {0}:
+{5}
     def __init__(self):\n{4}\n{1}\n        pass
     def get_type(self):\n        return self.__type__
 {2}'''
+
+_pattern_request = '''{0}\nclass IRequestHandler:
+    def __init__(self):\n        self.response = None
+    def visit(self, ctx):\n        if ctx == None:\n            return
+{1}\n{2}
+'''

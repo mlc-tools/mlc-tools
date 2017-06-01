@@ -1,6 +1,7 @@
 /simple_test/generated/
 /simple_test/build/
 /.idea/
+/.sublime/
 
 *.pyc
 .DS_Store

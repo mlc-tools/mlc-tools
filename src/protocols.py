@@ -439,7 +439,7 @@ if $(OWNER)$(FIELD):
 xml_pointer = xml.find('$(FIELD)')
         if xml_pointer:
             type = xml_pointer.get('type')
-            $(OWNER)$(FIELD) = Factory.Factory.build(type);
+            $(OWNER)$(FIELD) = Factory.build(type)
             $(OWNER)$(FIELD).deserialize(xml_pointer)
 
 
@@ -476,7 +476,7 @@ if $(OWNER)$(FIELD):
             $(OWNER)$(FIELD).serialize(xml_child)
 #deserialize:
 xml_child = xml.find('$(FIELD)')
-        if xml_child:
+        if len(xml_child):
             $(OWNER)$(FIELD) = $(TYPE)()
             $(OWNER)$(FIELD).deserialize(xml_child)
 
@@ -491,7 +491,7 @@ arr = ET.SubElement(xml, '$(FIELD)')
 arr = xml.find('$(FIELD)')
         for xml_item in arr:
             type = xml_item.tag
-            obj = Factory.Factory.build(type)
+            obj = Factory.build(type)
             obj.deserialize(xml_item)
             $(OWNER)$(FIELD).append(obj)
 
@@ -503,7 +503,7 @@ if isinstance($(OWNER)$(FIELD), $(TYPE)):
             xml.set("$(FIELD)", $(OWNER)$(FIELD))
 #deserialize:
 name_$(FIELD) = xml.get("$(FIELD)")
-        $(OWNER)$(FIELD) = get_data_storage().get$(TYPE)(name_$(FIELD))
+        $(OWNER)$(FIELD) = DataStorage.shared().get$(TYPE)(name_$(FIELD))
 
 #list<link>
 #serialize:
@@ -512,10 +512,11 @@ arr_$(FIELD) = ET.SubElement(xml, '$(FIELD)')
             item = ET.SubElement(arr_$(FIELD), 'item')
             item.set("value", t.name)
 #deserialize:
-from DataStorage import DataStorage
-        arr_$(FIELD) = xml.find('$(FIELD)')
-        data = get_data_storage().get$(TYPE)(name_$(FIELD).get('value'))
-        $(OWNER)$(FIELD).append(data)
+arr = xml.find('$(FIELD)')
+        for xml_item in arr:
+            name = xml_item.get('value')
+            data = DataStorage.shared().get$(ARG_0)(name)
+            $(OWNER)$(FIELD).append(data)
 
 #map
 #serialize
@@ -567,7 +568,7 @@ if $(OWNER)$(FIELD):
 #deserialize
 if '$(FIELD)' in dictionary:
             for key, value in dictionary['$(FIELD)'].iteritems():
-                $(OWNER)$(FIELD) = Factory.Factory.build(key);
+                $(OWNER)$(FIELD) = Factory.build(key);
                 $(OWNER)$(FIELD).deserialize(value)
                 break
 
@@ -621,7 +622,7 @@ arr = dictionary['$(FIELD)']
         size = len(arr)
         for index in xrange(size):
             for key, value in arr[index].iteritems():
-                obj = Factory.Factory.build(key)
+                obj = Factory.build(key)
                 $(OWNER)$(FIELD).append(obj)
                 $(OWNER)$(FIELD)[-1].deserialize(arr[index][key])
                 break
@@ -635,7 +636,7 @@ if isinstance($(OWNER)$(FIELD), $(TYPE)):
             dictionary['$(FIELD)'] = $(OWNER)$(FIELD)
 #deserialize:
 name = dictionary["$(FIELD)"]
-        $(OWNER)$(FIELD) = get_data_storage().get$(TYPE)(name)
+        $(OWNER)$(FIELD) = DataStorage.shared().get$(TYPE)(name)
 
 
 #list<link>
@@ -645,10 +646,9 @@ dictionary['$(FIELD)'] = []
         for t in $(OWNER)$(FIELD):
             arr.append(t.name)
 #deserialize:
-from DataStorage import DataStorage
-        arr = dictionary['$(FIELD)']
+arr = dictionary['$(FIELD)']
         for name in arr:
-            data = get_data_storage().get$(TYPE)(name)
+            data = DataStorage.shared().get$(TYPE)(name)
             $(OWNER)$(FIELD).append(data)
 
 
