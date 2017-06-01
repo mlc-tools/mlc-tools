@@ -419,7 +419,8 @@ py_xml = '''
 #int, bool, float, string
 #serialize:
 #with default value:
-if $(OWNER)$(FIELD) != $(DEFAULT_VALUE): xml.set("$(FIELD)", str($(OWNER)$(FIELD)))
+if $(OWNER)$(FIELD) != $(DEFAULT_VALUE):
+            xml.set("$(FIELD)", str($(OWNER)$(FIELD)))
 #without default value:
 xml.set("$(FIELD)", str($(OWNER)$(FIELD)))
 #deserialize:
@@ -430,13 +431,13 @@ $(OWNER)$(FIELD) = xml.get("$(FIELD)")
 
 #pointer
 #serialize:
-if $(OWNER)$(FIELD) != None:
+if $(OWNER)$(FIELD):
             xml_pointer = ET.SubElement(xml, '$(FIELD)')
             xml_pointer.set('type', str($(TYPE)))
             $(OWNER)$(FIELD).serialize(xml_pointer)
 #deserialize:
 xml_pointer = xml.find('$(FIELD)')
-        if xml_pointer != None:
+        if xml_pointer:
             type = xml_pointer.get('type')
             $(OWNER)$(FIELD) = Factory.Factory.build(type);
             $(OWNER)$(FIELD).deserialize(xml_pointer)
@@ -470,12 +471,12 @@ arr = xml.find('$(FIELD)')
 
 #serialized
 #serialize:
-if $(OWNER)$(FIELD) != None:
+if $(OWNER)$(FIELD):
             xml_child = ET.SubElement(xml, '$(FIELD)')
             $(OWNER)$(FIELD).serialize(xml_child)
 #deserialize:
 xml_child = xml.find('$(FIELD)')
-        if(xml_child != None):
+        if xml_child:
             $(OWNER)$(FIELD) = $(TYPE)()
             $(OWNER)$(FIELD).deserialize(xml_child)
 
@@ -533,7 +534,7 @@ $(VALUE_SERIALIZE)
             type = key
             xml = xml_child
 $(VALUE_SERIALIZE)
-            $(OWNER)$(FIELD)[type] = _value
+            $(OWNER)$(FIELD)[type] = value
         xml = xml_cache
 
 #enum
@@ -598,7 +599,7 @@ arr_$(FIELD) = dictionary['$(FIELD)']
 
 #serialized
 #serialize
-if $(OWNER)$(FIELD) != None:
+if $(OWNER)$(FIELD):
             dict = $({})
             $(OWNER)$(FIELD).serialize(dict)
             dictionary["$(FIELD)"] = dict

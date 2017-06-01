@@ -323,6 +323,24 @@ class IRequestHandler:
         factory = pattern.format(imports, lines, visits)
         self.save_file('IRequestHandler.py', factory)
 
+    def prepare_file(self, text):
+        lines = text.split('\n')
+        result = []
+        tabs = False
+        for line in lines:
+            if not line.split():
+                continue
+            if not line.startswith('    ') and tabs:
+                result.extend(['', ''])
+            elif line.startswith('class ') or line.startswith('def '):
+                result.extend(['', ''])
+            elif line.strip().startswith('def '):
+                result.extend([''])
+            result.append(line)
+            if line.startswith('    '):
+                tabs = True
+        result.append('')
+        return '\n'.join(result)
     def create_data_storage(self):
         pattern = '''
 class DataStorage():
