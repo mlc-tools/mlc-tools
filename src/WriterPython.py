@@ -27,7 +27,7 @@ class WriterPython(Writer):
     def save_generated_classes(self, out_directory):
         Writer.save_generated_classes(self, out_directory)
         self.createFactory()
-        self.createRequestHandler()
+        self.createVisitorAcceptors()
         # self.create_data_storage()
 
     def write_class(self, cls, flags):
@@ -286,48 +286,37 @@ class WriterPython(Writer):
         factory = pattern.format(imports, creates)
         self.save_file('Factory.py', factory)
 
-    def createRequestHandler(self):
-        pattern = _pattern_request
-        line = '        elif ctx.__class__ == {0}: self.visit_{1}(ctx)\n'
+    def createVisitorAcceptors(self):
+        pattern = _pattern_visitor
+        line = '        elif ctx.__class__ == {0}:\n            self.visit_{1}(ctx)\n'
         line_import = 'from {0} import {0}\n'
         line_visit = '''\n    def visit_{0}(self, ctx):\n        pass\n'''
-        lines = ''
-        visits = ''
-        imports = ''
+        base_visitors = {}
         for cls in self.parser.classes:
-            if self.parser.is_visitor(cls):
-                func_name = cls.name
-                func_name = func_name[0].lower() + func_name[1:]
+            if cls.is_visitor and (cls.behaviors and not cls.behaviors[0].is_visitor):
+                base_visitors[cls] = []
+        for cls in self.parser.classes:
+            parent = cls.behaviors[0] if cls.behaviors else None
+            while parent:
+                if parent in base_visitors:
+                    base_visitors[parent].append(cls)
+                    break
+                parent = parent.behaviors[0] if parent.behaviors else None
+        for parent in base_visitors:
+            lines = ''
+            visits = ''
+            imports = ''
+            for cls in base_visitors[parent]:
+                if self.parser.is_visitor(cls):
+                    func_name = cls.name
+                    func_name = func_name[0].lower() + func_name[1:]
 
-                lines += line.format(cls.name, func_name)
-                imports += line_import.format(cls.name)
-                visits += line_visit.format(func_name)
-        factory = pattern.format(imports, lines, visits)
-        self.save_file('IRequestHandler.py', factory)
-
-#     def create_data_storage(self):
-#         pattern = '''
-# class DataStorage():
-#     def getDataBuilding(self, name):
-#         import DataBuilding
-#         data = DataBuilding.DataBuilding()
-#         data.name = name
-#         return data
-#     def getDataResource(self, name):
-#         import DataResource
-#         data = DataResource.DataResource()
-#         data.name = name
-#         return data
-#     def getDataLocale(self, name):
-#         import DataLocale
-#         data = DataLocale.DataLocale()
-#         data.name = name
-#         return data
-
-# def get_data_storage():
-#     return DataStorage()
-# '''
-#         self.save_file('DataStorage.py', pattern)
+                    lines += line.format(cls.name, func_name)
+                    imports += line_import.format(cls.name)
+                    visits += line_visit.format(func_name)
+            name = 'IVisitor{}'.format(parent.name)
+            body = pattern.format(imports, lines, visits, name)
+            self.save_file(name + '.py', body)
 
     def create_data_storage_class(self, name, classes):
         if self.serialize_format == 'xml':
@@ -425,7 +414,7 @@ class {0}:
     def get_type(self):\n        return self.__type__
 {2}'''
 
-_pattern_request = '''{0}\nclass IRequestHandler:
+_pattern_visitor = '''{0}\nclass {3}:
     def __init__(self):\n        self.response = None
     def visit(self, ctx):\n        if ctx == None:\n            return
 {1}\n{2}
