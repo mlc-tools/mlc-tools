@@ -416,7 +416,7 @@ py_xml = '''
 # $(4) = owner
 # $(5) = obj_template_args[0].type if len(obj_template_args) > 0 else 'unknown_arg'
 
-#int, bool, float, string
+#int
 #serialize:
 #with default value:
 if $(OWNER)$(FIELD) != $(DEFAULT_VALUE):
@@ -425,9 +425,52 @@ if $(OWNER)$(FIELD) != $(DEFAULT_VALUE):
 xml.set("$(FIELD)", str($(OWNER)$(FIELD)))
 #deserialize:
 #with default value:
-$(OWNER)$(FIELD) = xml.get("$(FIELD)", default=$(DEFAULT_VALUE))
+$(OWNER)$(FIELD) = int(float(xml.get("$(FIELD)", default=$(DEFAULT_VALUE))))
 #without default value:
-$(OWNER)$(FIELD) = xml.get("$(FIELD)")
+$(OWNER)$(FIELD) = int(float(xml.get("$(FIELD)")))
+
+#bool
+#serialize:
+#with default value:
+if $(OWNER)$(FIELD) != $(DEFAULT_VALUE):
+            xml.set("$(FIELD)", str($(OWNER)$(FIELD)))
+#without default value:
+xml.set("$(FIELD)", str($(OWNER)$(FIELD)))
+#deserialize:
+#with default value:
+$(OWNER)$(FIELD) = bool(xml.get("$(FIELD)", default=$(DEFAULT_VALUE)))
+#without default value:
+$(OWNER)$(FIELD) = bool(xml.get("$(FIELD)"))
+
+#float
+#serialize:
+#with default value:
+if $(OWNER)$(FIELD) != $(DEFAULT_VALUE):
+            xml.set("$(FIELD)", str($(OWNER)$(FIELD)))
+#without default value:
+xml.set("$(FIELD)", str($(OWNER)$(FIELD)))
+#deserialize:
+#with default value:
+$(OWNER)$(FIELD) = float(xml.get("$(FIELD)", default=$(DEFAULT_VALUE)))
+#without default value:
+$(OWNER)$(FIELD) = float(xml.get("$(FIELD)"))
+
+#string
+#serialize:
+#with default value:
+if $(OWNER)$(FIELD) != $(DEFAULT_VALUE):
+            xml.set("$(FIELD)", str($(OWNER)$(FIELD)))
+#without default value:
+xml.set("$(FIELD)", str($(OWNER)$(FIELD)))
+#deserialize:
+#with default value:
+$(OWNER)$(FIELD) = str(xml.get("$(FIELD)", default=$(DEFAULT_VALUE)))
+#without default value:
+$(OWNER)$(FIELD) = str(xml.get("$(FIELD)"))
+
+
+
+
 
 #pointer
 #serialize:
@@ -437,22 +480,51 @@ if $(OWNER)$(FIELD):
             $(OWNER)$(FIELD).serialize(xml_pointer)
 #deserialize:
 xml_pointer = xml.find('$(FIELD)')
-        if xml_pointer:
+        if xml_pointer is not None:
             type = xml_pointer.get('type')
             $(OWNER)$(FIELD) = Factory.build(type)
             $(OWNER)$(FIELD).deserialize(xml_pointer)
 
 
-#list<int>, list<bool>, list<float>, list<string>
+#list<int>
 #serialize:
 arr = ET.SubElement(xml, '$(FIELD)')
         for obj in $(OWNER)$(FIELD):
-            item = ET.SubElement(arr, 'item')
-            item.set('value', str(obj))
+            ET.SubElement(arr, 'item').set('value', str(obj))
 #deserialize:
 arr = xml.find('$(FIELD)')
         for obj in arr:
-            $(OWNER)$(FIELD).append(obj.get('value'))
+            $(OWNER)$(FIELD).append(int(float(obj.get('value'))))
+
+#list<bool>
+#serialize:
+arr = ET.SubElement(xml, '$(FIELD)')
+        for obj in $(OWNER)$(FIELD):
+            ET.SubElement(arr, 'item').set('value', str(obj))
+#deserialize:
+arr = xml.find('$(FIELD)')
+        for obj in arr:
+            $(OWNER)$(FIELD).append(bool(obj.get('value')))
+
+#list<float>
+#serialize:
+arr = ET.SubElement(xml, '$(FIELD)')
+        for obj in $(OWNER)$(FIELD):
+            ET.SubElement(arr, 'item').set('value', str(obj))
+#deserialize:
+arr = xml.find('$(FIELD)')
+        for obj in arr:
+            $(OWNER)$(FIELD).append(float(obj.get('value')))
+
+#list<string>
+#serialize:
+arr = ET.SubElement(xml, '$(FIELD)')
+        for obj in $(OWNER)$(FIELD):
+            ET.SubElement(arr, 'item').set('value', str(obj))
+#deserialize:
+arr = xml.find('$(FIELD)')
+        for obj in arr:
+            $(OWNER)$(FIELD).append(str(obj.get('value')))
 
 
 #list<serialized>
@@ -476,7 +548,7 @@ if $(OWNER)$(FIELD):
             $(OWNER)$(FIELD).serialize(xml_child)
 #deserialize:
 xml_child = xml.find('$(FIELD)')
-        if len(xml_child):
+        if xml_child is not None:
             $(OWNER)$(FIELD) = $(TYPE)()
             $(OWNER)$(FIELD).deserialize(xml_child)
 
@@ -530,12 +602,12 @@ $(VALUE_SERIALIZE)
 #deserialize
         xml_cache = xml
         map = xml.find('$(FIELD)')
-        for xml_child in map:
-            key = xml_child.get('key')
-            type = key
+        for xml_child in (map if map is not None else []):
             xml = xml_child
+$(KEY_SERIALIZE)
+            map_key = key
 $(VALUE_SERIALIZE)
-            $(OWNER)$(FIELD)[type] = value
+            $(OWNER)$(FIELD)[map_key] = value
         xml = xml_cache
 
 #enum

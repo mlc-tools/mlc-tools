@@ -195,7 +195,7 @@ class WriterPython(Writer):
             if use_factory:
                 imports += '        from Factory import Factory\n'
             if use_data_storage:
-                imports = '        from DataStorage import DataStorage\n'
+                imports += '        from DataStorage import DataStorage\n'
         body = body.replace('$(import)', imports)
 
         body += '        return'

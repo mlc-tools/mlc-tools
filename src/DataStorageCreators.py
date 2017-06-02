@@ -162,11 +162,11 @@ class DataStoragePython(DataStorage):
                 continue
             pattern = '''
         map = xml.find('{0}')
-        for xml_child in map:
+        for xml_child in (map if map is not None else []):
             key = xml_child.get('key')
             xml_value = xml_child.find('value')
             if key not in self.{0}:
-                self.{0}[key] = DataUnit()
+                self.{0}[key] = {1}()
             self.{0}[key].deserialize(xml_value)'''
             function.operations.append(pattern.format(member.name, member.template_args[1].name))
 
