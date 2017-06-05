@@ -121,7 +121,7 @@ class Parser:
                 member.template_args = args
 
         for cls in self.classes:
-            cls.on_linked()
+            cls.on_linked(self)
 
     def _create_class(self, text):
         body, header, text = find_body(text)

@@ -48,10 +48,10 @@ class Class(Object):
             self._convert_to_enum()
         return
 
-    def on_linked(self):
+    def on_linked(self, parser):
         if self.generate_set_function:
-            self._generate_setters_function()
-            self._generate_getters_function()
+            self._generate_setters_function(parser)
+            self._generate_getters_function(parser)
 
     def find_modifiers(self, string):
         self.is_abstract = self.is_abstract or Modifier.abstract in string
@@ -73,7 +73,7 @@ class Class(Object):
         string = re.sub(Modifier.set_function, '', string)
         return string
 
-    def _generate_setters_function(self):
+    def _generate_setters_function(self, parser):
         function = Function()
         function.name = constants.CLASS_FUNCTION_SET_PROPERTY
         function.return_type = 'void'
@@ -81,7 +81,7 @@ class Class(Object):
         function.args.append(['value', 'string'])
 
         add_function = False
-        for i, member in enumerate(self.members):
+        for member in self.members:
             if member.is_pointer:
                 continue
             if member.is_runtime:
@@ -94,8 +94,8 @@ class Class(Object):
             if member.type in supported_types:
                 type_ = member.type
                 type_ = type_ if supported_types[type_] == 0 else supported_types[type_]
-                op = 'if(name == "{0}") \n{2}\n{0} = strTo<{1}>(value);\n{3}'
-                if i > 0:
+                op = 'if(name == "{0}") \n{2}\nthis->{0} = strTo<{1}>(value);\n{3}'
+                if len(function.operations):
                     op = 'else ' + op
                 function.operations.append(op.format(member.name, type_, '{', '}'))
                 add_function = True
@@ -122,14 +122,16 @@ class Class(Object):
         if add_function or not override:
             self.functions.append(function)
 
-    def _generate_getters_function(self):
+    def _generate_getters_function(self, parser):
         function = Function()
         function.name = constants.CLASS_FUNCTION_GET_PROPERTY
         function.return_type = 'string'
         function.args.append(['name', 'string'])
+        function.is_const = True
 
         add_function = False
-        for i, member in enumerate(self.members):
+
+        for member in self.members:
             if member.is_pointer:
                 continue
             if member.is_runtime:
@@ -139,13 +141,24 @@ class Class(Object):
             if member.is_const:
                 continue
             supported_types = ['string', 'int', 'float', 'bool']
-            if member.type in supported_types:
-                type_ = member.type
-                getter = 'if(name == "{0}")\n{2}\nreturn toStr({0});\n{3}'
-                if i > 0:
-                    getter = 'else ' + getter
-                function.operations.append(getter.format(member.name, type_, '{', '}'))
-                add_function = True
+
+            def get_getter(object, name_argument):
+                class_ = parser.find_class(member.type)
+                getter = ''
+                if member.type in supported_types:
+                    type_ = member.type
+                    getter = 'if({4} == "{0}")\n{2}\nreturn toStr(this->{0});\n{3}'
+                    getter = getter.format(member.name, type_, '{', '}', name_argument)
+                elif class_ and class_.generate_set_function and (class_.side == parser.side or class_.side == 'both'):
+                    getter = 'if({2}.find("{0}/") == 0)\n__begin__\nreturn {0}{1}get_property({2}.substr(strlen("{0}/")));\n__end__'
+                    operator = '->' if member.is_pointer else '.'
+                    getter = getter.format(member.name, operator, name_argument)
+                return getter
+            if member.type != 'map':
+                getter = get_getter(member, 'name')
+                if getter:
+                    add_function = True
+                    function.operations.append(getter)
 
         parent_class = ''
         if self.behaviors:
