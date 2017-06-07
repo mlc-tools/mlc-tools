@@ -89,6 +89,32 @@ class Parser:
                 text = self._create_declaration(text)
 
     def link(self):
+        for function in self.functions:
+            parts = function.name.split('::')
+            if len(parts) == 2:
+                class_name = parts[0]
+                function_name = parts[1]
+                class_ = self.find_class(class_name)
+                if class_ is None:
+                    print 'Cannot find class [{}] for method [{}]'.format(class_name, function.name)
+                    exit(-1)
+                function.name = function_name
+                class_.functions.append(function)
+                self.functions.remove(function)
+
+        for object_ in self.objects:
+            parts = object_.name.split('::')
+            if len(parts) == 2:
+                class_name = parts[0]
+                object_name = parts[1]
+                class_ = self.find_class(class_name)
+                if class_ is None:
+                    print 'Cannot find class [{}] for method [{}]'.format(class_name, object_.name)
+                    exit(-1)
+                object_.name = object_name
+                class_.members.append(object_)
+                self.objects.remove(object_)
+
         for cls in self.classes:
             if cls.type == 'class':
                 cls.add_get_type_function()
@@ -245,6 +271,8 @@ class Parser:
         function.parse(header)
         function.parse_body(body)
         self.functions.append(function)
+        if(function.name.find('test_function') != -1):
+            print function.name
         return text
 
     def parse_serialize_protocol(self, path):
