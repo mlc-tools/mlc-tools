@@ -157,48 +157,57 @@ class WriterCpp(Writer):
         Writer.__init__(self, parser, serialize_format)
         self._current_class = None
 
+    def build_type_str(self, object_, with_name=True):
+        args = list()
+        for arg in object_.template_args:
+            type_ = arg.name if isinstance(arg, Class) else arg.type
+            type_ = convert_type(type_)
+            if len(arg.template_args):
+                type_ = self.build_type_str(arg)
+            elif arg.is_link:
+                type_ = 'const {}* '.format(type_)
+            else:
+                if arg.is_pointer:
+                    type_ = 'IntrusivePtr<{}>'.format(type_)
+                if arg.is_const:
+                    type_ = 'const ' + type_
+            args.append(type_)
+        args = ', '.join(args)
+        type_ = object_.type
+        if object_.is_pointer:
+            if not object_.is_link:
+                f = '{}*'
+                class_ = self.parser.find_class(object_.type)
+                if class_:
+                    for b in class_.behaviors:
+                        if b.name == 'SerializedObject':
+                            f = 'IntrusivePtr<{}>'
+            else:
+                f = '{}*'
+
+            type_ = f.format(convert_type(type_))
+        modifiers = ''
+        if object_.is_static:
+            modifiers += 'static '
+        if object_.is_const:
+            modifiers += 'const '
+        if len(object_.template_args) > 0:
+            pattern = '{3}{0}<{2}>'
+        else:
+            pattern = '{3}{0}'
+        if with_name:
+            pattern += ' {1}'
+        return pattern.format(convert_type(type_), object_.name, args, modifiers)
+
     def write_object(self, object_, flags):
+
         out = Writer.write_object(self, object_, flags)
         if object_.side != 'both' and object_.side != self.parser.side:
             return out
 
         if flags == FLAG_HPP:
-            args = list()
-            for arg in object_.template_args:
-                type_ = arg.name if isinstance(arg, Class) else arg.type
-                type_ = convert_type(type_)
-                if arg.is_link:
-                    type_ = 'const {}* '.format(type_)
-                else:
-                    if arg.is_pointer:
-                        type_ = 'IntrusivePtr<{}>'.format(type_)
-                    if arg.is_const:
-                        type_ = 'const ' + type_
-                args.append(type_)
-            args = ', '.join(args)
-            type_ = object_.type
-            if object_.is_pointer:
-                if not object_.is_link:
-                    f = '{}*'
-                    class_ = self.parser.find_class(object_.type)
-                    if class_:
-                        for b in class_.behaviors:
-                            if b.name == 'SerializedObject':
-                                f = 'IntrusivePtr<{}>'
-                else:
-                    f = '{}*'
+            out[flags] += self.build_type_str(object_) + ';\n'
 
-                type_ = f.format(convert_type(type_))
-            modifiers = ''
-            if object_.is_static:
-                modifiers += 'static '
-            if object_.is_const:
-                modifiers += 'const '
-            if len(object_.template_args) > 0:
-                pattern = '{3}{0}<{2}> {1};\n'
-            else:
-                pattern = '{3}{0} {1};\n'
-            out[flags] += pattern.format(convert_type(type_), object_.name, args, modifiers)
         if flags == FLAG_CPP:
             if object_.is_static:
                 if object_.initial_value is None:
@@ -547,7 +556,7 @@ class WriterCpp(Writer):
         _value_is_pointer = value.is_pointer
         a0 = obj_name
         a1 = self._build_serialize_operation('key', key_type, None, key.is_pointer, [], SERIALIZATION, key.is_link)
-        a2 = self._build_serialize_operation('value', value_type, None, _value_is_pointer, [], SERIALIZATION, value.is_link)
+        a2 = self._build_serialize_operation('value', value_type, None, _value_is_pointer, value.template_args, SERIALIZATION, value.is_link)
         return pattern.format(a0, a1, a2)
 
     def build_map_deserialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args):
@@ -566,9 +575,9 @@ class WriterCpp(Writer):
         _value_is_pointer = value.is_pointer if isinstance(value, Object) else False
         a0 = obj_name
         a1 = self._build_serialize_operation('key', key_type, None, key.is_pointer, [], DESERIALIZATION, key.is_link)
-        a2 = self._build_serialize_operation('value', value_type, None, _value_is_pointer, [], DESERIALIZATION, value.is_link)
+        a2 = self._build_serialize_operation('value', value_type, None, _value_is_pointer, value.template_args, DESERIALIZATION, value.is_link)
         a3 = key_str
-        a4 = value_type
+        a4 = self.build_type_str(value)
         if value.is_pointer:
             a4 = 'IntrusivePtr<{}>'.format(value_type)
         return pattern.format(a0, a1, a2, a3, a4)
