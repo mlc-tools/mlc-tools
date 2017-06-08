@@ -20,6 +20,7 @@ class Class(Object):
         self.type = 'class'
         self.group = ''
         self.side = 'both'
+        self._linked = False
 
     def parse(self, line):
         line = line.strip()
@@ -49,9 +50,24 @@ class Class(Object):
         return
 
     def on_linked(self, parser):
+        if self._linked:
+            return
+
         if self.generate_set_function:
             self._generate_setters_function(parser)
             self._generate_getters_function(parser)
+        if not self.is_abstract:
+            for function in self.functions:
+                if function.is_abstract:
+                    self.is_abstract = True
+                    break
+            for parent in self.behaviors:
+                parent.on_linked(parser)
+                if parent.is_abstract:
+                    self.is_abstract = True
+                    break
+
+        self._linked = True
 
     def find_modifiers(self, string):
         self.is_abstract = self.is_abstract or Modifier.abstract in string

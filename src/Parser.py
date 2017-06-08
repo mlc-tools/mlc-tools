@@ -209,6 +209,7 @@ class Parser:
         function.name = 'visit'
         function.return_type = 'void'
         function.args.append(['ctx', cls.name + '*'])
+        function.is_abstract = True
         visitor.functions.append(function)
 
         def comparator(func):

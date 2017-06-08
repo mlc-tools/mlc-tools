@@ -76,11 +76,23 @@ def get_include_file(parser, class_, filename):
     return '"{0}.h"'.format(filename)
 
 
+def is_class_has_cpp_definitions(class_):
+    if not class_.is_abstract:
+        return True
+    for function in class_.functions:
+        if not function.is_abstract:
+            return True
+    for member in class_.members:
+        if member.initial_valueis is not None:
+            return True
+    return False
+
+
 def _create_constructor_function_hpp(class_):
     if class_.type == 'enum':
         return ''
     pattern = class_.name + '()'
-    if class_.is_abstract:
+    if not is_class_has_cpp_definitions(class_):
         pattern += '{}'
     pattern += ';\n'
     return pattern
@@ -90,7 +102,7 @@ def _create_destructor_function_hpp(class_):
     if class_.type == 'enum':
         return ''
     pattern = 'virtual ~{0}()'.format(class_.name)
-    if class_.is_abstract:
+    if not is_class_has_cpp_definitions(class_):
         pattern += '{}'
     pattern += ';\n'
     return pattern
@@ -98,6 +110,8 @@ def _create_destructor_function_hpp(class_):
 
 def _create_constructor_function_cpp(parser, class_):
     if class_.type == 'enum':
+        return ''
+    if not is_class_has_cpp_definitions(class_):
         return ''
     initialize = ''
     initialize2 = ''
@@ -123,6 +137,8 @@ def _create_constructor_function_cpp(parser, class_):
 
 def _create_destructor_function_cpp(class_):
     if class_.type == 'enum':
+        return ''
+    if not is_class_has_cpp_definitions(class_):
         return ''
     pattern = '{0}::~{0}()\n__begin__\n__end__\n'
     string = pattern.format(class_.name)
@@ -302,10 +318,9 @@ class WriterCpp(Writer):
                          {1}__end__'''
         registration = 'REGISTRATION_OBJECT({0});\n'.format(class_.name)
         has_get_type = False
+        if class_.is_abstract:
+            registration = ''
         for func in class_.functions:
-            if func.is_abstract:
-                registration = ''
-                break
             if func.name == constants.CLASS_FUNCTION_GET_TYPE:
                 has_get_type = True
         if not has_get_type:
@@ -315,6 +330,14 @@ class WriterCpp(Writer):
             registration = ''
         if class_.is_abstract:
             registration = ''
+
+        if not registration and \
+                not constructor and \
+                not destructor and \
+                not objects[FLAG_CPP] and \
+                not functions[FLAG_CPP]:
+            return out
+
         out[FLAG_CPP] += pattern.format(class_.name, functions[FLAG_CPP], constructor, _get_namespace(),
                                         includes, objects[FLAG_CPP], registration, destructor)
         out[FLAG_CPP] = re.sub('__begin__', '{', out[FLAG_CPP])
@@ -326,7 +349,7 @@ class WriterCpp(Writer):
         if function.side != 'both' and function.side != self.parser.side:
             return out
         if flags & FLAG_HPP:
-            if not self._current_class.is_abstract and not function.is_abstract:
+            if not function.is_abstract:
                 fstr = '{5}{0} {1}({2}){3}{4};\n'
             else:
                 fstr = '{5}{0} {1}({2}){3}{4} = 0;\n'
@@ -377,17 +400,19 @@ class WriterCpp(Writer):
                     filename = class_.group + '/' + filename
                 self.files[filename] = dictionary[FLAG_HPP]
         for class_ in classes:
-            if not class_.is_abstract:
-                dictionary = self.write_class(class_, FLAG_CPP)
-                if len(dictionary) > 0:
-                    filename = class_.name + '.cpp'
-                    if class_.group:
-                        filename = class_.group + '/' + filename
-                    self.files[filename] = dictionary[FLAG_CPP]
+            # if not class_.is_abstract:
+            dictionary = self.write_class(class_, FLAG_CPP)
+            if len(dictionary) > 0:
+                filename = class_.name + '.cpp'
+                if class_.group:
+                    filename = class_.group + '/' + filename
+                self.files[filename] = dictionary[FLAG_CPP]
 
     def write_functions(self, functions, flags):
         out = {FLAG_CPP: '', FLAG_HPP: ''}
         for function in functions:
+            if function.is_abstract and flags == FLAG_CPP:
+                continue
             out = add_dict(out, self.write_function(function, flags))
         return out
 
