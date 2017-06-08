@@ -141,13 +141,18 @@ class Parser:
 
         for cls in self.classes:
             for member in cls.members:
-                args = []
-                for arg in member.template_args:
-                    args.append(self._get_object_type(arg))
-                member.template_args = args
+                self._convert_template_args(member)
 
         for cls in self.classes:
             cls.on_linked(self)
+
+    def _convert_template_args(self, member):
+        args = []
+        for arg in member.template_args:
+            args.append(self._get_object_type(arg))
+            if isinstance(args[-1], Object):
+                self._convert_template_args(args[-1])
+        member.template_args = args
 
     def _create_class(self, text):
         body, header, text = find_body(text)
