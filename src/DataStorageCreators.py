@@ -205,7 +205,7 @@ class DataStorageCppXml(DataStorageCpp):
         function.operations.append('pugi::xml_document doc;')
         function.operations.append('doc.load(buffer.c_str());')
         function.operations.append('const_cast<{}*>(this)->deserialize(doc.root().first_child());'.format(self.name))
-        function.operations.append('const_cast<{}*>(this)->_loaded = static_cast<bool>(doc.root());'.format(self.name))
+        function.operations.append('const_cast<{}*>(this)->_loaded = doc.root() != nullptr;'.format(self.name))
 
 
 class DataStorageCppJson(DataStorageCpp):
