@@ -37,6 +37,7 @@ def main():
     parser.add_argument('-side', type=str, help='For different side generation - use both. server. client. Default: both', required=False, default='both')
     parser.add_argument('-data', type=str, help='Path to data configs', required=False, default='')
     parser.add_argument('-data_out', type=str, help='Out Path for data', required=False, default='')
+    parser.add_argument('-only_data', type=str, help='Flag for buiild only data xml (yes/no)', required=False, default='no')
     parser.add_argument('-protocols', type=str,
                         help='Path to file with serialization protocols. Default: empty, used default protocol',
                         required=False, default='')
@@ -49,6 +50,7 @@ def main():
     path_to_protocols = fileutils.normalize_path(args.protocols, False)
     language = args.l
     serialize_format = args.f
+    only_data = args.only_data.lower() == 'yes'
     side = args.side
 
     validate_arg_language(language)
@@ -74,9 +76,11 @@ def main():
         writer = WriterCpp(parser, serialize_format)
     elif language == 'py':
         writer = WriterPython(parser, serialize_format)
-    writer.generate()
+    if not only_data:
+        writer.generate()
     writer.save_generated_classes(out_directory)
-    writer.save_config_file()
+    if not only_data:
+        writer.save_config_file()
 
     if data_directory:
         classes = []
@@ -85,9 +89,11 @@ def main():
                 classes.append(class_)
         data_parser = DataParser(classes, serialize_format, data_directory)
         data_parser.flush(out_data_directory)
-    writer.create_data_storage()
+    if not only_data:
+        writer.create_data_storage()
 
-    writer.remove_non_actual_files()
+    if not only_data:
+        writer.remove_non_actual_files()
     print 'mlc(lang: {}, format: {} side: {}) finished successful'.format(language, serialize_format, side)
 
 
