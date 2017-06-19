@@ -69,7 +69,7 @@ class WriterPhp(Writer):
         return {flags: out}
 
     def write_function(self, cls, function):
-        if function.name not in ['serialize', 'deserialize']:
+        if function.name not in ['serialize', 'deserialize', 'get_type']:
             return ''
 
         out = '''public function {0}({1})
@@ -140,7 +140,7 @@ class WriterPhp(Writer):
             if obj.is_const and not obj.is_link:
                 continue
 
-            line = self._buildSerializeOperation(obj.name, obj.type, obj.initial_value, serialize_type, obj.template_args, obj.is_pointer)
+            line = self._buildSerializeOperation(obj.name, obj.type, obj.initial_value, serialize_type, obj.template_args, obj.is_pointer, is_link=obj.is_link)
             function.operations.append(line)
 
         cls.functions.append(function)
@@ -247,6 +247,7 @@ class WriterPhp(Writer):
     def prepare_file(self, body):
         body = body.replace('__begin__', '{')
         body = body.replace('__end__', '}')
+        body = body.replace('::__type__', '::$__type__')
 
         tabs = 0
         lines = body.split('\n')

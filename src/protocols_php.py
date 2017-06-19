@@ -21,9 +21,9 @@ $(OWNER)$(FIELD)->deserialize($xml->$(FIELD));
 
 #pointer
 #serialize
-if($(FIELD) != null)
+if($(FIELD))
 {
-    $child = xml.append_child("$(FIELD)");
+    $child = $xml->addChild("$(FIELD)");
     $child->addAttribute("type", $(OWNER)$(FIELD)->get_type());
     $(OWNER)$(FIELD)->serialize($child);
 }
@@ -44,7 +44,7 @@ foreach($(OWNER)$(FIELD) as $item)
     $xml_list->addChild("item")->addAttribute("value", $item);
 }
 #deserialize:
-foreach($xml->$(FIELD) as $item)
+foreach($xml->$(FIELD)->item as $item)
 {
     array_push($(OWNER)$(FIELD), $item["value"]);
 }
@@ -57,7 +57,7 @@ foreach($(OWNER)$(FIELD) as $item)
     $item->serialize($xml_list->addChild("item"));
 }
 #deserialize:
-foreach($xml->$(FIELD) as $item)
+foreach($xml->$(FIELD)->item as $item)
 {
     $obj = new $(TYPE)();
     $obj->deserialize($item);
@@ -67,9 +67,21 @@ foreach($xml->$(FIELD) as $item)
 
 #pointer_list
 #serialize:
-$xml->addAttribute("$(FIELD)", $(OWNER)$(FIELD));
+$xml_list = $xml->addChild("$(FIELD)");
+foreach($(OWNER)$(FIELD) as $item)
+{
+    $item->serialize($xml_list->addChild($item->get_type());
+}
 #deserialize:
-$(OWNER)$(FIELD) = $xml["$(FIELD)"];
+foreach($xml->$(FIELD)->children() as $item)
+{
+    $type = $item->getName();
+    echo '<tr/>';
+    echo 'TODO: Factory';
+    echo '<tr/>';
+    //TODO:
+}
+
 
 
 #link
@@ -87,7 +99,7 @@ foreach($(OWNER)$(FIELD) as $item)
     $xml_list->addChild("item")->addAttribute("value", $item);
 }
 #deserialize:
-foreach($xml->$(FIELD) as $item)
+foreach($xml->$(FIELD)->item as $item)
 {
     array_push($(OWNER)$(FIELD), $item["value"]);
 }
@@ -105,13 +117,12 @@ foreach($(OWNER)$(FIELD) as $key => $value)
 $xml = $xml_main;
 #deserialize:
 $xml_cache = $xml;
-$map = $xml->$(FIELD);
-foreach($map as $xml_child)
+foreach($xml->$(FIELD)->pair as $xml_child)
 {
     $xml = $xml_child;
     $(VALUE)
     $(KEY_SERIALIZE)
-    $map_key = $key;
+    $map_key = (string)$key;
     $(VALUE_SERIALIZE)
     $(OWNER)$(FIELD)[$map_key] = $value;
 }
