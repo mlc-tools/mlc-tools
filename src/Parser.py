@@ -363,6 +363,7 @@ class Parser:
         pattern = pattern.replace('$(VALUE_SERIALIZE)', '{2}')
         pattern = pattern.replace('$(KEY)', '{3}')
         pattern = pattern.replace('$(VALUE_TYPE)', '{4}')
+        pattern = pattern.replace('$(VALUE)', '{5}')
         # for python:
         pattern = pattern.replace('$(__begin____end__)', '{3}')
 

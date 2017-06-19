@@ -4,11 +4,12 @@ from Parser import Parser
 from DataParser import DataParser
 from WriterCpp import WriterCpp
 from WriterPython import WriterPython
+from WriterPhp import WriterPhp
 from Copyright import Copyright
 
 
 def validate_arg_language(language):
-    if language not in ['cpp', 'py']:
+    if language not in ['cpp', 'py', 'php']:
         print 'Unknown language (-l :', language, ')'
         print 'Please use any from [cpp, py]'
         exit(-1)
@@ -76,6 +77,8 @@ def main():
         writer = WriterCpp(parser, serialize_format)
     elif language == 'py':
         writer = WriterPython(parser, serialize_format)
+    elif language == 'php':
+        writer = WriterPhp(parser, serialize_format)
     if not only_data:
         writer.generate()
     writer.save_generated_classes(out_directory)
