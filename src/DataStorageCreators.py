@@ -166,6 +166,7 @@ class DataStoragePython(DataStorage):
             key = xml_child.get('key')
             xml_value = xml_child.find('value')
             if key not in self.{0}:
+                from {1} import {1}
                 self.{0}[key] = {1}()
             self.{0}[key].deserialize(xml_value)'''
             function.operations.append(pattern.format(member.name, member.template_args[1].name))
@@ -191,6 +192,7 @@ class DataStoragePython(DataStorage):
                 function.name = 'get' + class_.name
                 function.args.append(['name', ''])
                 function.operations.append('if not self._loaded and name not in self.{}:'.format(map_name))
+                function.operations.append('    from {0} import {0}'.format(class_.name))
                 function.operations.append('    self.{}[name] = {}()'.format(map_name, class_.name))
                 function.operations.append('return self.{}[name]'.format(map_name))
                 self.functions.append(function)

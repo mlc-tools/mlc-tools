@@ -63,16 +63,16 @@ class WriterPython(Writer):
             name += '(' + cls.behaviors[0].name + ')'
             imports += 'from {0} import {0}'.format(cls.behaviors[0].name)
             init_behavior = '        {0}.__init__(self)'.format(cls.behaviors[0].name)
-        for obj in cls.members:
-            if self.parser.find_class(obj.type):
-                if obj.type != cls.name:
-                    imports += '\nfrom {0} import {0}'.format(obj.type)
-            elif obj.type == 'list' or obj.type == 'map':
-                for arg in obj.template_args:
-                    if isinstance(arg, Class) and arg.name != cls.name:
-                        imports += '\nfrom {0} import {0}'.format(arg.name)
-                    elif self.parser.find_class(arg.type) and arg.type != cls.name:
-                        imports += '\nfrom {0} import {0}'.format(arg.type)
+        # for obj in cls.members:
+        #     if self.parser.find_class(obj.type):
+        #         # if obj.type != cls.name:
+        #         #     imports += '\nfrom {0} import {0}'.format(obj.type)
+        #     elif obj.type == 'list' or obj.type == 'map':
+        #         for arg in obj.template_args:
+        #             if isinstance(arg, Class) and arg.name != cls.name:
+        #                 imports += '\nfrom {0} import {0}'.format(arg.name)
+        #             elif self.parser.find_class(arg.type) and arg.type != cls.name:
+        #                 imports += '\nfrom {0} import {0}'.format(arg.type)
 
         out = pattern.format(name, initialize_list, functions, imports, init_behavior, static_list)
         # for line in out.split('\n'):
@@ -111,6 +111,8 @@ class WriterPython(Writer):
         return out
 
     def write_object(self, object):
+        if object.name == 'from':
+            object.name = 'from_'
         value = object.initial_value
         if value is None and not object.is_pointer:
             type = object.type
@@ -128,6 +130,8 @@ class WriterPython(Writer):
                 value = "[]"
             if type == "map":
                 value = "{}"
+        if value and value.endswith('f'):
+            value = value[0:-1] + '0'
 
         if object.is_static:
             out = '{0} = {1}'
@@ -210,8 +214,8 @@ class WriterPython(Writer):
         str = self.serialize_protocol[serialization_type]['map'][0]
         _value_is_pointer = value.is_pointer
         a0 = obj_name
-        a1 = self._buildSerializeOperation('key', key_type, None, serialization_type, [], False, '', key.is_link)
-        a2 = self._buildSerializeOperation("value", value_type, None, serialization_type, [], _value_is_pointer, '', False)
+        a1 = self._buildSerializeOperation('key', key_type, None, serialization_type, key.template_args, False, '', key.is_link)
+        a2 = self._buildSerializeOperation("value", value_type, None, serialization_type, value.template_args, _value_is_pointer, '', value.is_link)
         a1 = a1.split('\n')
         for index, a in enumerate(a1):
             a1[index] = '    ' + a
@@ -261,7 +265,6 @@ class WriterPython(Writer):
                     else:
                         type = "list<serialized>"
                         obj_type = arg_type
-
         fstr = self.serialize_protocol[serialization_type][type][index]
         str = fstr.format(obj_name, obj_type, obj_value, '{}', owner,
                           obj_template_args[0].type if len(obj_template_args) > 0 else 'unknown_arg')

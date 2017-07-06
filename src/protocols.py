@@ -495,8 +495,9 @@ arr = ET.SubElement(xml, '$(FIELD)')
             ET.SubElement(arr, 'item').set('value', str(obj))
 #deserialize:
 arr = xml.find('$(FIELD)')
-        for obj in arr:
-            $(OWNER)$(FIELD).append(int(float(obj.get('value'))))
+        if arr is not None:
+            for obj in arr:
+                $(OWNER)$(FIELD).append(int(float(obj.get('value'))))
 
 #list<bool>
 #serialize:
@@ -505,8 +506,9 @@ arr = ET.SubElement(xml, '$(FIELD)')
             ET.SubElement(arr, 'item').set('value', str(obj))
 #deserialize:
 arr = xml.find('$(FIELD)')
-        for obj in arr:
-            $(OWNER)$(FIELD).append(bool(obj.get('value')))
+        if arr is not None:
+            for obj in arr:
+                $(OWNER)$(FIELD).append(bool(obj.get('value')))
 
 #list<float>
 #serialize:
@@ -515,8 +517,9 @@ arr = ET.SubElement(xml, '$(FIELD)')
             ET.SubElement(arr, 'item').set('value', str(obj))
 #deserialize:
 arr = xml.find('$(FIELD)')
-        for obj in arr:
-            $(OWNER)$(FIELD).append(float(obj.get('value')))
+        if arr is not None:
+            for obj in arr:
+                $(OWNER)$(FIELD).append(float(obj.get('value')))
 
 #list<string>
 #serialize:
@@ -525,8 +528,9 @@ arr = ET.SubElement(xml, '$(FIELD)')
             ET.SubElement(arr, 'item').set('value', str(obj))
 #deserialize:
 arr = xml.find('$(FIELD)')
-        for obj in arr:
-            $(OWNER)$(FIELD).append(str(obj.get('value')))
+        if arr is not None:
+            for obj in arr:
+                $(OWNER)$(FIELD).append(str(obj.get('value')))
 
 
 #list<serialized>
@@ -537,10 +541,12 @@ arr = ET.SubElement(xml, '$(FIELD)')
             obj.serialize(item)
 #deserialize:
 arr = xml.find('$(FIELD)')
-        for xml_child in arr:
-            obj = $(TYPE)()
-            obj.deserialize(xml_child)
-            $(OWNER)$(FIELD).append(obj)
+        if arr is not None:
+            from $(TYPE) import $(TYPE)
+            for xml_child in arr:
+                obj = $(TYPE)()
+                obj.deserialize(xml_child)
+                $(OWNER)$(FIELD).append(obj)
 
 
 #serialized
@@ -550,6 +556,7 @@ if $(OWNER)$(FIELD):
             $(OWNER)$(FIELD).serialize(xml_child)
 #deserialize:
 xml_child = xml.find('$(FIELD)')
+        from $(TYPE) import $(TYPE)
         if xml_child is not None:
             $(OWNER)$(FIELD) = $(TYPE)()
             $(OWNER)$(FIELD).deserialize(xml_child)
@@ -563,20 +570,23 @@ arr = ET.SubElement(xml, '$(FIELD)')
             t.serialize(item)
 #deserialize:
 arr = xml.find('$(FIELD)')
-        for xml_item in arr:
-            type = xml_item.tag
-            obj = Factory.build(type)
-            obj.deserialize(xml_item)
-            $(OWNER)$(FIELD).append(obj)
+        if arr is not None:
+            for xml_item in arr:
+                type = xml_item.tag
+                obj = Factory.build(type)
+                obj.deserialize(xml_item)
+                $(OWNER)$(FIELD).append(obj)
 
 #link
 #serialize:
-if isinstance($(OWNER)$(FIELD), $(TYPE)):
+from $(TYPE) import $(TYPE)
+        if isinstance($(OWNER)$(FIELD), $(TYPE)):
             xml.set("$(FIELD)", $(OWNER)$(FIELD).name)
         else:
             xml.set("$(FIELD)", $(OWNER)$(FIELD))
 #deserialize:
 name_$(FIELD) = xml.get("$(FIELD)")
+        from $(TYPE) import $(TYPE)
         $(OWNER)$(FIELD) = DataStorage.shared().get$(TYPE)(name_$(FIELD))
 
 #list<link>
@@ -587,10 +597,11 @@ arr_$(FIELD) = ET.SubElement(xml, '$(FIELD)')
             item.set("value", t.name)
 #deserialize:
 arr = xml.find('$(FIELD)')
-        for xml_item in arr:
-            name = xml_item.get('value')
-            data = DataStorage.shared().get$(ARG_0)(name)
-            $(OWNER)$(FIELD).append(data)
+        if arr is not None:
+            for xml_item in arr:
+                name = xml_item.get('value')
+                data = DataStorage.shared().get$(ARG_0)(name)
+                $(OWNER)$(FIELD).append(data)
 
 #map
 #serialize
@@ -680,6 +691,7 @@ if $(OWNER)$(FIELD):
             dictionary["$(FIELD)"] = dict
 #deserialize
 if '$(FIELD)' in dictionary:
+            from $(TYPE) import $(TYPE)
             $(OWNER)$(FIELD) = $(TYPE)()
             $(OWNER)$(FIELD).deserialize(dictionary['$(FIELD)'])
 
@@ -705,6 +717,7 @@ arr = dictionary['$(FIELD)']
 #link
 #serialize:
 if isinstance($(OWNER)$(FIELD), $(TYPE)):
+            from $(TYPE) import $(TYPE)
             dictionary['$(FIELD)'] = $(OWNER)$(FIELD).name
         else:
             dictionary['$(FIELD)'] = $(OWNER)$(FIELD)
