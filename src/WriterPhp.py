@@ -285,7 +285,7 @@ class WriterPhp(Writer):
 
 # format(name, initialize_list, functions, imports)
 _pattern_file = {}
-_pattern_file['xml'] = '''<?
+_pattern_file['xml'] = '''<?php
 {4}
 
 class {0} {1}
