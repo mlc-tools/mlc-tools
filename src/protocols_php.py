@@ -70,7 +70,7 @@ foreach($xml->$(FIELD)->item as $item)
 $xml_list = $xml->addChild("$(FIELD)");
 foreach($(OWNER)$(FIELD) as $item)
 {
-    $item->serialize($xml_list->addChild($item->get_type());
+    $item->serialize($xml_list->addChild($item->get_type()));
 }
 #deserialize:
 foreach($xml->$(FIELD)->children() as $item)

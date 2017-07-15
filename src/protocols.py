@@ -99,7 +99,7 @@ if(xml_$(FIELD))
 auto arr_$(FIELD) = xml.append_child("$(FIELD)");
 for(auto t : $(FIELD))
 {
-    arr_$(FIELD).append_child("int").append_attribute("value").set_value(t);
+    arr_$(FIELD).append_child("item").append_attribute("value").set_value(t);
 }
 #deserialize:
 auto arr_$(FIELD) = xml.child("$(FIELD)");
@@ -113,7 +113,7 @@ for(const auto& child : arr_$(FIELD))
 auto arr_$(FIELD) = xml.append_child("$(FIELD)");
 for(auto t : $(FIELD))
 {
-    arr_$(FIELD).append_child("bool").append_attribute("value").set_value(t);
+    arr_$(FIELD).append_child("item").append_attribute("value").set_value(t);
 }
 #deserialize:
 auto arr_$(FIELD) = xml.child("$(FIELD)");
@@ -126,7 +126,7 @@ for(const auto& child : arr_$(FIELD))
 auto arr_$(FIELD) = xml.append_child("$(FIELD)");
 for(auto t : $(FIELD))
 {
-    arr_$(FIELD).append_child("float").append_attribute("value").set_value(t);
+    arr_$(FIELD).append_child("item").append_attribute("value").set_value(t);
 }
 #deserialize:
 auto arr_$(FIELD) = xml.child("$(FIELD)");
@@ -139,7 +139,7 @@ for(const auto& child : arr_$(FIELD))
 auto arr_$(FIELD) = xml.append_child("$(FIELD)");
 for(const auto& t : $(FIELD))
 {
-    arr_$(FIELD).append_child("str").append_attribute("value").set_value(t.c_str());
+    arr_$(FIELD).append_child("item").append_attribute("value").set_value(t.c_str());
 }
 #deserialize:
 auto arr_$(FIELD) = xml.child("$(FIELD)");

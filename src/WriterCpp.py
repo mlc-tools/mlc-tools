@@ -179,9 +179,8 @@ class WriterCpp(Writer):
                 f = '{}*'
                 class_ = self.parser.find_class(object_.type)
                 if class_:
-                    for b in class_.behaviors:
-                        if b.name == 'SerializedObject':
-                            f = 'IntrusivePtr<{}>'
+                    if class_.is_serialized:
+                        f = 'IntrusivePtr<{}>'
             else:
                 f = '{}*'
 
