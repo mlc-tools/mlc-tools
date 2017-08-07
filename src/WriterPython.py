@@ -419,6 +419,6 @@ class {0}:
 
 _pattern_visitor = '''{0}\nclass {3}:
     def __init__(self):\n        self.response = None
-    def visit(self, ctx):\n        if ctx == None:\n            return
+    def visit(self, ctx):\n        if ctx is not None:\n            return
 {1}\n{2}
 '''

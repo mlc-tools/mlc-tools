@@ -52,13 +52,14 @@ def find_body(text):
 
 class Parser:
 
-    def __init__(self, side):
+    def __init__(self, side, generate_visitors=True):
         self.classes = []
         self.objects = []
         self.functions = []
         self.side = side
         self.copyright_text = ''
         self.simple_types = ["int", "float", "bool", "string"]
+        self.generate_visitors = generate_visitors
         return
 
     def set_configs_directory(self, path):
@@ -119,10 +120,11 @@ class Parser:
             if cls.type == 'class':
                 cls.add_get_type_function()
 
-        for cls in self.classes:
-            if cls.is_visitor and self.get_type_of_visitor(cls) != cls.name:
-                if cls.name.find('IVisitor') != 0:
-                    self.create_visitor_class(cls)
+        if self.generate_visitors:
+            for cls in self.classes:
+                if cls.is_visitor and self.get_type_of_visitor(cls) != cls.name:
+                    if cls.name.find('IVisitor') != 0:
+                        self.create_visitor_class(cls)
 
         for cls in self.classes:
             behaviors = []
@@ -133,11 +135,12 @@ class Parser:
                 behaviors.append(c)
             cls.behaviors = behaviors
 
-        for cls in self.classes:
-            cls.is_serialized = self.is_serialised(cls)
-            cls.is_visitor = self.is_visitor(cls)
-            if cls.is_visitor and cls.name != self.get_type_of_visitor(cls):
-                self._append_visit_function(cls)
+        if self.generate_visitors:
+            for cls in self.classes:
+                cls.is_serialized = self.is_serialised(cls)
+                cls.is_visitor = self.is_visitor(cls)
+                if cls.is_visitor and cls.name != self.get_type_of_visitor(cls):
+                    self._append_visit_function(cls)
 
         for cls in self.classes:
             for member in cls.members:
