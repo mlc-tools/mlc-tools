@@ -562,6 +562,7 @@ class WriterCpp(Writer):
         key = obj_template_args[0]
         value = obj_template_args[1]
         key_type = key.name if isinstance(key, Class) else key.type
+        key_type = convert_type(key_type)
         value_type = value.name if isinstance(value, Class) else value.type
         pattern = self.serialize_protocol[DESERIALIZATION]['map'][0]
         if key.is_link:
