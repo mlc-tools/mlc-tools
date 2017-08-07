@@ -308,7 +308,7 @@ class WriterCpp(Writer):
         self._current_class = None
         if class_.type == 'class':
             pattern = '''#include "{0}.h"
-                         #include "Generics.h"{4}
+                         # include "Generics.h"{4}
 
                          namespace {3}
                          __begin__{5}{6}
@@ -317,7 +317,7 @@ class WriterCpp(Writer):
                          {1}__end__'''
         else:
             pattern = '''#include "{0}.h"
-                         #include "Generics.h"{4}
+                         # include "Generics.h"{4}
 
                          namespace {3}
                          __begin__
@@ -562,7 +562,6 @@ class WriterCpp(Writer):
         key = obj_template_args[0]
         value = obj_template_args[1]
         key_type = key.name if isinstance(key, Class) else key.type
-        key_type = convert_type(key_type)
         value_type = value.name if isinstance(value, Class) else value.type
         pattern = self.serialize_protocol[DESERIALIZATION]['map'][0]
         if key.is_link:
@@ -570,7 +569,7 @@ class WriterCpp(Writer):
         elif key.is_pointer:
             key_str = 'auto key = make_intrusive<{}>();'.format(key_type)
         else:
-            key_str = '{} key;'.format(key_type)
+            key_str = '{} key;'.format(convert_type(key_type))
 
         _value_is_pointer = value.is_pointer if isinstance(value, Object) else False
         a0 = obj_name
