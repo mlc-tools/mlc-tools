@@ -213,16 +213,19 @@ class Parser:
     def _append_visit_function(self, cls):
         visitor_name = self.get_type_of_visitor(cls)
         visitor = self.find_class(visitor_name)
-        function = Function()
-        function.name = 'visit'
-        function.return_type = 'void'
-        function.args.append(['ctx', cls.name + '*'])
-        function.is_abstract = True
-        visitor.functions.append(function)
+        append = cls.side == visitor.side and cls.side == self.side
+        append = append or cls.side == 'both'
+        if append:
+            function = Function()
+            function.name = 'visit'
+            function.return_type = 'void'
+            function.args.append(['ctx', cls.name + '*'])
+            function.is_abstract = True
+            visitor.functions.append(function)
 
-        def comparator(func):
-            return func.name
-        visitor.functions.sort(key=comparator)
+            def comparator(func):
+                return func.name
+            visitor.functions.sort(key=comparator)
 
     def _get_object_type(self, type_name):
         cls = self.find_class(type_name)
