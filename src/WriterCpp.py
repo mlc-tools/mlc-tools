@@ -588,6 +588,7 @@ class WriterCpp(Writer):
         function = Function()
         function.name = 'accept'
         function.return_type = 'void'
+        function.is_const = True
         function.args.append(['visitor', visitor + '*'])
         function.operations.append('visitor->visit( this );')
         class_.functions.append(function)
