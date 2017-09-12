@@ -219,7 +219,7 @@ class Parser:
             function = Function()
             function.name = 'visit'
             function.return_type = 'void'
-            function.args.append(['ctx', 'const %s*' % cls.name])
+            function.args.append(['ctx', cls.name + '*'])
             function.is_abstract = True
             visitor.functions.append(function)
 
