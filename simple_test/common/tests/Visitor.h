@@ -9,9 +9,9 @@ class Acceptor : public mg::IVisitorRequest
 public:
     Acceptor();
 
-    virtual void visit(const mg::Request* ctx) override;
-    virtual void visit(const mg::RequestFoo* ctx) override;
-    virtual void visit(const mg::RequestBar* ctx) override;
+    virtual void visit(mg::Request* ctx) override;
+    virtual void visit(mg::RequestFoo* ctx) override;
+    virtual void visit(mg::RequestBar* ctx) override;
 public:
 
     bool base;

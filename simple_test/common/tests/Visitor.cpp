@@ -11,17 +11,17 @@ Acceptor::Acceptor()
 {
 }
 
-void Acceptor::visit(const mg::Request* ctx)
+void Acceptor::visit(mg::Request* ctx)
 {
     base = true;
 }
 
-void Acceptor::visit(const mg::RequestFoo* ctx)
+void Acceptor::visit(mg::RequestFoo* ctx)
 {
     foo = true;
 }
 
-void Acceptor::visit(const mg::RequestBar* ctx)
+void Acceptor::visit(mg::RequestBar* ctx)
 {
     bar = true;
 }
