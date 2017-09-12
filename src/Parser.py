@@ -263,6 +263,7 @@ class Parser:
             visitor.type = "class"
             visitor.is_abstract = True
             visitor.is_visitor = True
+            visitor.side = cls.side
             self.classes.append(visitor)
 
     def _create_declaration(self, text):
