@@ -477,7 +477,7 @@ class WriterCpp(Writer):
         function.return_type = 'void'
 
         for behabior in class_.behaviors:
-            if not behabior.is_serialized or behabior.is_abstract:
+            if not behabior.is_serialized:
                 continue
             operation = self.get_behavior_call_format().format(behabior.name, function.name)
             function.operations.append(operation)

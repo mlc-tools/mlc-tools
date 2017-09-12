@@ -63,9 +63,9 @@ class Class(Object):
                     break
             for parent in self.behaviors:
                 parent.on_linked(parser)
-                if parent.is_abstract:
-                    self.is_abstract = True
-                    break
+                # if parent.is_abstract:
+                #     self.is_abstract = True
+                #     break
 
         self._linked = True
 
