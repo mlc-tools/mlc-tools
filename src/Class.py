@@ -45,13 +45,13 @@ class Class(Object):
             print 'Not supported inbody classes'
         self.members = parser.objects
         self.functions = parser.functions
-        if self.type == 'enum':
-            self._convert_to_enum()
         return
 
     def on_linked(self, parser):
         if self._linked:
             return
+        if self.type == 'enum':
+            self._convert_to_enum(parser)
 
         if self.generate_set_function:
             self._generate_setters_function(parser)
@@ -201,13 +201,14 @@ class Class(Object):
         if add_function or not parent_class:
             self.functions.append(function)
 
-    def _convert_to_enum(self):
+    def _convert_to_enum(self, parser):
         shift = 0
-        if len(self.behaviors) == 0:
-            self.behaviors.append('int')
-        cast = self.behaviors[0]
+        cast = 'int'
+        print self.name, cast
         values = []
         for m in self.members:
+            if len(m.name):
+                continue
             m.name = m.type
             m.type = cast
             m.is_static = True
@@ -216,11 +217,7 @@ class Class(Object):
                 if cast == 'int':
                     m.initial_value = '(1 << {})'.format(shift)
                     values.append(1 << shift)
-                else:
-                    print 'Enum with cast to not "int" not supported now. Please contact me'
-                    exit(-1)
             shift += 1
-        self.behaviors = []
 
         def add_function(type_, name, args, const):
             function = Function()

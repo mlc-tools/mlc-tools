@@ -184,6 +184,8 @@ class Parser:
         return result
 
     def is_function_override(self, cls, function):
+        if cls.type == 'enum':
+            return False
         if function.name == 'serialize' or function.name == 'deserialize':
             return len(cls.behaviors) > 0
 
