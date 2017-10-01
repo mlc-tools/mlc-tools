@@ -92,7 +92,7 @@ void deserialize(mg::SerializedObject* object, const std::string& payload)
 	Json::Value json;
 	Json::Reader reader;
 	reader.parse(payload, json);
-	object->deserialize(json);
+	object->deserialize(json[object->get_type()]);
 }
 #endif
 
