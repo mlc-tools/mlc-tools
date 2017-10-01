@@ -204,7 +204,6 @@ class Class(Object):
     def _convert_to_enum(self, parser):
         shift = 0
         cast = 'int'
-        print self.name, cast
         values = []
         for m in self.members:
             if len(m.name):
