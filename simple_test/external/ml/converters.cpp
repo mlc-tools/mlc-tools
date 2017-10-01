@@ -20,27 +20,23 @@ std::string boolToStr(bool value)
 
 std::string intToStr(int value)
 {
-	static char buffer[32];
-	buffer[0] = 0x0;
-	sprintf(buffer, "%d", value);
-
-	return buffer;
+	std::stringstream ss;
+	ss << value;
+	return ss.str();
 };
 
 std::string floatToStr(float value)
 {
-	static char buffer[32];
-	buffer[0] = 0x0;
-	sprintf(buffer, "%.2f", value);
-	return buffer;
+	std::stringstream ss;
+	ss << value;
+	return ss.str();
 };
 
 std::string floatToStr2(float value)
 {
-	static char buffer[32];
-	buffer[0] = 0x0;
-	sprintf(buffer, "%f", value);
-	return buffer;
+	std::stringstream ss;
+	ss << value;
+	return ss.str();
 };
 
 bool strToBool(const std::string & value)
@@ -57,13 +53,17 @@ bool strToBool(const std::string & value)
 
 int strToInt(const std::string & value)
 {
-	return value.empty() ? 0 :
-		atoi(value.c_str());
+	std::stringstream ss(value);
+	int result(0);
+	ss >> result;
+	return result;
 }
 
 float strToFloat(const std::string & value)
 {
-	return value.empty() ? 0 :
-		atof(value.c_str());
+	std::stringstream ss(value);
+	float result(0.f);
+	ss >> result;
+	return result;
 }
 

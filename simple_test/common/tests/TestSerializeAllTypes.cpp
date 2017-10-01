@@ -46,8 +46,8 @@ bool test_all_types()
 	auto result = true;
 	result = result && objA.int_value0 == objB.int_value0;
 	result = result && objA.int_value1 == objB.int_value1;
-	result = result && objA.float_value0 == objB.float_value0;
-	result = result && objA.float_value1 == objB.float_value1;
+	result = result && std::fabs(objA.float_value0 - objB.float_value0) < 0.0001f;
+	result = result && std::fabs(objA.float_value1 - objB.float_value1) < 0.0001f;
 	result = result && objA.bool_value0 == objB.bool_value0;
 	result = result && objA.bool_value1 == objB.bool_value1;
 	result = result && objA.str_value0 == objB.str_value0;

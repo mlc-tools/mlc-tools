@@ -50,7 +50,7 @@ int main()
 	result = test_visitor() && result;
 	result = test_side() && result;
 	result = test_data() && result;
-	//TODO: result = test_all_types() && result;
+	result = test_all_types() && result;
 
 
 	std::cout << "Execute results = " << (result ? "Ok" : "Fail") << std::endl;
