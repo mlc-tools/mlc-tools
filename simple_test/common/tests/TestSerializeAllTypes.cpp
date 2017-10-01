@@ -2,6 +2,7 @@
 #include "AllTypes.h"
 #include <stdlib.h>
 #include <iostream>
+#include "ml/Generics.h"
 
 extern std::string getSerializedString(const mg::SerializedObject* object);
 extern void deserialize(mg::SerializedObject* object, const std::string& payload);
@@ -29,7 +30,7 @@ bool test_all_types()
 	objA.str_value0 = rand_str();
 	objA.str_value1 = rand_str();
 
-	int count = rand() % 10;
+	int count = rand() % 100;
 	for(int i=0; i<count;++i) 
 		objA.int_list.push_back(rand());
 	for(int i=0; i<count;++i)
@@ -38,6 +39,51 @@ bool test_all_types()
 		objA.bool_list.push_back(rand() % 2 == 1);
 	for(int i=0; i<count;++i)
 		objA.string_list.push_back(rand_str());
+
+	for (int i = 0; i < count; ++i)
+		objA.int_string_map[i] = rand_str();
+	for (int i = 0; i < count; ++i)
+		objA.float_string_map[static_cast<float>(i)] = rand_str();
+	for (int i = 0; i < 2; ++i)
+		objA.bool_string_map[static_cast<bool>(i)] = rand_str();
+	for (int i = 0; i < count; ++i)
+		objA.string_string_map[toStr(i)] = rand_str();
+	for (int i = 0; i < count; ++i)
+		objA.string_int_map[toStr(i)] = i;
+	for (int i = 0; i < count; ++i)
+		objA.string_float_map[toStr(i)] = static_cast<float>(i);
+	for (int i = 0; i < 2; ++i)
+		objA.string_bool_map[toStr(i)] = static_cast<bool>(i);
+
+	objA.object.value = rand();
+	
+	objA.object_ptr = make_intrusive<mg::AllTypesChildren>();
+	objA.object_ptr->value = rand();
+	
+	for (int i = 0; i < count; ++i)
+	{
+		mg::AllTypesChildren object;
+		object.value = rand();
+		objA.object_list.push_back(object);
+	}
+	for (int i = 0; i < count; ++i)
+	{
+		auto object_ptr = make_intrusive<mg::AllTypesChildren>();
+		object_ptr->value = rand();
+		objA.object_ptr_list.push_back(object_ptr);
+	}
+	for (int i = 0; i < count; ++i)
+	{
+		mg::AllTypesChildren object;
+		object.value = rand();
+		objA.object_map[toStr(i)] = object;
+	}
+	for (int i = 0; i < count; ++i)
+	{
+		auto object_ptr = make_intrusive<mg::AllTypesChildren>();
+		object_ptr->value = rand();
+		objA.object_ptr_map[toStr(i)] = object_ptr;
+	}
 
     auto str = getSerializedString(&objA);
     std::cout << str << std::endl;
@@ -57,6 +103,28 @@ bool test_all_types()
 	result = result && objA.float_list == objB.float_list;
 	result = result && objA.bool_list == objB.bool_list;
 	result = result && objA.string_list == objB.string_list;
+
+	result = result && objA.int_string_map == objB.int_string_map;
+	result = result && objA.float_string_map == objB.float_string_map;
+	result = result && objA.bool_string_map == objB.bool_string_map;
+	result = result && objA.string_string_map == objB.string_string_map;
+	result = result && objA.string_int_map == objB.string_int_map;
+	result = result && objA.string_float_map == objB.string_float_map;
+	result = result && objA.string_bool_map == objB.string_bool_map;
+	result = result && objA.object == objB.object;
+	result = result && *objA.object_ptr == *objB.object_ptr;
+	result = result && objA.object_list == objB.object_list;
+	result = result && objA.object_map == objB.object_map;
+
+	result = result && objA.object_ptr_list.size() == objB.object_ptr_list.size();
+	for(size_t i=0; i<objA.object_ptr_list.size(); ++i)
+		result = result && *objA.object_ptr_list[i] == *objB.object_ptr_list[i];
+	for (auto& pair : objA.object_ptr_map)
+	{
+		auto ptrA = pair.second;
+		auto ptrB = objB.object_ptr_map.at(pair.first);
+		result = *ptrA == *ptrB && result;
+	}
 
 	return result;	
 }

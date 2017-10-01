@@ -23,6 +23,11 @@ class core/CommandBase<SerializedObject>
 	function string getSerializedString():external:const;
 }
 
+class AllTypesChildren<SerializedObject>
+{
+	int value
+}
+
 class AllTypes<SerializedObject>
 {
 	//simple
@@ -46,12 +51,12 @@ class AllTypes<SerializedObject>
 	map<string, float> string_float_map
 	map<string, bool> string_bool_map
 
-	SerializedObject object
-	SerializedObject* object_ptr = 0
-	list<SerializedObject> object_list
-	list<SerializedObject*> object_ptr_list
-	map<string, SerializedObject> object_map
-	map<string, SerializedObject*> object_ptr_map
+	AllTypesChildren object
+	AllTypesChildren* object_ptr = 0
+	list<AllTypesChildren> object_list
+	list<AllTypesChildren*> object_ptr_list
+	map<string, AllTypesChildren> object_map
+	map<string, AllTypesChildren*> object_ptr_map
 }
 
 class Request<SerializedObject>:visitor
