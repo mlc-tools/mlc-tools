@@ -186,16 +186,22 @@ class WriterCpp(Writer):
 
             type_ = f.format(convert_type(type_))
         modifiers = ''
+        initial_value = ''
         if object_.is_static:
             modifiers += 'static '
         if object_.is_const:
-            modifiers += 'const '
+            if object_.is_static and self._current_class.type == 'enum':
+                modifiers += 'constexpr '
+                initial_value = ' = {}'.format(object_.initial_value)
+            else:
+                modifiers += 'const '
         if len(object_.template_args) > 0:
             pattern = '{3}{0}<{2}>'
         else:
             pattern = '{3}{0}'
         if with_name:
             pattern += ' {1}'
+            pattern += initial_value
         return pattern.format(convert_type(type_), object_.name, args, modifiers)
 
     def write_object(self, object_, flags):
@@ -208,7 +214,7 @@ class WriterCpp(Writer):
             out[flags] += self.build_type_str(object_) + ';\n'
 
         if flags == FLAG_CPP:
-            if object_.is_static:
+            if object_.is_static and self._current_class.type != 'enum':
                 if object_.initial_value is None:
                     print 'static object_ {} of class {} have not initial_value'.\
                         format(object_.name, self._current_class.name)
@@ -225,6 +231,7 @@ class WriterCpp(Writer):
                 out[flags] += pattern.format(
                     convert_type(object_.type), object_.name,
                     self._current_class.name, object_.initial_value, modifier)
+                pass
         return out
 
     def write_class(self, class_, flags):

@@ -14,6 +14,7 @@
 #include "tests/Visitor.h"
 #include "tests/Side.h"
 #include "tests/Data.h"
+#include "tests/enum.h"
 #include "tests/TestSerializeAllTypes.h"
 #include <iostream>
 #include "DataStorage.h"
@@ -24,7 +25,6 @@ extern intrusive_ptr<mg::CommandBase> createCommand(const std::string& payload);
 
 
 bool test_serialization();
-bool test_enum();
 
 void initialize_data_storage()
 {
@@ -52,6 +52,7 @@ int main()
 	result = test_data() && result;
 	result = test_all_types() && result;
 
+	
 
 	std::cout << "Execute results = " << (result ? "Ok" : "Fail") << std::endl;
 	return result ? 0 : -1;
@@ -81,20 +82,5 @@ bool test_serialization()
 	else
 		std::cout << "Test serialization success." << std::endl;
 
-	return result;
-}
-
-bool test_enum()
-{
-    mg::TestEnum foo;
-
-    bool result = foo.value1 != foo.value2;
-    result = result && foo.value1 == foo.value1;
-    result = result && foo.value2 == foo.value2;
-
-	if(!result)
-	    std::cout << "Test compare enum fields failed." << std::endl;
-	else
-		std::cout << "Test compare enum fields success." << std::endl;
 	return result;
 }
