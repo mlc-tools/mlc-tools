@@ -18,6 +18,9 @@ def _get_files_list(path, prefix):
         return result_files
     except IOError:
         return []
+    except OSError as e:
+        print 'Exception in [_get_files_list]:', e
+        return []
 
 
 def get_files_list(path):
