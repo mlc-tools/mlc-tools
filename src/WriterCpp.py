@@ -33,9 +33,11 @@ def convert_return_type(parser, type_object):
     else:
         result = type_object.type
         if type_object.is_link and parser.find_class(type_object.type):
-            result = 'const {}*'.format(type_object.type)
+            result = '{}*'.format(type_object.type)
         elif type_object.is_pointer and parser.find_class(type_object.type):
             result = 'IntrusivePtr<{}>'.format(type_object.type)
+        if type_object.is_const:
+            result = 'const ' + result
     if result == 'string':
         result = 'std::string'
     return result
@@ -397,7 +399,7 @@ class WriterCpp(Writer):
             if function.is_const:
                 is_const = ' const'
 
-            out[FLAG_HPP] = fstr.format(convert_return_type(self.parser, convert_type(function.return_type)),
+            out[FLAG_HPP] = fstr.format(convert_return_type(self.parser, convert_type(function.get_return_type())),
                                         function.name, args, is_const, is_override, modifier)
         if flags & FLAG_CPP and not function.is_external and not function.is_abstract:
             is_const = ''
@@ -415,7 +417,7 @@ class WriterCpp(Writer):
             for arg in function.args:
                 args.append(_convert_argument_type(convert_type(arg[1])) + ' ' + arg[0])
             args = ', '.join(args)
-            out[FLAG_CPP] = fstr.format(convert_return_type(self.parser, convert_type(function.return_type)),
+            out[FLAG_CPP] = fstr.format(convert_return_type(self.parser, convert_type(function.get_return_type())),
                                         function.name, args, body, self._current_class.name, is_const)
         return out
 
@@ -718,7 +720,7 @@ class WriterCpp(Writer):
                         checkType(arg)
 
             if not f.is_template:
-                type_ = f.return_type if isinstance(f.return_type, str) else f.return_type.type
+                type_ = f.get_return_type().type
                 type_ = re.sub('const', '', type_).strip()
                 type_ = re.sub('\*', '', type_).strip()
                 type_ = re.sub('&', '', type_).strip()

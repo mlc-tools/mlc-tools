@@ -69,6 +69,11 @@ class Function:
         self.return_type, self.name = line.split(' ')
         return
 
+    def get_return_type(self):
+        if isinstance(self.return_type, str):
+            self.link()
+        return self.return_type
+
     def link(self):
         if not isinstance(self.return_type, str):
             return

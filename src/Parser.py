@@ -195,7 +195,7 @@ class Parser:
 
         for c in cls.behaviors:
             for f in c.functions:
-                if f.name == function.name and f.return_type.type == function.return_type.type and f.args == function.args:
+                if f.name == function.name and f.get_return_type().type == function.get_return_type().type and f.args == function.args:
                     return True
         is_override = False
         for c in cls.behaviors:

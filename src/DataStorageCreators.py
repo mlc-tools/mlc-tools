@@ -107,7 +107,7 @@ class DataStorageCpp(DataStorage):
         function = Function()
         function.name = 'shared'
         function.args.append(['', ''])
-        function.return_type = 'const {}&'.format(self.name)
+        function.return_type = '{}&:const'.format(self.name)
         function.is_static = True
         function.operations.append('static {} instance;'.format(self.name))
         function.operations.append('return instance;')
@@ -117,7 +117,8 @@ class DataStorageCpp(DataStorage):
         function = Function()
         function.name = 'get'
         function.args.append(['name', 'string'])
-        function.return_type = 'template <class T> const T*'
+        function.return_type = Object()
+        function.return_type.type = 'template <class T> const T*'
         function.is_const = True
         function.is_template = True
         return function
@@ -133,7 +134,8 @@ class DataStorageCpp(DataStorage):
                 getter.is_const = True
                 getter.name = 'get'
                 getter.args.append(['name', 'string'])
-                getter.return_type = 'template <> const {}*'.format(class_.name)
+                getter.return_type = Object()
+                getter.return_type.type = 'template<>const {}*'.format(class_.name)
                 name = get_data_list_name(get_data_name(class_.name))
                 getter.operations.append('return _loaded ? &{0}.at(name) : &const_cast<{1}*>(this)->{0}[name];'.format(name, self.name))
                 getters.append(getter)

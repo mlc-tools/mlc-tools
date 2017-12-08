@@ -122,7 +122,7 @@ class Class(Object):
                 if class_.is_abstract:
                     continue
                 for func in class_.functions:
-                    equal = func.name == function.name and func.return_type == function.return_type
+                    equal = func.name == function.name and func.get_return_type().type == function.get_return_type().type
                     for i, arg in enumerate(func.args):
                         equal = equal and func.args[i][1] == function.args[i][1]
                     if equal:
@@ -182,7 +182,7 @@ class Class(Object):
                 if class_.is_abstract:
                     continue
                 for func in class_.functions:
-                    equal = func.name == function.name and func.return_type == function.return_type
+                    equal = func.name == function.name and func.get_return_type().type == function.get_return_type().type
                     for i, arg in enumerate(func.args):
                         equal = equal and func.args[i][1] == function.args[i][1]
                     if equal:
@@ -252,7 +252,7 @@ class Class(Object):
             True). \
             operations = ['return _value;']
         add_function(
-            'const {0}&'.format(self.name),
+            '{0}&:const'.format(self.name),
             'operator =',
             [['rhs', 'const {0}&'.format(self.name)]],
             False). \
@@ -273,7 +273,7 @@ class Class(Object):
             operations = ['return _value < rhs._value;']
 
         function1 = add_function('', self.name, [['value', 'string']], False)
-        function2 = add_function('const {0}&'.format(self.name), 'operator =', [['value', 'string']], False)
+        function2 = add_function('{0}&:const'.format(self.name), 'operator =', [['value', 'string']], False)
         function3 = add_function('', 'operator std::string', [], True)
         function4 = add_function('string', 'str', [], True)
         index = 0
