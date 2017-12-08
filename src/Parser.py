@@ -147,6 +147,10 @@ class Parser:
                 self._convert_template_args(member)
 
         for cls in self.classes:
+            for func in cls.functions:
+                func.link()
+
+        for cls in self.classes:
             cls.on_linked(self)
 
     def _convert_template_args(self, member):
@@ -186,12 +190,12 @@ class Parser:
     def is_function_override(self, cls, function):
         if cls.type == 'enum':
             return False
-        if function.name == 'serialize' or function.name == 'deserialize':
+        if function.name in ['serialize', 'deserialize']:
             return len(cls.behaviors) > 0
 
         for c in cls.behaviors:
             for f in c.functions:
-                if f.name == function.name and f.return_type == function.return_type and f.args == function.args:
+                if f.name == function.name and f.return_type.type == function.return_type.type and f.args == function.args:
                     return True
         is_override = False
         for c in cls.behaviors:

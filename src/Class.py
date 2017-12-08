@@ -315,4 +315,5 @@ class Class(Object):
         function.return_type = 'string'
         function.is_const = True
         function.operations.append('return {}::__type__;'.format(self.name))
+        function.link()
         self.functions.append(function)

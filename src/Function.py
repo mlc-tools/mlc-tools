@@ -1,5 +1,6 @@
 import re
 from constants import Modifier
+from Object import Object
 
 
 class Function:
@@ -18,7 +19,6 @@ class Function:
 
     def parse(self, line):
         line = line.strip()
-        line = self._find_modifiers(line)
         k = line.find('function')
         if k == 0:
             line = line[k + 8:].strip()
@@ -64,9 +64,18 @@ class Function:
                 if not (p('*', arg) or p('&', arg) or p(' ', arg)):
                     exit(-1)
 
+        line = self._find_modifiers(line)
         line = line[0:line.find('(')].strip()
         self.return_type, self.name = line.split(' ')
         return
+
+    def link(self):
+        if not isinstance(self.return_type, str):
+            return
+
+        return_type = self.return_type
+        self.return_type = Object()
+        self.return_type.parse(return_type)
 
     def parse_body(self, body):
         counters = {}

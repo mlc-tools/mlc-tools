@@ -15,17 +15,30 @@ DESERIALIZATION = 1
 
 
 def _convert_argument_type(type_):
-    if type_ == 'string' or type_ == 'std::string':
-        return 'const std::string&'
-    return type_
+    if isinstance(type_, str):
+        if type_ == 'string' or type_ == 'std::string':
+            return 'const std::string&'
+        return type_
+    else:
+        return _convert_argument_type(type_.type)
 
 
-def convert_return_type(parser, type_):
-    if '*' in type_:
-        t = re.sub('\*', '', type_)
-        if parser.find_class(t):
-            return 'IntrusivePtr<{}>'.format(t)
-    return type_
+def convert_return_type(parser, type_object):
+    result = type_object
+    if isinstance(type_object, str):
+        if '*' in type_object:
+            t = re.sub('\*', '', type_object)
+            if parser.find_class(t):
+                result = 'IntrusivePtr<{}>'.format(t)
+    else:
+        result = type_object.type
+        if type_object.is_link and parser.find_class(type_object.type):
+            result = 'const {}*'.format(type_object.type)
+        elif type_object.is_pointer and parser.find_class(type_object.type):
+            result = 'IntrusivePtr<{}>'.format(type_object.type)
+    if result == 'string':
+        result = 'std::string'
+    return result
 
 
 def convert_type(type_):
@@ -482,6 +495,7 @@ class WriterCpp(Writer):
             function.name = 'deserialize'
             function.args.append(self.get_serialization_object_arg(serialization_type))
         function.return_type = 'void'
+        function.link()
 
         for behabior in class_.behaviors:
             if not behabior.is_serialized:
@@ -597,6 +611,7 @@ class WriterCpp(Writer):
         function.return_type = 'void'
         function.args.append(['visitor', visitor + '*'])
         function.operations.append('visitor->visit( this );')
+        function.link()
         class_.functions.append(function)
 
     def add_equal_methods(self, class_):
@@ -605,6 +620,7 @@ class WriterCpp(Writer):
         function.return_type = 'bool'
         function.args.append(['rhs', 'const ' + class_.name + '&'])
         function.is_const = True
+        function.link()
         fbody_line = 'result = result && {0} == rhs.{0};'
         function.operations.append('bool result = true;')
         for m in class_.members:
@@ -622,6 +638,7 @@ class WriterCpp(Writer):
         function.args.append(['rhs', 'const ' + class_.name + '&'])
         function.is_const = True
         function.operations.append('return !(*this == rhs);')
+        function.link()
         class_.functions.append(function)
 
     def _find_includes(self, class_, flags):
@@ -701,7 +718,7 @@ class WriterCpp(Writer):
                         checkType(arg)
 
             if not f.is_template:
-                type_ = f.return_type
+                type_ = f.return_type if isinstance(f.return_type, str) else f.return_type.type
                 type_ = re.sub('const', '', type_).strip()
                 type_ = re.sub('\*', '', type_).strip()
                 type_ = re.sub('&', '', type_).strip()
