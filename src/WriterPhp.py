@@ -70,7 +70,7 @@ class WriterPhp(Writer):
         return {flags: out}
 
     def write_function(self, cls, function):
-        if function.name not in ['serialize', 'deserialize', 'get_type', 'shared']:
+        if function.name not in ['serialize', 'deserialize', 'get_type', 'shared'] and self.current_class.name != 'DataStorage':
             return ''
 
         out = '''public function {0}({1})

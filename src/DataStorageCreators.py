@@ -195,7 +195,7 @@ class DataStoragePython(DataStorage):
                 function.args.append(['name', ''])
                 function.operations.append('if not self._loaded and name not in self.{}:'.format(map_name))
                 function.operations.append('    from {0} import {0}'.format(class_.name))
-                function.operations.append('    self.{}[name] = {}()'.format(map_name, class_.name))
+                function.operations.append('    self.{}[name] = {}();'.format(map_name, class_.name))
                 function.operations.append('return self.{}[name]'.format(map_name))
                 self.functions.append(function)
 
@@ -204,7 +204,7 @@ class DataStoragePhp(DataStorage):
 
     def __init__(self, *args):
         DataStorage.__init__(self, *args)
-        # self.create_deserialize()
+        self.create_deserialize()
 
         object = Object()
         object.type = self.name
@@ -213,16 +213,22 @@ class DataStoragePhp(DataStorage):
         object.is_static = True
         self.members.append(object)
 
+        object = Object()
+        object.type = self.name
+        object.name = '__xml'
+        object.initial_value = 'NULL'
+        object.is_static = True
+        self.members.append(object)
+
     def create_deserialize(self):
         function = Function()
         function.name = 'deserialize'
         function.args.append(['xml', ''])
-        for member in self.members:
-            if member.type != 'map':
-                continue
-            pattern = ''''''
-            function.operations.append(pattern.format(member.name, member.template_args[1].name))
+        self.functions.append(function)
 
+        function = Function()
+        function.name = 'serialize'
+        function.args.append(['xml', ''])
         self.functions.append(function)
 
     def create_shared_method(self):
@@ -232,7 +238,10 @@ class DataStoragePhp(DataStorage):
         function.return_type = self.name
         function.is_static = True
         function.operations.append('if({0}::$__instance == NULL)'.format(self.name))
+        function.operations.append('{')
         function.operations.append('    {0}::$__instance = new {0}();'.format(self.name))
+        function.operations.append('    {0}::$__xml = simplexml_load_file("data.xml")'.format(self.name))
+        function.operations.append('}')
         function.operations.append('return {0}::$__instance;'.format(self.name))
         function.link()
         self.functions.append(function)
@@ -244,10 +253,13 @@ class DataStoragePhp(DataStorage):
                 function = Function()
                 function.name = 'get' + class_.name
                 function.args.append(['name', ''])
-                function.operations.append('if not self._loaded and name not in self.{}:'.format(map_name))
-                function.operations.append('    from {0} import {0}'.format(class_.name))
-                function.operations.append('    self.{}[name] = {}()'.format(map_name, class_.name))
-                function.operations.append('return self.{}[name]'.format(map_name))
+                function.operations.append('''
+                    if(in_array($name, @{array}))
+                    {
+                        dasd;
+                    }
+                    ''')
+                function.operations[0] = function.operations[0].replace('@{array}', get_data_list_name(get_data_name(class_.name)))
                 self.functions.append(function)
 
 
