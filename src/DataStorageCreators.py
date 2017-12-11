@@ -240,7 +240,7 @@ class DataStoragePhp(DataStorage):
         function.operations.append('if({0}::$__instance == NULL)'.format(self.name))
         function.operations.append('{')
         function.operations.append('    {0}::$__instance = new {0}();'.format(self.name))
-        function.operations.append('    {0}::$__xml = simplexml_load_file("data.xml")'.format(self.name))
+        function.operations.append('    {0}::$__xml = simplexml_load_file("assets/data/data.xml");'.format(self.name))
         function.operations.append('}')
         function.operations.append('return {0}::$__instance;'.format(self.name))
         function.link()
@@ -254,12 +254,25 @@ class DataStoragePhp(DataStorage):
                 function.name = 'get' + class_.name
                 function.args.append(['name', ''])
                 function.operations.append('''
-                    if(in_array($name, @{array}))
+                    if (in_array($name, $this->@{array}))
                     {
-                        dasd;
+                        return $this->@{array}[$name];
+                    } else
+                    {
+                        $data = new @{type}();
+                        foreach (DataStorage::$__xml->@{array}->pair as $node)
+                        {
+                            if ($node["key"] == $name)
+                            {
+                                $data->deserialize($node->value);
+                                $this->@{array}[$name] = $data;
+                            }
+                        }
+                        return $data;
                     }
                     ''')
-                function.operations[0] = function.operations[0].replace('@{array}', get_data_list_name(get_data_name(class_.name)))
+                function.operations[0] = function.operations[0].replace('@{array}', map_name)
+                function.operations[0] = function.operations[0].replace('@{type}', class_.name)
                 self.functions.append(function)
 
 

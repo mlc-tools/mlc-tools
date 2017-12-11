@@ -28,6 +28,7 @@ class WriterPython(Writer):
         Writer.save_generated_classes(self, out_directory)
         self.createFactory()
         self.createVisitorAcceptors()
+        self.createInitFile()
         # self.create_data_storage()
 
     def write_class(self, cls, flags):
@@ -367,6 +368,9 @@ class WriterPython(Writer):
         content = self.write_class(storage, 0)[0]
         content = self.prepare_file(content)
         self.save_file(storage.name + '.py', content)
+
+    def createInitFile(self):
+        self.save_file('__init__.py', '')
 
 _factory = {}
 _factory['xml'] = '''import xml.etree.ElementTree as ET

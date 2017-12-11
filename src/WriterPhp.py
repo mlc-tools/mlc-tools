@@ -21,7 +21,7 @@ class WriterPhp(Writer):
 
     def save_generated_classes(self, out_directory):
         Writer.save_generated_classes(self, out_directory)
-        # self.createFactory()
+        self.createFactory()
         # self.createVisitorAcceptors()
         # self.create_data_storage()
 
@@ -64,6 +64,7 @@ class WriterPhp(Writer):
                         imports += include_patter.format(arg.name)
                     elif self.parser.find_class(arg.type) and arg.type != cls.name:
                         imports += include_patter.format(arg.type)
+        imports += include_patter.format('Factory')
 
         out = pattern.format(name, extend, initialize_list, functions, imports)
         self.current_class = None
@@ -222,18 +223,25 @@ class WriterPhp(Writer):
         # self.save_file('config.py', buffer)
 
     def createFactory(self):
-        pass
-        # global _factory
-        # pattern = _factory[self.serialize_format]
-        # line = '        if type == "{0}": return {0}.{0}()\n'
-        # line_import = 'import {0}\n'
-        # creates = ''
-        # imports = ''
-        # for cls in self.parser.classes:
-        #     creates += line.format(cls.name)
-        #     imports += line_import.format(cls.name)
-        # factory = pattern.format(imports, creates)
-        # self.save_file('Factory.py', factory)
+        pattern = '''
+<?php
+
+class Factory
+{1}
+    static function build($type)
+    {1}
+        {0}
+    {2}
+{2};
+
+?>
+'''
+        line = '\nif($type == "{0}")\n{1}\nrequire_once "{0}.php";\nreturn new {0}();\n{2}'
+        creates = ''
+        for cls in self.parser.classes:
+            creates += line.format(cls.name, '{', '}')
+        factory = pattern.format(creates, '{', '}')
+        self.save_file('Factory.php', factory)
 
     def createVisitorAcceptors(self):
         pass
@@ -277,7 +285,6 @@ class WriterPhp(Writer):
         return body
 
     def create_data_storage(self):
-        pass
         storage = self.create_data_storage_class('DataStorage', self.parser.classes)
         content = self.write_class(storage, 0)[0]
         content = self.prepare_file(content)

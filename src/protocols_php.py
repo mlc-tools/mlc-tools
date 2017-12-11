@@ -31,6 +31,7 @@ $(OWNER)$(FIELD) = ($(TYPE))$xml["$(FIELD)"];
 #serialize:
 $(OWNER)$(FIELD)->serialize($xml->addChild("$(FIELD)"));
 #deserialize:
+$(OWNER)$(FIELD) = new $(TYPE);
 $(OWNER)$(FIELD)->deserialize($xml->$(FIELD));
 
 #pointer
@@ -71,7 +72,7 @@ foreach($(OWNER)$(FIELD) as $item)
     $item->serialize($xml_list->addChild("item"));
 }
 #deserialize:
-foreach($xml->$(FIELD)->item as $item)
+foreach($xml->$(FIELD)->children() as $item)
 {
     $obj = new $(TYPE)();
     $obj->deserialize($item);
@@ -90,10 +91,9 @@ foreach($(OWNER)$(FIELD) as $item)
 foreach($xml->$(FIELD)->children() as $item)
 {
     $type = $item->getName();
-    echo '<tr/>';
-    echo 'TODO: Factory';
-    echo '<tr/>';
-    //TODO:
+    $obj = Factory::build($type);
+    $obj->deserialize($item);
+    array_push($(OWNER)$(FIELD), $obj);
 }
 
 
@@ -131,7 +131,7 @@ foreach($(OWNER)$(FIELD) as $key => $value)
 $xml = $xml_main;
 #deserialize:
 $xml_cache = $xml;
-foreach($xml->$(FIELD)->pair as $xml_child)
+foreach($xml->$(FIELD)->children() as $xml_child)
 {
     $xml = $xml_child;
     $(VALUE)
