@@ -200,6 +200,57 @@ class DataStoragePython(DataStorage):
                 self.functions.append(function)
 
 
+class DataStoragePhp(DataStorage):
+
+    def __init__(self, *args):
+        DataStorage.__init__(self, *args)
+        # self.create_deserialize()
+
+        object = Object()
+        object.type = self.name
+        object.name = '__instance'
+        object.initial_value = 'NULL'
+        object.is_static = True
+        self.members.append(object)
+
+    def create_deserialize(self):
+        function = Function()
+        function.name = 'deserialize'
+        function.args.append(['xml', ''])
+        for member in self.members:
+            if member.type != 'map':
+                continue
+            pattern = ''''''
+            function.operations.append(pattern.format(member.name, member.template_args[1].name))
+
+        self.functions.append(function)
+
+    def create_shared_method(self):
+        function = Function()
+        function.name = 'shared'
+        # function.args.append(['', ''])
+        function.return_type = self.name
+        function.is_static = True
+        function.operations.append('if({0}::$__instance == NULL)'.format(self.name))
+        function.operations.append('    {0}::$__instance = new {0}();'.format(self.name))
+        function.operations.append('return {0}::$__instance;'.format(self.name))
+        function.link()
+        self.functions.append(function)
+
+    def create_getters(self, classes):
+        for class_ in classes:
+            if class_.is_storage and (class_.side == self.parser.side or class_.side == 'both'):
+                map_name = get_data_list_name(get_data_name(class_.name))
+                function = Function()
+                function.name = 'get' + class_.name
+                function.args.append(['name', ''])
+                function.operations.append('if not self._loaded and name not in self.{}:'.format(map_name))
+                function.operations.append('    from {0} import {0}'.format(class_.name))
+                function.operations.append('    self.{}[name] = {}()'.format(map_name, class_.name))
+                function.operations.append('return self.{}[name]'.format(map_name))
+                self.functions.append(function)
+
+
 class DataStorageCppXml(DataStorageCpp):
 
     def __init__(self, *args):
@@ -242,3 +293,15 @@ class DataStoragePythonJson(DataStoragePython):
 
     def __init__(self, *args):
         DataStoragePython.__init__(self, *args)
+
+
+class DataStoragePhpXml(DataStoragePhp):
+    """docstring for DataStoragePythonXml"""
+
+    def __init__(self, *args):
+        DataStoragePhp.__init__(self, *args)
+
+    def add_initialize_function_operations(self, function):
+        function.operations.append('$root = simplexml_load_string(buffer);')
+        function.operations.append('$this->deserialize(root);')
+        function.operations.append('$this->_loaded = true;')

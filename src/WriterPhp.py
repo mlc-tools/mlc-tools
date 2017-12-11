@@ -1,6 +1,7 @@
 from Writer import Writer
 from Function import Function
 from Class import Class
+from DataStorageCreators import DataStoragePhpXml
 
 SERIALIZATION = 0
 DESERIALIZATION = 1
@@ -69,7 +70,7 @@ class WriterPhp(Writer):
         return {flags: out}
 
     def write_function(self, cls, function):
-        if function.name not in ['serialize', 'deserialize', 'get_type']:
+        if function.name not in ['serialize', 'deserialize', 'get_type', 'shared']:
             return ''
 
         out = '''public function {0}({1})
@@ -238,10 +239,10 @@ class WriterPhp(Writer):
         pass
 
     def create_data_storage_class(self, name, classes):
-        # if self.serialize_format == 'xml':
-        #     return DataStoragePythonXml(name, classes, self.parser)
+        if self.serialize_format == 'xml':
+            return DataStoragePhpXml(name, classes, self.parser)
         # else:
-        #     return DataStoragePythonJson(name, classes, self.parser)
+        #     return DataStoragePhpJson(name, classes, self.parser)
         pass
 
     def prepare_file(self, body):
@@ -277,10 +278,10 @@ class WriterPhp(Writer):
 
     def create_data_storage(self):
         pass
-        # storage = self.create_data_storage_class('DataStorage', self.parser.classes)
-        # content = self.write_class(storage, 0)[0]
-        # content = self.prepare_file(content)
-        # self.save_file(storage.name + '.py', content)
+        storage = self.create_data_storage_class('DataStorage', self.parser.classes)
+        content = self.write_class(storage, 0)[0]
+        content = self.prepare_file(content)
+        self.save_file(storage.name + '.php', content)
 
 
 # format(name, initialize_list, functions, imports)
