@@ -1,5 +1,5 @@
 php_xml = '''
-#int, bool, float, string
+#string
 #serialize:
 #with default value:
 $xml->addAttribute("$(FIELD)", $(OWNER)$(FIELD));
@@ -8,9 +8,23 @@ $xml->addAttribute("$(FIELD)", $(OWNER)$(FIELD));
 
 #deserialize:
 #with default value:
-$(OWNER)$(FIELD) = $xml["$(FIELD)"];
+$(OWNER)$(FIELD) = (string)$xml["$(FIELD)"];
 #without default value:
-$(OWNER)$(FIELD) = $xml["$(FIELD)"];
+$(OWNER)$(FIELD) = (string)$xml["$(FIELD)"];
+
+
+#bool, float, int
+#serialize:
+#with default value:
+$xml->addAttribute("$(FIELD)", $(OWNER)$(FIELD));
+#without default value:
+$xml->addAttribute("$(FIELD)", $(OWNER)$(FIELD));
+
+#deserialize:
+#with default value:
+$(OWNER)$(FIELD) = ($(TYPE))$xml["$(FIELD)"];
+#without default value:
+$(OWNER)$(FIELD) = ($(TYPE))$xml["$(FIELD)"];
 
 
 #serialized
