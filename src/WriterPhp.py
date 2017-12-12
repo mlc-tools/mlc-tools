@@ -22,7 +22,7 @@ class WriterPhp(Writer):
     def save_generated_classes(self, out_directory):
         Writer.save_generated_classes(self, out_directory)
         self.createFactory()
-        # self.createVisitorAcceptors()
+        self.createVisitorAcceptors()
         # self.create_data_storage()
 
     def write_class(self, cls, flags):
@@ -244,7 +244,39 @@ class Factory
         self.save_file('Factory.php', factory)
 
     def createVisitorAcceptors(self):
-        pass
+        pattern = _pattern_visitor
+        line = '        else if($ctx->get_type() == {0}::$__type__)\n@(\n$this->visit_{1}($ctx);\n@)\n'
+        line_import = 'require_once "{0}.php";\n'
+        line_visit = '''\n    function visit_{0}($ctx)\n@(\n@)\n'''
+        base_visitors = {}
+        for cls in self.parser.classes:
+            if cls.is_visitor and (cls.behaviors and not cls.behaviors[0].is_visitor):
+                base_visitors[cls] = []
+        for cls in self.parser.classes:
+            parent = cls.behaviors[0] if cls.behaviors else None
+            while parent:
+                if parent in base_visitors:
+                    base_visitors[parent].append(cls)
+                    break
+                parent = parent.behaviors[0] if parent.behaviors else None
+        for parent in base_visitors:
+            lines = ''
+            visits = ''
+            imports = ''
+            for cls in base_visitors[parent]:
+                if self.parser.is_visitor(cls):
+                    func_name = cls.name
+                    func_name = func_name[0].lower() + func_name[1:]
+
+                    lines += line.format(cls.name, func_name)
+                    imports += line_import.format(cls.name)
+                    visits += line_visit.format(func_name)
+            name = 'IVisitor{}'.format(parent.name)
+            body = pattern.format(imports, lines, visits, name)
+            body = body.replace('@(', '{')
+            body = body.replace('@)', '}')
+            body = self.prepare_file(body)
+            self.save_file(name + '.php', body)
 
     def create_data_storage_class(self, name, classes):
         if self.serialize_format == 'xml':
@@ -307,4 +339,19 @@ __end__;
 $test = new {0}();
 echo $test->__type__;
 
+?>'''
+
+_pattern_visitor = '''<?php
+
+{0}\nclass {3}
+@(
+function visit($ctx)
+@(
+    if(0)
+    @(
+    @)
+    {1}
+@)
+{2}
+@);
 ?>'''
