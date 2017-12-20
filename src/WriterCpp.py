@@ -390,7 +390,9 @@ class WriterCpp(Writer):
             modifier = 'virtual '
             if function.is_static:
                 modifier = 'static '
-            if function.name == self._current_class.name or function.name.find('operator ') == 0 or function.is_template:
+            if function.name == self._current_class.name or \
+               function.name.find('operator ') == 0 or \
+               function.is_template:
                 modifier = ''
             is_override = ''
             if self.parser.is_function_override(self._current_class, function):
@@ -422,6 +424,10 @@ class WriterCpp(Writer):
         return out
 
     def write_classes(self, classes, flags):
+        for class_ in classes:
+            if class_.type == 'enum':
+                self.convert_to_enum(class_)
+                
         for class_ in classes:
             dictionary = self.write_class(class_, FLAG_HPP)
             if len(dictionary) > 0:
@@ -578,7 +584,8 @@ class WriterCpp(Writer):
         _value_is_pointer = value.is_pointer
         a0 = obj_name
         a1 = self._build_serialize_operation('key', key_type, None, key.is_pointer, [], SERIALIZATION, key.is_link)
-        a2 = self._build_serialize_operation('value', value_type, None, _value_is_pointer, value.template_args, SERIALIZATION, value.is_link)
+        a2 = self._build_serialize_operation('value', value_type, None, _value_is_pointer, value.template_args,
+                                             SERIALIZATION, value.is_link)
         return pattern.format(a0, a1, a2)
 
     def build_map_deserialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args):
@@ -597,7 +604,8 @@ class WriterCpp(Writer):
         _value_is_pointer = value.is_pointer if isinstance(value, Object) else False
         a0 = obj_name
         a1 = self._build_serialize_operation('key', key_type, None, key.is_pointer, [], DESERIALIZATION, key.is_link)
-        a2 = self._build_serialize_operation('value', value_type, None, _value_is_pointer, value.template_args, DESERIALIZATION, value.is_link)
+        a2 = self._build_serialize_operation('value', value_type, None, _value_is_pointer, value.template_args,
+                                             DESERIALIZATION, value.is_link)
         a3 = key_str
         a4 = self.build_type_str(value)
         if value.is_pointer:
@@ -858,3 +866,104 @@ class WriterCpp(Writer):
         configs.append('#define MG_XML 2')
         configs.append('\n#define MG_SERIALIZE_FORMAT MG_' + self.serialize_format.upper())
         self.save_file('config.h', pattern.format('\n'.join(configs)))
+
+    def convert_to_enum(self, cls):
+        shift = 0
+        cast = 'int'
+        values = []
+        for m in cls.members:
+            if len(m.name):
+                continue
+            m.name = m.type
+            m.type = cast
+            m.is_static = True
+            m.is_const = True
+            if m.initial_value is None:
+                if cast == 'int':
+                    m.initial_value = '(1 << {})'.format(shift)
+                    values.append(1 << shift)
+            shift += 1
+    
+        def add_function(type_, name, args, const):
+            function = Function()
+            function.return_type = type_
+            function.name = name
+            function.args = args
+            function.is_const = const
+            cls.functions.append(function)
+            return function
+    
+        add_function(
+            '',
+            cls.name,
+            [],
+            False). \
+            operations = ['_value = {};'.format(cls.members[0].name)]
+        add_function(
+            '',
+            cls.name,
+            [['value', cast]],
+            False). \
+            operations = ['_value = value;']
+        add_function(
+            '',
+            cls.name,
+            [['rhs', 'const {0}&'.format(cls.name)]],
+            False). \
+            operations = ['_value = rhs._value;']
+        add_function(
+            '',
+            'operator int',
+            [],
+            True). \
+            operations = ['return _value;']
+        add_function(
+            '{0}&:const'.format(cls.name),
+            'operator =',
+            [['rhs', 'const {0}&'.format(cls.name)]],
+            False). \
+            operations = ['_value = rhs._value;', 'return *this;']
+        add_function(
+            'bool',
+            'operator ==',
+            [['rhs', 'const {0}&'.format(cls.name)]],
+            True). \
+            operations = ['return _value == rhs._value;']
+        add_function(
+            'bool',
+            'operator ==',
+            [['rhs', 'int']],
+            True). \
+            operations = ['return _value == rhs;']
+        add_function('bool', 'operator <', [['rhs', 'const {0}&'.format(cls.name)]], True). \
+            operations = ['return _value < rhs._value;']
+    
+        function1 = add_function('', cls.name, [['value', 'string']], False)
+        function2 = add_function('{0}&:const'.format(cls.name), 'operator =', [['value', 'string']], False)
+        function3 = add_function('', 'operator std::string', [], True)
+        function4 = add_function('string', 'str', [], True)
+        index = 0
+        for m in cls.members:
+            if m.name == '_value':
+                continue
+            function1.operations.append('if(value == "{0}") {1}_value = {0}; return; {2};'.format(m.name, '{', '}'))
+            function2.operations.append(
+                'if(value == "{0}") {1}_value = {0}; return *this; {2};'.format(m.name, '{', '}'))
+            function1.operations.append(
+                'if(value == "{0}") {1}_value = {0}; return; {2};'.format(values[index], '{', '}'))
+            function2.operations.append(
+                'if(value == "{0}") {1}_value = {0}; return *this; {2};'.format(values[index], '{', '}'))
+            function3.operations.append('if(_value == {0}) return "{0}";'.format(m.name))
+            function4.operations.append('if(_value == {0}) return "{0}";'.format(m.name))
+            index += 1
+        function1.operations.append('_value = 0;')
+        function2.operations.append('return *this;')
+        function3.operations.append('return "";')
+        function4.operations.append('return "";')
+        
+        value = Object()
+        value.initial_value = cls.members[0].name
+        value.name = '_value'
+        value.type = cast
+        cls.members.append(value)
+        return values

@@ -6,6 +6,15 @@ from DataStorageCreators import DataStoragePhpXml
 SERIALIZATION = 0
 DESERIALIZATION = 1
 
+allowed_functions = [
+    'serialize',
+    'deserialize',
+    'get_type',
+    'shared',
+    '__toString',
+    'str',
+    'set',
+]
 
 def convertInitializeValue(value):
     if value and value.startswith('this'):
@@ -71,7 +80,7 @@ class WriterPhp(Writer):
         return {flags: out}
 
     def write_function(self, cls, function):
-        if function.name not in ['serialize', 'deserialize', 'get_type', 'shared'] and self.current_class.name != 'DataStorage':
+        if function.name not in allowed_functions and self.current_class.name != 'DataStorage':
             return ''
 
         out = '''public function {0}({1})
@@ -176,10 +185,9 @@ class WriterPhp(Writer):
         index = 0
         if obj_value is None:
             index = 1
-
         type = obj_type
         if self.parser.find_class(type) and self.parser.find_class(type).type == 'enum':
-            type = 'string'
+            type = 'enum'
         elif obj_type not in self.simple_types and type != "list" and type != "map":
             if is_link:
                 type = 'string'
@@ -210,7 +218,6 @@ class WriterPhp(Writer):
                     else:
                         type = "list<serialized>"
                         obj_type = arg_type
-
         fstr = self.serialize_protocol[serialization_type][type][index]
         return fstr.format(obj_name, obj_type, obj_value, '{}', owner,
                            obj_template_args[0].type if len(obj_template_args) > 0 else 'unknown_arg')
@@ -322,6 +329,34 @@ class Factory
         content = self.prepare_file(content)
         self.save_file(storage.name + '.php', content)
 
+    def convert_to_enum(self, cls):
+        values = Writer.convert_to_enum(self, cls)
+        function = Function()
+        function.name = '__toString'
+        for i, member in enumerate(cls.members):
+            if member.name == '_value':
+                continue
+            function.operations.append('if($this->_value == {1}::${0})return "{0}";'.format(member.name, cls.name))
+            function.operations.append('if($this->_value == {1})\n{3}\n$this->_value = {2}::${0}; return "{0}";\n{4}\n'.format(member.name, values[i], cls.name, '{', '}'))
+            function.operations.append('if($this->_value == "{1}")\n{3}\n$this->_value = {2}::${0}; return "{0}";\n{4}\n;'.format(member.name, values[i], cls.name, '{', '}'))
+        cls.functions.append(function)
+
+        function = Function()
+        function.name = 'str'
+        function.operations.append('return (string)$this;')
+        cls.functions.append(function)
+
+        function = Function()
+        function.name = 'set'
+        function.args.append(['value', ''])
+        for i, member in enumerate(cls.members):
+            if member.name == '_value':
+                continue
+            function.operations.append('if($value == {1}::${0}) $this->_value = {1}::${0};'.format(member.name, cls.name))
+            function.operations.append('if($value == "{2}") $this->_value = {1}::${0};'.format(member.name, cls.name, values[i]))
+            function.operations.append('if($value == "{0}") $this->_value = {1}::${0};'.format(member.name, cls.name))
+        cls.functions.append(function)
+
 
 # format(name, initialize_list, functions, imports)
 _pattern_file = {}
@@ -335,9 +370,6 @@ __begin__
 //functions
 {3}
 __end__;
-
-$test = new {0}();
-echo $test->__type__;
 
 ?>'''
 

@@ -145,8 +145,8 @@ $xml = $xml_cache;
 
 #enum
 #serialize:
-$xml->addAttribute("$(FIELD)", $(OWNER)$(FIELD));
+$xml->addAttribute("$(FIELD)", $(OWNER)$(FIELD)->str());
 #deserialize:
-$xml->addAttribute("$(FIELD)", $(OWNER)$(FIELD));
-
+$(OWNER)$(FIELD) = new $(TYPE);
+$(OWNER)$(FIELD)->set($xml->$(FIELD));
 '''

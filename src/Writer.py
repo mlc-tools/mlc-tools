@@ -1,4 +1,5 @@
 import fileutils
+from Object import Object
 
 
 def add_dict(inDict, toDict):
@@ -19,6 +20,30 @@ class Writer:
         self.serialize_format = serialize_format
         self.serialize_protocol = self.parser.serialize_protocol
         self.files = {}
+        
+    def convert_to_enum(self, cls):
+        shift = 0
+        cast = 'int'
+        values = []
+        for m in cls.members:
+            if len(m.name):
+                continue
+            m.name = m.type
+            m.type = cast
+            m.is_static = True
+            m.is_const = True
+            if m.initial_value is None:
+                if cast == 'int':
+                    m.initial_value = '(1 << {})'.format(shift)
+                    values.append(1 << shift)
+            shift += 1
+        value = Object()
+        value.initial_value = cls.members[0].name
+        value.name = '_value'
+        value.type = cast
+        cls.members.append(value)
+        return values
+
 
     def generate(self):
         self.write_classes(self.parser.classes, 0)
@@ -40,6 +65,8 @@ class Writer:
 
     def write_classes(self, classes, flags):
         for class_ in classes:
+            if class_.type == 'enum':
+                self.convert_to_enum(class_)
             dictionary = self.write_class(class_, flags)
             filepath = self._get_filename_of_class(class_)
             self.files[filepath] = dictionary[flags]

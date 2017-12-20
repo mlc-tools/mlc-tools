@@ -50,8 +50,6 @@ class Class(Object):
     def on_linked(self, parser):
         if self._linked:
             return
-        if self.type == 'enum':
-            self._convert_to_enum(parser)
 
         if self.generate_set_function:
             self._generate_setters_function(parser)
@@ -63,9 +61,6 @@ class Class(Object):
                     break
             for parent in self.behaviors:
                 parent.on_linked(parser)
-                # if parent.is_abstract:
-                #     self.is_abstract = True
-                #     break
 
         self._linked = True
 
@@ -200,105 +195,6 @@ class Class(Object):
 
         if add_function or not parent_class:
             self.functions.append(function)
-
-    def _convert_to_enum(self, parser):
-        shift = 0
-        cast = 'int'
-        values = []
-        for m in self.members:
-            if len(m.name):
-                continue
-            m.name = m.type
-            m.type = cast
-            m.is_static = True
-            m.is_const = True
-            if m.initial_value is None:
-                if cast == 'int':
-                    m.initial_value = '(1 << {})'.format(shift)
-                    values.append(1 << shift)
-            shift += 1
-
-        def add_function(type_, name, args, const):
-            function = Function()
-            function.return_type = type_
-            function.name = name
-            function.args = args
-            function.is_const = const
-            self.functions.append(function)
-            return function
-
-        add_function(
-            '',
-            self.name,
-            [],
-            False). \
-            operations = ['_value = {};'.format(self.members[0].name)]
-        add_function(
-            '',
-            self.name,
-            [['value', cast]],
-            False). \
-            operations = ['_value = value;']
-        add_function(
-            '',
-            self.name,
-            [['rhs', 'const {0}&'.format(self.name)]],
-            False). \
-            operations = ['_value = rhs._value;']
-        add_function(
-            '',
-            'operator int',
-            [],
-            True). \
-            operations = ['return _value;']
-        add_function(
-            '{0}&:const'.format(self.name),
-            'operator =',
-            [['rhs', 'const {0}&'.format(self.name)]],
-            False). \
-            operations = ['_value = rhs._value;', 'return *this;']
-        add_function(
-            'bool',
-            'operator ==',
-            [['rhs', 'const {0}&'.format(self.name)]],
-            True). \
-            operations = ['return _value == rhs._value;']
-        add_function(
-            'bool',
-            'operator ==',
-            [['rhs', 'int']],
-            True). \
-            operations = ['return _value == rhs;']
-        add_function('bool', 'operator <', [['rhs', 'const {0}&'.format(self.name)]], True). \
-            operations = ['return _value < rhs._value;']
-
-        function1 = add_function('', self.name, [['value', 'string']], False)
-        function2 = add_function('{0}&:const'.format(self.name), 'operator =', [['value', 'string']], False)
-        function3 = add_function('', 'operator std::string', [], True)
-        function4 = add_function('string', 'str', [], True)
-        index = 0
-        for m in self.members:
-            function1.operations.append('if(value == "{0}") {1}_value = {0}; return; {2};'.format(m.name, '{', '}'))
-            function2.operations.append(
-                'if(value == "{0}") {1}_value = {0}; return *this; {2};'.format(m.name, '{', '}'))
-            if index in values:
-                function1.operations.append(
-                    'if(value == "{0}") {1}_value = {0}; return; {2};'.format(values[index], '{', '}'))
-                function2.operations.append(
-                    'if(value == "{0}") {1}_value = {0}; return *this; {2};'.format(values[index], '{', '}'))
-            function3.operations.append('if(_value == {0}) return "{0}";'.format(m.name))
-            function4.operations.append('if(_value == {0}) return "{0}";'.format(m.name))
-            index += 1
-        function1.operations.append('_value = 0;')
-        function2.operations.append('return *this;')
-        function3.operations.append('return "";')
-        function4.operations.append('return "";')
-
-        value = Object()
-        value.initial_value = self.members[0].name
-        value.name = '_value'
-        value.type = cast
-        self.members.append(value)
 
     def add_get_type_function(self):
         if not self.is_abstract:
