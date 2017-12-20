@@ -58,7 +58,7 @@ def main():
     validate_arg_format(serialize_format)
     validate_arg_side(side)
 
-    parser = Parser(side, language != 'py')
+    parser = Parser(side, language == 'cpp')
     parser.set_configs_directory(configs_directory)
     files = fileutils.get_files_list(configs_directory)
     for file in files:
