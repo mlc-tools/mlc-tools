@@ -6,6 +6,7 @@ from WriterCpp import WriterCpp
 from WriterPython import WriterPython
 from WriterPhp import WriterPhp
 from Copyright import Copyright
+import os
 
 
 def validate_arg_language(language):
@@ -42,6 +43,7 @@ def main():
     parser.add_argument('-protocols', type=str,
                         help='Path to file with serialization protocols. Default: empty, used default protocol',
                         required=False, default='')
+    parser.add_argument('-test_script', type=str, help='Path to script to launch tests', required=False, default='')
     args = parser.parse_args()
 
     configs_directory = fileutils.normalize_path(args.i)
@@ -98,6 +100,10 @@ def main():
     if not only_data:
         writer.remove_non_actual_files()
     print 'mlc(lang: {}, format: {} side: {}) finished successful'.format(language, serialize_format, side)
+
+    if args.test_script and os.path.isfile(args.test_script):
+        os.system('python ' + args.test_script)
+
 
 
 if __name__ == '__main__':
