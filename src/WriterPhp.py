@@ -21,6 +21,8 @@ allowed_functions = [
 def convertInitializeValue(value):
     if value and value.startswith('this'):
         value = '$' + value
+    if value is None:
+        value = 'null'
     return value
 
 

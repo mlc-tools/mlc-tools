@@ -23,7 +23,7 @@ function test_enums(){
 
     $test2 = new EnumHolder();
     $test2->deserialize($xml);
-    if($test2->value != $test->value && $test->map != $test2->map){
+    if($test2 != $test){
         echo("\nCompare two serialized-deserialized object with original - fail");
     } else {
         echo("\nCompare two serialized-deserialized object with original - Ok");
@@ -49,20 +49,22 @@ function test_factory(){
 
 function test_data_storage(){
     require_once "gen/DataStorage.php";
-    function test($name){
+    function test_get_data($name){
         $data = DataStorage::shared()->getDataResource($name);
         if(is_null($data) || $data->name != $name || $data->count != 10){
             echo("\nGet data ($name) - fail");
         } else {
-            echo("\nGet data ($name) - ok");
+            echo("\nGet data ($name) - Ok");
         }
     }
     DataStorage::$PATH_TO_DATA = "../php_tests/gen_data/data.xml";
-    test("gems");
-    test("gold");
+    test_get_data("gems");
+    test_get_data("gold");
 }
 
 test_enums();
 test_factory();
 test_data_storage();
+echo("\n");
+
 ?>
