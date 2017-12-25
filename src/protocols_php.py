@@ -45,8 +45,8 @@ if($(FIELD))
 #deserialize:
 if($xml->$(FIELD))
 {
-    $type = $xml->$(FIELD)["type"];
-    $(OWNER)$(FIELD) = Factory().build(type);
+    $type = (string)$xml->$(FIELD)["type"];
+    $(OWNER)$(FIELD) = Factory::build($type);
     $(OWNER)$(FIELD)->deserialize($xml->$(FIELD));
 }
 
@@ -145,8 +145,7 @@ $xml = $xml_cache;
 
 #enum
 #serialize:
-$xml->addAttribute("$(FIELD)", $(OWNER)$(FIELD)->str());
+$xml->addAttribute("$(FIELD)", $(OWNER)$(FIELD));
 #deserialize:
-$(OWNER)$(FIELD) = new $(TYPE);
-$(OWNER)$(FIELD)->set($xml->$(FIELD));
+$(OWNER)$(FIELD) = $(TYPE)::s_to_int($xml["$(FIELD)"]);
 '''

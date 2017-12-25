@@ -13,7 +13,9 @@ allowed_functions = [
     'shared',
     '__toString',
     'str',
+    'int',
     'set',
+    's_to_int',
 ]
 
 def convertInitializeValue(value):
@@ -346,6 +348,10 @@ class Factory
         function.operations.append('return (string)$this;')
         cls.functions.append(function)
 
+        for i, member in enumerate(cls.members):
+            if member.name == '_value':
+                member.type = 'string'
+
         function = Function()
         function.name = 'set'
         function.args.append(['value', ''])
@@ -356,6 +362,37 @@ class Factory
             function.operations.append('if($value == "{2}") $this->_value = {1}::${0};'.format(member.name, cls.name, values[i]))
             function.operations.append('if($value == "{0}") $this->_value = {1}::${0};'.format(member.name, cls.name))
         cls.functions.append(function)
+
+        function = Function()
+        function.name = 'int'
+        for i, member in enumerate(cls.members):
+            if member.name == '_value':
+                continue
+            function.operations.append('if($this->_value == {1}::${0}) return {1}::${0};'.format(member.name, cls.name))
+            function.operations.append('if($this->_value == "{2}") return {1}::${0};'.format(member.name, cls.name, values[i]))
+            function.operations.append('if($this->_value == "{0}") return {1}::${0};'.format(member.name, cls.name))
+        cls.functions.append(function)
+
+        function = Function()
+        function.name = 's_to_int'
+        function.is_static = True
+        function.args.append(['value', ''])
+        for i, member in enumerate(cls.members):
+            if member.name == '_value':
+                continue
+            function.operations.append('if($value == {1}::${0}) return {1}::${0};'.format(member.name, cls.name))
+            function.operations.append('if($value == "{2}") return {1}::${0};'.format(member.name, cls.name, values[i]))
+            function.operations.append('if($value == "{0}") return {1}::${0};'.format(member.name, cls.name))
+        cls.functions.append(function)
+
+        function = Function()
+        function.name = 'serialize'
+        cls.functions.append(function)
+
+        function = Function()
+        function.name = 'deserialize'
+        cls.functions.append(function)
+
 
 
 # format(name, initialize_list, functions, imports)
