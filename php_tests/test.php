@@ -40,6 +40,11 @@ function test_factory(){
 
     $test = new FactoryTest();
     $test->deserialize($xml);
+    if(is_null($test) || is_null($test->ptr)){
+        echo("\nDeserialized pointer - fail");
+    }else{
+        echo("\nDeserialized pointer - Ok");
+    }
 }
 
 test_enums();

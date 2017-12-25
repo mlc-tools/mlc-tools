@@ -21,9 +21,9 @@ class Writer:
         self.serialize_protocol = self.parser.serialize_protocol
         self.files = {}
         
-    def convert_to_enum(self, cls):
+    def convert_to_enum(self, cls, use_type='int'):
         shift = 0
-        cast = 'int'
+        cast = use_type
         values = []
         for m in cls.members:
             if len(m.name):
@@ -36,6 +36,9 @@ class Writer:
                 if cast == 'int':
                     m.initial_value = '(1 << {})'.format(shift)
                     values.append(1 << shift)
+                elif cast == 'string':
+                    m.initial_value = '"{}"'.format(m.name)
+                    values.append(m.initial_value)
             shift += 1
         value = Object()
         value.initial_value = cls.members[0].name

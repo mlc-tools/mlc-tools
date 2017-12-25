@@ -357,20 +357,15 @@ class WriterPython(Writer):
 
     def create_data_storage(self):
         storage = self.create_data_storage_class('DataStorage', self.parser.classes)
-
-        # for function in storage.functions:
-        #     if function.name == 'shared':
-        #         args = '():\n'
-        #         body = '\n'.join(function.operations)
-        #         self.loaded_functions[storage.name + '.' + function.name] = args + body
-        #         break
-
         content = self.write_class(storage, 0)[0]
         content = self.prepare_file(content)
         self.save_file(storage.name + '.py', content)
 
     def createInitFile(self):
         self.save_file('__init__.py', '')
+
+    def convert_to_enum(self, cls, use_type='string'):
+        Writer.convert_to_enum(self, cls, use_type)
 
 _factory = {}
 _factory['xml'] = '''import xml.etree.ElementTree as ET

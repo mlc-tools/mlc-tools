@@ -327,16 +327,11 @@ __end__;
         content = self.prepare_file(content)
         self.save_file(storage.name + '.php', content)
 
-    def convert_to_enum(self, cls):
-        values = Writer.convert_to_enum(self, cls)
+    def convert_to_enum(self, cls, use_type='string'):
+        values = Writer.convert_to_enum(self, cls, use_type)
         function = Function()
         function.name = '__toString'
-        for i, member in enumerate(cls.members):
-            if member.name == '_value':
-                continue
-            function.operations.append('if($this->_value == {1}::${0})return "{0}";'.format(member.name, cls.name))
-            function.operations.append('if($this->_value == {1})\n{3}\n$this->_value = {2}::${0}; return "{0}";\n{4}\n'.format(member.name, values[i], cls.name, '{', '}'))
-            function.operations.append('if($this->_value == "{1}")\n{3}\n$this->_value = {2}::${0}; return "{0}";\n{4}\n;'.format(member.name, values[i], cls.name, '{', '}'))
+        function.operations.append('return $this->_value;')
         cls.functions.append(function)
 
         function = Function()
@@ -351,34 +346,7 @@ __end__;
         function = Function()
         function.name = 'set'
         function.args.append(['value', ''])
-        for i, member in enumerate(cls.members):
-            if member.name == '_value':
-                continue
-            function.operations.append('if($value == {1}::${0}) $this->_value = {1}::${0};'.format(member.name, cls.name))
-            function.operations.append('if($value == "{2}") $this->_value = {1}::${0};'.format(member.name, cls.name, values[i]))
-            function.operations.append('if($value == "{0}") $this->_value = {1}::${0};'.format(member.name, cls.name))
-        cls.functions.append(function)
-
-        function = Function()
-        function.name = 'int'
-        for i, member in enumerate(cls.members):
-            if member.name == '_value':
-                continue
-            function.operations.append('if($this->_value == {1}::${0}) return {1}::${0};'.format(member.name, cls.name))
-            function.operations.append('if($this->_value == "{2}") return {1}::${0};'.format(member.name, cls.name, values[i]))
-            function.operations.append('if($this->_value == "{0}") return {1}::${0};'.format(member.name, cls.name))
-        cls.functions.append(function)
-
-        function = Function()
-        function.name = 's_to_int'
-        function.is_static = True
-        function.args.append(['value', ''])
-        for i, member in enumerate(cls.members):
-            if member.name == '_value':
-                continue
-            function.operations.append('if($value == {1}::${0}) return {1}::${0};'.format(member.name, cls.name))
-            function.operations.append('if($value == "{2}") return {1}::${0};'.format(member.name, cls.name, values[i]))
-            function.operations.append('if($value == "{0}") return {1}::${0};'.format(member.name, cls.name))
+        function.operations.append('$this->_value = $value;')
         cls.functions.append(function)
 
         function = Function()

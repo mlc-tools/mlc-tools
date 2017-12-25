@@ -147,5 +147,5 @@ $xml = $xml_cache;
 #serialize:
 $xml->addAttribute("$(FIELD)", $(OWNER)$(FIELD));
 #deserialize:
-$(OWNER)$(FIELD) = $(TYPE)::s_to_int($xml["$(FIELD)"]);
+$(OWNER)$(FIELD) = (string)($xml["$(FIELD)"]);
 '''
