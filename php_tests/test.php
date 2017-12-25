@@ -47,6 +47,22 @@ function test_factory(){
     }
 }
 
+function test_data_storage(){
+    require_once "gen/DataStorage.php";
+    function test($name){
+        $data = DataStorage::shared()->getDataResource($name);
+        if(is_null($data) || $data->name != $name || $data->count != 10){
+            echo("\nGet data ($name) - fail");
+        } else {
+            echo("\nGet data ($name) - ok");
+        }
+    }
+    DataStorage::$PATH_TO_DATA = "../php_tests/gen_data/data.xml";
+    test("gems");
+    test("gold");
+}
+
 test_enums();
 test_factory();
+test_data_storage();
 ?>

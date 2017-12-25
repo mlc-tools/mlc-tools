@@ -220,6 +220,13 @@ class DataStoragePhp(DataStorage):
         object.is_static = True
         self.members.append(object)
 
+        object = Object()
+        object.type = 'string'
+        object.name = 'PATH_TO_DATA'
+        object.initial_value = '"assets/data/data.xml"'
+        object.is_static = True
+        self.members.append(object)
+
     def create_deserialize(self):
         function = Function()
         function.name = 'deserialize'
@@ -240,7 +247,7 @@ class DataStoragePhp(DataStorage):
         function.operations.append('if({0}::$__instance == NULL)'.format(self.name))
         function.operations.append('{')
         function.operations.append('    {0}::$__instance = new {0}();'.format(self.name))
-        function.operations.append('    {0}::$__xml = simplexml_load_file("assets/data/data.xml");'.format(self.name))
+        function.operations.append('    {0}::$__xml = simplexml_load_file({0}::$PATH_TO_DATA);'.format(self.name))
         function.operations.append('}')
         function.operations.append('return {0}::$__instance;'.format(self.name))
         function.link()

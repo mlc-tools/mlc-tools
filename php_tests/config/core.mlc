@@ -32,3 +32,9 @@ class FactoryTest
 {
     EnumHolder* ptr
 }
+
+class DataResource:storage
+{
+    string name
+    int count
+}

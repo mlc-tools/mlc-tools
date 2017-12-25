@@ -11,4 +11,5 @@ simple_test/mlc_tools_test.xcodeproj
 .vs/mlc/v14/.suo
 simple_test/assets/
 php_tests/gen/
+php_tests/gen_data/
 mlc.sln
