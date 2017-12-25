@@ -946,6 +946,8 @@ class WriterCpp(Writer):
         for m in cls.members:
             if m.name == '_value':
                 continue
+            if index >= len(values):
+                continue
             function1.operations.append('if(value == "{0}") {1}_value = {0}; return; {2};'.format(m.name, '{', '}'))
             function2.operations.append(
                 'if(value == "{0}") {1}_value = {0}; return *this; {2};'.format(m.name, '{', '}'))

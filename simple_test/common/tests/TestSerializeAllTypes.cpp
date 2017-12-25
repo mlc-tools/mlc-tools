@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include "ml/Generics.h"
+#include <cmath>
 
 extern std::string getSerializedString(const mg::SerializedObject* object);
 extern void deserialize(mg::SerializedObject* object, const std::string& payload);
