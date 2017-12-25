@@ -236,20 +236,16 @@ class WriterPhp(Writer):
 <?php
 
 class Factory
-{1}
+__begin__
     static function build($type)
-    {1}
+    __begin__
         {0}
-    {2}
-{2};
+    __end__
+__end__;
 
 ?>
 '''
-        line = '\nif($type == "{0}")\n{1}\nrequire_once "{0}.php";\nreturn new {0}();\n{2}'
-        creates = ''
-        for cls in self.parser.classes:
-            creates += line.format(cls.name, '{', '}')
-        factory = pattern.format(creates, '{', '}')
+        factory = pattern.format('require_once "$type.php"; \n return new $type;')
         self.save_file('Factory.php', factory)
 
     def createVisitorAcceptors(self):
