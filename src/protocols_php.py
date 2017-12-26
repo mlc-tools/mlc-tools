@@ -13,7 +13,7 @@ $(OWNER)$(FIELD) = (string)$xml["$(FIELD)"];
 $(OWNER)$(FIELD) = (string)$xml["$(FIELD)"];
 
 
-#bool, float, int
+#float, int
 #serialize:
 #with default value:
 $xml->addAttribute("$(FIELD)", $(OWNER)$(FIELD));
@@ -25,6 +25,21 @@ $xml->addAttribute("$(FIELD)", $(OWNER)$(FIELD));
 $(OWNER)$(FIELD) = ($(TYPE))$xml["$(FIELD)"];
 #without default value:
 $(OWNER)$(FIELD) = ($(TYPE))$xml["$(FIELD)"];
+
+#bool
+#serialize:
+#with default value:
+$xml->addAttribute("$(FIELD)", $(OWNER)$(FIELD) ? 'yes' : 'no');
+#without default value:
+$xml->addAttribute("$(FIELD)", $(OWNER)$(FIELD) ? 'yes' : 'no');
+
+#deserialize:
+#with default value:
+$value = strtolower((string)$xml["$(FIELD)"]);
+$(OWNER)$(FIELD) = ($value == 'true' || $value == 'yes');
+#without default value:
+$value = strtolower((string)$xml["$(FIELD)"]);
+$(OWNER)$(FIELD) = ($value == 'true' || $value == 'yes');
 
 
 #serialized
