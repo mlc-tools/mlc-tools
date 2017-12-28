@@ -87,11 +87,14 @@ foreach($(OWNER)$(FIELD) as $item)
     $item->serialize($xml_list->addChild("item"));
 }
 #deserialize:
-foreach($xml->$(FIELD)->children() as $item)
+if($xml->$(FIELD))
 {
-    $obj = new $(TYPE)();
-    $obj->deserialize($item);
-    array_push($(OWNER)$(FIELD), $obj);
+    foreach($xml->$(FIELD)->children() as $item)
+    {
+        $obj = new $(TYPE)();
+        $obj->deserialize($item);
+        array_push($(OWNER)$(FIELD), $obj);
+    }
 }
 
 
@@ -103,21 +106,23 @@ foreach($(OWNER)$(FIELD) as $item)
     $item->serialize($xml_list->addChild($item->get_type()));
 }
 #deserialize:
-foreach($xml->$(FIELD)->children() as $item)
+if($xml->$(FIELD))
 {
-    $type = $item->getName();
-    $obj = Factory::build($type);
-    $obj->deserialize($item);
-    array_push($(OWNER)$(FIELD), $obj);
+    foreach($xml->$(FIELD)->children() as $item)
+    {
+        $type = $item->getName();
+        $obj = Factory::build($type);
+        $obj->deserialize($item);
+        array_push($(OWNER)$(FIELD), $obj);
+    }
 }
-
 
 
 #link
 #serialize:
-$xml->addAttribute("$(FIELD)", $(OWNER)$(FIELD));
+$xml->addAttribute("$(FIELD)", is_string($(OWNER)$(FIELD)) ? $(OWNER)$(FIELD) : $(OWNER)$(FIELD)->name);
 #deserialize:
-$(OWNER)$(FIELD) = $xml["$(FIELD)"];
+$(OWNER)$(FIELD) = (string)$xml["$(FIELD)"];
 
 
 #list<link>
@@ -125,12 +130,12 @@ $(OWNER)$(FIELD) = $xml["$(FIELD)"];
 $xml_list = $xml->addChild("$(FIELD)");
 foreach($(OWNER)$(FIELD) as $item)
 {
-    $xml_list->addChild("item")->addAttribute("value", $item);
+    $xml_list->addChild("item")->addAttribute("value", is_string($item) ? $item : $item->name);
 }
 #deserialize:
 foreach($xml->$(FIELD)->item as $item)
 {
-    array_push($(OWNER)$(FIELD), $item["value"]);
+    array_push($(OWNER)$(FIELD), (string)$item["value"]);
 }
 
 #map

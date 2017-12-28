@@ -82,6 +82,8 @@ class WriterPhp(Writer):
                     elif self.parser.find_class(arg.type) and arg.type != cls.name:
                         imports += include_patter.format(arg.type)
         imports += include_patter.format('Factory')
+        if 'DataStorage' in functions:
+            imports += include_patter.format('DataStorage')
 
         out = pattern.format(name, extend, initialize_list, functions, imports)
         self.current_class = None
@@ -205,7 +207,7 @@ class WriterPhp(Writer):
             type = 'enum'
         elif obj_type not in self.simple_types and type != "list" and type != "map":
             if is_link:
-                type = 'string'
+                type = 'link'
             elif obj_is_pointer:
                 type = "pointer"
             else:
@@ -428,6 +430,7 @@ def convert_function_to_php(func):
         ['([-0-9])->([-0-9])f', '\\1.\\2'],
         ['assert\\(.+\\);', ''],
         ['make_intrusive<(\w+)>', 'new \\1'],
+        ['(.+?)\\->push_back\\((.+)\\);', 'array_push(\\1, \\2);'],
     ]
 
     regs2 = [
@@ -450,6 +453,8 @@ def convert_function_to_php(func):
         for var in arr:
             for ch in ' +-*\\=([<>\t':
                 func = func.replace(ch + var, ch + '$' + var)
+            for ch in ['->']:
+                func = func.replace(ch + '$' + var, ch + var)
 
     for reg in regs2:
         func = re.sub(reg[0], reg[1], func)
