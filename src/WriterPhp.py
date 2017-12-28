@@ -441,8 +441,10 @@ def convert_function_to_php(func):
         ['$if(', 'if('],
         ['function $', 'function '],
         ['($int)', '(int)'],
-        ['(int)time(nullptr)', 'time()'],
+        ['time(nullptr)', 'time()'],
         ['$$', '$'],
+        ['std::max', 'max'],
+        ['std::min', 'min'],
     ]
 
     for reg in regs:
