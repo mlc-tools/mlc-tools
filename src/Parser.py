@@ -60,6 +60,8 @@ class Parser:
         self.copyright_text = ''
         self.simple_types = ["int", "float", "bool", "string"]
         self.generate_visitors = generate_visitors
+        self.is_validate_php_features = True
+        self.configs_root = ''
         return
 
     def set_configs_directory(self, path):
@@ -152,6 +154,20 @@ class Parser:
 
         for cls in self.classes:
             cls.on_linked(self)
+
+    def validate_php_features(self):
+        for cls in self.classes:
+            for member in cls.members:
+                if member.type == 'map':
+                    key_type = member.template_args[0]
+                    key_type = key_type if isinstance(key_type, str) else key_type.type
+                    cls_type = self.find_class(key_type)
+                    if cls_type is not None and cls_type.type != 'enum':
+                        value_type = member.template_args[1] if isinstance(member.template_args[1], str) else member.template_args[1].type
+                        tips = 'You can disable with error by flag [-php_validate no]'
+                        print ' - Error: validate php feature: key of array cannot be object [{}::map<{},{}> {}]\n\t{}'.\
+                            format(cls.name, key_type, value_type, member.name, tips)
+                        exit(-1)
 
     def _convert_template_args(self, member):
         args = []

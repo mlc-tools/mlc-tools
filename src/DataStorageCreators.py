@@ -267,12 +267,15 @@ class DataStoragePhp(DataStorage):
                     } else
                     {
                         $data = new @{type}();
-                        foreach (DataStorage::$__xml->@{array}->pair as $node)
+                        if(DataStorage::$__xml->@{array})
                         {
-                            if ($node["key"] == $name)
+                            foreach (DataStorage::$__xml->@{array}->pair as $node)
                             {
-                                $data->deserialize($node->value);
-                                $this->@{array}[$name] = $data;
+                                if ($node["key"] == $name)
+                                {
+                                    $data->deserialize($node->value);
+                                    $this->@{array}[$name] = $data;
+                                }
                             }
                         }
                         return $data;

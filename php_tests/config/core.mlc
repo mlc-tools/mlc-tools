@@ -26,6 +26,7 @@ class EnumHolder
 {
     EnumTest value
     map<EnumTest, string> map
+    map<DataResource*, string> map_test
 }
 
 class FactoryTest

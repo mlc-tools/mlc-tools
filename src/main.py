@@ -43,6 +43,7 @@ def main():
     parser.add_argument('-protocols', type=str,
                         help='Path to file with serialization protocols. Default: empty, used default protocol',
                         required=False, default='')
+    parser.add_argument('-php_validate', type=str, help='Check php features on generate other languages (Example - key of map cannot be object)', required=False, default='yes')
     parser.add_argument('-test_script', type=str, help='Path to script to launch tests', required=False, default='')
     args = parser.parse_args()
 
@@ -55,6 +56,7 @@ def main():
     serialize_format = args.f
     only_data = args.only_data.lower() == 'yes'
     side = args.side
+    php_validate = args.php_validate.lower() == 'yes'
 
     validate_arg_language(language)
     validate_arg_format(serialize_format)
@@ -68,6 +70,8 @@ def main():
             text = open(configs_directory + file).read()
             parser.parse(text)
     parser.link()
+    if php_validate:
+        parser.validate_php_features()
     parser.copyright_text = Copyright(configs_directory).text
     if path_to_protocols:
         parser.parse_serialize_protocol(path_to_protocols)

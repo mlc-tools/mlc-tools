@@ -51,7 +51,7 @@ $(OWNER)$(FIELD)->deserialize($xml->$(FIELD));
 
 #pointer
 #serialize
-if($(FIELD))
+if($(OWNER)$(FIELD))
 {
     $child = $xml->addChild("$(FIELD)");
     $child->addAttribute("type", $(OWNER)$(FIELD)->get_type());
@@ -122,7 +122,7 @@ if($xml->$(FIELD))
 #serialize:
 $xml->addAttribute("$(FIELD)", is_string($(OWNER)$(FIELD)) ? $(OWNER)$(FIELD) : $(OWNER)$(FIELD)->name);
 #deserialize:
-$(OWNER)$(FIELD) = (string)$xml["$(FIELD)"];
+$(OWNER)$(FIELD) = DataStorage::shared()->get$(TYPE)((string)$xml["$(FIELD)"]);
 
 
 #list<link>
@@ -151,14 +151,17 @@ foreach($(OWNER)$(FIELD) as $key => $value)
 $xml = $xml_main;
 #deserialize:
 $xml_cache = $xml;
-foreach($xml->$(FIELD)->children() as $xml_child)
+if($xml->$(FIELD))
 {
-    $xml = $xml_child;
-    $(VALUE)
-    $(KEY_SERIALIZE)
-    $map_key = (string)$key;
-    $(VALUE_SERIALIZE)
-    $(OWNER)$(FIELD)[$map_key] = $value;
+    foreach($xml->$(FIELD)->children() as $xml_child)
+    {
+        $xml = $xml_child;
+        $(VALUE)
+        $(KEY_SERIALIZE)
+        $map_key = (string)$key;
+        $(VALUE_SERIALIZE)
+        $(OWNER)$(FIELD)[$map_key] = $value;
+    }
 }
 $xml = $xml_cache;
 
