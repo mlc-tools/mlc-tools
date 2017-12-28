@@ -2,6 +2,7 @@ from Writer import Writer
 from Function import Function
 from Class import Class
 from DataStorageCreators import DataStoragePhpXml
+import re
 
 SERIALIZATION = 0
 DESERIALIZATION = 1
@@ -18,6 +19,7 @@ allowed_functions = [
     's_to_int',
 ]
 
+
 def convertInitializeValue(value):
     if value and value.startswith('this'):
         value = '$' + value
@@ -25,6 +27,8 @@ def convertInitializeValue(value):
         value = 'null'
     return value
 
+
+functions_cache = {}
 
 class WriterPhp(Writer):
 
@@ -84,8 +88,14 @@ class WriterPhp(Writer):
         return {flags: out}
 
     def write_function(self, cls, function):
-        if function.name not in allowed_functions and self.current_class.name != 'DataStorage':
+        global functions_cache
+        if cls.name not in functions_cache:
+            functions_cache[cls.name] = []
+        if function.name in functions_cache[cls.name]:
+            print '  - dublicate function in one class [{}::{}]'.format(cls.name, function.name)
             return ''
+        functions_cache[cls.name].append(function.name)
+        convert = function.name not in allowed_functions and self.current_class.name != 'DataStorage'
 
         out = '''public function {0}({1})
         __begin__
@@ -95,7 +105,8 @@ class WriterPhp(Writer):
         args = ', '.join(['$' + x[0] for x in function.args])
         ops = '\n'.join(function.operations)
         out = out.format(name, args, ops)
-
+        if convert:
+            out = convert_function_to_php(out)
         return out
 
     def write_object(self, object):
@@ -321,6 +332,16 @@ __end__;
                 tabs += 1
             body.append(line)
         body = '\n'.join(body)
+        for i in xrange(10):
+            tabs = '\n'
+            for k in xrange(i):
+                tabs += '\t'
+            tabs += '{'
+            body = body.replace(tabs, ' {')
+        body = body.replace('foreach(', 'foreach (')
+        body = body.replace('for(', 'for (')
+        body = body.replace('if(', 'if (')
+        body = body.replace('  extends', ' extends')
         return body
 
     def create_data_storage(self):
@@ -359,6 +380,83 @@ __end__;
         function.name = 'deserialize'
         cls.functions.append(function)
 
+
+def convert_function_to_php(func):
+    variables = {
+        '\$(\w+)'
+    }
+
+    regs = [
+        ['DataStorage::shared\(\).get<(\w+)>', 'DataStorage::shared()->get\\1'],
+        ['\\.str\\(\\)', ''],
+        ['for\\(auto (.+?) : (.+?)\\)', 'foreach($\\2 as $\\1)'],
+        ['for\\(auto& (.+?) : (.+?)\\)', 'foreach($\\2 as $\\1)'],
+        ['auto (\w+)', '$\\1'],
+        ['auto& (\w+)', '$\\1'],
+        ['void (\w+)', '$\\1'],
+        ['int (\w+)', '$\\1'],
+        ['bool (\w+)', '$\\1'],
+
+        # func args
+        ['\\((\w+) (\w+)\\)', '($\\2)'],
+        ['\\(const (\w+)\\& (\w+)\\)', '($\\2)'],
+        ['\\(const (\w+)\\* (\w+)\\)', '($\\2)'],
+        ['\\((\w+)\\* (\w+)\\)', '($\\2)'],
+        ['(\w+)\\ (\w+),', '$\\2,'],
+        ['(\w+)\\& (\w+),', '$\\2,'],
+        ['(\w+)\\* (\w+),', '$\\2,'],
+        ['const (\w+)\\* (\w+)', '$\\2'],
+        ['const (\w+)\\& (\w+)', '$\\2'],
+
+        ['float (\w+)', '$\\1'],
+        ['std::string (\w+)', '$\\1'],
+        ['this->', '$this->'],
+        [':const', ''],
+        ['(\w+)::(\w+)\)', '\\1::$\\2)'],
+        ['(\w+)::(\w+)\.', '\\1::$\\2.'],
+        ['(\w+)::(\w+)->', '\\1::$\\2->'],
+        ['(\w+)::(\w+)\]', '\\1::$\\2]'],
+        ['function \\$(\w+)', 'function \\1'],
+        ['\\.at\\((\w+)\\)', '[\\1]'],
+        ['\\.at\(\$(\w+)\)', '[\\1]'],
+        ['(\w+)\.', '\\1->'],
+        ['(\w+)\\(\)\.', '\\1()->'],
+        ['(\w+)\]\.', '\\1]->'],
+        ['&(\w+)', '\\1'],
+        ['\\$if\\(', 'if('],
+        ['delete (\w+);', ''],
+        ['([-0-9])->([-0-9])f', '\\1.\\2'],
+        ['assert\\(.+\\);', ''],
+        ['make_intrusive<(\w+)>', 'new \\1'],
+    ]
+
+    regs2 = [
+        ['->\\$(\w+)\\(', '->\\1('],
+    ]
+
+    repl = [
+        ['$if(', 'if('],
+        ['function $', 'function '],
+        ['($int)', '(int)'],
+        ['(int)time(nullptr)', 'time()'],
+        ['$$', '$'],
+    ]
+
+    for reg in regs:
+        func = re.sub(reg[0], reg[1], func)
+
+    for key in variables:
+        arr = re.findall(key, func)
+        for var in arr:
+            for ch in ' +-*\\=([<>\t':
+                func = func.replace(ch + var, ch + '$' + var)
+
+    for reg in regs2:
+        func = re.sub(reg[0], reg[1], func)
+
+    for reg in repl:
+        func = func.replace(reg[0], reg[1])
+    return func
 
 
 # format(name, initialize_list, functions, imports)
