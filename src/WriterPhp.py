@@ -445,6 +445,8 @@ def convert_function_to_php(func):
         ['$$', '$'],
         ['std::max', 'max'],
         ['std::min', 'min'],
+        ['in_map(', 'in_array('],
+        ['list_push', 'array_push'],
     ]
 
     for reg in regs:

@@ -8,6 +8,7 @@ from DataStorageCreators import DataStorageCppXml
 from DataStorageCreators import DataStorageCppJson
 from Error import Error
 import constants
+from cpp_functions import cpp_functions, hpp_functions
 
 FLAG_HPP = 2
 FLAG_CPP = 4
@@ -756,6 +757,7 @@ class WriterCpp(Writer):
             out += '\n#include "IntrusivePtr.h"'
         if flags == FLAG_CPP:
             out += '\n#include "Factory.h"'
+            out += '\n#include "mg_extensions.h"'
             out += '\n#include <algorithm>'
 
         out = out.split('\n')
@@ -850,6 +852,8 @@ class WriterCpp(Writer):
         configs.append('#define MG_XML 2')
         configs.append('\n#define MG_SERIALIZE_FORMAT MG_' + self.serialize_format.upper())
         self.save_file('config.h', pattern.format('\n'.join(configs)))
+        self.save_file("mg_extensions.h", hpp_functions)
+        self.save_file("mg_extensions.cpp", cpp_functions)
 
     def convert_to_enum(self, cls):
         shift = 0
