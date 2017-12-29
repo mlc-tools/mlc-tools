@@ -135,7 +135,7 @@ foreach($(OWNER)$(FIELD) as $item)
 #deserialize:
 foreach($xml->$(FIELD)->item as $item)
 {
-    array_push($(OWNER)$(FIELD), (string)$item["value"]);
+    array_push($(OWNER)$(FIELD), DataStorage::shared()->get$(ARG_0)((string)$item["value"]));
 }
 
 #map
