@@ -46,6 +46,7 @@ def main():
                         required=False, default='')
     parser.add_argument('-php_validate', type=str, help='Check php features on generate other languages (Example - key of map cannot be object)', required=False, default='yes')
     parser.add_argument('-test_script', type=str, help='Path to script to launch tests', required=False, default='')
+    parser.add_argument('-use_colors', type=str, help='Path to script to launch tests', required=False, default='yes')
     args = parser.parse_args()
 
     configs_directory = fileutils.normalize_path(args.i)
@@ -58,11 +59,13 @@ def main():
     only_data = args.only_data.lower() == 'yes'
     side = args.side
     php_validate = args.php_validate.lower() == 'yes'
+    use_colors = args.use_colors.lower() == 'yes'
 
     validate_arg_language(language)
     validate_arg_format(serialize_format)
     validate_arg_side(side)
-
+    
+    Log.use_colors = use_colors
     parser = Parser(side, language == 'cpp')
     parser.set_configs_directory(configs_directory)
     files = fileutils.get_files_list(configs_directory)

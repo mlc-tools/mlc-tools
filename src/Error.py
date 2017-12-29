@@ -11,21 +11,23 @@ class Color:
 
 class Log:
     
+    use_colors = True
+    
     @staticmethod
     def debug(msg):
-        print(Color.light_grey + msg + Color.endc)
+        print(Color.light_grey + msg + Color.endc) if Log.use_colors else msg
 
     @staticmethod
     def error(msg):
-        print(Color.red + msg + Color.endc)
+        print(Color.red + msg + Color.endc) if Log.use_colors else msg
 
     @staticmethod
     def warning(msg):
-        print(Color.orange + msg + Color.endc)
+        print(Color.orange + msg + Color.endc) if Log.use_colors else msg
 
     @staticmethod
     def message(msg):
-        print(Color.green + msg + Color.endc)
+        print(Color.green + msg + Color.endc) if Log.use_colors else msg
     
 
 class Error:
