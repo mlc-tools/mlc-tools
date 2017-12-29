@@ -3376,7 +3376,7 @@ PUGI__NS_BEGIN
 	PUGI__FN bool set_value_convert(char_t*& dest, uintptr_t& header, uintptr_t header_mask, double value)
 	{
 		char buf[128];
-		sprintf(buf, "%g", value);
+		sprintf(buf, "%f", value);
 
 		return set_value_buffer(dest, header, header_mask, buf);
 	}

@@ -80,12 +80,12 @@ bool test_map_links()
 
 	for (auto pair : unit1->map_units)
 	{
-		result = result && (pair.first== unit1 || pair.first == unit2);
+		result = result && (pair.first == unit1->name || pair.first == unit2->name);
 		result = result && (pair.second == 1 || pair.second == 2);
 	}
 	for (auto pair : unit2->map_units)
 	{
-		result = result && (pair.first == unit1 || pair.first == unit2);
+		result = result && (pair.first == unit1->name || pair.first == unit2->name);
 		result = result && (pair.second == 1 || pair.second == 2);
 	}
 
