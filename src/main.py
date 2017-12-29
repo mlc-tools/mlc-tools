@@ -6,27 +6,28 @@ from WriterCpp import WriterCpp
 from WriterPython import WriterPython
 from WriterPhp import WriterPhp
 from Copyright import Copyright
+from Error import Log
 import os
 
 
 def validate_arg_language(language):
     if language not in ['cpp', 'py', 'php']:
-        print 'Unknown language (-l :', language, ')'
-        print 'Please use any from [cpp, py]'
+        Log.error('Unknown language (-l : %s)' % language)
+        Log.error('Please use any from [cpp, py, php]')
         exit(-1)
 
 
 def validate_arg_format(format):
     if format not in ['xml', 'json']:
-        print 'Unknown language (-l :', format, ')'
-        print 'Please use any from [xml, json]'
+        Log.error('Unknown language (-l : %s)' % format)
+        Log.error('Please use any from [xml, json]')
         exit(-1)
 
 
 def validate_arg_side(side):
     if side not in ['both', 'server', 'client']:
-        print 'Unknown side (-side :', side, ')'
-        print 'Please use any from [both, server, client]'
+        Log.error('Unknown side (-side :' % side)
+        Log.error('Please use any from [both, server, client]')
         exit(-1)
 
 
@@ -103,7 +104,7 @@ def main():
 
     if not only_data:
         writer.remove_non_actual_files()
-    print 'mlc(lang: {}, format: {} side: {}) finished successful'.format(language, serialize_format, side)
+    Log.message('mlc(lang: {}, format: {} side: {}) finished successful'.format(language, serialize_format, side))
 
     if args.test_script and os.path.isfile(args.test_script):
         os.system('python ' + args.test_script)

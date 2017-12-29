@@ -2,6 +2,7 @@ from Writer import Writer
 from Function import Function
 from Class import Class
 from DataStorageCreators import DataStoragePhpXml
+from Error import Error
 import re
 
 SERIALIZATION = 0
@@ -94,7 +95,7 @@ class WriterPhp(Writer):
         if cls.name not in functions_cache:
             functions_cache[cls.name] = []
         if function.name in functions_cache[cls.name]:
-            print '  - dublicate function in one class [{}::{}]'.format(cls.name, function.name)
+            Error.warning(Error.DUBLICATE_METHODS, cls.name, function.name)
             return ''
         functions_cache[cls.name].append(function.name)
         convert = function.name not in allowed_functions and self.current_class.name != 'DataStorage'
@@ -218,8 +219,7 @@ class WriterPhp(Writer):
             if len(obj_template_args) > 0:
                 if type == "map":
                     if len(obj_template_args) != 2:
-                        print "map should have 2 arguments"
-                        exit - 1
+                        Error.exit(Error.MAP_TWO_ARGS, self._current_class.name, obj_name)
                     return self.buildMapSerialization(obj_name, obj_type, obj_value, obj_is_pointer,
                                                       obj_template_args, serialization_type)
                 else:

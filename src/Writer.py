@@ -1,5 +1,6 @@
 import fileutils
 from Object import Object
+from Error import Log
 
 
 def add_dict(inDict, toDict):
@@ -20,6 +21,7 @@ class Writer:
         self.serialize_format = serialize_format
         self.serialize_protocol = self.parser.serialize_protocol
         self.files = {}
+        self.out_directory = ''
         
     def convert_to_enum(self, cls, use_type='int'):
         shift = 0
@@ -89,8 +91,8 @@ class Writer:
         self.created_files.append(filename)
         exist = fileutils.isfile(filename)
         if fileutils.write(filename, string):
-            msg = 'create:' if not exist else 'rewrited'
-            print msg, filename
+            msg = ' Create: {}' if not exist else ' Overwriting: {}'
+            Log.debug(msg.format(filename))
 
     def remove_non_actual_files(self):
         if not fileutils.isdir(self.out_directory):
@@ -99,7 +101,7 @@ class Writer:
         for filename in files:
             if self.out_directory + filename not in self.created_files:
                 if not filename.endswith('.pyc'):
-                    print 'remove', filename
+                    Log.debug(' Removed: {}'.format(filename))
                 fileutils.remove(self.out_directory + filename)
 
     def save_generated_classes(self, out_directory):

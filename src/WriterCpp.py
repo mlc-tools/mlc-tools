@@ -6,6 +6,7 @@ from Object import Object
 from Function import Function
 from DataStorageCreators import DataStorageCppXml
 from DataStorageCreators import DataStorageCppJson
+from Error import Error
 import constants
 
 FLAG_HPP = 2
@@ -135,7 +136,7 @@ def _create_constructor_function_cpp(parser, class_):
             str1 = '\nstatic {0} {1}_key = 0;'.format(obj.type, obj.name)
             str2 = '\n{0} = ++{0}_key;'.format(obj.name)
             initialize2 += str1 + str2
-        elif obj.initial_value and not obj.is_static and (obj.side == parser.side or obj.side == 'both'):
+        elif obj.initial_value and not obj.is_static:
             pattern = '\n{2} {0}({1})'
             s = ','
             if initialize == '':
@@ -222,8 +223,6 @@ class WriterCpp(Writer):
     def write_object(self, object_, flags):
 
         out = Writer.write_object(self, object_, flags)
-        if object_.side != 'both' and object_.side != self.parser.side:
-            return out
 
         if flags == FLAG_HPP:
             out[flags] += self.build_type_str(object_) + ';\n'
@@ -231,13 +230,7 @@ class WriterCpp(Writer):
         if flags == FLAG_CPP:
             if object_.is_static and self._current_class.type != 'enum':
                 if object_.initial_value is None:
-                    print 'static object_ {} of class {} have not initial_value'.\
-                        format(object_.name, self._current_class.name)
-                    exit(-1)
-                if len(object_.template_args) > 0:
-                    print '#TODO: static object_ {} of class {} have template arguments'.\
-                        format(object_.name, self._current_class.name)
-                    exit(-1)
+                    Error.exit(Error.STATIS_MEMBER_SHOULD_HAVE_INITIALISATION, self._current_class.name, object_.name)
                 pattern = '{4}{0} {2}::{1} = {3}'
                 pattern += ';\n'
                 modifier = ''
@@ -251,8 +244,6 @@ class WriterCpp(Writer):
 
     def write_class(self, class_, flags):
         out = dict()
-        if class_.side != 'both' and class_.side != self.parser.side:
-            return out
         class_ = self.add_methods(class_)
 
         if flags & FLAG_HPP:
@@ -376,8 +367,6 @@ class WriterCpp(Writer):
 
     def write_function(self, function, flags):
         out = dict()
-        if function.side != 'both' and function.side != self.parser.side:
-            return out
         if flags & FLAG_HPP:
             if not function.is_abstract:
                 fstr = '{5}{0} {1}({2}){3}{4};\n'
@@ -514,8 +503,6 @@ class WriterCpp(Writer):
         for obj in class_.members:
             if obj.is_runtime or obj.is_static or (obj.is_const and not obj.is_link):
                 continue
-            if obj.side != 'both' and obj.side != self.parser.side:
-                continue
             operation = self._build_serialize_object_operation(obj, serialization_type)
             function.operations.append(operation)
         class_.functions.append(function)
@@ -551,8 +538,7 @@ class WriterCpp(Writer):
             if len(obj_template_args) > 0:
                 if type_ == 'map':
                     if len(obj_template_args) != 2:
-                        print 'map should have 2 arguments'
-                        exit(-1)
+                        Error.exit(Error.MAP_TWO_ARGS, self._current_class.name, obj_name)
                     if serialization_type == SERIALIZATION:
                         return self.build_map_serialization(obj_name, obj_type, obj_value,
                                                             obj_is_pointer, obj_template_args)
@@ -571,6 +557,8 @@ class WriterCpp(Writer):
                         type_ = 'pointer_list'
                     else:
                         type_ = '{0}<serialized>'.format(type_)
+            if type_ not in self.serialize_protocol[serialization_type]:
+                Error.exit(Error.UNKNOWN_SERIALISED_TYPE, type_, obj_type)
             pattern = self.serialize_protocol[serialization_type][type_][index]
             string = pattern.format(obj_name, convert_type(obj_type), obj_value, '{', '}', *template_args)
         return string
@@ -634,8 +622,6 @@ class WriterCpp(Writer):
         fbody_line = 'result = result && {0} == rhs.{0};'
         function.operations.append('bool result = true;')
         for m in class_.members:
-            if m.side != 'both' and m.side != self.parser.side:
-                continue
             if m.is_static or m.is_const:
                 continue
             function.operations.append(fbody_line.format(m.name))
@@ -673,8 +659,6 @@ class WriterCpp(Writer):
         for t in class_.behaviors:
             include_types[t.name] = 1
         for t in class_.members:
-            if t.side != 'both' and t.side != self.parser.side:
-                continue
             type_ = t.type
             type_ = re.sub('const', '', type_).strip()
             type_ = re.sub('\*', '', type_).strip()

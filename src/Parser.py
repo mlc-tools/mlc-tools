@@ -2,11 +2,7 @@ from Object import Object
 from Class import Class
 from Function import Function
 from protocols import protocols
-
-
-def _throw_error(msg):
-    print msg
-    exit(-1)
+from Error import Error
 
 
 def _is_class(line):
@@ -66,6 +62,9 @@ class Parser:
 
     def set_configs_directory(self, path):
         self.configs_root = path
+        
+    def is_side(self, side):
+        return self.side == 'both' or side == self.side or side == 'both'
 
     def parse(self, text):
         text = text.strip()
@@ -99,8 +98,7 @@ class Parser:
                 function_name = parts[1]
                 class_ = self.find_class(class_name)
                 if class_ is None:
-                    print 'Cannot find class [{}] for method [{}]'.format(class_name, function.name)
-                    exit(-1)
+                    Error.exit(Error.CANNOT_FIND_CLASS_FOR_METHOD, class_name, function.name)
                 function.name = function_name
                 class_.functions.append(function)
                 self.functions.remove(function)
@@ -112,8 +110,7 @@ class Parser:
                 object_name = parts[1]
                 class_ = self.find_class(class_name)
                 if class_ is None:
-                    print 'Cannot find class [{}] for method [{}]'.format(class_name, object_.name)
-                    exit(-1)
+                    Error.exit(Error.CANNOT_FIND_CLASS_FOR_OBJECT, class_name, object_.name)
                 object_.name = object_name
                 class_.members.append(object_)
                 self.objects.remove(object_)
@@ -133,7 +130,7 @@ class Parser:
             for name in cls.behaviors:
                 c = self.find_class(name)
                 if c is None:
-                    _throw_error('cannot find behavior class: {0}<{1}>'.format(cls.name, name))
+                    Error.exit(Error.UNKNOWN_BEHAVIOR, cls.name, name)
                 behaviors.append(c)
             cls.behaviors = behaviors
 
@@ -164,10 +161,7 @@ class Parser:
                     cls_type = self.find_class(key_type)
                     if cls_type is not None and cls_type.type != 'enum':
                         value_type = member.template_args[1] if isinstance(member.template_args[1], str) else member.template_args[1].type
-                        tips = 'You can disable with error by flag [-php_validate no]'
-                        print ' - Error: validate php feature: key of array cannot be object [{}::map<{},{}> {}]\n\t{}'.\
-                            format(cls.name, key_type, value_type, member.name, tips)
-                        exit(-1)
+                        Error.exit(Error.OBJECT_IS_KEY_OF_MAP, cls.name, key_type, value_type, member.name)
 
     def _convert_template_args(self, member):
         args = []
@@ -181,9 +175,11 @@ class Parser:
         body, header, text = find_body(text)
         cls = Class()
         cls.parse(header)
+        if not self.is_side(cls.side):
+            return text
         cls.parse_body(Parser(self.side), body)
         if self.find_class(cls.name):
-            _throw_error('Error: duplicate classes [{}]'.format(cls.name))
+            Error.exit(Error.DUBLICATE_CLASS, cls.name)
         self.classes.append(cls)
         return text
 
@@ -271,6 +267,8 @@ class Parser:
         cls = Class()
         cls.type = 'enum'
         cls.parse(header)
+        if not self.is_side(cls.side):
+            return text
         cls.parse_body(Parser(self.side), body)
         self.classes.append(cls)
         return text
@@ -297,6 +295,8 @@ class Parser:
             text = ""
         obj = Object()
         obj.parse(line)
+        if not self.is_side(obj.side):
+            return text
         self.objects.append(obj)
         return text
 
@@ -304,10 +304,10 @@ class Parser:
         body, header, text = find_body(text)
         function = Function()
         function.parse(header)
+        if not self.is_side(function.side):
+            return text
         function.parse_body(body)
         self.functions.append(function)
-        if(function.name.find('test_function') != -1):
-            print function.name
         return text
 
     def parse_serialize_protocol(self, path):
@@ -404,7 +404,4 @@ class Parser:
             print 'in_initial_value', in_initial_value
             print def_
             exit(-1)
-        # print '-- ', type, in_type, '------'
-        # print pattern
-        # print '--------'
         return pattern
