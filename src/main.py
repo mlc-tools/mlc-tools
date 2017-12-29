@@ -97,6 +97,9 @@ def main():
         for class_ in parser.classes:
             if class_.is_storage:
                 classes.append(class_)
+        for class_ in parser.classes_for_data:
+            if class_.is_storage:
+                classes.append(class_)
         data_parser = DataParser(classes, serialize_format, data_directory)
         data_parser.flush(out_data_directory)
     if not only_data:

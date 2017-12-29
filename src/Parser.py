@@ -50,6 +50,7 @@ class Parser:
 
     def __init__(self, side, generate_visitors=True):
         self.classes = []
+        self.classes_for_data = []
         self.objects = []
         self.functions = []
         self.side = side
@@ -175,8 +176,12 @@ class Parser:
         body, header, text = find_body(text)
         cls = Class()
         cls.parse(header)
+
         if not self.is_side(cls.side):
+            if cls.is_storage:
+                self.classes_for_data.append(cls)
             return text
+
         cls.parse_body(Parser(self.side), body)
         if self.find_class(cls.name):
             Error.exit(Error.DUBLICATE_CLASS, cls.name)
