@@ -102,7 +102,7 @@ class Parser:
                     Error.exit(Error.CANNOT_FIND_CLASS_FOR_METHOD, class_name, function.name)
                 function.name = function_name
                 class_.functions.append(function)
-                self.functions.remove(function)
+        self.functions = []
 
         for object_ in self.objects:
             parts = object_.name.split('::')
