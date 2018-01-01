@@ -70,7 +70,7 @@ def main():
     parser.set_configs_directory(configs_directory)
     files = fileutils.get_files_list(configs_directory)
     for file in files:
-        if file.find('.mlc') == len(file) - 4:
+        if file.endswith('.mlc'):
             text = open(configs_directory + file).read()
             parser.parse(text)
     parser.link()
