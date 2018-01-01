@@ -41,6 +41,7 @@ class Error:
     CANNOT_FIND_CLASS_FOR_METHOD = inspect.currentframe().f_lineno
     CANNOT_FIND_CLASS_FOR_OBJECT = inspect.currentframe().f_lineno
     OBJECT_IS_KEY_OF_MAP = inspect.currentframe().f_lineno
+    CANNOT_PARSE_XML = inspect.currentframe().f_lineno
     
     texts = {
         UNKNOWN_SERIALISED_TYPE: '[{}] unknown serialized serialized format. Base type - [{}]',
@@ -53,6 +54,7 @@ class Error:
         CANNOT_FIND_CLASS_FOR_METHOD: 'Cannot find class [{}] for method [{}]',
         CANNOT_FIND_CLASS_FOR_OBJECT: 'Cannot find class [{}] for object [{}]',
         OBJECT_IS_KEY_OF_MAP: 'Validate php feature: key of array cannot be object [{}::map<{}, {}> {}]',
+        CANNOT_PARSE_XML: 'Error on parsing xml [{}]',
     }
     
     @staticmethod

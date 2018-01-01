@@ -2,6 +2,7 @@ import xml.etree.ElementTree as ET
 import fileutils
 import xml.dom.minidom
 from DataStorageCreators import *
+from Error import Error
 import json
 
 
@@ -33,7 +34,11 @@ class DataParser:
             if not file.endswith('.xml'):
                 continue
             file = data_directory + file
-            tree = ET.parse(file)
+            try:
+                tree = ET.parse(file)
+            except ET.ParseError:
+                Error.exit(Error.CANNOT_PARSE_XML, file)
+                
             root = tree.getroot()
 
             def add(object):
