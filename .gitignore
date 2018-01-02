@@ -13,3 +13,4 @@ simple_test/assets/
 php_tests/gen/
 php_tests/gen_data/
 mlc.sln
+/out

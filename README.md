@@ -4,88 +4,53 @@
 
 
 ```
-#!shell
 cd src
 python main.py
 ```
 
-Configs directory - *configs/*
-
-Out directory - *out/*
-
-Python library src directory - *src/*
-
-
 ### Configured launch: ###
 
-```
-#!shell
-python src/main.py -o out -i config -incremental yes -t no -side both -f xml
-```
-
 **Parameters:**
+```
+    -h, --help      show this help message and exit
+    -i              Path to classes configs. Default = ./config/
+    -o              Out Path for classes. Default = ./out/
+    -l              Used language. Supported cpp, py, php. Default = cpp
+    -f              Used serialized format. Supported xml, json. Default = xml
+    -side           To different side generation, used both, server, client. Default = both
+    -data           Path to static data configs. Default = empty, conversion is not used
+    -data_out       Out path for static data config. Default = empty
+    -only_data      Flag for build only data xml. Default = no
+    -protocols      Path to file with serialization protocols. Default = empty, default protocol is used
+    -php_validate   Check PHP features on generate other languages. Default = yes
+    -test_script    The path to the script to run the tests
+    -use_colors     Using colors on outputting to the console
+```
 
-	-o - path to out directory
-
-	-i - path to configs directory
-
-	-incremental - yes/no - rewrite/no rewrite not modified classes
-
-	-side - both/client/server - used for different code
-
-	-f xml/json - serialization type
-
-
-### Синтаксис: ###
+### Syntax: ###
 
 ```
-#!cpp
-class core/CommandBase<SerializedObject>
+class core/Request<SerializedObject>
 {
-	int user_id:key = 0
-	int current_time = 0
-	function string getSerializedString():external:const;
-	function int getCurrentType():const
-	{
-	    return current_time;
-	}
+    Action action
+    int int_data
+    float float_data = 0
+    function void some_function(){}
 }
 ```
 
-**class** - служебное слово, указывает, что начинается описание класса
+**class** - keyword
 
-**core/** - модуль. Используется только для группировки классов по папкам
+**core/** - The module. Used only for grouping classes into folders for c++ generation
 
-**CommandBase** - имя класса
+**Request** - Name of the class
 
-**<SerializedObject>** - наследуемый класс. Множественное наследование не поддерживается.
+**SerializedObject** - The inherited class. Multiple inheritance is not supported.
 
-**{ ... }** - тело класса или функции-метода
+**{ ... }** - Body of the class or method
 
-**int user_id:key** = 0  -  поле класса user_id целочисленного типа.
+**int int_data** - Field of class *int_data* of integer type.
 
-                        Модификатор ':key' указывает на постоянный инкремент этого поля при сохдании новых объектов класса
+**int float_data** - Field of class *float_data* of float type with initialized.
 
-**int current_time** = 0 - целочисленное поле класса с инициализацией нолем
-
-**function string getSerializedString():external:const** - метод класса:
-
-                        function - служебное слово, указывает, что начинается описание метода
-
-                        string - возвращаемый тип
-
-                        getSerializedString - имя метода
-
-                        :external - модификатор указывает, что у метода есть внешнее определение
-
-                        :const - модификатор указывает на константность метода
-
-```
-#!cpp
-function int getCurrentType():const
-{
-    return current_time;
-}
-```
-
-Функция с явным определением. Тело функций не подвергается изменению и в конечный класс помещается "как есть", за исключением простого форматирования.
+**function void some_function(){}** - Method of the class without body

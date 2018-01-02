@@ -33,20 +33,33 @@ def validate_arg_side(side):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i',  type=str, help='Path to classes configs', required=False, default='../config/')
-    parser.add_argument('-o', type=str, help='Out Path for classes', required=False, default='../out/')
-    parser.add_argument('-l', type=str, help='Used language. Supported cpp, py. Default: cpp', required=False, default='cpp')
-    parser.add_argument('-f', type=str, help='Used serialized format. Supported xml, json. Default: xml', required=False, default='xml')
-    parser.add_argument('-side', type=str, help='For different side generation - use both. server. client. Default: both', required=False, default='both')
-    parser.add_argument('-data', type=str, help='Path to data configs', required=False, default='')
-    parser.add_argument('-data_out', type=str, help='Out Path for data', required=False, default='')
-    parser.add_argument('-only_data', type=str, help='Flag for buiild only data xml (yes/no)', required=False, default='no')
-    parser.add_argument('-protocols', type=str,
-                        help='Path to file with serialization protocols. Default: empty, used default protocol',
+    parser.add_argument('-i',  type=str, help='Path to classes configs. Default = ./config/',
+                        required=False, default='./config/')
+    parser.add_argument('-o', type=str, help='Out Path for classes. Default = ./out/',
+                        required=False, default='./out/')
+    parser.add_argument('-l', type=str, help='Used language. Supported cpp, py, php. Default = cpp',
+                        required=False, default='cpp')
+    parser.add_argument('-f', type=str, help='Used serialized format. Supported xml, json. Default = xml',
+                        required=False, default='xml')
+    parser.add_argument('-side', type=str,
+                        help='To different side generation, used both, server, client. Default = both',
+                        required=False, default='both')
+    parser.add_argument('-data', type=str, help='Path to static data configs. Default = empty, conversion is not used',
                         required=False, default='')
-    parser.add_argument('-php_validate', type=str, help='Check php features on generate other languages (Example - key of map cannot be object)', required=False, default='yes')
-    parser.add_argument('-test_script', type=str, help='Path to script to launch tests', required=False, default='')
-    parser.add_argument('-use_colors', type=str, help='Path to script to launch tests', required=False, default='yes')
+    parser.add_argument('-data_out', type=str, help='Out path for static data config. Default = empty',
+                        required=False, default='')
+    parser.add_argument('-only_data', type=str, help='Flag for build only data xml. Default = no',
+                        required=False, default='no')
+    parser.add_argument('-protocols', type=str,
+                        help='Path to file with serialization protocols. Default = empty, default protocol is used',
+                        required=False, default='')
+    parser.add_argument('-php_validate', type=str,
+                        help='Check PHP features on generate other languages. Default = yes',
+                        required=False, default='yes')
+    parser.add_argument('-test_script', type=str, help='The path to the script to run the tests',
+                        required=False, default='')
+    parser.add_argument('-use_colors', type=str, help='Using colors on outputting to the console',
+                        required=False, default='yes')
     args = parser.parse_args()
 
     configs_directory = fileutils.normalize_path(args.i)
