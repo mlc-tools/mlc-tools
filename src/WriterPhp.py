@@ -272,7 +272,7 @@ __end__;
 
     def createVisitorAcceptors(self):
         pattern = _pattern_visitor
-        line = '        else if($ctx->get_type() == {0}::$__type__)\n@(\n$this->visit_{1}($ctx);\n@)\n'
+        line = '        else if($ctx->get_type() == {0}::$TYPE)\n@(\n$this->visit_{1}($ctx);\n@)\n'
         line_import = 'require_once "{0}.php";\n'
         line_visit = '''\n    function visit_{0}($ctx)\n@(\n@)\n'''
         base_visitors = {}
@@ -315,7 +315,7 @@ __end__;
     def prepare_file(self, body):
         body = body.replace('__begin__', '{')
         body = body.replace('__end__', '}')
-        body = body.replace('::__type__', '::$__type__')
+        body = body.replace('::TYPE', '::$TYPE')
 
         tabs = 0
         lines = body.split('\n')

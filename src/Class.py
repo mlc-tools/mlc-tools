@@ -202,7 +202,7 @@ class Class(Object):
             member.is_static = True
             member.is_const = True
             member.type = 'string'
-            member.name = '__type__'
+            member.name = 'TYPE'
             member.initial_value = '"{}"'.format(self.name)
             member.access = AccessSpecifier.public
             self.members.append(member)
@@ -211,6 +211,6 @@ class Class(Object):
         function.name = constants.CLASS_FUNCTION_GET_TYPE
         function.return_type = 'string'
         function.is_const = True
-        function.operations.append('return {}::__type__;'.format(self.name))
+        function.operations.append('return {}::TYPE;'.format(self.name))
         function.link()
         self.functions.append(function)

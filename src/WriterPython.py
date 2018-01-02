@@ -405,7 +405,7 @@ _pattern_file['xml'] = '''import xml.etree.ElementTree as ET
 {3}\nclass {0}:
 {5}
     def __init__(self):\n{4}\n{1}\n        pass
-    def get_type(self):\n        return self.__type__
+    def get_type(self):\n        return self.TYPE
 {2}'''
 
 _pattern_file['json'] = '''import json
@@ -413,7 +413,7 @@ _pattern_file['json'] = '''import json
 class {0}:
 {5}
     def __init__(self):\n{4}\n{1}\n        pass
-    def get_type(self):\n        return self.__type__
+    def get_type(self):\n        return self.TYPE
 {2}'''
 
 _pattern_visitor = '''{0}\nclass {3}:
