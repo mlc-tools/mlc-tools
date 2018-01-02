@@ -1,5 +1,5 @@
 import fileutils
-from Object import Object
+from Object import *
 from Error import Log
 
 
@@ -46,6 +46,7 @@ class Writer:
         value.initial_value = cls.members[0].name
         value.name = '_value'
         value.type = cast
+        value.access = AccessSpecifier.private
         cls.members.append(value)
         return values
 

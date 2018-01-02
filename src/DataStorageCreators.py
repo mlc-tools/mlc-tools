@@ -1,6 +1,7 @@
 from Class import Class
 from Object import Object
 from Function import Function
+from Object import AccessSpecifier
 
 
 def get_data_name(name):
@@ -68,6 +69,7 @@ class DataStorage(Class):
                 object.name = get_data_list_name(get_data_name(class_.name))
                 object.template_args.append(string_obj)
                 object.template_args.append(class_)
+                object.access = AccessSpecifier.public
                 self.members.append(object)
 
         loaded = Object()
@@ -75,6 +77,7 @@ class DataStorage(Class):
         loaded.name = '_loaded'
         loaded.type = 'bool'
         loaded.initial_value = 'false'
+        loaded.access = AccessSpecifier.private
         self.members.append(loaded)
 
         self.create_shared_method()
@@ -153,6 +156,7 @@ class DataStoragePython(DataStorage):
         object.type = self.name
         object.name = '__instance'
         object.is_static = True
+        object.access = AccessSpecifier.private
         self.members.append(object)
 
     def create_deserialize(self):
@@ -211,6 +215,7 @@ class DataStoragePhp(DataStorage):
         object.name = '__instance'
         object.initial_value = 'NULL'
         object.is_static = True
+        object.access = AccessSpecifier.private
         self.members.append(object)
 
         object = Object()
@@ -218,6 +223,7 @@ class DataStoragePhp(DataStorage):
         object.name = '__xml'
         object.initial_value = 'NULL'
         object.is_static = True
+        object.access = AccessSpecifier.private
         self.members.append(object)
 
         object = Object()
@@ -225,6 +231,7 @@ class DataStoragePhp(DataStorage):
         object.name = 'PATH_TO_DATA'
         object.initial_value = '"assets/data/data.xml"'
         object.is_static = True
+        object.access = AccessSpecifier.public
         self.members.append(object)
 
     def create_deserialize(self):

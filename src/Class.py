@@ -1,5 +1,5 @@
 import re
-from Object import Object
+from Object import *
 from Function import Function
 import constants
 from constants import Modifier
@@ -204,6 +204,7 @@ class Class(Object):
             member.type = 'string'
             member.name = '__type__'
             member.initial_value = '"{}"'.format(self.name)
+            member.access = AccessSpecifier.public
             self.members.append(member)
 
         function = Function()

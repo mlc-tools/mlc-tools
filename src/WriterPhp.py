@@ -4,6 +4,7 @@ from Class import Class
 from DataStorageCreators import DataStoragePhpXml
 from Error import Error
 import re
+from Object import AccessSpecifier
 
 SERIALIZATION = 0
 DESERIALIZATION = 1
@@ -131,11 +132,17 @@ class WriterPhp(Writer):
                 value = "array()"
             elif type == "map":
                 value = "array()"
+        
+        accesses = {
+            AccessSpecifier.public: 'public',
+            AccessSpecifier.protected: 'protected',
+            AccessSpecifier.private: 'private',
+        }
 
         if object.is_static:
-            out = 'public static ${0} = {1};'
+            out = accesses[object.access] + ' static ${0} = {1};'
         else:
-            out = 'public ${0} = {1};'
+            out = accesses[object.access] + ' ${0} = {1};'
         out = out.format(object.name, convertInitializeValue(value))
         return out
 

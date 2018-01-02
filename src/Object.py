@@ -2,6 +2,12 @@ import re
 from constants import Modifier
 
 
+class AccessSpecifier:
+    public = 0
+    protected = 1
+    private = 2
+   
+
 class Object:
     def __init__(self):
         self.type = ''
@@ -15,6 +21,7 @@ class Object:
         self.is_key = False
         self.is_link = ''
         self.side = 'both'
+        self.access = AccessSpecifier.public
 
     def parse(self, line):
         line = line.strip()
@@ -36,8 +43,17 @@ class Object:
                 self.type = arg
             elif not self.name:
                 self.name = arg
+        
         if expression:
             self.initial_value = expression
+        
+        if self.name.startswith('__'):
+            self.access = AccessSpecifier.private
+        elif self.name.startswith('_'):
+            self.access = AccessSpecifier.protected
+        else:
+            self.access = AccessSpecifier.public
+            
         self.parse_type()
 
     def parse_type(self):

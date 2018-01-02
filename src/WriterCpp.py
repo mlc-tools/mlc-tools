@@ -9,6 +9,7 @@ from DataStorageCreators import DataStorageCppJson
 from Error import Error
 import constants
 from cpp_functions import cpp_functions, hpp_functions
+from Object import AccessSpecifier
 
 FLAG_HPP = 2
 FLAG_CPP = 4
@@ -221,6 +222,25 @@ class WriterCpp(Writer):
             pattern += initial_value
         return pattern.format(convert_type(type_), object_.name, args, modifiers)
 
+    def write_objects(self, objects, flags):
+    
+        accesses = {
+            AccessSpecifier.public: 'public: ',
+            AccessSpecifier.protected: 'protected: ',
+            AccessSpecifier.private: 'private: ',
+        }
+        
+        out = {flags: '\n'}
+        for access in accesses:
+            add = flags == FLAG_HPP
+            for object_ in objects:
+                if object_.access == access:
+                    if add:
+                        out[flags] += accesses[access] + '\n'
+                        add = False
+                    out = add_dict(out, self.write_object(object_, flags))
+        return out
+    
     def write_object(self, object_, flags):
 
         out = Writer.write_object(self, object_, flags)
@@ -287,12 +307,12 @@ class WriterCpp(Writer):
         if objects[FLAG_HPP].strip() == '':
             o = ''
         else:
-            o = '\npublic:{3}'
+            o = '{3}'
 
         if class_.type != 'enum':
             pattern += '\n__begin__\npublic:\n{5}{6}' + f + o + '__end__;\n\n'
         else:
-            pattern += '\n__begin__{5}' + o + f + '__end__;\n\n'
+            pattern += '\n__begin__{5}' + o + 'public:' + f + '__end__;\n\n'
 
         pattern = '{3}\nnamespace {0}\n__begin__{2}\n\n{1}__end__//namespace {0}'.\
             format(_get_namespace(), pattern, forward_declarations, forward_declarations_out)
@@ -810,10 +830,12 @@ class WriterCpp(Writer):
 
             if line and line[0] == '}':
                 tabs -= 1
-            if 'public:' in line:
+            backward = False
+            if 'public:' in line or 'protected:' in line or 'private:' in line :
+                backward = True
                 tabs -= 1
             line = get_tabs(tabs) + line
-            if 'public:' in line:
+            if backward:
                 tabs += 1
             if line.strip() and line.strip()[0] == '{':
                 tabs += 1
@@ -955,5 +977,6 @@ class WriterCpp(Writer):
         value.initial_value = cls.members[0].name
         value.name = '_value'
         value.type = cast
+        value.access = AccessSpecifier.private
         cls.members.append(value)
         return values
