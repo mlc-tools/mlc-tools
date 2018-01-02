@@ -39,18 +39,18 @@ class core/Request<SerializedObject>
 }
 ```
 
-```class``` - keyword
+```class                            ``` - keyword
 
-```core/``` - The module. Used only for grouping classes into folders for c++ generation
+```core/                            ``` - The module. Used only for grouping classes into folders for c++ generation
 
-```Request``` - Name of the class
+```Request                          ``` - Name of the class
 
-```SerializedObject``` - The inherited class. Multiple inheritance is not supported.
+```SerializedObject                 ``` - The inherited class. Multiple inheritance is not supported.
 
-```{ ... }``` - Body of the class or method
+```{ ... }                          ``` - Body of the class or method
 
-```int int_data``` - Field of class *int_data* of integer type.
+```int int_data                     ``` - Field of class *int_data* of integer type.
 
-```int float_data``` - Field of class *float_data* of float type with initialized.
+```int float_data                   ``` - Field of class *float_data* of float type with initialized.
 
-```function void some_function(){}``` - Method of the class without body
+```function void some_function(){}  ``` - Method of the class without body
