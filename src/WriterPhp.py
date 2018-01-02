@@ -302,7 +302,6 @@ __end__;
             body = pattern.format(imports, lines, visits, name)
             body = body.replace('@(', '{')
             body = body.replace('@)', '}')
-            body = self.prepare_file(body)
             self.save_file(name + '.php', body)
 
     def create_data_storage_class(self, name, classes):
@@ -332,11 +331,7 @@ __end__;
 
             if line and line[0] == '}':
                 tabs -= 1
-            if 'public:' in line:
-                tabs -= 1
             line = get_tabs(tabs) + line
-            if 'public:' in line:
-                tabs += 1
             if line.strip() and line.strip()[0] == '{':
                 tabs += 1
             body.append(line)
@@ -356,7 +351,6 @@ __end__;
     def create_data_storage(self):
         storage = self.create_data_storage_class('DataStorage', self.parser.classes)
         content = self.write_class(storage, 0)[0]
-        content = self.prepare_file(content)
         self.save_file(storage.name + '.php', content)
 
     def convert_to_enum(self, cls, use_type='string'):
