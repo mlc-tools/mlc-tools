@@ -268,7 +268,7 @@ class DataStoragePhp(DataStorage):
                 function.name = 'get' + class_.name
                 function.args.append(['name', ''])
                 function.operations.append('''
-                    if (in_array($name, $this->@{array}))
+                    if (array_key_exists($name, $this->@{array}))
                     {
                         return $this->@{array}[$name];
                     } else
