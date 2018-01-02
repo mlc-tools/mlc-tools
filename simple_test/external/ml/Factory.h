@@ -18,7 +18,7 @@
 #include "SerializedObject.h"
 #include <assert.h>
 
-#define REGISTRATION_OBJECT( T ) class registrator__##T {public: registrator__##T() { Factory::shared().registrationCommand<T>( T::__type__ ); } }___registrator__##T;
+#define REGISTRATION_OBJECT( T ) class registrator__##T {public: registrator__##T() { Factory::shared().registrationCommand<T>( T::TYPE ); } }___registrator__##T;
 
 void throw_error( const std::string& message );
 
