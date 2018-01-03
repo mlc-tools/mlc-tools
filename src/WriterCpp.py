@@ -29,13 +29,13 @@ def _convert_argument_type(type_):
 def convert_return_type(parser, type_object):
     result = type_object
     if isinstance(type_object, str):
-        if '*' in type_object:
+        if '*' in type_object and 'const ' not in type_object:
             t = re.sub('\*', '', type_object)
             if parser.find_class(t):
                 result = 'IntrusivePtr<{}>'.format(t)
     else:
         result = type_object.type
-        if type_object.is_link and parser.find_class(type_object.type):
+        if (type_object.is_link or type_object.is_const) and parser.find_class(type_object.type):
             result = '{}*'.format(type_object.type)
         elif type_object.is_pointer and parser.find_class(type_object.type):
             result = 'IntrusivePtr<{}>'.format(type_object.type)
@@ -66,7 +66,10 @@ def convert_type(type_):
                     s += ', '
             s += '>'
         if type_.is_pointer:
-            s = 'IntrusivePtr<%s>' % s
+            if type_.is_const:
+                s = s + '*'
+            else:
+                s = 'IntrusivePtr<%s>' % s
         if type_.is_const:
             s = 'const ' + s
         return s
