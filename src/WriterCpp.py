@@ -47,14 +47,32 @@ def convert_return_type(parser, type_object):
 
 
 def convert_type(type_):
-    types = dict()
-    types['list'] = 'std::vector'
-    types['map'] = 'std::map'
-    types['set'] = 'std::set'
-    types['string'] = 'std::string'
-    types['Observer'] = 'Observer<std::function<void()>>'
-    if type_ in types:
-        return types[type_]
+    if isinstance(type_, str):
+        types = dict()
+        types['list'] = 'std::vector'
+        types['map'] = 'std::map'
+        types['set'] = 'std::set'
+        types['string'] = 'std::string'
+        types['Observer'] = 'Observer<std::function<void()>>'
+        if type_ in types:
+            return types[type_]
+    elif isinstance(type_, Object):
+        s = convert_type(type_.type)
+        if type_.template_args:
+            s += '<'
+            for i, arg in enumerate(type_.template_args):
+                s += convert_type(arg)
+                if i < len(type_.template_args) - 1:
+                    s += ', '
+            s += '>'
+        if type_.is_pointer:
+            s = 'IntrusivePtr<%s>' % s
+        if type_.is_const:
+            s = 'const ' + s
+        return s
+    else:
+        # TODO: add error
+        exit(-1)
     return type_
 
 
@@ -76,7 +94,7 @@ def get_include_file(parser, class_, filename):
         return types[filename]
     if 'std::map' in filename:
         return '<map>'
-    if filename == 'DataStorage':
+    if filename in ['DataStorage', 'mg_extensions']:
         back = ''
         backs = len(class_.group.split('/')) if class_.group else 0
         for i in range(backs):
@@ -731,12 +749,20 @@ class WriterCpp(Writer):
                     args = type_[k:l].strip().split(',')
                     for arg in args:
                         checkType(arg)
+                        
+                for cls in self.parser.classes:
+                    if cls.name in t[1]:
+                        if flags == FLAG_HPP:
+                            forward_types[cls.name] = 1
+                        else:
+                            include_types[cls.name] = 1
 
             if not f.is_template:
                 type_ = f.get_return_type().type
                 type_ = re.sub('const', '', type_).strip()
                 type_ = re.sub('\*', '', type_).strip()
                 type_ = re.sub('&', '', type_).strip()
+                type_ = re.sub('std::', '', type_).strip()
                 include_types[type_] = 1
 
         forward_declarations_out = ''
@@ -777,7 +803,7 @@ class WriterCpp(Writer):
             out += '\n#include "IntrusivePtr.h"'
         if flags == FLAG_CPP:
             out += '\n#include "Factory.h"'
-            out += '\n#include "mg_extensions.h"'
+            out += pattern.format(get_include_file(self.parser, self._current_class, 'mg_extensions'))
             out += '\n#include <algorithm>'
 
         out = out.split('\n')
@@ -891,7 +917,7 @@ class WriterCpp(Writer):
             if m.initial_value is None:
                 if cast == 'int':
                     m.initial_value = '(1 << {})'.format(shift)
-                    values.append(1 << shift)
+            values.append(1 << shift)
             shift += 1
     
         def add_function(type_, name, args, const):

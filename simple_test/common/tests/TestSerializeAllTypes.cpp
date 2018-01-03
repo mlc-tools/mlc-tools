@@ -87,7 +87,7 @@ bool test_all_types()
 	}
 
     auto str = getSerializedString(&objA);
-    std::cout << str << std::endl;
+    // std::cout << str << std::endl;
 	deserialize(&objB, str);
 
 	auto result = true;

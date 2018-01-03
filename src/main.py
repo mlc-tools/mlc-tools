@@ -126,7 +126,9 @@ def main():
     Log.message('mlc(lang: {}, format: {} side: {}) finished successful'.format(language, serialize_format, side))
 
     if args.test_script and os.path.isfile(args.test_script):
-        os.system('python ' + args.test_script)
+        Log.message('Run test (%s):' % args.test_script)
+        if os.system('python ' + args.test_script) != 0:
+            exit(1)
 
 
 

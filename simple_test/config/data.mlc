@@ -13,6 +13,107 @@ class data/DataUnit<SerializedObject>:storage
 	DataUnit*:link link_to_data
 	list<DataUnit*:link> all_units
 	map<string, int> map_units
+
+	function bool tests():static
+	{
+	    auto result = true;
+	    result = DataUnit::test_links() && result;
+	    result = DataUnit::test_enums() && result;
+	    result = DataUnit::test_list_links() && result;
+	    result = DataUnit::test_map_links() && result;
+	    return result;
+	}
+
+	function bool test_1():static
+	{
+	    auto result = true;
+	    auto units = DataStorage::shared().units;
+        for (auto&& [name, unit] : units)
+        {
+            auto pUnit = DataStorage::shared().get<DataUnit>(name);
+            result = result && pUnit == &unit;
+            result = result && name == unit.name;
+        }
+        return result;
+	}
+
+	function bool test_links():static
+	{
+        bool result = true;
+
+        auto unit1 = DataStorage::shared().get<DataUnit>("unitname1");
+        auto unit2 = DataStorage::shared().get<DataUnit>("unitname2");
+
+        result = result && unit1->link_to_data == unit2;
+        result = result && unit2->link_to_data == unit1;
+        result = result && unit1 != unit2;
+        return result;
+	}
+
+
+    function bool test_enums():static
+    {
+        bool result = true;
+
+        auto unit1 = DataStorage::shared().get<DataUnit>("unitname1");
+        auto unit2 = DataStorage::shared().get<DataUnit>("unitname2");
+
+        result = result && unit1->unit_type == UnitType::attack;
+        result = result && unit1->unit_type != UnitType::defend;
+        result = result && unit1->unit_type != UnitType::support;
+
+        result = result && unit2->unit_type == UnitType::defend;
+        result = result && unit2->unit_type != UnitType::attack;
+        result = result && unit2->unit_type != UnitType::support;
+        return result;
+    }
+
+
+    function bool test_list_links():static
+    {
+        bool result = true;
+
+        auto unit1 = DataStorage::shared().get<DataUnit>("unitname1");
+        auto unit2 = DataStorage::shared().get<DataUnit>("unitname2");
+
+        result = result && list_size(unit1->all_units) == 2;
+        result = result && list_size(unit2->all_units) == 2;
+        for (auto unit : unit1->all_units)
+        {
+            result = result && (unit == unit1 || unit == unit2);
+        }
+        for (auto unit : unit2->all_units)
+        {
+            result = result && (unit == unit1 || unit == unit2);
+        }
+
+        return result;
+    }
+
+    function bool test_map_links():static
+    {
+        bool result = true;
+
+        auto unit1 = DataStorage::shared().get<DataUnit>("unitname1");
+        auto unit2 = DataStorage::shared().get<DataUnit>("unitname2");
+
+        result = result && map_size(unit1->map_units) == 2;
+        result = result && map_size(unit2->map_units) == 2;
+
+        for (auto&& [name, count] : unit1->map_units)
+        {
+            result = result && (name == unit1->name || name == unit2->name);
+            result = result && (count == 1 || count == 2);
+        }
+        for (auto&& [name, count] : unit2->map_units)
+        {
+            result = result && (name == unit1->name || name == unit2->name);
+            result = result && (count == 1 || count == 2);
+        }
+
+        return result;
+    }
+
 }
 class data/VisualUnit<SerializedObject>
 {

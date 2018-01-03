@@ -3,6 +3,7 @@ from Function import Function
 from Class import Class
 from DataStorageCreators import DataStoragePythonXml
 from DataStorageCreators import DataStoragePythonJson
+import re
 
 SERIALIZATION = 0
 DESERIALIZATION = 1
@@ -94,21 +95,31 @@ class WriterPython(Writer):
             body = self.loaded_functions[key]
             out += '    def {0}{1}\n\n'.format(function.name, body)
             return out
-        if cls.name == 'DataStorage':
-            args = ['self'] if not function.is_static else []
-            for arg in function.args:
-                args.append(arg[0])
-            args = ', '.join(args)
-            if function.is_static:
-                out = '    @staticmethod\n'
-            out += '    def {}({}):\n'.format(function.name, args)
-            body = ''
-            for op in function.operations:
-                body += '        ' + op + '\n'
-            if not body:
-                body = '        pass\n'
 
-            out += body
+        out = '''    def {0}({1}):
+{2}
+        \n'''
+        name = function.name
+        args = ', '.join([x[0] for x in function.args])
+        if function.is_static:
+            out = '    @staticmethod\n' + out
+        else:
+            if args:
+                args = 'self, ' + args
+            else:
+                args = 'self'
+                
+        convert = self.current_class.name != 'DataStorage'
+        if convert:
+            ops = '\n'.join(function.operations)
+            ops = convert_function_to_python(ops, self.parser)
+        else:
+            ops = '        ' + '\n        '.join(function.operations)
+
+        if not ops:
+            ops = 'pass'
+        out = out.format(name, args, ops)
+
         return out
 
     def write_object(self, object):
@@ -367,6 +378,94 @@ class WriterPython(Writer):
     def convert_to_enum(self, cls, use_type='string'):
         Writer.convert_to_enum(self, cls, use_type)
 
+
+def convert_function_to_python(func, parser):
+    regs = [
+        ['DataStorage::shared\(\).get<(\w+)>', 'DataStorage::shared().get\\1'],
+        ['for\s*\\(\s*\w+[\s&\*]*(\w+)\s*:\s*(.+)\s*\\)', 'for \\1 in \\2:'],
+        ['for\s*\\(\s*\w+\s*(\w+)=(\w+);\s*\w+<(\w+);\s*\\+\\+\w+\s*\\)', 'for \\1 in xrange(\\2, \\3):'],
+        ['for\s*\\(\s*\w+\s*(\w+)=(\w+);\s*\w+>(\w+);\s*--\w+\s*\\)', 'for \\1 in xrange(\\2, \\3, -1):'],
+        ['for\s*\\(\s*\w+\s*(\w+)=(\w+);\s*\w+<(\w+);\s*\w+\\+=(\w)\s*\\)', 'for \\1 in xrange(\\2, \\3, \\4):'],
+        ['for\s*\\(\s*\w+\s*(\w+)=(\w+);\s*\w+>(\w+);\s*\w+-=(\w)\s*\\)', 'for \\1 in xrange(\\2, \\3, -\\4):'],
+        ['for\s*\\(auto&&\s*\\[(\w+),\s*(\w+)\\]\s*:\s*(.+)\\)', 'for \\1, \\2 in \\3.iteritems():'],
+        ['if\s*\\(\s*(.+)\s*\\)', 'if \\1:'],
+        # ['!in_map\\((.+),(.+)\\)', '\\1 not in \\2'],
+        ['in_map\s*\\(\s*(.+),\s*(.+)\s*\\)', '(\\1 in \\2)'],
+        ['in_list\s*\\(\s*(.+),\s*(.+)\s*\\)', '(\\1 in \\2)'],
+        ['list_push\s*\\(\s*(.+),\s*(.+)\s*\\)', '\\1.append(\\2)'],
+        ['list_size\s*\\(', 'len('],
+        ['map_size\s*\\(', 'len('],
+        ['auto (\w+)', '\\1'],
+        ['string (\w+)', '\\1'],
+        ['int (\w+)', '\\1'],
+        ['float (\w+)', '\\1'],
+        ['bool (\w+)', '\\1'],
+        ['(\w)->', '\\1.'],
+        ['\+\+(\w+)', '\\1 += 1'],
+        ['delete (\w+);', 'pass'],
+        ['&(\w+)', '\\1'],
+        [';', ''],
+    ]
+    
+    repl = [
+        ['this.', 'self.'],
+        ['->', '.'],
+        ['::', '.'],
+        ['&&', ' and '],
+        ['||', ' or '],
+        ['true', 'True'],
+        ['false', 'False'],
+        ['nullptr', 'None'],
+    ]
+
+    for reg in regs:
+        func = re.sub(reg[0], reg[1], func)
+
+    for reg in repl:
+        func = func.replace(reg[0], reg[1])
+
+    def get_tabs(count):
+        r = ''
+        for i in xrange(count):
+            r += '    '
+        return r
+
+    lines = func.split('\n')
+    tabs = 2
+    next_tab = False
+    for i, line in enumerate(lines):
+        if next_tab:
+            tabs += 1
+        if '{' in line:
+            tabs += 1
+            line = line.replace('{', '')
+        if '}' in line:
+            tabs -= 1
+            line = line.replace('}', '')
+        lines[i] = get_tabs(tabs) + line.strip()
+        if next_tab:
+            next_tab = False
+            tabs -= 1
+        if ('for' in line or 'if' in line) and (i < len(lines) - 1 and '{' not in line and '{' not in lines[i + 1]):
+            next_tab = True
+
+    func = '\n'.join(lines)
+    func = func.replace('\n    \n', '\n')
+    func = func.replace('\n        \n', '\n')
+    func = func.replace('\n            \n', '\n')
+    func = func.replace('\n                \n', '\n')
+    func = func.replace('\n                    \n', '\n')
+    func = func.replace('\n                        \n', '\n')
+    if 'DataStorage' in func:
+        func = get_tabs(2) + 'from DataStorage import DataStorage\n' + func
+    for cls in parser.classes:
+        if cls.name in func:
+            func = get_tabs(2) + 'from {0} import {0}\n'.format(cls.name) + func
+            
+
+    return func
+
+
 _factory = {}
 _factory['xml'] = '''import xml.etree.ElementTree as ET
 {0}
@@ -404,16 +503,16 @@ _pattern_file = {}
 _pattern_file['xml'] = '''import xml.etree.ElementTree as ET
 {3}\nclass {0}:
 {5}
+
     def __init__(self):\n{4}\n{1}\n        pass
-    def get_type(self):\n        return self.TYPE
 {2}'''
 
 _pattern_file['json'] = '''import json
 {3}
 class {0}:
 {5}
+
     def __init__(self):\n{4}\n{1}\n        pass
-    def get_type(self):\n        return self.TYPE
 {2}'''
 
 _pattern_visitor = '''{0}\nclass {3}:

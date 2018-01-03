@@ -13,7 +13,6 @@
 #include "IntrusivePtr.h"
 #include "tests/Visitor.h"
 #include "tests/Side.h"
-#include "tests/Data.h"
 #include "tests/enum.h"
 #include "tests/TestSerializeAllTypes.h"
 #include <iostream>
@@ -22,25 +21,30 @@
 #include "config.h"
 
 extern intrusive_ptr<mg::CommandBase> createCommand(const std::string& payload);
-
-
-bool test_serialization();
-
+std::string root = "../../";
 void initialize_data_storage()
 {
 #if MG_SERIALIZE_FORMAT == MG_JSON
-	std::fstream stream("../../assets/data.json", std::ios::in);
+	std::fstream stream(root + "assets/data.json", std::ios::in);
 #endif
 #if MG_SERIALIZE_FORMAT == MG_XML
-	std::fstream stream("../../assets/data.xml", std::ios::in);
+	std::fstream stream(root + "assets/data.xml", std::ios::in);
 #endif
 
 	std::string str((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
 	mg::DataStorage::shared().initialize(str);
 }
 
-int main()
+bool test_serialization();
+bool test_data();
+
+int main(int argc, char ** args)
 {
+    if(argc > 1)
+    {
+        root = args[1];
+    }
+
 	auto result = true;
 
 	initialize_data_storage();
@@ -51,8 +55,6 @@ int main()
 	result = test_side() && result;
 	result = test_data() && result;
 	result = test_all_types() && result;
-
-	
 
 	std::cout << "Execute results = " << (result ? "Ok" : "Fail") << std::endl;
 	return result ? 0 : -1;
@@ -84,3 +86,11 @@ bool test_serialization()
 
 	return result;
 }
+
+bool test_data()
+{
+    bool result = mg::DataUnit::tests();
+    std::cout << (result ? "Test data success." : "Test data failed.") << std::endl;
+    return result;
+}
+

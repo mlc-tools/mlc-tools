@@ -3,11 +3,13 @@ class SerializedObject:serialized
 	int _reference_counter:runtime = 1
 	function int retain()
 	{
-		return ++_reference_counter;
+		this->_reference_counter += 1;
+		return this->_reference_counter;
 	}
 	function int release()
 	{
-		auto c = --_reference_counter;
+		this->_reference_counter -= 1;
+		auto c = this->_reference_counter;
 		if( c == 0)
 		{
 			delete this;

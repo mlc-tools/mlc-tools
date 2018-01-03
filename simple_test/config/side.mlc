@@ -19,10 +19,10 @@ class SideTestCommon<SerializedObject>
 
     function string get_value():server
     {
-        return server_value;
+        return this->server_value;
     }
     function string get_value():client
     {
-        return client_value;
+        return this->client_value;
     }
 }

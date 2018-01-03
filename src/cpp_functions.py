@@ -23,6 +23,18 @@ void list_push(std::vector<T>& list, const T& t)
     list.push_back(t);
 }
 
+template <class T>
+int list_size(const std::vector<T>& vector)
+{
+    return static_cast<int>(vector.size());
+}
+
+template <class T, class P>
+int map_size(const std::map<T, P>& map)
+{
+    return static_cast<int>(map.size());
+}
+
 #endif
 '''
 cpp_functions = '''

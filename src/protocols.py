@@ -478,7 +478,7 @@ $(OWNER)$(FIELD) = str(xml.get("$(FIELD)"))
 #serialize:
 if $(OWNER)$(FIELD):
             xml_pointer = ET.SubElement(xml, '$(FIELD)')
-            xml_pointer.set('type', str($(TYPE)))
+            xml_pointer.set('type', '$(TYPE)')
             $(OWNER)$(FIELD).serialize(xml_pointer)
 #deserialize:
 xml_pointer = xml.find('$(FIELD)')

@@ -449,6 +449,8 @@ def convert_function_to_php(func):
         ['in_list(', 'in_array('],
         ['in_map', 'isset'],
         ['list_push', 'array_push'],
+        ['list_size', 'count'],
+        ['map', 'count'],
     ]
 
     for reg in regs:

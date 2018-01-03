@@ -41,6 +41,10 @@ class Function:
         if args and args[0]:
             for arg in args:
                 arg = arg.strip()
+                is_const = False
+                if arg.startswith('const '):
+                    is_const = True
+                    arg = arg[len('const '):]
 
                 def p(char, string):
                     index = -1
@@ -57,10 +61,12 @@ class Function:
                         return False
 
                     type_ = (string[:index].strip() + char).strip()
+                    if is_const:
+                        type_ = 'const ' + type_
                     name = string[index + 1:].strip()
                     self.args.append([name, type_])
                     return True
-
+                
                 if not (p('*', arg) or p('&', arg) or p(' ', arg)):
                     exit(-1)
 
