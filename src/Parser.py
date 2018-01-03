@@ -163,6 +163,13 @@ class Parser:
                     if cls_type is not None and cls_type.type != 'enum':
                         value_type = member.template_args[1] if isinstance(member.template_args[1], str) else member.template_args[1].type
                         Error.exit(Error.OBJECT_IS_KEY_OF_MAP, cls.name, key_type, value_type, member.name)
+                if cls.type == 'enum' and member.initial_value is not None:
+                    if '|' in member.initial_value or \
+                       '&' in member.initial_value or \
+                       '^' in member.initial_value or \
+                       '~' in member.initial_value:
+                        Error.exit(Error.ENUM_CANNOT_BE_COMBINATED, cls.name, member.name, member.initial_value)
+
 
     def _convert_template_args(self, member):
         args = []
