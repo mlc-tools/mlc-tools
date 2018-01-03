@@ -440,6 +440,14 @@ class WriterCpp(Writer):
             fstr = header + body
             body = ''
             for operation in function.operations:
+                convert_c17_toc14 = True
+                if convert_c17_toc14:
+                    reg = ['for\s*\\(auto&&\s*\\[(\w+),\s*(\w+)\\]\s*:\s*(.+)\\)\s*{',
+                           'for (auto&& pair : \\3) \n{ \nauto& \\1 = pair.first; \nauto& \\2 = pair.second;']
+                    
+                    operation2 = re.sub(reg[0], reg[1], operation)
+                    if operation2 != operation:
+                        operation = operation2
                 fline = '{0}'
                 line = '\n' + fline.format(operation)
                 body += line
