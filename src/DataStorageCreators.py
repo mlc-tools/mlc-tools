@@ -280,8 +280,8 @@ class DataStoragePhp(DataStorage):
                             {
                                 if ($node["key"] == $name)
                                 {
-                                    $data->deserialize($node->value);
                                     $this->@{array}[$name] = $data;
+                                    $data->deserialize($node->value);
                                 }
                             }
                         }
