@@ -32,6 +32,7 @@ def convertInitializeValue(value):
 
 functions_cache = {}
 
+
 class WriterPhp(Writer):
 
     def __init__(self, parser, serialize_format):
@@ -108,9 +109,9 @@ class WriterPhp(Writer):
         name = function.name
         args = ', '.join(['$' + x[0] for x in function.args])
         ops = '\n'.join(function.operations)
-        out = out.format(name, args, ops)
         if convert:
-            out = convert_function_to_php(out)
+            ops = convert_function_to_php(ops, self.parser)
+        out = out.format(name, args, ops)
         return out
 
     def write_object(self, object):
@@ -132,7 +133,7 @@ class WriterPhp(Writer):
                 value = "array()"
             elif type == "map":
                 value = "array()"
-        
+
         accesses = {
             AccessSpecifier.public: 'public',
             AccessSpecifier.protected: 'protected',
@@ -384,7 +385,7 @@ __end__;
         cls.functions.append(function)
 
 
-def convert_function_to_php(func):
+def convert_function_to_php(func, parser):
     variables = {
         '\$(\w+)'
     }
@@ -415,16 +416,18 @@ def convert_function_to_php(func):
         ['std::string (\w+)', '$\\1'],
         ['this->', '$this->'],
         [':const', ''],
-        ['(\w+)::(\w+)\)', '\\1::$\\2)'],
-        ['(\w+)::(\w+)\.', '\\1::$\\2.'],
+        ['(\w+)::(\w+)', '\\1::$\\2'],
+        ['(\w+)::(\w+)\\)', '\\1::$\\2)'],
+        ['(\w+)::(\w+)\\.', '\\1::$\\2.'],
         ['(\w+)::(\w+)->', '\\1::$\\2->'],
-        ['(\w+)::(\w+)\]', '\\1::$\\2]'],
+        ['(\w+)::(\w+)\\]', '\\1::$\\2]'],
+        ['(\w+)::\\$(\w+)\\((\w*)\\)', '\\1::\\2(\\3)'],
         ['function \\$(\w+)', 'function \\1'],
         ['\\.at\\((\w+)\\)', '[\\1]'],
-        ['\\.at\(\$(\w+)\)', '[\\1]'],
-        ['(\w+)\.', '\\1->'],
-        ['(\w+)\\(\)\.', '\\1()->'],
-        ['(\w+)\]\.', '\\1]->'],
+        ['\\.at\(\$(\w+)\\)', '[\\1]'],
+        ['(\w+)\\.', '\\1->'],
+        ['(\w+)\\(\\)\\.', '\\1()->'],
+        ['(\w+)\\]\.', '\\1]->'],
         ['&(\w+)', '\\1'],
         ['\\$if\\(', 'if('],
         ['delete (\w+);', ''],
@@ -459,7 +462,7 @@ def convert_function_to_php(func):
     for key in variables:
         arr = re.findall(key, func)
         for var in arr:
-            for ch in ' +-*\\=([<>\t':
+            for ch in ' +-*\\=([<>\t\n':
                 func = func.replace(ch + var, ch + '$' + var)
             for ch in ['->']:
                 func = func.replace(ch + '$' + var, ch + var)
@@ -469,6 +472,11 @@ def convert_function_to_php(func):
 
     for reg in repl:
         func = func.replace(reg[0], reg[1])
+
+    for cls in parser.classes:
+        if cls.name in func:
+            func = 'require_once "{}.php";\n'.format(cls.name) + func
+
     return func
 
 

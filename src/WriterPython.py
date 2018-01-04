@@ -404,6 +404,7 @@ def convert_function_to_python(func, parser):
         ['\+\+(\w+)', '\\1 += 1'],
         ['delete (\w+);', 'pass'],
         ['&(\w+)', '\\1'],
+        ['make_intrusive<(\w+)>\\(\\)', '\\1()'],
         [';', ''],
     ]
     
