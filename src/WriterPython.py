@@ -108,7 +108,7 @@ class WriterPython(Writer):
                 args = 'self, ' + args
             else:
                 args = 'self'
-                
+
         convert = self.current_class.name != 'DataStorage'
         if convert:
             ops = '\n'.join(function.operations)
@@ -116,8 +116,8 @@ class WriterPython(Writer):
         else:
             ops = '        ' + '\n        '.join(function.operations)
 
-        if not ops:
-            ops = 'pass'
+        if not ops.split():
+            ops = '        pass'
         out = out.format(name, args, ops)
 
         return out
@@ -407,7 +407,7 @@ def convert_function_to_python(func, parser):
         ['make_intrusive<(\w+)>\\(\\)', '\\1()'],
         [';', ''],
     ]
-    
+
     repl = [
         ['this.', 'self.'],
         ['->', '.'],
@@ -462,7 +462,6 @@ def convert_function_to_python(func, parser):
     for cls in parser.classes:
         if cls.name in func:
             func = get_tabs(2) + 'from {0} import {0}\n'.format(cls.name) + func
-            
 
     return func
 
