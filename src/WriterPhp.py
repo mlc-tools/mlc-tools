@@ -385,57 +385,57 @@ __end__;
         cls.functions.append(function)
 
 
+regs = [
+    [re.compile('DataStorage::shared\(\).get<(\w+)>'), 'DataStorage::shared()->get\\1'],
+    [re.compile('\\.str\\(\\)'), ''],
+    [re.compile('for\\(auto (.+?) : (.+?)\\)'), 'foreach($\\2 as $\\1)'],
+    [re.compile('for\\(auto& (.+?) : (.+?)\\)'), 'foreach($\\2 as $\\1)'],
+    [re.compile('auto (\w+)'), '$\\1'],
+    [re.compile('auto& (\w+)'), '$\\1'],
+    [re.compile('void (\w+)'), '$\\1'],
+    [re.compile('int (\w+)'), '$\\1'],
+    [re.compile('bool (\w+)'), '$\\1'],
+    [re.compile('\\((\w+) (\w+)\\)'), '($\\2)'],
+    [re.compile('\\(const (\w+)\\& (\w+)\\)'), '($\\2)'],
+    [re.compile('\\(const (\w+)\\* (\w+)\\)'), '($\\2)'],
+    [re.compile('\\((\w+)\\* (\w+)\\)'), '($\\2)'],
+    [re.compile('(\w+)\\ (\w+),'), '$\\2,'],
+    [re.compile('(\w+)\\& (\w+),'), '$\\2,'],
+    [re.compile('(\w+)\\* (\w+),'), '$\\2,'],
+    [re.compile('const (\w+)\\* (\w+)'), '$\\2'],
+    [re.compile('const (\w+)\\& (\w+)'), '$\\2'],
+    [re.compile('float (\w+)'), '$\\1'],
+    [re.compile('std::string (\w+)'), '$\\1'],
+    [re.compile('this->'), '$this->'],
+    [re.compile(':const'), ''],
+    [re.compile('(\w+)::(\w+)'), '\\1::$\\2'],
+    [re.compile('(\w+)::(\w+)\\)'), '\\1::$\\2)'],
+    [re.compile('(\w+)::(\w+)\\.'), '\\1::$\\2.'],
+    [re.compile('(\w+)::(\w+)->'), '\\1::$\\2->'],
+    [re.compile('(\w+)::(\w+)\\]'), '\\1::$\\2]'],
+    [re.compile('(\w+)::\\$(\w+)\\((\w*)\\)'), '\\1::\\2(\\3)'],
+    [re.compile('function \\$(\w+)'), 'function \\1'],
+    [re.compile('\\.at\\((\w+)\\)'), '[\\1]'],
+    [re.compile('\\.at\(\$(\w+)\\)'), '[\\1]'],
+    [re.compile('(\w+)\\.'), '\\1->'],
+    [re.compile('(\w+)\\(\\)\\.'), '\\1()->'],
+    [re.compile('(\w+)\\]\.'), '\\1]->'],
+    [re.compile('&(\w+)'), '\\1'],
+    [re.compile('\\$if\\('), 'if('],
+    [re.compile('delete (\w+);'), ''],
+    [re.compile('([-0-9])->([-0-9])f'), '\\1.\\2'],
+    [re.compile('assert\\(.+\\);'), ''],
+    [re.compile('make_intrusive<(\w+)>\\(\s*\\)'), 'new \\1()'],
+    [re.compile('new\s*(\w+)\s*\\(\s*\\)'), 'new \\1()'],
+    [re.compile('(.+?)\\->push_back\\((.+)\\);'), 'array_push(\\1, \\2);'],
+]
+
+
 def convert_function_to_php(func, parser):
+    global regs
     variables = {
         '\$(\w+)'
     }
-
-    regs = [
-        ['DataStorage::shared\(\).get<(\w+)>', 'DataStorage::shared()->get\\1'],
-        ['\\.str\\(\\)', ''],
-        ['for\\(auto (.+?) : (.+?)\\)', 'foreach($\\2 as $\\1)'],
-        ['for\\(auto& (.+?) : (.+?)\\)', 'foreach($\\2 as $\\1)'],
-        ['auto (\w+)', '$\\1'],
-        ['auto& (\w+)', '$\\1'],
-        ['void (\w+)', '$\\1'],
-        ['int (\w+)', '$\\1'],
-        ['bool (\w+)', '$\\1'],
-
-        # func args
-        ['\\((\w+) (\w+)\\)', '($\\2)'],
-        ['\\(const (\w+)\\& (\w+)\\)', '($\\2)'],
-        ['\\(const (\w+)\\* (\w+)\\)', '($\\2)'],
-        ['\\((\w+)\\* (\w+)\\)', '($\\2)'],
-        ['(\w+)\\ (\w+),', '$\\2,'],
-        ['(\w+)\\& (\w+),', '$\\2,'],
-        ['(\w+)\\* (\w+),', '$\\2,'],
-        ['const (\w+)\\* (\w+)', '$\\2'],
-        ['const (\w+)\\& (\w+)', '$\\2'],
-
-        ['float (\w+)', '$\\1'],
-        ['std::string (\w+)', '$\\1'],
-        ['this->', '$this->'],
-        [':const', ''],
-        ['(\w+)::(\w+)', '\\1::$\\2'],
-        ['(\w+)::(\w+)\\)', '\\1::$\\2)'],
-        ['(\w+)::(\w+)\\.', '\\1::$\\2.'],
-        ['(\w+)::(\w+)->', '\\1::$\\2->'],
-        ['(\w+)::(\w+)\\]', '\\1::$\\2]'],
-        ['(\w+)::\\$(\w+)\\((\w*)\\)', '\\1::\\2(\\3)'],
-        ['function \\$(\w+)', 'function \\1'],
-        ['\\.at\\((\w+)\\)', '[\\1]'],
-        ['\\.at\(\$(\w+)\\)', '[\\1]'],
-        ['(\w+)\\.', '\\1->'],
-        ['(\w+)\\(\\)\\.', '\\1()->'],
-        ['(\w+)\\]\.', '\\1]->'],
-        ['&(\w+)', '\\1'],
-        ['\\$if\\(', 'if('],
-        ['delete (\w+);', ''],
-        ['([-0-9])->([-0-9])f', '\\1.\\2'],
-        ['assert\\(.+\\);', ''],
-        ['make_intrusive<(\w+)>', 'new \\1'],
-        ['(.+?)\\->push_back\\((.+)\\);', 'array_push(\\1, \\2);'],
-    ]
 
     regs2 = [
         ['->\\$(\w+)\\(', '->\\1('],

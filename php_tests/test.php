@@ -57,7 +57,7 @@ function test_data_storage(){
             echo("\nGet data ($name) - Ok");
         }
     }
-    DataStorage::$PATH_TO_DATA = "../php_tests/gen_data/data.xml";
+    DataStorage::$PATH_TO_DATA = "php_tests/gen_data/data.xml";
     test_get_data("gems");
     test_get_data("gold");
 }

@@ -199,7 +199,7 @@ class DataStoragePython(DataStorage):
                 function.args.append(['name', ''])
                 function.operations.append('if not self._loaded and name not in self.{}:'.format(map_name))
                 function.operations.append('    from {0} import {0}'.format(class_.name))
-                function.operations.append('    self.{}[name] = {}();'.format(map_name, class_.name))
+                function.operations.append('    self.{}[name] = {}()'.format(map_name, class_.name))
                 function.operations.append('return self.{}[name]'.format(map_name))
                 self.functions.append(function)
 

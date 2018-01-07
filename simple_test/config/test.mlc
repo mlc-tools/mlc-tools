@@ -18,6 +18,23 @@ class SerializedObject:serialized
 	}
 }
 
+class Logger<SerializedObject>
+{
+    function bool add_result(bool result, string message):abstract
+}
+
+class AllTests<SerializedObject>
+{
+    function bool run(Logger* loger):static
+    {
+        bool result = true;
+        result = loger->add_result(FunctionTest::tests(loger), "Function tests") && result;
+        result = loger->add_result(DataUnit::tests(), "Static data") && result;
+
+        return result;
+    }
+}
+
 class core/CommandBase<SerializedObject>
 {
 	int user_id:key = 0
@@ -90,3 +107,148 @@ enum TestEnumValue2<TestEnum>
 {
 	int parameter
 }
+
+class FunctionTest<SerializedObject>
+{
+    bool initialized = false;
+    DataUnit*:link data_unit;
+    list<int> list
+    map<int, int> map
+
+    function void initialize()
+    {
+        this->initialized = true;
+        this->data_unit = DataStorage::shared().get<DataUnit>("unitname1");
+    }
+
+    function bool tests(Logger* loger):static
+    {
+        auto result = true;
+        result = FunctionTest::test_create_objects(loger) && result;
+        result = FunctionTest::test_for(loger) && result;
+        result = FunctionTest::test_if_(loger) && result;
+        result = FunctionTest::std_functions(loger) && result;
+        return result;
+    }
+
+    function bool test_create_objects(Logger* loger):static
+    {
+        auto pointer = new FunctionTest();
+        pointer->initialize();
+        auto result = pointer->initialized;
+        result = result && pointer->data_unit != nullptr;
+        loger->add_result(result, "Create new object in function");
+        return result;
+    }
+
+    function bool test_for(Logger* logger):static
+    {
+        auto result = true;
+        auto units = DataStorage::shared().units;
+        int index = 0;
+        int count = map_size(units);
+        for(auto& pair : units)
+        {
+            ++index;
+        }
+        result = result && index == count;
+        logger->add_result(result, "FOR(AUTO& PAIR : MAP)");
+
+        index = 0;
+        for(auto&& [name, unit] : units)
+        {
+            ++index;
+        }
+        result = result && index == count;
+        logger->add_result(result, "FOR(AUTO&& [NAME, UNIT] : UNITS)");
+
+        index = 0;
+        for(int i=0; i<count; ++i)
+        {
+            ++index;
+        }
+        result = result && index == count;
+        logger->add_result(result, "FOR(int i=0; i<count; ++i)");
+
+        index = 0;
+        for(int i=count; i>0; --i)
+        {
+            ++index;
+        }
+        result = result && index == count;
+        logger->add_result(result, "FOR(int i=count; i>0; --i)");
+
+        index = 0;
+        auto count2 = count*2;
+        for(int i=0; i<count2; i+=2)
+        {
+            ++index;
+        }
+        result = result && index == count;
+        logger->add_result(result, "FOR(int i=0; i<count*2; i+=2)");
+
+        return result;
+    }
+
+    function bool test_if_(Logger* logger):static
+    {
+        bool result = true;
+        if(true)
+        {
+            result = result && true;
+        }
+        else
+        {
+            result = false;
+        }
+        if(true)
+        {
+            result = result && true;
+            result = result && true;
+        }
+        else
+        {
+            result = false;
+            result = false;
+        }
+        if(true)
+            result = result && true;
+        else
+            result = false;
+        logger->add_result(result, "IF-ELSE");
+        return result;
+    }
+
+    function bool std_functions(Logger* logger):static
+    {
+        auto result = true;
+        auto pointer = new FunctionTest();
+
+        list_push(pointer->list, 1);
+        result = result && list_size(pointer->list) == 1;
+        result = result && in_list(1, pointer->list);
+
+        pointer->map[1] = 1;
+        result = result && map_size(pointer->map) == 1;
+        result = result && in_map(1, pointer->map);
+
+        logger->add_result(result, "std functions");
+        return result;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

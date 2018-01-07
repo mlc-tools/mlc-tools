@@ -19,6 +19,8 @@
 #include "DataStorage.h"
 #include <fstream>
 #include "config.h"
+#include "AllTests.h"
+#include "Logger.h"
 
 extern intrusive_ptr<mg::CommandBase> createCommand(const std::string& payload);
 std::string root = "../../";
@@ -36,7 +38,18 @@ void initialize_data_storage()
 }
 
 bool test_serialization();
-bool test_data();
+
+
+class Logger : public mg::Logger
+{
+public:
+    virtual bool add_result(bool result, const std::string& message) override
+    {
+        std::cout << message << " " << (result? "Ok" : "Fail") << std::endl;
+        return result;
+    }
+};
+
 
 int main(int argc, char ** args)
 {
@@ -49,12 +62,14 @@ int main(int argc, char ** args)
 
 	initialize_data_storage();
 
+	auto logger = make_intrusive<Logger>();
+
 	result = test_serialization() && result;
 	result = test_enum() && result;
 	result = test_visitor() && result;
 	result = test_side() && result;
-	result = test_data() && result;
 	result = test_all_types() && result;
+	result = mg::AllTests::run(logger) && result;
 
 	std::cout << "Execute results = " << (result ? "Ok" : "Fail") << std::endl;
 	return result ? 0 : -1;
@@ -86,11 +101,3 @@ bool test_serialization()
 
 	return result;
 }
-
-bool test_data()
-{
-    bool result = mg::DataUnit::tests();
-    std::cout << (result ? "Test data success." : "Test data failed.") << std::endl;
-    return result;
-}
-

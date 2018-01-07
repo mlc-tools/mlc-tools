@@ -108,7 +108,7 @@ class WriterPython(Writer):
                 args = 'self, ' + args
             else:
                 args = 'self'
-                
+
         convert = self.current_class.name != 'DataStorage'
         if convert:
             ops = '\n'.join(function.operations)
@@ -378,36 +378,39 @@ class WriterPython(Writer):
     def convert_to_enum(self, cls, use_type='string'):
         Writer.convert_to_enum(self, cls, use_type)
 
+regs = [
+    [re.compile('DataStorage::shared\(\).get<(\w+)>'), 'DataStorage::shared().get\\1'],
+    [re.compile('for\s*\\(\s*\w+[\s&\*]*(\w+)\s*:\s*(.+)\s*\\)'), 'for \\1 in \\2:'],
+    [re.compile('for\s*\\(\s*\w+\s*(\w+)=(\w+);\s*\w+<(\w+);\s*\\+\\+\w+\s*\\)'), 'for \\1 in xrange(\\2, \\3):'],
+    [re.compile('for\s*\\(\s*\w+\s*(\w+)=(\w+);\s*\w+>(\w+);\s*--\w+\s*\\)'), 'for \\1 in xrange(\\2, \\3, -1):'],
+    [re.compile('for\s*\\(\s*\w+\s*(\w+)=(\w+);\s*\w+<(\w+);\s*\w+\\+=(\w)\s*\\)'), 'for \\1 in xrange(\\2, \\3, \\4):'],
+    [re.compile('for\s*\\(\s*\w+\s*(\w+)=(\w+);\s*\w+>(\w+);\s*\w+-=(\w)\s*\\)'), 'for \\1 in xrange(\\2, \\3, -\\4):'],
+    [re.compile('for\s*\\(auto&&\s*\\[(\w+),\s*(\w+)\\]\s*:\s*(.+)\\)'), 'for \\1, \\2 in \\3.iteritems():'],
+    [re.compile('if\s*\\(\s*(.+)\s*\\)'), 'if \\1:'],
+    [re.compile('else if'), 'elif:'],
+    [re.compile('else'), 'else:'],
+    [re.compile('in_map\s*\\(\s*(.+),\s*(.+)\s*\\)'), '(\\1 in \\2)'],
+    [re.compile('in_list\s*\\(\s*(.+),\s*(.+)\s*\\)'), '(\\1 in \\2)'],
+    [re.compile('list_push\s*\\(\s*(.+),\s*(.+)\s*\\)'), '\\1.append(\\2)'],
+    [re.compile('list_size\s*\\('), 'len('],
+    [re.compile('map_size\s*\\('), 'len('],
+    [re.compile('auto (\w+)'), '\\1'],
+    [re.compile('string (\w+)'), '\\1'],
+    [re.compile('int (\w+)'), '\\1'],
+    [re.compile('float (\w+)'), '\\1'],
+    [re.compile('bool (\w+)'), '\\1'],
+    [re.compile('(\w)->'), '\\1.'],
+    [re.compile('\+\+(\w+)'), '\\1 += 1'],
+    [re.compile('delete (\w+);'), 'pass'],
+    [re.compile('&(\w+)'), '\\1'],
+    [re.compile('make_intrusive<(\w+)>\\(\\)'), '\\1()'],
+    [re.compile('new\s*(\w+)\s*\\(\s*\\)'), '\\1()'],
+    [re.compile(';'), ''],
+]
+
 
 def convert_function_to_python(func, parser):
-    regs = [
-        ['DataStorage::shared\(\).get<(\w+)>', 'DataStorage::shared().get\\1'],
-        ['for\s*\\(\s*\w+[\s&\*]*(\w+)\s*:\s*(.+)\s*\\)', 'for \\1 in \\2:'],
-        ['for\s*\\(\s*\w+\s*(\w+)=(\w+);\s*\w+<(\w+);\s*\\+\\+\w+\s*\\)', 'for \\1 in xrange(\\2, \\3):'],
-        ['for\s*\\(\s*\w+\s*(\w+)=(\w+);\s*\w+>(\w+);\s*--\w+\s*\\)', 'for \\1 in xrange(\\2, \\3, -1):'],
-        ['for\s*\\(\s*\w+\s*(\w+)=(\w+);\s*\w+<(\w+);\s*\w+\\+=(\w)\s*\\)', 'for \\1 in xrange(\\2, \\3, \\4):'],
-        ['for\s*\\(\s*\w+\s*(\w+)=(\w+);\s*\w+>(\w+);\s*\w+-=(\w)\s*\\)', 'for \\1 in xrange(\\2, \\3, -\\4):'],
-        ['for\s*\\(auto&&\s*\\[(\w+),\s*(\w+)\\]\s*:\s*(.+)\\)', 'for \\1, \\2 in \\3.iteritems():'],
-        ['if\s*\\(\s*(.+)\s*\\)', 'if \\1:'],
-        # ['!in_map\\((.+),(.+)\\)', '\\1 not in \\2'],
-        ['in_map\s*\\(\s*(.+),\s*(.+)\s*\\)', '(\\1 in \\2)'],
-        ['in_list\s*\\(\s*(.+),\s*(.+)\s*\\)', '(\\1 in \\2)'],
-        ['list_push\s*\\(\s*(.+),\s*(.+)\s*\\)', '\\1.append(\\2)'],
-        ['list_size\s*\\(', 'len('],
-        ['map_size\s*\\(', 'len('],
-        ['auto (\w+)', '\\1'],
-        ['string (\w+)', '\\1'],
-        ['int (\w+)', '\\1'],
-        ['float (\w+)', '\\1'],
-        ['bool (\w+)', '\\1'],
-        ['(\w)->', '\\1.'],
-        ['\+\+(\w+)', '\\1 += 1'],
-        ['delete (\w+);', 'pass'],
-        ['&(\w+)', '\\1'],
-        ['make_intrusive<(\w+)>\\(\\)', '\\1()'],
-        [';', ''],
-    ]
-    
+    global regs
     repl = [
         ['this.', 'self.'],
         ['->', '.'],
@@ -447,7 +450,8 @@ def convert_function_to_python(func, parser):
         if next_tab:
             next_tab = False
             tabs -= 1
-        if ('for' in line or 'if' in line) and (i < len(lines) - 1 and '{' not in line and '{' not in lines[i + 1]):
+        if (line.startswith('for') or line.startswith('if') or line.startswith('else')) \
+                and (i < len(lines) - 1 and '{' not in line and '{' not in lines[i + 1]):
             next_tab = True
 
     func = '\n'.join(lines)
@@ -462,7 +466,6 @@ def convert_function_to_python(func, parser):
     for cls in parser.classes:
         if cls.name in func:
             func = get_tabs(2) + 'from {0} import {0}\n'.format(cls.name) + func
-            
 
     return func
 

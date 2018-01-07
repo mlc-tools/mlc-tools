@@ -454,6 +454,9 @@ class WriterCpp(Writer):
                 fline = '{0}'
                 line = '\n' + fline.format(operation)
                 body += line
+            
+            body = convert_function_to_cpp(body, self.parser)
+                
             args = list()
             for arg in function.args:
                 args.append(_convert_argument_type(convert_type(arg[1])) + ' ' + arg[0])
@@ -1017,3 +1020,14 @@ class WriterCpp(Writer):
         value.access = AccessSpecifier.private
         cls.members.append(value)
         return values
+    
+regs = [
+    [re.compile('new\s*(\w+)\s*\\(\s*\\)'), 'make_intrusive<\\1>()'],
+]
+
+def convert_function_to_cpp(func, parser):
+    global regs
+    for reg in regs:
+        func = re.sub(reg[0], reg[1], func)
+    return func
+
