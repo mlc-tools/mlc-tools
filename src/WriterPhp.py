@@ -110,7 +110,7 @@ class WriterPhp(Writer):
         args = ', '.join(['$' + x[0] for x in function.args])
         ops = '\n'.join(function.operations)
         if convert:
-            ops = convert_function_to_php(ops, self.parser)
+            ops = convert_function_to_php(ops, self.parser, args)
         out = out.format(name, args, ops)
         return out
 
@@ -388,8 +388,9 @@ __end__;
 regs = [
     [re.compile('DataStorage::shared\(\).get<(\w+)>'), 'DataStorage::shared()->get\\1'],
     [re.compile('\\.str\\(\\)'), ''],
-    [re.compile('for\\(auto (.+?) : (.+?)\\)'), 'foreach($\\2 as $\\1)'],
-    [re.compile('for\\(auto& (.+?) : (.+?)\\)'), 'foreach($\\2 as $\\1)'],
+    [re.compile('for\s*\\(auto (.+?)\s*:\s*(.+?)\s*\\)'), 'foreach($\\2 as $\\1)'],
+    [re.compile('for\s*\\(auto& (.+?)\s*:\s*(.+?)\s*\\)'), 'foreach($\\2 as $\\1)'],
+    [re.compile('for\s*\\(auto&&\s*\\[(\w+),\s*(\w+)\\]\s*:\s*(.+)\\)'), 'foreach ($\\3 as $\\1 => $\\2)'],
     [re.compile('auto (\w+)'), '$\\1'],
     [re.compile('auto& (\w+)'), '$\\1'],
     [re.compile('void (\w+)'), '$\\1'],
@@ -431,7 +432,7 @@ regs = [
 ]
 
 
-def convert_function_to_php(func, parser):
+def convert_function_to_php(func, parser, function_args):
     global regs
     variables = {
         '\$(\w+)'
@@ -447,23 +448,25 @@ def convert_function_to_php(func, parser):
         ['($int)', '(int)'],
         ['time(nullptr)', 'time()'],
         ['$$', '$'],
-        ['std::max', 'max'],
-        ['std::min', 'min'],
+        ['std::$max', 'max'],
+        ['std::$min', 'min'],
         ['in_list(', 'in_array('],
-        ['in_map', 'isset'],
+        ['in_map', 'array_key_exists'],
         ['list_push', 'array_push'],
         ['list_size', 'count'],
-        ['map', 'count'],
+        ['map_size', 'count'],
+        ['nullptr', 'null'],
     ]
 
     for reg in regs:
         func = re.sub(reg[0], reg[1], func)
 
     for key in variables:
-        arr = re.findall(key, func)
+        arr = re.findall(key, function_args + '\n' + func)
         for var in arr:
             for ch in ' +-*\\=([<>\t\n':
                 func = func.replace(ch + var, ch + '$' + var)
+            func = re.sub('^' + var, '$' + var, func)
             for ch in ['->']:
                 func = func.replace(ch + '$' + var, ch + var)
 

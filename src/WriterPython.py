@@ -387,6 +387,7 @@ regs = [
     [re.compile('for\s*\\(\s*\w+\s*(\w+)=(\w+);\s*\w+>(\w+);\s*\w+-=(\w)\s*\\)'), 'for \\1 in xrange(\\2, \\3, -\\4):'],
     [re.compile('for\s*\\(auto&&\s*\\[(\w+),\s*(\w+)\\]\s*:\s*(.+)\\)'), 'for \\1, \\2 in \\3.iteritems():'],
     [re.compile('if\s*\\(\s*(.+)\s*\\)'), 'if \\1:'],
+    [re.compile('if\s*!(.+):'), 'if not (\\1):'],
     [re.compile('else if'), 'elif:'],
     [re.compile('else'), 'else:'],
     [re.compile('in_map\s*\\(\s*(.+),\s*(.+)\s*\\)'), '(\\1 in \\2)'],
@@ -405,6 +406,8 @@ regs = [
     [re.compile('&(\w+)'), '\\1'],
     [re.compile('make_intrusive<(\w+)>\\(\\)'), '\\1()'],
     [re.compile('new\s*(\w+)\s*\\(\s*\\)'), '\\1()'],
+    [re.compile('assert\\(.+\\);'), ''],
+    [re.compile('([-0-9]).([-0-9])f'), '\\1.\\2'],
     [re.compile(';'), ''],
 ]
 

@@ -121,13 +121,14 @@ class FunctionTest<SerializedObject>
         this->data_unit = DataStorage::shared().get<DataUnit>("unitname1");
     }
 
-    function bool tests(Logger* loger):static
+    function bool tests(Logger* logger):static
     {
         auto result = true;
-        result = FunctionTest::test_create_objects(loger) && result;
-        result = FunctionTest::test_for(loger) && result;
-        result = FunctionTest::test_if_(loger) && result;
-        result = FunctionTest::std_functions(loger) && result;
+        result = FunctionTest::test_create_objects(logger) && result;
+        result = FunctionTest::test_for(logger) && result;
+        result = FunctionTest::test_if_(logger) && result;
+        result = FunctionTest::std_functions(logger) && result;
+        result = FunctionTest::test_1(logger) && result;
         return result;
     }
 
@@ -235,8 +236,23 @@ class FunctionTest<SerializedObject>
         logger->add_result(result, "std functions");
         return result;
     }
+
+    function bool test_1(Logger* logger):static {
+        auto user = new TestUser1();
+		auto result = FunctionTest::test_1_1(user);
+		logger->add_result(result, "Functions: test 1");
+		return result;
+	}
+    function bool test_1_1(bool user):static {
+		auto result = user->result;
+		return result;
+	}
 }
 
+class TestUser1
+{
+    bool result = true
+}
 
 
 
