@@ -243,13 +243,13 @@ class FunctionTest<SerializedObject>
 		logger->add_result(result, "Functions: test 1");
 		return result;
 	}
-    function bool test_1_1(bool user):static {
+    function bool test_1_1(TestUser1* user):static {
 		auto result = user->result;
 		return result;
 	}
 }
 
-class TestUser1
+class TestUser1<SerializedObject>
 {
     bool result = true
 }
