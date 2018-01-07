@@ -116,8 +116,8 @@ class WriterPython(Writer):
         else:
             ops = '        ' + '\n        '.join(function.operations)
 
-        if not ops:
-            ops = 'pass'
+        if not ops.split():
+            ops = '        pass'
         out = out.format(name, args, ops)
 
         return out
