@@ -2,12 +2,18 @@ php_xml = '''
 #string
 #serialize:
 #with default value:
-if($(OWNER)$(FIELD) != $(DEFAULT_VALUE)) $xml->addAttribute("$(FIELD)", $(OWNER)$(FIELD));
+if($(OWNER)$(FIELD) != $(DEFAULT_VALUE))
+{
+    $xml->addAttribute("$(FIELD)", $(OWNER)$(FIELD));
+}
 #without default value:
 $xml->addAttribute("$(FIELD)", $(OWNER)$(FIELD));
 #deserialize:
 #with default value:
-$(OWNER)$(FIELD) = (string)$xml["$(FIELD)"];
+if($xml["$(FIELD)"])
+{
+    $(OWNER)$(FIELD) = (string)$xml["$(FIELD)"];
+}
 #without default value:
 $(OWNER)$(FIELD) = (string)$xml["$(FIELD)"];
 
@@ -15,25 +21,37 @@ $(OWNER)$(FIELD) = (string)$xml["$(FIELD)"];
 #float, int
 #serialize:
 #with default value:
-if($(OWNER)$(FIELD) != $(DEFAULT_VALUE)) $xml->addAttribute("$(FIELD)", $(OWNER)$(FIELD));
+if($(OWNER)$(FIELD) != $(DEFAULT_VALUE))
+{
+    $xml->addAttribute("$(FIELD)", $(OWNER)$(FIELD));
+}
 #without default value:
 $xml->addAttribute("$(FIELD)", $(OWNER)$(FIELD));
 #deserialize:
 #with default value:
-$(OWNER)$(FIELD) = ($(TYPE))$xml["$(FIELD)"];
+if($xml["$(FIELD)"])
+{
+    $(OWNER)$(FIELD) = ($(TYPE))$xml["$(FIELD)"];
+}
 #without default value:
 $(OWNER)$(FIELD) = ($(TYPE))$xml["$(FIELD)"];
 
 #bool
 #serialize:
 #with default value:
-if($(OWNER)$(FIELD) != $(DEFAULT_VALUE)) $xml->addAttribute("$(FIELD)", $(OWNER)$(FIELD) ? 'yes' : 'no');
+if($(OWNER)$(FIELD) != $(DEFAULT_VALUE))
+{
+    $xml->addAttribute("$(FIELD)", $(OWNER)$(FIELD) ? 'yes' : 'no');
+}
 #without default value:
 $xml->addAttribute("$(FIELD)", $(OWNER)$(FIELD) ? 'yes' : 'no');
 #deserialize:
 #with default value:
-$value = strtolower((string)$xml["$(FIELD)"]);
-$(OWNER)$(FIELD) = ($value == 'true' || $value == 'yes');
+if(isset($xml["$(FIELD)"]))
+{
+    $value = strtolower((string)$xml["$(FIELD)"]);
+    $(OWNER)$(FIELD) = ($value == 'true' || $value == 'yes');
+}
 #without default value:
 $value = strtolower((string)$xml["$(FIELD)"]);
 $(OWNER)$(FIELD) = ($value == 'true' || $value == 'yes');
