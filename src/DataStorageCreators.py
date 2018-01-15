@@ -292,6 +292,23 @@ class DataStoragePhp(DataStorage):
                 function.operations[0] = function.operations[0].replace('@{type}', class_.name)
                 self.functions.append(function)
 
+                function = Function()
+                function.name = 'loadAll' + get_data_list_name(class_.name)
+                function.operations.append('''
+                    if(DataStorage::$__xml->@{array})
+                    {
+                        foreach (DataStorage::$__xml->@{array}->pair as $node)
+                        {
+                            $name = (string)$node["key"];
+                            $this->@{array}[$name] = new @{type}();
+                            $this->@{array}[$name]->deserialize($node->value);
+                        }
+                    }
+                    ''')
+                function.operations[0] = function.operations[0].replace('@{array}', map_name)
+                function.operations[0] = function.operations[0].replace('@{type}', class_.name)
+                self.functions.append(function)
+
 
 class DataStorageCppXml(DataStorageCpp):
 
