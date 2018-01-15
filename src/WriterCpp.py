@@ -244,13 +244,13 @@ class WriterCpp(Writer):
         return pattern.format(convert_type(type_), object_.name, args, modifiers)
 
     def write_objects(self, objects, flags):
-    
+
         accesses = {
             AccessSpecifier.public: 'public: ',
             AccessSpecifier.protected: 'protected: ',
             AccessSpecifier.private: 'private: ',
         }
-        
+
         out = {flags: '\n'}
         for access in accesses:
             add = flags == FLAG_HPP
@@ -261,7 +261,7 @@ class WriterCpp(Writer):
                         add = False
                     out = add_dict(out, self.write_object(object_, flags))
         return out
-    
+
     def write_object(self, object_, flags):
 
         out = Writer.write_object(self, object_, flags)
@@ -446,17 +446,19 @@ class WriterCpp(Writer):
                 convert_c17_toc14 = True
                 if convert_c17_toc14:
                     reg = ['for\s*\\(auto&&\s*\\[(\w+),\s*(\w+)\\]\s*:\s*(.+)\\)\s*{',
-                           'for (auto&& pair : \\3) \n{ \nauto& \\1 = pair.first; \nauto& \\2 = pair.second;']
-                    
+                           '''for (auto&& pair : \\3) \n{ \nauto& \\1 = pair.first; \nauto& \\2 = pair.second;
+                           (void)\\1; //don't generate 'Unused variable' warning
+                           (void)\\2; //don't generate 'Unused variable' warning''']
+
                     operation2 = re.sub(reg[0], reg[1], operation)
                     if operation2 != operation:
                         operation = operation2
                 fline = '{0}'
                 line = '\n' + fline.format(operation)
                 body += line
-            
+
             body = convert_function_to_cpp(body, self.parser)
-                
+
             args = list()
             for arg in function.args:
                 args.append(_convert_argument_type(convert_type(arg[1])) + ' ' + arg[0])
@@ -469,7 +471,7 @@ class WriterCpp(Writer):
         for class_ in classes:
             if class_.type == 'enum':
                 self.convert_to_enum(class_)
-                
+
         for class_ in classes:
             dictionary = self.write_class(class_, FLAG_HPP)
             if len(dictionary) > 0:
@@ -763,7 +765,7 @@ class WriterCpp(Writer):
                     args = type_[k:l].strip().split(',')
                     for arg in args:
                         checkType(arg)
-                        
+
                 for cls in self.parser.classes:
                     if cls.name in t[1]:
                         if flags == FLAG_HPP:
@@ -871,7 +873,7 @@ class WriterCpp(Writer):
             if line and line[0] == '}':
                 tabs -= 1
             backward = False
-            if 'public:' in line or 'protected:' in line or 'private:' in line :
+            if 'public:' in line or 'protected:' in line or 'private:' in line:
                 backward = True
                 tabs -= 1
             line = get_tabs(tabs) + line
@@ -933,7 +935,7 @@ class WriterCpp(Writer):
                     m.initial_value = '(1 << {})'.format(shift)
             values.append(1 << shift)
             shift += 1
-    
+
         def add_function(type_, name, args, const):
             function = Function()
             function.return_type = type_
@@ -942,7 +944,7 @@ class WriterCpp(Writer):
             function.is_const = const
             cls.functions.append(function)
             return function
-    
+
         add_function(
             '',
             cls.name,
@@ -987,7 +989,7 @@ class WriterCpp(Writer):
             operations = ['return _value == rhs;']
         add_function('bool', 'operator <', [['rhs', 'const {0}&'.format(cls.name)]], True). \
             operations = ['return _value < rhs._value;']
-    
+
         function1 = add_function('', cls.name, [['value', 'string']], False)
         function2 = add_function('{0}&:const'.format(cls.name), 'operator =', [['value', 'string']], False)
         function3 = add_function('', 'operator std::string', [], True)
@@ -1012,7 +1014,7 @@ class WriterCpp(Writer):
         function2.operations.append('return *this;')
         function3.operations.append('return "";')
         function4.operations.append('return "";')
-        
+
         value = Object()
         value.initial_value = cls.members[0].name
         value.name = '_value'
@@ -1020,14 +1022,14 @@ class WriterCpp(Writer):
         value.access = AccessSpecifier.private
         cls.members.append(value)
         return values
-    
+
 regs = [
     [re.compile('new\s*(\w+)\s*\\(\s*\\)'), 'make_intrusive<\\1>()'],
 ]
+
 
 def convert_function_to_cpp(func, parser):
     global regs
     for reg in regs:
         func = re.sub(reg[0], reg[1], func)
     return func
-
