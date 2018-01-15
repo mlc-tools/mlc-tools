@@ -6,9 +6,10 @@ class AccessSpecifier:
     public = 0
     protected = 1
     private = 2
-   
+
 
 class Object:
+
     def __init__(self):
         self.type = ''
         self.template_args = []
@@ -43,17 +44,16 @@ class Object:
                 self.type = arg
             elif not self.name:
                 self.name = arg
-        
+
         if expression:
             self.initial_value = expression
-        
-        if self.name.startswith('__'):
-            self.access = AccessSpecifier.private
-        elif self.name.startswith('_'):
-            self.access = AccessSpecifier.protected
-        else:
-            self.access = AccessSpecifier.public
-            
+
+        if self.access == AccessSpecifier.public:
+            if self.name.startswith('__'):
+                self.access = AccessSpecifier.private
+            elif self.name.startswith('_'):
+                self.access = AccessSpecifier.protected
+
         self.parse_type()
 
     def parse_type(self):
@@ -90,6 +90,8 @@ class Object:
         self.is_link = self.is_link or Modifier.link in string
         self.is_const = self.is_const or Modifier.const in string
         self.is_const = self.is_const or self.is_link
+        if Modifier.private in string:
+            self.access = AccessSpecifier.private
 
         string = re.sub(Modifier.server, '', string)
         string = re.sub(Modifier.client, '', string)
@@ -98,6 +100,7 @@ class Object:
         string = re.sub(Modifier.static, '', string)
         string = re.sub(Modifier.key, '', string)
         string = re.sub(Modifier.link, '', string)
+        string = re.sub(Modifier.private, '', string)
 
         if args:
             string = string[0:l] + args + string[l:]

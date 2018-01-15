@@ -20,6 +20,7 @@ class Modifier:
     key = ':key'
     link = ':link'
     storage = ":storage"
+    private = ":private"
 
     client = ':client'
     server = ':server'
