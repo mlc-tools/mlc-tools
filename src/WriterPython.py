@@ -404,6 +404,7 @@ regs = [
     [re.compile('\+\+(\w+)'), '\\1 += 1'],
     [re.compile('delete (\w+);'), 'pass'],
     [re.compile('&(\w+)'), '\\1'],
+    [re.compile('!(\w+)'), 'not \\1'],
     [re.compile('make_intrusive<(\w+)>\\(\\)'), '\\1()'],
     [re.compile('new\s*(\w+)\s*\\(\s*\\)'), '\\1()'],
     [re.compile('assert\\(.+\\);'), ''],

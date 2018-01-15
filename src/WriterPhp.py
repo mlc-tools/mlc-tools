@@ -416,8 +416,8 @@ regs = [
     [re.compile('(\w+)::(\w+)\\]'), '\\1::$\\2]'],
     [re.compile('(\w+)::\\$(\w+)\\((\w*)\\)'), '\\1::\\2(\\3)'],
     [re.compile('function \\$(\w+)'), 'function \\1'],
-    [re.compile('\\.at\\((\w+)\\)'), '[\\1]'],
-    [re.compile('\\.at\(\$(\w+)\\)'), '[\\1]'],
+    [re.compile('\\.at\\((.*?)\\)'), '[\\1]'],
+
     [re.compile('(\w+)\\.'), '\\1->'],
     [re.compile('(\w+)\\(\\)\\.'), '\\1()->'],
     [re.compile('(\w+)\\]\.'), '\\1]->'],
@@ -464,7 +464,7 @@ def convert_function_to_php(func, parser, function_args):
     for key in variables:
         arr = re.findall(key, function_args + '\n' + func)
         for var in arr:
-            for ch in ' +-*\\=([<>\t\n':
+            for ch in ' +-*\\=([<>\t\n!':
                 func = func.replace(ch + var, ch + '$' + var)
             func = re.sub('^' + var, '$' + var, func)
             for ch in ['->']:
