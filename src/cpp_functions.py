@@ -11,6 +11,12 @@ bool in_map(const T& element, const std::map<T, P>& map)
     return map.count(element) > 0;
 }
 
+template <class T, class P>
+bool in_map(int element, const std::map<T, P>& map)
+{
+    return map.count(element) > 0;
+}
+
 template <class T>
 bool in_list(const T& element, const std::vector<T>& list)
 {
