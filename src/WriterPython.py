@@ -408,8 +408,8 @@ regs = [
     [re.compile('make_intrusive<(\w+)>\\(\\)'), '\\1()'],
     [re.compile('new\s*(\w+)\s*\\(\s*\\)'), '\\1()'],
     [re.compile('assert\\(.+\\);'), ''],
-    [re.compile('([-0-9])\\.([-0-9])f'), '\\1.\\2'],
-    [re.compile('([-0-9])\\.f'), '\\1.0'],
+    [re.compile('([-0-9]*)\\.([-0-9]*)f'), '\\1.\\2'],
+    [re.compile('([-0-9]*)\\.f'), '\\1.0'],
     [re.compile(';'), ''],
 ]
 
