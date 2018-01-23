@@ -440,6 +440,8 @@ def convert_function_to_php(func, parser, function_args):
 
     regs2 = [
         ['->\\$(\w+)\\(', '->\\1('],
+        ['([-0-9]*)->([-0-9]*)f', '\\1.\\2'],
+        ['([-0-9]*)->f', '\\1.0'],
     ]
 
     repl = [
