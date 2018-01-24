@@ -408,9 +408,10 @@ regs = [
     [re.compile('make_intrusive<(\w+)>\\(\\)'), '\\1()'],
     [re.compile('new\s*(\w+)\s*\\(\s*\\)'), '\\1()'],
     [re.compile('assert\\(.+\\);'), ''],
-    [re.compile('([-0-9]*)\\.([-0-9]*)f'), '\\1.\\2'],
-    [re.compile('([-0-9]*)\\.f'), '\\1.0'],
+    [re.compile('([-0-9]+)\\.f'), '\\1.0'],
+    [re.compile('([-0-9]+)\\.([-0-9]*)f'), '\\1.\\2'],
     [re.compile(';'), ''],
+    [re.compile('([*+-/\s])log\\((.+?)\\)'), '\\1math.log(\\2)'],
 ]
 
 
@@ -425,6 +426,9 @@ def convert_function_to_python(func, parser):
         ['true', 'True'],
         ['false', 'False'],
         ['nullptr', 'None'],
+        ['std.round', 'round'],
+        ['std.min', 'min'],
+        ['std.max', 'max'],
     ]
 
     for reg in regs:
@@ -471,6 +475,8 @@ def convert_function_to_python(func, parser):
     for cls in parser.classes:
         if cls.name in func:
             func = get_tabs(2) + 'from {0} import {0}\n'.format(cls.name) + func
+    if 'math.' in func:
+        func = get_tabs(2) + 'import math\n' + func
 
     return func
 
