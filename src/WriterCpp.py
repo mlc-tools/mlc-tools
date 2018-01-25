@@ -453,6 +453,7 @@ class WriterCpp(Writer):
                     operation2 = re.sub(reg[0], reg[1], operation)
                     if operation2 != operation:
                         operation = operation2
+                operation = operation.replace('std::round', 'round')
                 fline = '{0}'
                 line = '\n' + fline.format(operation)
                 body += line
