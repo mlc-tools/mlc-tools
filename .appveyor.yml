@@ -22,7 +22,7 @@ configuration:
 
 environment:
     matrix:
-        - TOOLCHAIN: msvc15
+        - TOOLCHAIN: msvc17
 
 install:
 
