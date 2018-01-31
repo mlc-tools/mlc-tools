@@ -6,21 +6,21 @@ hpp_functions = '''
 #include <vector>
 
 template <class T, class P>
-bool in_map(const T& key, const std::map<T, P>& map)
+bool in_map(const T& element, const std::map<T, P>& map)
 {
-    return map.count(key) > 0;
+    return map.count(element) > 0;
 }
 
-template <class P>
-bool in_map(int key, const std::map<int, P>& map)
+template <class T, class P>
+bool in_map(int element, const std::map<T, P>& map)
 {
-    return map.count(key) > 0;
+    return map.count(element) > 0;
 }
 
 template <class T>
-bool in_list(const T& item, const std::vector<T>& list)
+bool in_list(const T& element, const std::vector<T>& list)
 {
-    return std::find(list.begin(), list.end(), item) != list.end();
+    return std::find(list.begin(), list.end(), element) != list.end();
 }
 
 template <class T>
