@@ -5,30 +5,17 @@ hpp_functions = '''
 #include <map>
 #include <vector>
 
-template <class T, class P>
+template <class T=int, class P>
 bool in_map(const T& key, const std::map<T, P>& map)
 {
-    return map.count(key) > 0;
+	return map.count(key) > 0;
 }
-
-#ifdef _MSC_VER
-
-template <class P>
-bool in_map(int key, const std::map<int, P>& map)
-{
-    return map.count(key) > 0;
-}
-
-#else
 
 template <class T, class P>
 bool in_map(int element, const std::map<T, P>& map)
 {
-    return map.count(element) > 0;
+	return map.count(element) > 0;
 }
-
-#endif
-
 
 template <class T>
 bool in_list(const T& item, const std::vector<T>& list)
