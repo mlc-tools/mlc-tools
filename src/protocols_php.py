@@ -89,9 +89,12 @@ foreach($(OWNER)$(FIELD) as $item)
     $xml_list->addChild("item")->addAttribute("value", $item);
 }
 #deserialize:
-foreach($xml->$(FIELD)->item as $item)
+if($xml->$(FIELD))
 {
-    array_push($(OWNER)$(FIELD), $item["value"]);
+    foreach($xml->$(FIELD)->item as $item)
+    {
+        array_push($(OWNER)$(FIELD), $item["value"]);
+    }
 }
 
 #list<serialized>
