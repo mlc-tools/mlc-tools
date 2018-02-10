@@ -5,34 +5,15 @@ hpp_functions = '''
 #include <map>
 #include <vector>
 
-#define SUPPORT_OLDEST @{support_oldest}
 
-#if SUPPORT_OLDEST == 1
-
-template <class P>
-bool in_map(int key, const std::map<int, P>& map)
-{
-    return map.count(key) > 0;
-}
-
-#else
-
-template <class T, class P>
-bool in_map(int element, const std::map<T, P>& map)
+template <class K, class T, class P>
+bool in_map(const K& element, const std::map<T, P>& map)
 {
     return map.count(element) > 0;
 }
 
-#endif
-
-template <class T, class P>
-bool in_map(const T& key, const std::map<T, P>& map)
-{
-    return map.count(key) > 0;
-}
-
-template <class T>
-bool in_list(const T& item, const std::vector<T>& list)
+template <class I, class T>
+bool in_list(const I& item, const std::vector<T>& list)
 {
     return std::find(list.begin(), list.end(), item) != list.end();
 }
