@@ -5,8 +5,9 @@ hpp_functions = '''
 #include <map>
 #include <vector>
 
+#define SUPPORT_OLDEST @{support_oldest}
 
-#ifdef _MSC_VER
+#if SUPPORT_OLDEST == 1
 
 template <class P>
 bool in_map(int key, const std::map<int, P>& map)

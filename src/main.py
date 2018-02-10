@@ -60,6 +60,8 @@ def main():
                         required=False, default='')
     parser.add_argument('-use_colors', type=str, help='Using colors on outputting to the console',
                         required=False, default='yes')
+    parser.add_argument('-support_oldest_cpp', type=str, help='Support oldesct cpp compilers. Default is yes',
+                        required=False, default='yes')
     args = parser.parse_args()
 
     configs_directory = fileutils.normalize_path(args.i)
@@ -73,14 +75,16 @@ def main():
     side = args.side
     php_validate = args.php_validate.lower() == 'yes'
     use_colors = args.use_colors.lower() == 'yes'
+    support_oldest_cpp = args.support_oldest_cpp.lower() == 'yes'
 
     validate_arg_language(language)
     validate_arg_format(serialize_format)
     validate_arg_side(side)
-    
+
     Log.use_colors = use_colors
     parser = Parser(side, language == 'cpp')
     parser.set_configs_directory(configs_directory)
+    parser.support_oldest_cpp = support_oldest_cpp
     files = fileutils.get_files_list(configs_directory)
     for file in files:
         if file.endswith('.mlc'):
@@ -129,7 +133,6 @@ def main():
         Log.message('Run test (%s):' % args.test_script)
         if os.system('python ' + args.test_script) != 0:
             exit(1)
-
 
 
 if __name__ == '__main__':

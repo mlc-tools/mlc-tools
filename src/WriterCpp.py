@@ -914,11 +914,16 @@ class WriterCpp(Writer):
         self.save_file(storage.name + '.cpp', source)
 
     def save_config_file(self):
+        global hpp_functions
+        global cpp_functions
         pattern = '#ifndef __mg_Config_h__\n#define __mg_Config_h__\n\n{}\n\n#endif //#ifndef __mg_Config_h__'
         configs = list()
         configs.append('#define MG_JSON 1')
         configs.append('#define MG_XML 2')
         configs.append('\n#define MG_SERIALIZE_FORMAT MG_' + self.serialize_format.upper())
+
+        hpp_functions = hpp_functions.replace('@{support_oldest}', '1' if self.parser.support_oldest_cpp else '0')
+
         self.save_file('config.h', pattern.format('\n'.join(configs)))
         self.save_file("mg_extensions.h", hpp_functions)
         self.save_file("mg_extensions.cpp", cpp_functions)
