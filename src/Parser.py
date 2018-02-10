@@ -59,12 +59,11 @@ class Parser:
         self.generate_visitors = generate_visitors
         self.is_validate_php_features = True
         self.configs_root = ''
-        self.support_oldest_cpp = True
         return
 
     def set_configs_directory(self, path):
         self.configs_root = path
-
+        
     def is_side(self, side):
         return self.side == 'both' or side == self.side or side == 'both'
 
@@ -170,6 +169,7 @@ class Parser:
                        '^' in member.initial_value or \
                        '~' in member.initial_value:
                         Error.exit(Error.ENUM_CANNOT_BE_COMBINATED, cls.name, member.name, member.initial_value)
+
 
     def _convert_template_args(self, member):
         args = []
