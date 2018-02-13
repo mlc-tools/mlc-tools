@@ -190,3 +190,162 @@ $xml->addAttribute("$(FIELD)", $(OWNER)$(FIELD));
 #deserialize:
 $(OWNER)$(FIELD) = (string)($xml["$(FIELD)"]);
 '''
+
+php_json = '''
+
+#int,bool,float,string
+#serialize:
+#with default value:
+if($(OWNER)$(FIELD) != $(DEFAULT_VALUE))
+{
+    $json["$(FIELD)"] = $(OWNER)$(FIELD);
+}
+#without default value:
+$json["$(FIELD)"] = $(OWNER)$(FIELD);
+#deserialize:
+#with default value:
+if(isset($json->$(FIELD)))
+{
+    $(OWNER)$(FIELD) = $json->$(FIELD);
+}
+#without default value:
+$(OWNER)$(FIELD) = $json->$(FIELD);
+
+
+#serialized
+#serialize:
+$json["$(FIELD)"] = array();
+$(OWNER)$(FIELD)->serialize($json->$(FIELD));
+#deserialize:
+$(OWNER)$(FIELD) = new $(TYPE);
+$(OWNER)$(FIELD)->deserialize($json->$(FIELD));
+
+#pointer
+#serialize
+if($(OWNER)$(FIELD))
+{
+    $json["$(FIELD)"] = array();
+    $json["$(FIELD)"]["type"] = $(OWNER)$(FIELD)->get_type());
+    $(OWNER)$(FIELD)->serialize($json["$(FIELD)"]);
+}
+#deserialize:
+if(isset(json->$(FIELD)))
+{
+    $type = (string)$json->$(FIELD)->type;
+    $(OWNER)$(FIELD) = Factory::build($type);
+    $(OWNER)$(FIELD)->deserialize($json->$(FIELD));
+}
+
+
+#list<int>, list<bool>, list<float>, list<string>
+#serialize:
+$json["$(FIELD)"] = array();
+foreach($(OWNER)$(FIELD) as $item)
+{
+    array_push($json["$(FIELD)"], $item);
+}
+#deserialize:
+if(isset($json->$(FIELD)))
+{
+    foreach($json->$(FIELD) as $item)
+    {
+        array_push($(OWNER)$(FIELD), $item);
+    }
+}
+
+
+#list<serialized>
+#serialize:
+$json["$(FIELD)"] = array();
+foreach($(OWNER)$(FIELD) as $item)
+{
+    array_push(json["$(FIELD)"], "");
+    $item->serialize(json["$(FIELD)"][count(json["$(FIELD)"])]);
+}
+#deserialize:
+foreach($json["$(FIELD)"] as $item)
+{
+    $obj = new $(TYPE)();
+    $obj->deserialize($item);
+    array_push($(OWNER)$(FIELD), &obj);
+}
+
+#pointer_list
+#serialize:
+$json["$(FIELD)"] = array();
+foreach($(OWNER)$(FIELD) as $t)
+{
+    array_push($json[$(FIELD)], array());
+    $arr = array();
+    t->serialize($arr);
+    $json[$(FIELD)][count($json[$(FIELD)])][t->get_type()] = $arr;
+}
+#deserialize:
+$arr_$(FIELD) = $json->"$(FIELD)";
+foreach($arr_$(FIELD) as $item)
+{
+    $type = current($item[0]);
+    $obj = Factory::build($type);
+    $obj->deserialize($item->$type);
+    array_push($(OWNER)$(FIELD), $obj);
+}
+
+
+#link
+#serialize:
+$json["$(FIELD)"] = $(OWNER)$(FIELD)->name;
+#deserialize:
+$name = $json->$(FIELD);
+$(OWNER)$(FIELD) = DataStorage::shared()->get$(TYPE)((string)$name);
+
+#list<link>
+#serialize:
+$json[$(FIELD)] = array();
+foreach($(OWNER)$(FIELD) as $data)
+{
+    array_push($json[$(FIELD)], $data->name);
+}
+#deserialize:
+foreach($json->$(FIELD) as $name)
+{
+    $data = DataStorage::shared()->get$(ARG_0)((string)$name);
+    array_push($(OWNER)$(FIELD), $data);
+}
+
+#map
+#serialize:
+$json["$(FIELD)"] = array();
+$map_$(FIELD) = $json["$(FIELD)"];
+$json_main = $json;
+foreach($(OWNER)$(FIELD) as $key => $value)
+{
+    $json = $map_$(FIELD)["pair"] = array();
+    $(KEY_SERIALIZE)
+    $(VALUE_SERIALIZE)
+}
+$json = $json_main;
+#deserialize:
+$json_cache = $json;
+if(isset($json->$(FIELD)))
+{
+    $arr = $json->$(FIELD);
+    foreach($arr as $json)
+    {
+        $(VALUE)
+        $(KEY_SERIALIZE)
+        $map_key = (string)$key;
+        $(VALUE_SERIALIZE)
+        $(OWNER)$(FIELD)[$map_key] = $value;
+    }
+}
+$json = $json_cache;
+
+
+
+#enum
+#serialize:
+$json["$(FIELD)"] = $(OWNER)$(FIELD);
+#deserialize:
+$(OWNER)$(FIELD) = (string)($json["$(FIELD)"]);
+
+'''

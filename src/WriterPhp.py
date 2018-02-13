@@ -2,6 +2,7 @@ from Writer import Writer
 from Function import Function
 from Class import Class
 from DataStorageCreators import DataStoragePhpXml
+from DataStorageCreators import DataStoragePhpJson
 from Error import Error
 import re
 from Object import AccessSpecifier
@@ -168,7 +169,10 @@ class WriterPhp(Writer):
         function.args = [[self.getSerialiationFunctionArgs(), None]]
 
         if cls.behaviors:
-            function.operations.append('parent::{}($xml);'.format(function.name))
+            if self.serialize_format == 'xml':
+                function.operations.append('parent::{}($xml);'.format(function.name))
+            else:
+                function.operations.append('parent::{}($json);'.format(function.name))
         for obj in cls.members:
             if obj.is_runtime:
                 continue
@@ -308,8 +312,8 @@ __end__;
     def create_data_storage_class(self, name, classes):
         if self.serialize_format == 'xml':
             return DataStoragePhpXml(name, classes, self.parser)
-        # else:
-        #     return DataStoragePhpJson(name, classes, self.parser)
+        else:
+            return DataStoragePhpJson(name, classes, self.parser)
         pass
 
     def prepare_file(self, body):
@@ -500,6 +504,7 @@ __begin__
 __end__;
 
 ?>'''
+_pattern_file['json'] = _pattern_file['xml']
 
 _pattern_visitor = '''<?php
 

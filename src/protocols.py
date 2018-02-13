@@ -1,4 +1,5 @@
 from protocols_php import php_xml
+from protocols_php import php_json
 
 cpp_xml = '''
 #int
@@ -772,4 +773,4 @@ $(OWNER)$(FIELD) = dictionary["$(FIELD)"]
 protocols = {}
 protocols['cpp'] = {'xml': cpp_xml, 'json': cpp_json}
 protocols['py'] = {'xml': py_xml, 'json': py_json}
-protocols['php'] = {'xml': php_xml, 'json': None}
+protocols['php'] = {'xml': php_xml, 'json': php_json}

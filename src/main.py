@@ -19,7 +19,7 @@ def validate_arg_language(language):
 
 def validate_arg_format(format):
     if format not in ['xml', 'json']:
-        Log.error('Unknown language (-l : %s)' % format)
+        Log.error('Unknown format (-l : %s)' % format)
         Log.error('Please use any from [xml, json]')
         exit(-1)
 

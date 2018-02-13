@@ -364,3 +364,15 @@ class DataStoragePhpXml(DataStoragePhp):
         function.operations.append('$root = simplexml_load_string(buffer);')
         function.operations.append('$this->deserialize(root);')
         function.operations.append('$this->_loaded = true;')
+
+
+class DataStoragePhpJson(DataStoragePhp):
+    """docstring for DataStoragePythonXml"""
+
+    def __init__(self, *args):
+        DataStoragePhp.__init__(self, *args)
+
+    def add_initialize_function_operations(self, function):
+        function.operations.append('$json = json_decode(buffer);')
+        function.operations.append('$this->deserialize(json);')
+        function.operations.append('$this->_loaded = true;')
