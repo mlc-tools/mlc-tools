@@ -13,7 +13,7 @@ bool in_map(const K& element, const std::map<T, P>& map)
 }
 
 template <class I, class T>
-bool in_list(const I& item, const std::vector<T>& list)
+bool in_list(I item, const std::vector<T>& list)
 {
     return std::find(list.begin(), list.end(), item) != list.end();
 }
