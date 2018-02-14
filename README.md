@@ -1,4 +1,5 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/t5sp7poff0ygygw5/branch/master?svg=true)](https://ci.appveyor.com/project/Volodar/tools-mlc/branch/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/h67gs6x8s4i400lw?svg=true)](https://ci.appveyor.com/project/Volodar/mlc-tools)
+
 
 ### Simple using: ###
 
