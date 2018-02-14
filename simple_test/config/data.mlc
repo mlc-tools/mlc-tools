@@ -17,10 +17,10 @@ class data/DataUnit<SerializedObject>:storage
 	function bool tests(Logger* logger):static
 	{
 	    auto result = true;
-	    result = logger->add_result(DataUnit::test_links(logger), ' - DataUnit: links') && result;
-	    result = logger->add_result(DataUnit::test_enums(logger), ' - DataUnit: enums') && result;
-	    result = logger->add_result(DataUnit::test_list_links(logger), ' - DataUnit: list_links') && result;
-	    result = logger->add_result(DataUnit::test_map_links(logger), ' - DataUnit: map_links') && result;
+	    result = logger->add_result(DataUnit::test_links(logger), " - DataUnit: links") && result;
+	    result = logger->add_result(DataUnit::test_enums(logger), " - DataUnit: enums") && result;
+	    result = logger->add_result(DataUnit::test_list_links(logger), " - DataUnit: list_links") && result;
+	    result = logger->add_result(DataUnit::test_map_links(logger), " - DataUnit: map_links") && result;
 	    return result;
 	}
 
@@ -42,7 +42,7 @@ class data/DataUnit<SerializedObject>:storage
         bool result = true;
 
         auto units = DataStorage::shared().units;
-        result = logger->add_result(2 == list_size(units), 'Two units in storage') && result;
+        result = logger->add_result(2 == map_size(units), " - Two units in storage") && result;
 
         auto unit1 = DataStorage::shared().get<DataUnit>("unitname1");
         auto unit2 = DataStorage::shared().get<DataUnit>("unitname2");

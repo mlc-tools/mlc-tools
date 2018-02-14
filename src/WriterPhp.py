@@ -57,9 +57,13 @@ class WriterPhp(Writer):
                 if member.initial_value is not None and member.name == '_value':
                     member.initial_value = cls.members[0].initial_value
 
-        initialize_list = ''
+        declaration_list = ''
+        initialization_list = ''
         for object in cls.members:
-            initialize_list += self.write_object(object) + '\n'
+            declare, init = self.write_object(object)
+            declaration_list += declare + '\n'
+            if init:
+                initialization_list += init + '\n'
 
         self.createSerializationFunction(cls, SERIALIZATION)
         self.createSerializationFunction(cls, DESERIALIZATION)
@@ -89,7 +93,7 @@ class WriterPhp(Writer):
         if 'DataStorage' in functions:
             imports += include_patter.format('DataStorage')
 
-        out = pattern.format(name, extend, initialize_list, functions, imports)
+        out = pattern.format(name, extend, declaration_list, functions, imports, initialization_list)
         self.current_class = None
         return {flags: out}
 
@@ -122,7 +126,8 @@ class WriterPhp(Writer):
         return out
 
     def write_object(self, object):
-        out = ''
+        out_declaration = ''
+        out_init = ''
         value = object.initial_value
         if value is None and not object.is_pointer:
             type = object.type
@@ -140,6 +145,10 @@ class WriterPhp(Writer):
                 value = "array()"
             elif type == "map":
                 value = "array()"
+            else:
+                if self.parser.find_class(object.type):
+                    value = 'null'
+                    out_init = '$this->{} = new {}();'.format(object.name, object.type)
 
         accesses = {
             AccessSpecifier.public: 'public',
@@ -148,11 +157,11 @@ class WriterPhp(Writer):
         }
 
         if object.is_static:
-            out = accesses[object.access] + ' static ${0} = {1};'
+            out_declaration = accesses[object.access] + ' static ${0} = {1};'
         else:
-            out = accesses[object.access] + ' ${0} = {1};'
-        out = out.format(object.name, convertInitializeValue(value))
-        return out
+            out_declaration = accesses[object.access] + ' ${0} = {1};'
+        out_declaration = out_declaration.format(object.name, convertInitializeValue(value))
+        return out_declaration, out_init
 
     def _getImports(self, cls):
         return ""
@@ -363,7 +372,7 @@ __end__;
         self.save_file(storage.name + '.php', content)
 
     def convert_to_enum(self, cls, use_type='string'):
-        values = Writer.convert_to_enum(self, cls, use_type)
+        Writer.convert_to_enum(self, cls, use_type)
         function = Function()
         function.name = '__toString'
         function.operations.append('return $this->_value;')
@@ -432,7 +441,7 @@ regs = [
     [re.compile('&(\w+)'), '\\1'],
     [re.compile('\\$if\\('), 'if('],
     [re.compile('delete (\w+);'), ''],
-    [re.compile('([-0-9])->([-0-9])f'), '\\1.\\2'],
+    [re.compile('([-0-9])->([-0-9])f\\b'), '\\1.\\2'],
     [re.compile('assert\\(.+\\);'), ''],
     [re.compile('make_intrusive<(\w+)>\\(\s*\\)'), 'new \\1()'],
     [re.compile('new\s*(\w+)\s*\\(\s*\\)'), 'new \\1()'],
@@ -448,8 +457,8 @@ def convert_function_to_php(func, parser, function_args):
 
     regs2 = [
         ['->\\$(\w+)\\(', '->\\1('],
-        ['([-0-9]*)->([-0-9]*)f', '\\1.\\2'],
-        ['([-0-9]*)->f', '\\1.0'],
+        ['([-0-9]*)->([-0-9]*)f\\b', '\\1.\\2'],
+        ['([-0-9]*)->f\\b', '\\1.0'],
     ]
 
     repl = [
@@ -503,6 +512,10 @@ class {0} {1}
 __begin__
 //members:
 {2}
+public function __construct()
+__begin__
+{5}
+__end__
 //functions
 {3}
 __end__;

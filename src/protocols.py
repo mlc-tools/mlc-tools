@@ -736,7 +736,7 @@ dictionary['$(FIELD)'] = []
 #deserialize:
 arr = dictionary['$(FIELD)']
         for name in arr:
-            data = DataStorage.shared().get$(TYPE)(name)
+            data = DataStorage.shared().get$(ARG_0)(name)
             $(OWNER)$(FIELD).append(data)
 
 
@@ -759,7 +759,7 @@ $(VALUE_SERIALIZE)
             type = key
             dictionary = dict
 $(VALUE_SERIALIZE)
-            $(OWNER)$(FIELD)[type] = _value
+            $(OWNER)$(FIELD)[type] = value
         dictionary = dict_cach
 
 

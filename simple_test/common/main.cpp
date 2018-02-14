@@ -28,9 +28,11 @@ void initialize_data_storage()
 {
 #if MG_SERIALIZE_FORMAT == MG_JSON
 	std::fstream stream(root + "assets/data.json", std::ios::in);
+    std::cout << "MG_SERIALIZE_FORMAT == MG_JSON\n";
 #endif
 #if MG_SERIALIZE_FORMAT == MG_XML
 	std::fstream stream(root + "assets/data.xml", std::ios::in);
+    std::cout << "MG_SERIALIZE_FORMAT == MG_XML\n";
 #endif
 
 	std::string str((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());

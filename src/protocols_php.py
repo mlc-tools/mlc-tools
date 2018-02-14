@@ -225,11 +225,11 @@ $(OWNER)$(FIELD)->deserialize($json->$(FIELD));
 if($(OWNER)$(FIELD))
 {
     $json["$(FIELD)"] = array();
-    $json["$(FIELD)"]["type"] = $(OWNER)$(FIELD)->get_type());
+    $json["$(FIELD)"]["type"] = $(OWNER)$(FIELD)->get_type();
     $(OWNER)$(FIELD)->serialize($json["$(FIELD)"]);
 }
 #deserialize:
-if(isset(json->$(FIELD)))
+if(isset($json->$(FIELD)))
 {
     $type = (string)$json->$(FIELD)->type;
     $(OWNER)$(FIELD) = Factory::build($type);
@@ -259,15 +259,15 @@ if(isset($json->$(FIELD)))
 $json["$(FIELD)"] = array();
 foreach($(OWNER)$(FIELD) as $item)
 {
-    array_push(json["$(FIELD)"], "");
-    $item->serialize(json["$(FIELD)"][count(json["$(FIELD)"])]);
+    array_push($json["$(FIELD)"], "");
+    $item->serialize($json["$(FIELD)"][count($json["$(FIELD)"])]);
 }
 #deserialize:
 foreach($json->$(FIELD) as $item)
 {
     $obj = new $(TYPE)();
     $obj->deserialize($item);
-    array_push($(OWNER)$(FIELD), &obj);
+    array_push($(OWNER)$(FIELD), $obj);
 }
 
 #pointer_list
@@ -275,13 +275,13 @@ foreach($json->$(FIELD) as $item)
 $json["$(FIELD)"] = array();
 foreach($(OWNER)$(FIELD) as $t)
 {
-    array_push($json[$(FIELD)], array());
+    array_push($json["$(FIELD)"], array());
     $arr = array();
-    t->serialize($arr);
-    $json[$(FIELD)][count($json[$(FIELD)])][t->get_type()] = $arr;
+    $t->serialize($arr);
+    $json["$(FIELD)"][count($json["$(FIELD)"])][$t->get_type()] = $arr;
 }
 #deserialize:
-$arr_$(FIELD) = $json->"$(FIELD)";
+$arr_$(FIELD) = $json->$(FIELD);
 foreach($arr_$(FIELD) as $item)
 {
     $type = current($item[0]);

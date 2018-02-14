@@ -123,6 +123,7 @@ class WriterPython(Writer):
         return out
 
     def write_object(self, object):
+        imports = ''
         if object.name == 'from':
             object.name = 'from_'
         value = object.initial_value
@@ -142,6 +143,10 @@ class WriterPython(Writer):
                 value = "[]"
             if type == "map":
                 value = "{}"
+            else:
+                if self.parser.find_class(object.type):
+                    value = object.type + '()'
+                    imports += 'from {0} import {0}\n        '.format(object.type)
         if value and value.endswith('f'):
             value = value[0:-1] + '0'
 
@@ -150,7 +155,7 @@ class WriterPython(Writer):
         else:
             out = 'self.{0} = {1}'
         out = out.format(object.name, convertInitializeValue(value))
-        return out
+        return imports + out
 
     def _getImports(self, cls):
         return ""

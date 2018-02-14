@@ -162,19 +162,11 @@ class DataStoragePython(DataStorage):
     def create_deserialize(self):
         function = Function()
         function.name = 'deserialize'
-        function.args.append(['xml', ''])
+        function.args.append(self.get_deserialize_args())
         for member in self.members:
             if member.type != 'map':
                 continue
-            pattern = '''
-        map = xml.find('{0}')
-        for xml_child in (map if map is not None else []):
-            key = xml_child.get('key')
-            xml_value = xml_child.find('value')
-            if key not in self.{0}:
-                from {1} import {1}
-                self.{0}[key] = {1}()
-            self.{0}[key].deserialize(xml_value)'''
+            pattern = self.get_deserialize_pattern()
             function.operations.append(pattern.format(member.name, member.template_args[1].name))
 
         self.functions.append(function)
@@ -274,6 +266,20 @@ class DataStoragePythonXml(DataStoragePython):
         function.operations.append('root = ET.fromstring(buffer)')
         function.operations.append('self.deserialize(root)')
         function.operations.append('self._loaded = True')
+        
+    def get_deserialize_pattern(self):
+        return '''
+        map = xml.find('{0}')
+        for xml_child in (map if map is not None else []):
+            key = xml_child.get('key')
+            xml_value = xml_child.find('value')
+            if key not in self.{0}:
+                from {1} import {1}
+                self.{0}[key] = {1}()
+            self.{0}[key].deserialize(xml_value)'''
+    
+    def get_deserialize_args(self):
+        return ['xml', '']
 
 
 class DataStoragePythonJson(DataStoragePython):
@@ -281,6 +287,26 @@ class DataStoragePythonJson(DataStoragePython):
 
     def __init__(self, *args):
         DataStoragePython.__init__(self, *args)
+
+    def add_initialize_function_operations(self, function):
+        function.operations.append('import json')
+        function.operations.append('js = json.loads(buffer)')
+        function.operations.append('self.deserialize(js)')
+        function.operations.append('self._loaded = True')
+        
+    def get_deserialize_pattern(self):
+        return '''
+        map = js['{0}'] if '{0}' in js else []
+        for json_child in map:
+            key = json_child['key']
+            value = json_child['value']
+            if key not in self.{0}:
+                from {1} import {1}
+                self.{0}[key] = {1}()
+            self.{0}[key].deserialize(value)'''
+
+    def get_deserialize_args(self):
+        return ['js', '']
 
 
 class DataStoragePhpXml(DataStoragePhp):

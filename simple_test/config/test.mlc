@@ -30,6 +30,7 @@ class AllTests<SerializedObject>
         bool result = true;
         result = logger->add_result(FunctionTest::tests(logger), "Function tests") && result;
         result = logger->add_result(DataUnit::tests(logger), "Static data") && result;
+        result = logger->add_result(AllTypes::tests(logger), "AllTypes tests") && result;
 
         return result;
     }
@@ -76,6 +77,60 @@ class AllTypes<SerializedObject>
 	list<AllTypesChildren*> object_ptr_list
 	map<string, AllTypesChildren> object_map
 	map<string, AllTypesChildren*> object_ptr_map
+
+    function void initialize()
+    {
+        this->int_value0 = 1;
+        this->int_value1 = 1;
+        this->float_value0 = 1.f;
+        this->float_value1 = 1.0f;
+        this->bool_value0 = false;
+        this->bool_value1 = true;
+        this->str_value0 = "test_string";
+        this->str_value1 = "test_string";
+
+        list_push(this->int_list, 0);
+        list_push(this->int_list, 1);
+        list_push(this->float_list, 0.f);
+        list_push(this->float_list, 1.f);
+        list_push(this->bool_list, true);
+        list_push(this->bool_list, true);
+        list_push(this->string_list, "0");
+        list_push(this->string_list, "1");
+
+        this->int_string_map[0] = "0";
+        this->int_string_map[1] = "1";
+        this->bool_string_map[true] = "0";
+        this->bool_string_map[false] = "1";
+        this->float_string_map[0.f] = "0";
+        this->float_string_map[1.f] = "1";
+        this->string_string_map["0"] = "0";
+        this->string_string_map["1"] = "1";
+
+        this->string_int_map["0"] = 0;
+        this->string_int_map["1"] = 1;
+        this->string_bool_map["0"] = true;
+        this->string_bool_map["1"] = false;
+        this->string_float_map["0"] = 0.f;
+        this->string_float_map["1"] = 1.f;
+        this->string_string_map["0"] = "0";
+        this->string_string_map["1"] = "1";
+
+        this->object.value = 0;
+        this->object_ptr = new AllTypesChildren();
+        this->object_ptr->value = 0;
+
+    }
+
+    function bool tests(Logger* logger):static
+    {
+        bool result = true;
+
+        auto inst = new AllTypes();
+        inst->initialize();
+
+        return result;
+    }
 }
 
 class Request<SerializedObject>:visitor

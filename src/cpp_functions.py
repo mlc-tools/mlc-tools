@@ -18,8 +18,8 @@ bool in_list(I item, const std::vector<T>& list)
     return std::find(list.begin(), list.end(), item) != list.end();
 }
 
-template <class T>
-void list_push(std::vector<T>& list, const T& t)
+template <class T, class I>
+void list_push(std::vector<T>& list, const I& t)
 {
     list.push_back(t);
 }
