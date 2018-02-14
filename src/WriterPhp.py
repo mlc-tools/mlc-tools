@@ -103,10 +103,16 @@ class WriterPhp(Writer):
         functions_cache[cls.name].append(function.name)
         convert = function.name not in allowed_functions and self.current_class.name != 'DataStorage'
 
-        out = '''public function {0}({1})
+        out = '''function {0}({1})
         __begin__
         {2}
         __end__\n'''
+
+        if function.is_static:
+            out = 'public static ' + out
+        else:
+            out = 'public ' + out
+
         name = function.name
         args = ', '.join(['$' + x[0] for x in function.args])
         ops = '\n'.join(function.operations)
