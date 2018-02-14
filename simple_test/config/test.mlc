@@ -25,11 +25,11 @@ class Logger<SerializedObject>
 
 class AllTests<SerializedObject>
 {
-    function bool run(Logger* loger):static
+    function bool run(Logger* logger):static
     {
         bool result = true;
-        result = loger->add_result(FunctionTest::tests(loger), "Function tests") && result;
-        result = loger->add_result(DataUnit::tests(), "Static data") && result;
+        result = logger->add_result(FunctionTest::tests(logger), "Function tests") && result;
+        result = logger->add_result(DataUnit::tests(logger), "Static data") && result;
 
         return result;
     }

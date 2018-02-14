@@ -208,7 +208,6 @@ class DataStoragePhp(DataStorage):
 
     def __init__(self, *args):
         DataStorage.__init__(self, *args)
-        self.create_deserialize()
 
         object = Object()
         object.type = self.name
@@ -218,47 +217,7 @@ class DataStoragePhp(DataStorage):
         object.access = AccessSpecifier.private
         self.members.append(object)
 
-        object = Object()
-        object.type = self.name
-        object.name = '__xml'
-        object.initial_value = 'NULL'
-        object.is_static = True
-        object.access = AccessSpecifier.private
-        self.members.append(object)
-
-        object = Object()
-        object.type = 'string'
-        object.name = 'PATH_TO_DATA'
-        object.initial_value = '"assets/data/data.xml"'
-        object.is_static = True
-        object.access = AccessSpecifier.public
-        self.members.append(object)
-
-    def create_deserialize(self):
-        function = Function()
-        function.name = 'deserialize'
-        function.args.append(['xml', ''])
-        self.functions.append(function)
-
-        function = Function()
-        function.name = 'serialize'
-        function.args.append(['xml', ''])
-        self.functions.append(function)
-
-    def create_shared_method(self):
-        function = Function()
-        function.name = 'shared'
-        # function.args.append(['', ''])
-        function.return_type = self.name
-        function.is_static = True
-        function.operations.append('if({0}::$__instance == NULL)'.format(self.name))
-        function.operations.append('{')
-        function.operations.append('    {0}::$__instance = new {0}();'.format(self.name))
-        function.operations.append('    {0}::$__xml = simplexml_load_file({0}::$PATH_TO_DATA);'.format(self.name))
-        function.operations.append('}')
-        function.operations.append('return {0}::$__instance;'.format(self.name))
-        function.link()
-        self.functions.append(function)
+        self.create_deserialize()
 
     def create_getters(self, classes):
         for class_ in classes:
@@ -267,44 +226,14 @@ class DataStoragePhp(DataStorage):
                 function = Function()
                 function.name = 'get' + class_.name
                 function.args.append(['name', ''])
-                function.operations.append('''
-                    if (array_key_exists($name, $this->@{array}))
-                    {
-                        return $this->@{array}[$name];
-                    } else
-                    {
-                        $data = new @{type}();
-                        if(DataStorage::$__xml->@{array})
-                        {
-                            foreach (DataStorage::$__xml->@{array}->pair as $node)
-                            {
-                                if ($node["key"] == $name)
-                                {
-                                    $this->@{array}[$name] = $data;
-                                    $data->deserialize($node->value);
-                                }
-                            }
-                        }
-                        return $data;
-                    }
-                    ''')
+                function.operations.append(self.get_getter_pattern())
                 function.operations[0] = function.operations[0].replace('@{array}', map_name)
                 function.operations[0] = function.operations[0].replace('@{type}', class_.name)
                 self.functions.append(function)
 
                 function = Function()
                 function.name = 'loadAll' + get_data_list_name(class_.name)
-                function.operations.append('''
-                    if(DataStorage::$__xml->@{array})
-                    {
-                        foreach (DataStorage::$__xml->@{array}->pair as $node)
-                        {
-                            $name = (string)$node["key"];
-                            $this->@{array}[$name] = new @{type}();
-                            $this->@{array}[$name]->deserialize($node->value);
-                        }
-                    }
-                    ''')
+                function.operations.append(self.get_load_all_pattern())
                 function.operations[0] = function.operations[0].replace('@{array}', map_name)
                 function.operations[0] = function.operations[0].replace('@{type}', class_.name)
                 self.functions.append(function)
@@ -360,10 +289,88 @@ class DataStoragePhpXml(DataStoragePhp):
     def __init__(self, *args):
         DataStoragePhp.__init__(self, *args)
 
+        object = Object()
+        object.type = self.name
+        object.name = '__xml'
+        object.initial_value = 'NULL'
+        object.is_static = True
+        object.access = AccessSpecifier.private
+        self.members.append(object)
+
+        object = Object()
+        object.type = 'string'
+        object.name = 'PATH_TO_DATA'
+        object.initial_value = '"assets/data/data.xml"'
+        object.is_static = True
+        object.access = AccessSpecifier.public
+        self.members.append(object)
+
+    def create_deserialize(self):
+        function = Function()
+        function.name = 'deserialize'
+        function.args.append(['xml', ''])
+        self.functions.append(function)
+
+        function = Function()
+        function.name = 'serialize'
+        function.args.append(['xml', ''])
+        self.functions.append(function)
+
     def add_initialize_function_operations(self, function):
         function.operations.append('$root = simplexml_load_string(buffer);')
         function.operations.append('$this->deserialize(root);')
         function.operations.append('$this->_loaded = true;')
+
+    def create_shared_method(self):
+        function = Function()
+        function.name = 'shared'
+        # function.args.append(['', ''])
+        function.return_type = self.name
+        function.is_static = True
+        function.operations.append('if({0}::$__instance == NULL)'.format(self.name))
+        function.operations.append('{')
+        function.operations.append('    {0}::$__instance = new {0}();'.format(self.name))
+        function.operations.append('    {0}::$__xml = simplexml_load_file({0}::$PATH_TO_DATA);'.format(self.name))
+        function.operations.append('}')
+        function.operations.append('return {0}::$__instance;'.format(self.name))
+        function.link()
+        self.functions.append(function)
+
+    def get_getter_pattern(self):
+        return '''
+            if (array_key_exists($name, $this->@{array}))
+            {
+                return $this->@{array}[$name];
+            } else
+            {
+                $data = new @{type}();
+                if(DataStorage::$__xml->@{array})
+                {
+                    foreach (DataStorage::$__xml->@{array}->pair as $node)
+                    {
+                        if ($node["key"] == $name)
+                        {
+                            $this->@{array}[$name] = $data;
+                            $data->deserialize($node->value);
+                        }
+                    }
+                }
+                return $data;
+            }
+            '''
+
+    def get_load_all_pattern(self):
+        return '''
+            if(DataStorage::$__xml->@{array})
+            {
+                foreach (DataStorage::$__xml->@{array}->pair as $node)
+                {
+                    $name = (string)$node["key"];
+                    $this->@{array}[$name] = new @{type}();
+                    $this->@{array}[$name]->deserialize($node->value);
+                }
+            }
+            '''
 
 
 class DataStoragePhpJson(DataStoragePhp):
@@ -372,7 +379,86 @@ class DataStoragePhpJson(DataStoragePhp):
     def __init__(self, *args):
         DataStoragePhp.__init__(self, *args)
 
+        object = Object()
+        object.type = self.name
+        object.name = '__json'
+        object.initial_value = 'NULL'
+        object.is_static = True
+        object.access = AccessSpecifier.private
+        self.members.append(object)
+
+        object = Object()
+        object.type = 'string'
+        object.name = 'PATH_TO_DATA'
+        object.initial_value = '"assets/data/data.json"'
+        object.is_static = True
+        object.access = AccessSpecifier.public
+        self.members.append(object)
+
+    def create_deserialize(self):
+        function = Function()
+        function.name = 'deserialize'
+        function.args.append(['json', ''])
+        self.functions.append(function)
+
+        function = Function()
+        function.name = 'serialize'
+        function.args.append(['json', ''])
+        self.functions.append(function)
+
     def add_initialize_function_operations(self, function):
         function.operations.append('$json = json_decode(buffer);')
         function.operations.append('$this->deserialize(json);')
         function.operations.append('$this->_loaded = true;')
+
+    def create_shared_method(self):
+        function = Function()
+        function.name = 'shared'
+        # function.args.append(['', ''])
+        function.return_type = self.name
+        function.is_static = True
+        function.operations.append('if({0}::$__instance == NULL)'.format(self.name))
+        function.operations.append('{')
+        function.operations.append('    {0}::$__instance = new {0}();'.format(self.name))
+        function.operations.append('    $string = file_get_contents(DataStorage::$PATH_TO_DATA);')
+        function.operations.append('    {0}::$__json = json_decode($string);'.format(self.name))
+        function.operations.append('}')
+        function.operations.append('return {0}::$__instance;'.format(self.name))
+        function.link()
+        self.functions.append(function)
+
+    def get_getter_pattern(self):
+        return '''
+            if (array_key_exists($name, $this->@{array}))
+            {
+                return $this->@{array}[$name];
+            } else
+            {
+                $data = new @{type}();
+                if(DataStorage::$__json->@{array})
+                {
+                    foreach (DataStorage::$__json->@{array} as $node)
+                    {
+                        if ($node->key == $name)
+                        {
+                            $this->@{array}[$name] = $data;
+                            $data->deserialize($node->value);
+                        }
+                    }
+                }
+                return $data;
+            }
+            '''
+
+    def get_load_all_pattern(self):
+        return '''
+            if(DataStorage::$__json->@{array})
+            {
+                foreach (DataStorage::$__json->@{array} as $node)
+                {
+                    $name = (string)$node->key;
+                    $this->@{array}[$name] = new @{type}();
+                    $this->@{array}[$name]->deserialize($node->value);
+                }
+            }
+            '''

@@ -265,8 +265,7 @@ class WriterPhp(Writer):
         # self.save_file('config.py', buffer)
 
     def createFactory(self):
-        pattern = '''
-<?php
+        pattern = '''<?php
 
 class Factory
 __begin__
@@ -276,8 +275,7 @@ __begin__
     __end__
 __end__;
 
-?>
-'''
+?>'''
         factory = pattern.format('require_once "$type.php"; \n return new $type;')
         self.save_file('Factory.php', factory)
 

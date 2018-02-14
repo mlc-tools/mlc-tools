@@ -263,7 +263,7 @@ foreach($(OWNER)$(FIELD) as $item)
     $item->serialize(json["$(FIELD)"][count(json["$(FIELD)"])]);
 }
 #deserialize:
-foreach($json["$(FIELD)"] as $item)
+foreach($json->$(FIELD) as $item)
 {
     $obj = new $(TYPE)();
     $obj->deserialize($item);
@@ -346,6 +346,6 @@ $json = $json_cache;
 #serialize:
 $json["$(FIELD)"] = $(OWNER)$(FIELD);
 #deserialize:
-$(OWNER)$(FIELD) = (string)($json["$(FIELD)"]);
+$(OWNER)$(FIELD) = (string)($json->$(FIELD));
 
 '''

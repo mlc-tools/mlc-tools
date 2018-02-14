@@ -16,3 +16,5 @@ php_tests/gen/
 php_tests/gen_data/
 mlc.sln
 /out
+mlc.sublime-project
+mlc.sublime-workspace

@@ -22,7 +22,7 @@ class Writer:
         self.serialize_protocol = self.parser.serialize_protocol
         self.files = {}
         self.out_directory = ''
-        
+
     def convert_to_enum(self, cls, use_type='int'):
         shift = 0
         cast = use_type
@@ -45,7 +45,7 @@ class Writer:
                 values.append(m.initial_value)
             else:
                 m.initial_value = 'None'
-                
+
             shift += 1
         value = Object()
         value.initial_value = cls.members[0].name
@@ -54,7 +54,6 @@ class Writer:
         value.access = AccessSpecifier.private
         cls.members.append(value)
         return values
-
 
     def generate(self):
         self.write_classes(self.parser.classes, 0)
@@ -96,7 +95,7 @@ class Writer:
         filename = self.out_directory + filename
         self.created_files.append(filename)
         exist = fileutils.isfile(filename)
-        if fileutils.write(filename, string):
+        if fileutils.write(filename, string.strip()):
             msg = ' Create: {}' if not exist else ' Overwriting: {}'
             Log.debug(msg.format(filename))
 
