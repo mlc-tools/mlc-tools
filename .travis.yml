@@ -1,14 +1,8 @@
 sudo: required
 
 language: cpp
-
-os:
-  - linux
-  # - osx
-
-compiler:
-  - gcc
-  # - clang
+compiler: gcc
+dist: trusty
 
 before_install:
   # C++14
@@ -17,69 +11,9 @@ before_install:
 
 install: 
   # C++14
-  - sudo apt-get install -qq g++-5
-  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 90
-
-env:
-  - TARGET_CPU=amd64 BUILD_CONFIGURATION=Debug
-  - TARGET_CPU=amd64 BUILD_CONFIGURATION=Release
-  # - TARGET_CPU=x86 BUILD_CONFIGURATION=Debug
-  # - TARGET_CPU=x86 BUILD_CONFIGURATION=Release
-
-matrix:
-  # include:
-  #   - os: linux
-  #     addons:
-  #       apt:
-  #         packages:
-  #           - g++-5
-  #     env:
-  #        - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
-
-  #   - os: linux
-  #     addons:
-  #       apt:
-  #         packages:
-  #           - g++-6
-  #     env:
-  #        - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
-
-  #   - os: linux
-  #     addons:
-  #       apt:
-  #         packages:
-  #           - g++-7
-  #     env:
-  #        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
-
-
-  # exclude:
-  #   - os:       osx
-  #     compiler: gcc
-
-  #   - os:  osx
-  #     env: TARGET_CPU=x86 BUILD_CONFIGURATION=Debug
-
-  #   - os:  osx
-  #     env: TARGET_CPU=x86 BUILD_CONFIGURATION=Release
+  - sudo apt-get install -qq g++-6
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 90
 
 
 script:
   - gcc --version
-  - python src/main.py -i simple_test/config -o simple_test/generated_cpp/xml -f xml -l cpp -side server -data simple_test/data_xml -data_out simple_test/assets
-  # - python src/main.py -i simple_test/config -o simple_test/generated_cpp/json -f json -l cpp -side client -data simple_test/data_json -data_out simple_test/assets
-  
-  - cd simple_test
-  - mkdir build_xml
-  - cd build_xml
-  - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DBUILD_XML=ON -DBUILD_JSON=OFF -DBUILD_SIDE=SERVER 
-  - cmake --build .
-  - ./test_mlc_xml
-  - cd ..
-
-  # - mkdir build_json
-  # - cd build_json
-  # - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DBUILD_XML=OFF -DBUILD_JSON=ON -DBUILD_SIDE=CLIENT
-  # - cmake --build .
-  # - ./test_mlc_xml
-  # - cd ..
