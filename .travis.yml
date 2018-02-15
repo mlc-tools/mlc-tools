@@ -1,3 +1,5 @@
+sudo: required
+
 language: cpp
 
 os:
@@ -8,6 +10,10 @@ compiler:
   - gcc
   - clang
 
+packages:
+    - gcc-5
+    - g++-5
+
 env:
   - TARGET_CPU=amd64 BUILD_CONFIGURATION=Debug
   - TARGET_CPU=amd64 BUILD_CONFIGURATION=Release
@@ -15,30 +21,30 @@ env:
   - TARGET_CPU=x86 BUILD_CONFIGURATION=Release
 
 matrix:
-  include:
-    - os: linux
-      addons:
-        apt:
-          packages:
-            - g++-5
-      env:
-         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+  # include:
+  #   - os: linux
+  #     addons:
+  #       apt:
+  #         packages:
+  #           - g++-5
+  #     env:
+  #        - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
 
-    - os: linux
-      addons:
-        apt:
-          packages:
-            - g++-6
-      env:
-         - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
+  #   - os: linux
+  #     addons:
+  #       apt:
+  #         packages:
+  #           - g++-6
+  #     env:
+  #        - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
 
-    - os: linux
-      addons:
-        apt:
-          packages:
-            - g++-7
-      env:
-         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+  #   - os: linux
+  #     addons:
+  #       apt:
+  #         packages:
+  #           - g++-7
+  #     env:
+  #        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
 
 
   exclude:
@@ -50,6 +56,10 @@ matrix:
 
     - os:  osx
       env: TARGET_CPU=x86 BUILD_CONFIGURATION=Release
+
+script:
+  - sudo unlink /usr/bin/gcc && sudo ln -s /usr/bin/gcc-5 /usr/bin/gcc
+  - gcc --version
 
 script:
   - python src/main.py -i simple_test/config -o simple_test/generated_cpp/xml -f xml -l cpp -side server -data simple_test/data_xml -data_out simple_test/assets
