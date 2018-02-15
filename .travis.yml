@@ -29,6 +29,7 @@ script:
     - python src/main.py -i simple_test/config -o simple_test/generated_cpp/xml -f xml -l cpp -side server -data simple_test/data_xml -data_out simple_test/assets
     - python src/main.py -i simple_test/config -o simple_test/generated_cpp/json -f json -l cpp -side client -data simple_test/data_json -data_out simple_test/assets
     
+    - cd simple_test
     - mkdir build_xml
     - cd build_xml
     - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DBUILD_XML=ON -DBUILD_JSON=OFF -DBUILD_SIDE=SERVER 
