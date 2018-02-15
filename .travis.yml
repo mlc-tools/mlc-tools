@@ -8,6 +8,9 @@ compiler:
     - gcc
     - clang
 
+install:
+    - export CXX="g++-5"
+
 env:
     - TARGET_CPU=amd64 BUILD_CONFIGURATION=Debug
     - TARGET_CPU=amd64 BUILD_CONFIGURATION=Release
