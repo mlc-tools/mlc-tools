@@ -18,7 +18,7 @@ file(GLOB_RECURSE SRC
 						${ROOT}/external/ml/*.cpp *.h
 						${ROOT}/external/pugixml/*.cpp *.h
 						${ROOT}/external/jsoncpp/*.cpp *.h
-						${ROOT}/generated_cpp/*.cpp *.h
+						${ROOT}/generated_cpp/${TYPE}/*.cpp *.h
 						)
 
 foreach(FILE ${SRC}) 
@@ -38,7 +38,7 @@ add_definitions(-DCLIENT=2)
 add_definitions(-DBUILD_SIDE=${BUILD_SIDE})
 
 include_directories(
-	${ROOT}/generated_cpp/
+	${ROOT}/generated_cpp/${TYPE}/
 	${ROOT}/common/
 	${ROOT}/external/
 	${ROOT}/external/ml

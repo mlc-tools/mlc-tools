@@ -3,7 +3,14 @@
 require_once 'generated_php/DataStorage.php';
 require_once 'generated_php/AllTests.php';
 
-DataStorage::$PATH_TO_DATA = realpath(dirname(__FILE__))."/assets/data.json";
+$file = 'data.xml';
+if (count($argv) > 1) {
+	$file = 'data.'.$argv[1];
+}
+
+$file = realpath(dirname(__FILE__))."/assets/$file";
+
+DataStorage::$PATH_TO_DATA = $file;
 DataStorage::shared()->loadAllDataUnits();
 
 class Logger {

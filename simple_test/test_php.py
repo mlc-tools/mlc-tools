@@ -1,5 +1,10 @@
 import os
-path = os.path.dirname(os.path.abspath(__file__))
+import sys
 
-print 'run tests:'
-os.system('php {}/{}'.format(path, 'test_php.php'))
+
+def main(argv):
+    path = os.path.dirname(os.path.abspath(__file__))
+    os.system('php {}/{} {}'.format(path, 'test_php.php', ' '.join(argv[1:])))
+
+if __name__ == '__main__':
+    main(sys.argv)

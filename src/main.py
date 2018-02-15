@@ -56,10 +56,14 @@ def main():
     parser.add_argument('-php_validate', type=str,
                         help='Check PHP features on generate other languages. Default = yes',
                         required=False, default='yes')
-    parser.add_argument('-test_script', type=str, help='The path to the script to run the tests',
-                        required=False, default='')
     parser.add_argument('-use_colors', type=str, help='Using colors on outputting to the console',
                         required=False, default='yes')
+    parser.add_argument('-test_script', type=str, help='The path to the script to run the tests',
+                        required=False, default='')
+    parser.add_argument('-test_script_args', type=str, help='The arg to pass to test script',
+                        required=False, default='')
+    parser.add_argument('-disable_logs', type=str, help='Disabling logs to output',
+                        required=False, default='no')
     args = parser.parse_args()
 
     configs_directory = fileutils.normalize_path(args.i)
@@ -73,12 +77,14 @@ def main():
     side = args.side
     php_validate = args.php_validate.lower() == 'yes'
     use_colors = args.use_colors.lower() == 'yes'
+    disable_logs = args.disable_logs.lower() == 'yes'
 
     validate_arg_language(language)
     validate_arg_format(serialize_format)
     validate_arg_side(side)
-    
+
     Log.use_colors = use_colors
+    Log.disable_logs = disable_logs
     parser = Parser(side, language == 'cpp')
     parser.set_configs_directory(configs_directory)
     files = fileutils.get_files_list(configs_directory)
@@ -127,9 +133,8 @@ def main():
 
     if args.test_script and os.path.isfile(args.test_script):
         Log.message('Run test (%s):' % args.test_script)
-        if os.system('python ' + args.test_script) != 0:
+        if os.system('python {} {}'.format(args.test_script, args.test_script_args)) != 0:
             exit(1)
-
 
 
 if __name__ == '__main__':
