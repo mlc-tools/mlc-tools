@@ -59,7 +59,7 @@ script:
   - cmake --build .
   - ./test_mlc_json ../
   - cd ..
-  -popd
+  - popd
 
   # test serialize:
   - push
