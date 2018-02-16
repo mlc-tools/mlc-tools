@@ -436,14 +436,18 @@ $(OWNER)$(FIELD) = int(float(xml.get("$(FIELD)")))
 #serialize:
 #with default value:
 if $(OWNER)$(FIELD) != $(DEFAULT_VALUE):
-            xml.set("$(FIELD)", str($(OWNER)$(FIELD)))
+            xml.set("$(FIELD)", "yes" if $(OWNER)$(FIELD) else "no" )
 #without default value:
 xml.set("$(FIELD)", str($(OWNER)$(FIELD)))
 #deserialize:
 #with default value:
-$(OWNER)$(FIELD) = bool(xml.get("$(FIELD)", default=$(DEFAULT_VALUE)))
+value = xml.get("$(FIELD)", default="$(DEFAULT_VALUE)")
+        value = value.lower()[0] in ['t', 'y'] if value else False
+$(OWNER)$(FIELD) = value
 #without default value:
-$(OWNER)$(FIELD) = bool(xml.get("$(FIELD)"))
+value = xml.get("$(FIELD)")
+        value = value.lower()[0] in ['t', 'y'] if value else False
+        $(OWNER)$(FIELD) = value
 
 #float
 #serialize:
@@ -509,7 +513,9 @@ arr = ET.SubElement(xml, '$(FIELD)')
 arr = xml.find('$(FIELD)')
         if arr is not None:
             for obj in arr:
-                $(OWNER)$(FIELD).append(bool(obj.get('value')))
+                value = obj.get('value')
+                value = value.lower()[0] in ['t', 'y'] if value else False
+                $(OWNER)$(FIELD).append(value)
 
 #list<float>
 #serialize:
