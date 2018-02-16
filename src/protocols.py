@@ -443,7 +443,7 @@ xml.set("$(FIELD)", str($(OWNER)$(FIELD)))
 #with default value:
 value = xml.get("$(FIELD)", default="$(DEFAULT_VALUE)")
         value = value.lower()[0] in ['t', 'y'] if value else False
-$(OWNER)$(FIELD) = value
+        $(OWNER)$(FIELD) = value
 #without default value:
 value = xml.get("$(FIELD)")
         value = value.lower()[0] in ['t', 'y'] if value else False
