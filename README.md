@@ -1,6 +1,7 @@
-[![Build status (Appveyor)](https://ci.appveyor.com/api/projects/status/h67gs6x8s4i400lw?svg=true)](https://ci.appveyor.com/project/Volodar/mlc-tools)
-
-[![Build Status (travis-ci)](https://travis-ci.org/mlc-tools/mlc-tools.svg?branch=master)](https://travis-ci.org/mlc-tools/mlc-tools)
+| ci       | Status                                                                                                                                      |
+|----------|---------------------------------------------------------------------------------------------------------------------------------------------|
+| Travis   | [![Build Status](https://travis-ci.org/mlc-tools/mlc-tools.svg?branch=master)](https://travis-ci.org/mlc-tools/mlc-tools)                   |
+| Appveyor | [![Build status](https://ci.appveyor.com/api/projects/status/h67gs6x8s4i400lw?svg=true)](https://ci.appveyor.com/project/Volodar/mlc-tools) |
 
 ### Simple using: ###
 
