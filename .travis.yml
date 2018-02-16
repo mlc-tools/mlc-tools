@@ -43,31 +43,16 @@ script:
   
   - cd simple_test
 
-  - mkdir build_xml_server
-  - cd build_xml_server
+  - mkdir build_xml
+  - cd build_xml
   - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DBUILD_XML=ON -DBUILD_JSON=OFF -DBUILD_SIDE=SERVER 
   - make
   - ./test_mlc_xml ../
   - cd ..
 
-  - mkdir build_xml_client
-  - cd build_xml_client
-  - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DBUILD_XML=ON -DBUILD_JSON=OFF -DBUILD_SIDE=CLIENT 
-  - make
-  - ./test_mlc_xml ../
-  - cd ..
-
-
-  - mkdir build_json_server
-  - cd build_json_server
+  - mkdir build_json
+  - cd build_json
   - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DBUILD_XML=OFF -DBUILD_JSON=ON -DBUILD_SIDE=SERVER
-  - cmake --build .
-  - ./test_mlc_json ../
-  - cd ..
-
-  - mkdir build_json_client
-  - cd build_json_client
-  - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DBUILD_XML=OFF -DBUILD_JSON=ON -DBUILD_SIDE=CLIENT
   - cmake --build .
   - ./test_mlc_json ../
   - cd ..
