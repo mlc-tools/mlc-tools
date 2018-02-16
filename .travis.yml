@@ -39,8 +39,10 @@ matrix:
 
 script:
   - python src/main.py -i simple_test/config -o simple_test/generated_cpp/xml -f xml -l cpp -side server -data simple_test/data_xml -data_out simple_test/assets
+  - python src/main.py -i simple_test/config -o simple_test/generated_cpp/json -f json -l cpp -side client -data simple_test/data_json -data_out simple_test/assets
   
   - cd simple_test
+
   - mkdir build_xml_server
   - cd build_xml_server
   - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DBUILD_XML=ON -DBUILD_JSON=OFF -DBUILD_SIDE=SERVER 
@@ -48,7 +50,6 @@ script:
   - ./test_mlc_xml ../
   - cd ..
 
-  - cd simple_test
   - mkdir build_xml_client
   - cd build_xml_client
   - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DBUILD_XML=ON -DBUILD_JSON=OFF -DBUILD_SIDE=CLIENT 
@@ -56,8 +57,6 @@ script:
   - ./test_mlc_xml ../
   - cd ..
 
-
-  - python src/main.py -i simple_test/config -o simple_test/generated_cpp/json -f json -l cpp -side client -data simple_test/data_json -data_out simple_test/assets
 
   - mkdir build_json_server
   - cd build_json_server
