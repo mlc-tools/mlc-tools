@@ -4,6 +4,18 @@
 /simple_test/build/
 /simple_test/build_xml/
 /simple_test/build_json/
+
+/test_serialize/build/
+/test_serialize/generated_cpp/
+/test_serialize/generated_py/
+/test_serialize/generated_php/
+/test_serialize/data.py.xml
+/test_serialize/data.php.xml
+/test_serialize/data.cpp.xml
+/test_serialize/step_2
+/test_serialize/step_2.exe
+
+
 /.idea/
 /.sublime/
 

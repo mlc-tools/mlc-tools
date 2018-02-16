@@ -459,6 +459,7 @@ def convert_function_to_php(func, parser, function_args):
         ['->\\$(\w+)\\(', '->\\1('],
         ['([-0-9]*)->([-0-9]*)f\\b', '\\1.\\2'],
         ['([-0-9]*)->f\\b', '\\1.0'],
+        [re.compile('\\$return\s'), 'return'],
     ]
 
     repl = [

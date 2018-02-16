@@ -38,6 +38,9 @@ matrix:
 
 
 script:
+  # simple test:
+
+  - pushd
   - python src/main.py -i simple_test/config -o simple_test/generated_cpp/xml -f xml -l cpp -side server -data simple_test/data_xml -data_out simple_test/assets
   - python src/main.py -i simple_test/config -o simple_test/generated_cpp/json -f json -l cpp -side client -data simple_test/data_json -data_out simple_test/assets
   
@@ -56,3 +59,10 @@ script:
   - cmake --build .
   - ./test_mlc_json ../
   - cd ..
+  -popd
+
+  # test serialize:
+  - push
+  - cd test_serialize
+  - python run.py
+  - popd
