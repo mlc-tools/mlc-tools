@@ -150,8 +150,6 @@ class DataStoragePython(DataStorage):
     def __init__(self, *args):
         DataStorage.__init__(self, *args)
 
-        self.create_deserialize()
-
         object = Object()
         object.type = self.name
         object.name = '__instance'
