@@ -723,7 +723,8 @@ arr = dictionary['$(FIELD)']
 
 #link
 #serialize:
-if isinstance($(OWNER)$(FIELD), $(TYPE)):
+from $(TYPE) import $(TYPE)
+        if isinstance($(OWNER)$(FIELD), $(TYPE)):
             from $(TYPE) import $(TYPE)
             dictionary['$(FIELD)'] = $(OWNER)$(FIELD).name
         else:
