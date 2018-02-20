@@ -267,11 +267,13 @@ class WriterPhp(Writer):
                            obj_template_args[0].type if len(obj_template_args) > 0 else 'unknown_arg')
 
     def save_config_file(self):
-        pass
-        # buffer = 'MG_XML = 2\nMG_JSON = 1\n'
-        # buffer += 'MG_SERIALIZE_FORMAT = MG_' + self.serialize_format.upper()
-        # buffer += '\n'
-        # self.save_file('config.py', buffer)
+        content = '''<?php\n
+$MG_XML = 1;
+$MG_JSON = 2;
+$MG_SERIALIZE_FORMAT = $MG_{};
+\n?>
+        '''.format(self.serialize_format.upper())
+        self.save_file('config.php', content)
 
     def createFactory(self):
         pattern = '''<?php

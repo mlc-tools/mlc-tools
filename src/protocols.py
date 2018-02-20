@@ -659,9 +659,9 @@ if $(OWNER)$(FIELD):
             $(OWNER)$(FIELD).serialize(dictionary['$(FIELD)'][$(OWNER)$(FIELD).get_type()])
 #deserialize
 if '$(FIELD)' in dictionary:
-            for key, value in dictionary['$(FIELD)'].iteritems():
-                $(OWNER)$(FIELD) = Factory.build(key);
-                $(OWNER)$(FIELD).deserialize(value)
+            for key, value_ in dictionary['$(FIELD)'].iteritems():
+                $(OWNER)$(FIELD) = Factory.build(key)
+                $(OWNER)$(FIELD).deserialize(value_)
                 break
 
 #list<int>, list<float>, list<bool>, list<string>

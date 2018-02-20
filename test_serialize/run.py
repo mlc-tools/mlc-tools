@@ -8,8 +8,6 @@ def generate(lang, protocol):
     global root
 
     out_path_postfix = lang
-    if lang == 'cpp':
-        out_path_postfix = lang + '/' + protocol
     command = '''python {0}/src/main.py
         -i {0}/test_serialize
         -o {0}/test_serialize/generated_{3}
@@ -18,7 +16,7 @@ def generate(lang, protocol):
         -php_validate yes
         -use_colors no
         -side client
-        -disable_logs no
+        -disable_logs yes
         '''.format(root, lang, protocol, out_path_postfix)
     command = command.replace('\n', '')
     if 0 != os.system(command):
@@ -26,31 +24,44 @@ def generate(lang, protocol):
 
 
 def clean():
-    if os.path.isfile('../test_serialize/data.py.xml'):
-        os.remove('../test_serialize/data.py.xml')
-    if os.path.isfile('../test_serialize/data.php.xml'):
-        os.remove('../test_serialize/data.php.xml')
-    if os.path.isfile('../test_serialize/data.cpp.xml'):
-        os.remove('../test_serialize/data.cpp.xml')
-    if os.path.isfile('../test_serialize/step_2'):
-        os.remove('../test_serialize/step_2')
-    if os.path.isdir('../test_serialize/build'):
-        shutil.rmtree('../test_serialize/build')
+    def rem(file):
+        if os.path.isfile(file):
+            os.remove(file)
+        elif os.path.isdir(file):
+            shutil.rmtree(file)
 
-generate('py', 'xml')
-generate('php', 'xml')
-generate('cpp', 'xml')
-clean()
-command = '''
-    cd ../test_serialize;
-    python step_0.py;
-    php step_1.php;
-    mkdir build; cd build; cmake ..; make -j8 install; cd ..; ./step_2;
-    python step_3.py;
-    '''
-command = command.replace('\n', '')
-if 0 != os.system(command):
+    rem('../test_serialize/data.py.xml')
+    rem('../test_serialize/data.php.xml')
+    rem('../test_serialize/data.cpp.xml')
+    rem('../test_serialize/data.py.json')
+    rem('../test_serialize/data.php.json')
+    rem('../test_serialize/data.cpp.json')
+    rem('../test_serialize/step_2')
+    rem('../test_serialize/build')
+    rem('../test_serialize/generated_py')
+    rem('../test_serialize/generated_php')
+    rem('../test_serialize/generated_cpp')
+
+
+def run(protocol):
     clean()
-    exit(1)
+    generate('py', protocol)
+    generate('php', protocol)
+    generate('cpp', protocol)
+    command = '''
+        cd ../test_serialize;
+        python step_0.py;
+        php step_1.php;
+        mkdir build; cd build; cmake ..; make -j8 install; cd ..; ./step_2;
+        python step_3.py;
+        '''
+    command = command.replace('\n', '')
+    if 0 != os.system(command):
+        clean()
+        exit(1)
 
-clean()
+    clean()
+
+if __name__ == '__main__':
+    run('xml')
+    run('json')

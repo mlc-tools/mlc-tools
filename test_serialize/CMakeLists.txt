@@ -8,13 +8,13 @@ project(step_2)
 file(GLOB_RECURSE SRC 
 						${EXTERNAL}/pugixml/*.cpp
 						${EXTERNAL}/jsoncpp/*.cpp
-						${ROOT}/generated_cpp/xml/*.cpp
+						${ROOT}/generated_cpp/*.cpp
 						)
 
 add_definitions(-w -std=c++14)
 
 include_directories(
-	${ROOT}/generated_cpp/xml/
+	${ROOT}/generated_cpp/
 	${EXTERNAL}/
 	${EXTERNAL}/ml
 )
