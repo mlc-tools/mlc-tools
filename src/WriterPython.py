@@ -513,11 +513,11 @@ class Factory:
     @staticmethod
     def create_command(string):
         dictionary = json.loads(string)
-        type = dictionary["command"]["type"]
-        command = Factory.build(type)
-        if command != None:
-            command.deserialize(dictionary)
-        return command'''
+        for key in dictionary:
+            command = Factory.build(key)
+            if command != None:
+                command.deserialize(dictionary[key])
+            return command'''
 
 _pattern_file = {}
 _pattern_file['xml'] = '''import xml.etree.ElementTree as ET
