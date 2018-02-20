@@ -41,6 +41,14 @@ class TestData<SerializedObject>
 	float float_value
 	bool bool_value
 	string str_value
+	int i_int_value_0 = 0
+	float i_float_value_0 = 0
+	bool i_bool_value_0 = false
+	string i_str_value_0 = ""
+	int i_int_value_1 = 0
+	float i_float_value_1 = 0
+	bool i_bool_value_1 = false
+	string i_str_value_1 = ""
 	list<int> int_list
 	list<float> float_list
 	list<bool> bool_list
@@ -66,10 +74,10 @@ class TestData<SerializedObject>
 		this->float_value = 2;
 		this->bool_value = true;
 		this->str_value = "string";
-		this->int_value = 100;
-		this->float_value = 200;
-		this->bool_value = false;
-		this->str_value = "";
+		this->i_int_value_0 = 100;
+		this->i_float_value_0 = 200;
+		this->i_bool_value_0 = true;
+		this->i_str_value_0 = "some_value";
 		list_push(this->int_list, 1);
 		list_push(this->float_list, 2);
 		list_push(this->bool_list, true);
@@ -117,6 +125,17 @@ class TestData<SerializedObject>
 		result = result && this->float_value == r->float_value;
 		result = result && this->bool_value == r->bool_value;
 		result = result && this->str_value == r->str_value;
+
+		result = result && this->i_int_value_0 == r->i_int_value_0;
+		result = result && this->i_float_value_0 == r->i_float_value_0;
+		result = result && this->i_bool_value_0 == r->i_bool_value_0;
+		result = result && this->i_str_value_0 == r->i_str_value_0;
+
+		result = result && this->i_int_value_1 == r->i_int_value_1;
+		result = result && this->i_float_value_1 == r->i_float_value_1;
+		result = result && this->i_bool_value_1 == r->i_bool_value_1;
+		result = result && this->i_str_value_1 == r->i_str_value_1;
+
 		result = result && this->int_list == r->int_list;
 		result = result && this->float_list == r->float_list;
 		result = result && this->bool_list == r->bool_list;
