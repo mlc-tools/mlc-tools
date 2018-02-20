@@ -38,7 +38,7 @@ class DataParser:
                 tree = ET.parse(file)
             except ET.ParseError:
                 Error.exit(Error.CANNOT_PARSE_XML, file)
-                
+
             root = tree.getroot()
 
             def add(object):
@@ -60,12 +60,20 @@ class DataParser:
                 continue
             file = data_directory + file
             root = json.loads(open(file).read())
-            for key in root:
+
+            def parse(key, dict_):
                 name = key
                 self._validate_type(key, file)
                 if name not in self.objects:
                     self.objects[name] = []
-                self.objects[name].append(root)
+                self.objects[name].append(dict_)
+            if isinstance(root, dict):
+                for key in root:
+                    parse(key, root)
+            elif isinstance(root, list):
+                for dict_ in root:
+                    for key in dict_:
+                        parse(key, dict_)
 
     def _validate(self):
         pass
