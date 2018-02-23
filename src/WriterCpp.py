@@ -1007,10 +1007,10 @@ class WriterCpp(Writer):
             function1.operations.append('if(value == "{0}") {1}_value = {0}; return; {2};'.format(m.name, '{', '}'))
             function2.operations.append(
                 'if(value == "{0}") {1}_value = {0}; return *this; {2};'.format(m.name, '{', '}'))
-            function1.operations.append(
-                'if(value == "{0}") {1}_value = {0}; return; {2};'.format(values[index], '{', '}'))
-            function2.operations.append(
-                'if(value == "{0}") {1}_value = {0}; return *this; {2};'.format(values[index], '{', '}'))
+            # function1.operations.append(
+            #     'if(value == "{0}") {1}_value = {0}; return; {2};'.format(values[index], '{', '}'))
+            # function2.operations.append(
+            #     'if(value == "{0}") {1}_value = {0}; return *this; {2};'.format(values[index], '{', '}'))
             function3.operations.append('if(_value == {0}) return "{0}";'.format(m.name))
             function4.operations.append('if(_value == {0}) return "{0}";'.format(m.name))
             index += 1

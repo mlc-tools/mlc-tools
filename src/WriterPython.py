@@ -27,9 +27,9 @@ class WriterPython(Writer):
 
     def save_generated_classes(self, out_directory):
         Writer.save_generated_classes(self, out_directory)
-        self.createFactory()
-        self.createVisitorAcceptors()
-        self.createInitFile()
+        self.create_factory()
+        self.create_visitor_acceptors()
+        self.create_init_file()
         # self.create_data_storage()
 
     def write_class(self, cls, flags):
@@ -51,8 +51,8 @@ class WriterPython(Writer):
             else:
                 static_list += '    ' + self.write_object(object) + '\n'
 
-        self.createSerializationFunction(cls, SERIALIZATION)
-        self.createSerializationFunction(cls, DESERIALIZATION)
+        self.create_serialization_function(cls, SERIALIZATION)
+        self.create_serialization_function(cls, DESERIALIZATION)
         functions = ''
         for function in cls.functions:
             f = self.write_function(cls, function)
@@ -183,22 +183,22 @@ class WriterPython(Writer):
             body = '\n'.join(body)
             self.loaded_functions[name] = body
 
-    def getSerialiationFunctionArgs(self):
+    def get_serialiation_function_args(self):
         if self.serialize_format == 'xml':
             return '(self, xml)'
         return '(self, dictionary)'
 
-    def createSerializationFunction(self, cls, serialize_type):
+    def create_serialization_function(self, cls, serialize_type):
         function = Function()
         function.name = 'serialize' if serialize_type == SERIALIZATION else 'deserialize'
         for func in cls.functions:
             if func.name == function.name:
                 return
 
-        body = self.getSerialiationFunctionArgs() + ':\n$(import)'
+        body = self.get_serialiation_function_args() + ':\n$(import)'
         if cls.behaviors:
-            body += ('        {0}.{1}' + self.getSerialiationFunctionArgs() + '\n').format(cls.behaviors[0].name,
-                                                                                           function.name)
+            body += ('        {0}.{1}' + self.get_serialiation_function_args() + '\n').format(cls.behaviors[0].name,
+                                                                                              function.name)
         for obj in cls.members:
             if obj.is_runtime:
                 continue
@@ -207,8 +207,8 @@ class WriterPython(Writer):
             if obj.is_const and not obj.is_link:
                 continue
 
-            body += self._buildSerializeOperation(obj.name, obj.type, convertInitializeValue(obj.initial_value),
-                                                  serialize_type, obj.template_args, obj.is_pointer, 'self.', obj.is_link)
+            body += self.build_serialize_operation(obj.name, obj.type, convertInitializeValue(obj.initial_value),
+                                                   serialize_type, obj.template_args, obj.is_pointer, 'self.', obj.is_link)
         use_factory = 'Factory.build' in body
         use_data_storage = 'DataStorage.shared()' in body
         imports = ''
@@ -223,7 +223,7 @@ class WriterPython(Writer):
         self.loaded_functions[cls.name + '.' + function.name] = body
         cls.functions.append(function)
 
-    def buildMapSerialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args, serialization_type):
+    def build_map_serialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args, serialization_type):
         key = obj_template_args[0]
         value = obj_template_args[1]
         key_type = key.name if isinstance(key, Class) else key.type
@@ -231,8 +231,8 @@ class WriterPython(Writer):
         str = self.serialize_protocol[serialization_type]['map'][0]
         _value_is_pointer = value.is_pointer
         a0 = obj_name
-        a1 = self._buildSerializeOperation('key', key_type, None, serialization_type, key.template_args, False, '', key.is_link)
-        a2 = self._buildSerializeOperation("value", value_type, None, serialization_type, value.template_args, _value_is_pointer, '', value.is_link)
+        a1 = self.build_serialize_operation('key', key_type, None, serialization_type, key.template_args, False, '', key.is_link)
+        a2 = self.build_serialize_operation("value", value_type, None, serialization_type, value.template_args, _value_is_pointer, '', value.is_link)
         a1 = a1.split('\n')
         for index, a in enumerate(a1):
             a1[index] = '    ' + a
@@ -243,8 +243,8 @@ class WriterPython(Writer):
         a2 = '\n'.join(a2)
         return str.format(a0, a1, a2, '{}', 'self.') + '\n'
 
-    def _buildSerializeOperation(self, obj_name, obj_type, obj_value, serialization_type, obj_template_args,
-                                 obj_is_pointer, owner='self.', is_link=False):
+    def build_serialize_operation(self, obj_name, obj_type, obj_value, serialization_type, obj_template_args,
+                                  obj_is_pointer, owner='self.', is_link=False):
         index = 0
         if obj_value is None:
             index = 1
@@ -267,8 +267,8 @@ class WriterPython(Writer):
                     if len(obj_template_args) != 2:
                         print "map should have 2 arguments"
                         exit - 1
-                    return self.buildMapSerialization(obj_name, obj_type, obj_value, obj_is_pointer,
-                                                      obj_template_args, serialization_type)
+                    return self.build_map_serialization(obj_name, obj_type, obj_value, obj_is_pointer,
+                                                        obj_template_args, serialization_type)
                 else:
                     arg = obj_template_args[0]
                     arg_type = arg.name if isinstance(arg, Class) else arg.type
@@ -293,7 +293,7 @@ class WriterPython(Writer):
         buffer += '\n'
         self.save_file('config.py', buffer)
 
-    def createFactory(self):
+    def create_factory(self):
         global _factory
         pattern = _factory[self.serialize_format]
         line = '        if type == "{0}": return {0}.{0}()\n'
@@ -306,7 +306,7 @@ class WriterPython(Writer):
         factory = pattern.format(imports, creates)
         self.save_file('Factory.py', factory)
 
-    def createVisitorAcceptors(self):
+    def create_visitor_acceptors(self):
         pattern = _pattern_visitor
         line = '        elif ctx.__class__ == {0}:\n            self.visit_{1}(ctx)\n'
         line_import = 'from {0} import {0}\n'
@@ -377,7 +377,7 @@ class WriterPython(Writer):
         content = self.prepare_file(content)
         self.save_file(storage.name + '.py', content)
 
-    def createInitFile(self):
+    def create_init_file(self):
         self.save_file('__init__.py', '')
 
     def convert_to_enum(self, cls, use_type='string'):

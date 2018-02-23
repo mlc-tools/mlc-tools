@@ -42,8 +42,8 @@ class WriterPhp(Writer):
 
     def save_generated_classes(self, out_directory):
         Writer.save_generated_classes(self, out_directory)
-        self.createFactory()
-        self.createVisitorAcceptors()
+        self.create_factory()
+        self.create_visitor_acceptors()
         # self.create_data_storage()
 
     def write_class(self, cls, flags):
@@ -65,8 +65,8 @@ class WriterPhp(Writer):
             if init:
                 initialization_list += init + '\n'
 
-        self.createSerializationFunction(cls, SERIALIZATION)
-        self.createSerializationFunction(cls, DESERIALIZATION)
+        self.create_serialization_function(cls, SERIALIZATION)
+        self.create_serialization_function(cls, DESERIALIZATION)
         functions = ''
         for function in cls.functions:
             f = self.write_function(cls, function)
@@ -169,19 +169,19 @@ class WriterPhp(Writer):
     def _get_filename_of_class(self, cls):
         return cls.name + ".php"
 
-    def getSerialiationFunctionArgs(self):
+    def get_serialiation_function_args(self):
         if self.serialize_format == 'xml':
             return 'xml'
         return 'json'
 
-    def createSerializationFunction(self, cls, serialize_type):
+    def create_serialization_function(self, cls, serialize_type):
         function = Function()
         function.name = 'serialize' if serialize_type == SERIALIZATION else 'deserialize'
         for func in cls.functions:
             if func.name == function.name:
                 return
 
-        function.args = [[self.getSerialiationFunctionArgs(), None]]
+        function.args = [[self.get_serialiation_function_args(), None]]
 
         if cls.behaviors:
             if self.serialize_format == 'xml':
@@ -196,12 +196,13 @@ class WriterPhp(Writer):
             if obj.is_const and not obj.is_link:
                 continue
 
-            line = self._buildSerializeOperation(obj.name, obj.type, obj.initial_value, serialize_type, obj.template_args, obj.is_pointer, is_link=obj.is_link)
+            line = self.build_serialize_operation(obj.name, obj.type, obj.initial_value, serialize_type,
+                                                  obj.template_args, obj.is_pointer, is_link=obj.is_link)
             function.operations.append(line)
 
         cls.functions.append(function)
 
-    def buildMapSerialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args, serialization_type):
+    def build_map_serialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args, serialization_type):
         key = obj_template_args[0]
         value = obj_template_args[1]
         key_type = key.name if isinstance(key, Class) else key.type
@@ -213,8 +214,8 @@ class WriterPhp(Writer):
         else:
             value_declararion = ''
         a0 = obj_name
-        a1 = self._buildSerializeOperation('key', key_type, None, serialization_type, key.template_args, False, '$', key.is_link)
-        a2 = self._buildSerializeOperation('value', value_type, None, serialization_type, value.template_args, _value_is_pointer, '$', False)
+        a1 = self.build_serialize_operation('key', key_type, None, serialization_type, key.template_args, False, '$', key.is_link)
+        a2 = self.build_serialize_operation('value', value_type, None, serialization_type, value.template_args, _value_is_pointer, '$', False)
         a1 = a1.split('\n')
         for index, a in enumerate(a1):
             a1[index] = a
@@ -225,8 +226,8 @@ class WriterPhp(Writer):
         a2 = '\n'.join(a2)
         return str.format(a0, a1, a2, '{}', '$this->', value_declararion) + '\n'
 
-    def _buildSerializeOperation(self, obj_name, obj_type, obj_value, serialization_type, obj_template_args,
-                                 obj_is_pointer, owner='$this->', is_link=False):
+    def build_serialize_operation(self, obj_name, obj_type, obj_value, serialization_type, obj_template_args,
+                                  obj_is_pointer, owner='$this->', is_link=False):
         index = 0
         if obj_value is None:
             index = 1
@@ -247,8 +248,8 @@ class WriterPhp(Writer):
                 if type == "map":
                     if len(obj_template_args) != 2:
                         Error.exit(Error.MAP_TWO_ARGS, self._current_class.name, obj_name)
-                    return self.buildMapSerialization(obj_name, obj_type, obj_value, obj_is_pointer,
-                                                      obj_template_args, serialization_type)
+                    return self.build_map_serialization(obj_name, obj_type, obj_value, obj_is_pointer,
+                                                        obj_template_args, serialization_type)
                 else:
                     arg = obj_template_args[0]
                     arg_type = arg.name if isinstance(arg, Class) else arg.type
@@ -275,7 +276,7 @@ $MG_SERIALIZE_FORMAT = $MG_{};
         '''.format(self.serialize_format.upper())
         self.save_file('config.php', content)
 
-    def createFactory(self):
+    def create_factory(self):
         pattern = '''<?php
 
 class Factory
@@ -290,7 +291,7 @@ __end__;
         factory = pattern.format('require_once "$type.php"; \n return new $type;')
         self.save_file('Factory.php', factory)
 
-    def createVisitorAcceptors(self):
+    def create_visitor_acceptors(self):
         pattern = _pattern_visitor
         line = '        else if($ctx->get_type() == {0}::$TYPE)\n@(\n$this->visit_{1}($ctx);\n@)\n'
         line_import = 'require_once "{0}.php";\n'

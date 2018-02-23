@@ -24,23 +24,20 @@ def generate(lang, protocol):
 
 
 def clean():
-    def rem(file):
-        if os.path.isfile(file):
-            os.remove(file)
-        elif os.path.isdir(file):
-            shutil.rmtree(file)
+    def rem(path):
+        path = '{}/{}'.format(root, path)
+        if os.path.isfile(path):
+            os.remove(path)
+        elif os.path.isdir(path):
+            shutil.rmtree(path)
 
-    rem('../test_serialize/data.py.xml')
-    rem('../test_serialize/data.php.xml')
-    rem('../test_serialize/data.cpp.xml')
-    rem('../test_serialize/data.py.json')
-    rem('../test_serialize/data.php.json')
-    rem('../test_serialize/data.cpp.json')
-    rem('../test_serialize/step_2')
-    rem('../test_serialize/build')
-    rem('../test_serialize/generated_py')
-    rem('../test_serialize/generated_php')
-    rem('../test_serialize/generated_cpp')
+    rem('test_serialize/data.py.xml')
+    rem('test_serialize/data.php.xml')
+    rem('test_serialize/data.cpp.xml')
+    rem('test_serialize/data.py.json')
+    rem('test_serialize/data.php.json')
+    rem('test_serialize/data.cpp.json')
+    rem('test_serialize/step_2')
 
 
 def run(protocol):
@@ -49,12 +46,12 @@ def run(protocol):
     generate('php', protocol)
     generate('cpp', protocol)
     command = '''
-        cd ../test_serialize;
+        cd {}/test_serialize;
         python step_0.py;
         php step_1.php;
         mkdir build; cd build; cmake ..; make -j8 install; cd ..; ./step_2;
         python step_3.py;
-        '''
+        '''.format(root)
     command = command.replace('\n', '')
     if 0 != os.system(command):
         clean()
