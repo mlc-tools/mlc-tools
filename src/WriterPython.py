@@ -279,6 +279,8 @@ class WriterPython(Writer):
                         obj_type = arg_type
                     elif arg.is_pointer:
                         type = "pointer_list"
+                    elif arg.type == 'enum':
+                        type = 'list<string>'
                     else:
                         type = "list<serialized>"
                         obj_type = arg_type

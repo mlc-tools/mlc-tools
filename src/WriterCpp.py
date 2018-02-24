@@ -614,6 +614,8 @@ class WriterCpp(Writer):
                         type_ = '{0}<{1}>'.format(type_, arg_type)
                     elif arg.is_pointer:
                         type_ = 'pointer_list'
+                    elif arg.type == 'enum':
+                        type_ = 'list<enum>'
                     else:
                         type_ = '{0}<serialized>'.format(type_)
             if type_ not in self.serialize_protocol[serialization_type]:
@@ -954,74 +956,74 @@ class WriterCpp(Writer):
             cls.name,
             [],
             False). \
-            operations = ['_value = {};'.format(cls.members[0].name)]
+            operations = ['value = {};'.format(cls.members[0].name)]
         add_function(
             '',
             cls.name,
-            [['value', cast]],
+            [['_value', cast]],
             False). \
-            operations = ['_value = value;']
+            operations = ['value = _value;']
         add_function(
             '',
             cls.name,
             [['rhs', 'const {0}&'.format(cls.name)]],
             False). \
-            operations = ['_value = rhs._value;']
+            operations = ['value = rhs.value;']
         add_function(
             '',
             'operator int',
             [],
             True). \
-            operations = ['return _value;']
+            operations = ['return value;']
         add_function(
             '{0}&:const'.format(cls.name),
             'operator =',
             [['rhs', 'const {0}&'.format(cls.name)]],
             False). \
-            operations = ['_value = rhs._value;', 'return *this;']
+            operations = ['value = rhs.value;', 'return *this;']
         add_function(
             'bool',
             'operator ==',
             [['rhs', 'const {0}&'.format(cls.name)]],
             True). \
-            operations = ['return _value == rhs._value;']
+            operations = ['return value == rhs.value;']
         add_function(
             'bool',
             'operator ==',
             [['rhs', 'int']],
             True). \
-            operations = ['return _value == rhs;']
+            operations = ['return value == rhs;']
         add_function('bool', 'operator <', [['rhs', 'const {0}&'.format(cls.name)]], True). \
-            operations = ['return _value < rhs._value;']
+            operations = ['return value < rhs.value;']
 
-        function1 = add_function('', cls.name, [['value', 'string']], False)
-        function2 = add_function('{0}&:const'.format(cls.name), 'operator =', [['value', 'string']], False)
+        function1 = add_function('', cls.name, [['_value', 'string']], False)
+        function2 = add_function('{0}&:const'.format(cls.name), 'operator =', [['_value', 'string']], False)
         function3 = add_function('', 'operator std::string', [], True)
         function4 = add_function('string', 'str', [], True)
         index = 0
         for m in cls.members:
-            if m.name == '_value':
+            if m.name == 'value':
                 continue
             if index >= len(values):
                 continue
-            function1.operations.append('if(value == "{0}") {1}_value = {0}; return; {2};'.format(m.name, '{', '}'))
+            function1.operations.append('if(_value == "{0}") {1}value = {0}; return; {2};'.format(m.name, '{', '}'))
             function2.operations.append(
-                'if(value == "{0}") {1}_value = {0}; return *this; {2};'.format(m.name, '{', '}'))
+                'if(_value == "{0}") {1}value = {0}; return *this; {2};'.format(m.name, '{', '}'))
             # function1.operations.append(
-            #     'if(value == "{0}") {1}_value = {0}; return; {2};'.format(values[index], '{', '}'))
+            #     'if(value == "{0}") {1}value = {0}; return; {2};'.format(values[index], '{', '}'))
             # function2.operations.append(
-            #     'if(value == "{0}") {1}_value = {0}; return *this; {2};'.format(values[index], '{', '}'))
-            function3.operations.append('if(_value == {0}) return "{0}";'.format(m.name))
-            function4.operations.append('if(_value == {0}) return "{0}";'.format(m.name))
+            #     'if(value == "{0}") {1}value = {0}; return *this; {2};'.format(values[index], '{', '}'))
+            function3.operations.append('if(value == {0}) return "{0}";'.format(m.name))
+            function4.operations.append('if(value == {0}) return "{0}";'.format(m.name))
             index += 1
-        function1.operations.append('_value = 0;')
+        function1.operations.append('value = 0;')
         function2.operations.append('return *this;')
         function3.operations.append('return "";')
         function4.operations.append('return "";')
 
         value = Object()
         value.initial_value = cls.members[0].name
-        value.name = '_value'
+        value.name = 'value'
         value.type = cast
         value.access = AccessSpecifier.private
         cls.members.append(value)

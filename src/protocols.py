@@ -233,6 +233,21 @@ for(auto child : map_$(FIELD))
 xml.append_attribute("$(FIELD)").set_value($(FIELD).str().c_str());
 #deserialize:
 $(FIELD) = std::string(xml.attribute("$(FIELD)").as_string(""));
+
+#list<enum>
+#serialize:
+auto arr_$(FIELD) = xml.append_child("$(FIELD)");
+for(auto t : $(FIELD))
+{
+
+    arr_$(FIELD).append_child("item").append_attribute("value").set_value(t.str().c_str());
+}
+#deserialize:
+auto arr_$(FIELD) = xml.child("$(FIELD)");
+for(const auto& child : arr_$(FIELD))
+{
+    $(FIELD).emplace_back(child.attribute("value").as_string());
+}
 '''
 
 
@@ -409,6 +424,21 @@ for(unsigned int i = 0; i < size_$(FIELD); ++i)
 ::set(json, "$(FIELD)", $(FIELD).str());
 #deserialize:
 $(FIELD) = ::get<std::string>(json["$(FIELD)"]);
+
+#list<enum>
+#serialize:
+auto& arr_$(FIELD) = json["$(FIELD)"];
+int i_$(FIELD)=0;
+for(const auto& t : $(FIELD))
+{
+    ::set(arr_$(FIELD)[i_$(FIELD)++], t.str());
+}
+#deserialize:
+auto& arr_$(FIELD) = json["$(FIELD)"];
+for(int i = 0; i < arr_$(FIELD).size(); ++i)
+{
+    $(FIELD).emplace_back(::get<std::string>(arr_$(FIELD)[i]));
+}
 '''
 
 py_xml = '''

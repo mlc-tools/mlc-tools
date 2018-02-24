@@ -63,7 +63,7 @@ class Parser:
 
     def set_configs_directory(self, path):
         self.configs_root = path
-        
+
     def is_side(self, side):
         return self.side == 'both' or side == self.side or side == 'both'
 
@@ -169,7 +169,6 @@ class Parser:
                        '^' in member.initial_value or \
                        '~' in member.initial_value:
                         Error.exit(Error.ENUM_CANNOT_BE_COMBINATED, cls.name, member.name, member.initial_value)
-
 
     def _convert_template_args(self, member):
         args = []
@@ -344,6 +343,7 @@ class Parser:
         supported_types.append('serialized')
         supported_types.append('map')
         supported_types.append('enum')
+        supported_types.append('list<enum>')
         for type_ in self.simple_types:
             list_type = "list<{0}>".format(type_)
             supported_types.append(list_type)
@@ -354,13 +354,13 @@ class Parser:
         for x in xrange(2):
             for type_ in supported_types:
                 simple = type_ in self.simple_types
-                p0 = self._load_protocol(lines, x, type_, True if simple else None)
+                p0 = self._load_protocol(lines, x, type_, True if simple else None, optional=type_ == 'list<enum>')
                 p1 = p0 if not simple else self._load_protocol(lines, x, type_, False)
                 serialize_protocol[x][type_] = []
                 serialize_protocol[x][type_].extend([p0, p1])
         self.serialize_protocol = serialize_protocol
 
-    def _load_protocol(self, lines, serialize_type, type, initial_value=None):
+    def _load_protocol(self, lines, serialize_type, type, initial_value=None, optional=False):
         stypes = ['serialize', 'deserialize']
         sinit = ['with default value', 'without default value']
         in_type = False
@@ -408,7 +408,7 @@ class Parser:
         # for python:
         pattern = pattern.replace('$(__begin____end__)', '{3}')
 
-        if not pattern:
+        if not pattern and not optional:
             print 'cannot find pattern for args:'
             print type, stypes[serialize_type], initial_value
             print 'in_type', in_type
