@@ -186,15 +186,15 @@ def _create_destructor_function_cpp(class_):
     return string
 
 
-def _get_namespace():
-    return 'mg'
-
-
 class WriterCpp(Writer):
 
-    def __init__(self, parser, serialize_format):
+    def __init__(self, parser, serialize_format, namespace):
         Writer.__init__(self, parser, serialize_format)
+        self.namespace = namespace
         self._current_class = None
+
+    def get_namespace(self):
+        return self.namespace
 
     def build_type_str(self, object_, with_name=True):
         args = list()
@@ -339,9 +339,9 @@ class WriterCpp(Writer):
             pattern += '\n__begin__{5}' + o + 'public:' + f + '__end__;\n\n'
 
         pattern = '{3}\nnamespace {0}\n__begin__{2}\n\n{1}__end__//namespace {0}'.\
-            format(_get_namespace(), pattern, forward_declarations, forward_declarations_out)
-        pattern = '#ifndef __mg_{0}_h__\n#define __mg_{0}_h__\n{2}\n\n{1}\n\n#endif //#ifndef __{0}_h__'.\
-            format(class_.name, pattern, includes)
+            format(self.get_namespace(), pattern, forward_declarations, forward_declarations_out)
+        pattern = '#ifndef __{3}_{0}_h__\n#define __{3}_{0}_h__\n{2}\n\n{1}\n\n#endif //#ifndef __{3}_{0}_h__'.\
+            format(class_.name, pattern, includes, self.get_namespace())
 
         out[FLAG_HPP] += pattern.format('class', class_.name, behaviors, objects[FLAG_HPP],
                                         functions[FLAG_HPP], constructor, destructor)
@@ -404,7 +404,7 @@ class WriterCpp(Writer):
                 not functions[FLAG_CPP]:
             return out
 
-        out[FLAG_CPP] += pattern.format(class_.name, functions[FLAG_CPP], constructor, _get_namespace(),
+        out[FLAG_CPP] += pattern.format(class_.name, functions[FLAG_CPP], constructor, self.get_namespace(),
                                         includes, objects[FLAG_CPP], registration, destructor)
         out[FLAG_CPP] = re.sub('__begin__', '{', out[FLAG_CPP])
         out[FLAG_CPP] = re.sub('__end__', '}', out[FLAG_CPP])
@@ -916,14 +916,15 @@ class WriterCpp(Writer):
         self.save_file(storage.name + '.cpp', source)
 
     def save_config_file(self):
-        pattern = '#ifndef __mg_Config_h__\n#define __mg_Config_h__\n\n{}\n\n#endif //#ifndef __mg_Config_h__'
+        pattern = '#ifndef __{0}_Config_h__\n#define __{0}_Config_h__\n\n{1}\n\n#endif //#ifndef __{0}_Config_h__'
         configs = list()
-        configs.append('#define MG_JSON 1')
-        configs.append('#define MG_XML 2')
-        configs.append('\n#define MG_SERIALIZE_FORMAT MG_' + self.serialize_format.upper())
-        self.save_file('config.h', pattern.format('\n'.join(configs)))
-        self.save_file("mg_extensions.h", hpp_functions)
-        self.save_file("mg_extensions.cpp", cpp_functions)
+        configs.append('#define {}_JSON 1'.format(self.get_namespace().upper()))
+        configs.append('#define {}_XML 2'.format(self.get_namespace().upper()))
+        configs.append('\n#define {0}_SERIALIZE_FORMAT {0}_{1}'.format(self.get_namespace().upper(), self.serialize_format.upper()))
+        filename_config = 'config.h' if self.get_namespace() == 'mg' else '{}_config.h'.format(self.get_namespace())
+        self.save_file(filename_config, pattern.format(self.get_namespace(), '\n'.join(configs)))
+        self.save_file("{}_extensions.h".format(self.get_namespace()), hpp_functions)
+        self.save_file("{}_extensions.cpp".format(self.get_namespace()), cpp_functions)
 
     def convert_to_enum(self, cls):
         shift = 0

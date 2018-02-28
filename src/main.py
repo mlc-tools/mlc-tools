@@ -50,6 +50,8 @@ def main():
                         required=False, default='')
     parser.add_argument('-only_data', type=str, help='Flag for build only data xml. Default = no',
                         required=False, default='no')
+    parser.add_argument('-namespace', type=str, help='Used namespace on generate cpp code. Default = mg',
+                        required=False, default='mg')
     parser.add_argument('-protocols', type=str,
                         help='Path to file with serialization protocols. Default = empty, default protocol is used',
                         required=False, default='')
@@ -74,6 +76,7 @@ def main():
     language = args.l
     serialize_format = args.f
     only_data = args.only_data.lower() == 'yes'
+    namespace = args.namespace
     side = args.side
     php_validate = args.php_validate.lower() == 'yes'
     use_colors = args.use_colors.lower() == 'yes'
@@ -103,7 +106,7 @@ def main():
 
     writer = None
     if language == 'cpp':
-        writer = WriterCpp(parser, serialize_format)
+        writer = WriterCpp(parser, serialize_format, namespace=namespace)
     elif language == 'py':
         writer = WriterPython(parser, serialize_format)
     elif language == 'php':
