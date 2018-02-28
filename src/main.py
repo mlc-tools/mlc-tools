@@ -124,8 +124,8 @@ def main():
                 classes.append(class_)
         data_parser = DataParser(classes, serialize_format, data_directory)
         data_parser.flush(out_data_directory)
-    if not only_data:
-        writer.create_data_storage()
+        if not only_data:
+            writer.create_data_storage()
 
     if not only_data:
         writer.remove_non_actual_files()
