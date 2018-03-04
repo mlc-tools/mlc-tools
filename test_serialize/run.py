@@ -1,7 +1,16 @@
 import os
 import shutil
+import subprocess
+
 
 root = os.path.dirname(os.path.abspath(__file__)) + '/..'
+
+
+def execute(command):
+    p = subprocess.Popen(command, shell=True)
+    (output, err) = p.communicate()
+    p.wait()
+    return 0 if err is None else err
 
 
 def generate(lang, protocol):
@@ -16,10 +25,10 @@ def generate(lang, protocol):
         -php_validate yes
         -use_colors no
         -side client
-        -disable_logs yes
+        -disable_logs no
         '''.format(root, lang, protocol, out_path_postfix)
     command = command.replace('\n', '')
-    if 0 != os.system(command):
+    if 0 != execute(command):
         exit(1)
 
 
@@ -53,7 +62,7 @@ def run(protocol):
         python step_3.py;
         '''.format(root)
     command = command.replace('\n', '')
-    if 0 != os.system(command):
+    if 0 != execute(command):
         clean()
         exit(1)
 

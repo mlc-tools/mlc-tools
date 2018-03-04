@@ -1,6 +1,14 @@
 import os
+import subprocess
 
 root = os.path.dirname(os.path.abspath(__file__)) + '/..'
+
+
+def execute(command):
+    p = subprocess.Popen(command, shell=True)
+    (output, err) = p.communicate()
+    p.wait()
+    return 0 if err is None else err
 
 
 def simple_test():
@@ -24,7 +32,7 @@ def simple_test():
             -disable_logs yes
             '''.format(root, lang, protocol, out_path_postfix)
         command = command.replace('\n', '')
-        if 0 != os.system(command):
+        if 0 != execute(command):
             exit(1)
         print '-----------------------------------------'
         print '|  test with params [{}, {}] finished'.format(lang, protocol)
@@ -41,7 +49,7 @@ def test_serialize():
     global root
 
     command = 'python {}/test_serialize/run.py'.format(root)
-    if 0 != os.system(command):
+    if 0 != execute(command):
         exit(1)
 
 
