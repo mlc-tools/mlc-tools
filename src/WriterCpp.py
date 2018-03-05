@@ -613,7 +613,7 @@ class WriterCpp(Writer):
                     elif arg_type in self.simple_types:
                         type_ = '{0}<{1}>'.format(type_, arg_type)
                     elif arg.is_pointer:
-                        type_ = 'pointer_list'
+                        type_ = 'list<pointer>'
                     elif arg.type == 'enum':
                         type_ = 'list<enum>'
                     else:

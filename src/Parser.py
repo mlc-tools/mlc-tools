@@ -337,7 +337,7 @@ class Parser:
         supported_types.append('serialized')
         supported_types.append('pointer')
         supported_types.append('list<serialized>')
-        supported_types.append('pointer_list')
+        supported_types.append('list<pointer>')
         supported_types.append('link')
         supported_types.append('list<link>')
         supported_types.append('serialized')

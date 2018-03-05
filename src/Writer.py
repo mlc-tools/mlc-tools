@@ -22,6 +22,7 @@ class Writer:
         self.serialize_protocol = self.parser.serialize_protocol
         self.files = {}
         self.out_directory = ''
+        self.current_class = None
 
     def convert_to_enum(self, cls, use_type='int'):
         shift = 0

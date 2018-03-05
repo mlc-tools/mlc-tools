@@ -22,15 +22,11 @@ class WriterPython(Writer):
     def __init__(self, parser, serialize_format):
         Writer.__init__(self, parser, serialize_format)
         self.loaded_functions = {}
-        # self.load_functions(configsDirectory + 'python_external.mlc_py')
-        self.current_class = None
 
     def save_generated_classes(self, out_directory):
         Writer.save_generated_classes(self, out_directory)
         self.create_factory()
         self.create_visitor_acceptors()
-        self.create_init_file()
-        # self.create_data_storage()
 
     def write_class(self, cls, flags):
         global _pattern_file
@@ -41,7 +37,7 @@ class WriterPython(Writer):
         if cls.type == 'enum':
             for member in cls.members:
                 if member.initial_value is not None and member.name == '_value':
-                    member.initial_value = 'self.' + member.initial_value
+                    member.initial_value = cls.members[0].initial_value
 
         initialize_list = ''
         static_list = ''
@@ -65,26 +61,8 @@ class WriterPython(Writer):
             name += '(' + cls.behaviors[0].name + ')'
             imports += 'from {0} import {0}'.format(cls.behaviors[0].name)
             init_behavior = '        {0}.__init__(self)'.format(cls.behaviors[0].name)
-        # for obj in cls.members:
-        #     if self.parser.find_class(obj.type):
-        #         # if obj.type != cls.name:
-        #         #     imports += '\nfrom {0} import {0}'.format(obj.type)
-        #     elif obj.type == 'list' or obj.type == 'map':
-        #         for arg in obj.template_args:
-        #             if isinstance(arg, Class) and arg.name != cls.name:
-        #                 imports += '\nfrom {0} import {0}'.format(arg.name)
-        #             elif self.parser.find_class(arg.type) and arg.type != cls.name:
-        #                 imports += '\nfrom {0} import {0}'.format(arg.type)
 
         out = pattern.format(name, initialize_list, functions, imports, init_behavior, static_list)
-        # for line in out.split('\n'):
-        #     if 'get_data_storage()' in line:
-        #         out = 'from DataStorage import get_data_storage\n' + out
-        #         break
-        # for line in out.split('\n'):
-        #     if 'Factory.' in line:
-        #         out = 'import Factory\n' + out
-        #         break
         self.current_class = None
         return {flags: out}
 
@@ -162,26 +140,6 @@ class WriterPython(Writer):
 
     def _get_filename_of_class(self, cls):
         return cls.name + ".py"
-
-    def load_functions(self, path):
-        try:
-            buffer = open(path).read()
-        except IOError:
-            buffer = ''
-            pass
-        functions = buffer.split('function:')
-        for func in functions:
-            k = func.find('(')
-            if k == -1:
-                continue
-            name = func[0:k]
-            rawbody = func[k:].split('\n')
-            body = [rawbody[0]]
-            for line in rawbody[1:]:
-                if line:
-                    body.append('    ' + line)
-            body = '\n'.join(body)
-            self.loaded_functions[name] = body
 
     def get_serialiation_function_args(self):
         if self.serialize_format == 'xml':
@@ -278,7 +236,7 @@ class WriterPython(Writer):
                         type = "list<{}>".format(arg_type)
                         obj_type = arg_type
                     elif arg.is_pointer:
-                        type = "pointer_list"
+                        type = "list<pointer>"
                     elif arg.type == 'enum':
                         type = 'list<string>'
                     else:
@@ -294,6 +252,7 @@ class WriterPython(Writer):
         buffer += 'MG_SERIALIZE_FORMAT = MG_' + self.serialize_format.upper()
         buffer += '\n'
         self.save_file('config.py', buffer)
+        self.create_init_file()
 
     def create_factory(self):
         global _factory

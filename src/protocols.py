@@ -165,7 +165,7 @@ for(auto child : arr_$(FIELD))
 }
 
 
-#pointer_list
+#list<pointer>
 #serialize:
 auto arr_$(FIELD) = xml.append_child("$(FIELD)");
 for(auto& t : $(FIELD))
@@ -349,7 +349,7 @@ for(int i = 0; i < arr_$(FIELD).size(); ++i)
 }
 
 
-#pointer_list
+#list<pointer>
 #serialize:
 auto& arr_$(FIELD) = json["$(FIELD)"];
 for(auto& t : $(FIELD))
@@ -599,7 +599,7 @@ xml_child = xml.find('$(FIELD)')
             $(OWNER)$(FIELD).deserialize(xml_child)
 
 
-#pointer_list
+#list<pointer>
 #serialize:
 arr = ET.SubElement(xml, '$(FIELD)')
         for t in $(OWNER)$(FIELD):
@@ -732,7 +732,7 @@ if '$(FIELD)' in dictionary:
             $(OWNER)$(FIELD) = $(TYPE)()
             $(OWNER)$(FIELD).deserialize(dictionary['$(FIELD)'])
 
-#pointer_list
+#list<pointer>
 #serialize
 dictionary['$(FIELD)'] = []
         arr = dictionary['$(FIELD)']

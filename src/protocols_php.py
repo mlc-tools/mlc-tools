@@ -116,7 +116,7 @@ if($xml->$(FIELD))
 }
 
 
-#pointer_list
+#list<pointer>
 #serialize:
 $xml_list = $xml->addChild("$(FIELD)");
 foreach($(OWNER)$(FIELD) as $item)
@@ -271,7 +271,7 @@ foreach($json->$(FIELD) as $item)
     array_push($(OWNER)$(FIELD), $obj);
 }
 
-#pointer_list
+#list<pointer>
 #serialize:
 $json->$(FIELD) = array();
 foreach($(OWNER)$(FIELD) as $t)

@@ -10,18 +10,6 @@ from Object import AccessSpecifier
 SERIALIZATION = 0
 DESERIALIZATION = 1
 
-allowed_functions = [
-    'serialize',
-    'deserialize',
-    'get_type',
-    'shared',
-    '__toString',
-    'str',
-    'int',
-    'set',
-    's_to_int',
-]
-
 
 def convertInitializeValue(value):
     if value and value.startswith('this'):
@@ -38,13 +26,11 @@ class WriterPhp(Writer):
 
     def __init__(self, parser, serialize_format):
         Writer.__init__(self, parser, serialize_format)
-        self.current_class = None
 
     def save_generated_classes(self, out_directory):
         Writer.save_generated_classes(self, out_directory)
         self.create_factory()
         self.create_visitor_acceptors()
-        # self.create_data_storage()
 
     def write_class(self, cls, flags):
         global _pattern_file
@@ -105,7 +91,7 @@ class WriterPhp(Writer):
             Error.warning(Error.DUBLICATE_METHODS, cls.name, function.name)
             return ''
         functions_cache[cls.name].append(function.name)
-        convert = function.name not in allowed_functions and self.current_class.name != 'DataStorage'
+        convert = function.name not in generated_functions and self.current_class.name != 'DataStorage'
 
         out = '''function {0}({1})
         __begin__
@@ -163,16 +149,11 @@ class WriterPhp(Writer):
         out_declaration = out_declaration.format(object.name, convertInitializeValue(value))
         return out_declaration, out_init
 
-    def _getImports(self, cls):
-        return ""
-
     def _get_filename_of_class(self, cls):
         return cls.name + ".php"
 
     def get_serialiation_function_args(self):
-        if self.serialize_format == 'xml':
-            return 'xml'
-        return 'json'
+        return self.serialize_format
 
     def create_serialization_function(self, cls, serialize_type):
         function = Function()
@@ -183,11 +164,8 @@ class WriterPhp(Writer):
 
         function.args = [[self.get_serialiation_function_args(), None]]
 
-        if cls.behaviors:
-            if self.serialize_format == 'xml':
-                function.operations.append('parent::{}($xml);'.format(function.name))
-            else:
-                function.operations.append('parent::{}($json);'.format(function.name))
+        if len(cls.behaviors):
+            function.operations.append('parent::{}(${});'.format(function.name, self.get_serialiation_function_args()))
         for obj in cls.members:
             if obj.is_runtime:
                 continue
@@ -232,7 +210,8 @@ class WriterPhp(Writer):
         if obj_value is None:
             index = 1
         type = obj_type
-        if self.parser.find_class(type) and self.parser.find_class(type).type == 'enum':
+        cls = self.parser.find_class(type)
+        if cls and cls.type == 'enum':
             type = 'enum'
         elif obj_type not in self.simple_types and type != "list" and type != "map":
             if is_link:
@@ -259,7 +238,7 @@ class WriterPhp(Writer):
                         type = "list<{}>".format(arg_type)
                         obj_type = arg_type
                     elif arg.is_pointer:
-                        type = "pointer_list"
+                        type = "list<pointer>"
                     elif arg.type == 'enum':
                         type = 'list<string>'
                     else:
@@ -295,9 +274,9 @@ __end__;
 
     def create_visitor_acceptors(self):
         pattern = _pattern_visitor
-        line = '        else if($ctx->get_type() == {0}::$TYPE)\n@(\n$this->visit_{1}($ctx);\n@)\n'
+        line = 'else if($ctx->get_type() == {0}::$TYPE)\n@(\n$this->visit_{1}($ctx);\n@)\n'
         line_import = 'require_once "{0}.php";\n'
-        line_visit = '''\n    function visit_{0}($ctx)\n@(\n@)\n'''
+        line_visit = '''\nfunction visit_{0}($ctx)\n@(\n@)\n'''
         base_visitors = {}
         for cls in self.parser.classes:
             if cls.is_visitor and (cls.behaviors and not cls.behaviors[0].is_visitor):
@@ -332,12 +311,10 @@ __end__;
             return DataStoragePhpXml(name, classes, self.parser)
         else:
             return DataStoragePhpJson(name, classes, self.parser)
-        pass
 
     def prepare_file(self, body):
         body = body.replace('__begin__', '{')
         body = body.replace('__end__', '}')
-        body = body.replace('::TYPE', '::$TYPE')
 
         tabs = 0
         lines = body.split('\n')
@@ -390,7 +367,7 @@ __end__;
 
         for i, member in enumerate(cls.members):
             if member.name == '_value':
-                member.type = 'string'
+                member.type = use_type
 
         function = Function()
         function.name = 'set'
@@ -408,49 +385,48 @@ __end__;
 
 
 regs = [
-    [re.compile('DataStorage::shared\(\).get<(\w+)>'), 'DataStorage::shared()->get\\1'],
-    [re.compile('\\.str\\(\\)'), ''],
-    [re.compile('for\s*\\(auto (.+?)\s*:\s*(.+?)\s*\\)'), 'foreach($\\2 as $\\1)'],
-    [re.compile('for\s*\\(auto& (.+?)\s*:\s*(.+?)\s*\\)'), 'foreach($\\2 as $\\1)'],
-    [re.compile('for\s*\\(auto&&\s*\\[(\w+),\s*(\w+)\\]\s*:\s*(.+)\\)'), 'foreach ($\\3 as $\\1 => $\\2)'],
-    [re.compile('auto (\w+)'), '$\\1'],
-    [re.compile('auto& (\w+)'), '$\\1'],
-    [re.compile('void (\w+)'), '$\\1'],
-    [re.compile('int (\w+)'), '$\\1'],
-    [re.compile('bool (\w+)'), '$\\1'],
-    [re.compile('\\((\w+) (\w+)\\)'), '($\\2)'],
-    [re.compile('\\(const (\w+)\\& (\w+)\\)'), '($\\2)'],
-    [re.compile('\\(const (\w+)\\* (\w+)\\)'), '($\\2)'],
-    [re.compile('\\((\w+)\\* (\w+)\\)'), '($\\2)'],
-    [re.compile('(\w+)\\ (\w+),'), '$\\2,'],
-    [re.compile('(\w+)\\& (\w+),'), '$\\2,'],
-    [re.compile('(\w+)\\* (\w+),'), '$\\2,'],
-    [re.compile('const (\w+)\\* (\w+)'), '$\\2'],
-    [re.compile('const (\w+)\\& (\w+)'), '$\\2'],
-    [re.compile('float (\w+)'), '$\\1'],
-    [re.compile('std::string (\w+)'), '$\\1'],
-    [re.compile('this->'), '$this->'],
-    [re.compile(':const'), ''],
-    [re.compile('(\w+)::(\w+)'), '\\1::$\\2'],
-    [re.compile('(\w+)::(\w+)\\)'), '\\1::$\\2)'],
-    [re.compile('(\w+)::(\w+)\\.'), '\\1::$\\2.'],
-    [re.compile('(\w+)::(\w+)->'), '\\1::$\\2->'],
-    [re.compile('(\w+)::(\w+)\\]'), '\\1::$\\2]'],
-    [re.compile('(\w+)::\\$(\w+)\\((\w*)\\)'), '\\1::\\2(\\3)'],
-    [re.compile('function \\$(\w+)'), 'function \\1'],
-    [re.compile('\\.at\\((.*?)\\)'), '[\\1]'],
-
-    [re.compile('(\w+)\\.'), '\\1->'],
-    [re.compile('(\w+)\\(\\)\\.'), '\\1()->'],
-    [re.compile('(\w+)\\]\.'), '\\1]->'],
-    [re.compile('&(\w+)'), '\\1'],
-    [re.compile('\\$if\\('), 'if('],
-    [re.compile('delete (\w+);'), ''],
-    [re.compile('([-0-9])->([-0-9])f\\b'), '\\1.\\2'],
-    [re.compile('assert\\(.+\\);'), ''],
-    [re.compile('make_intrusive<(\w+)>\\(\s*\\)'), 'new \\1()'],
-    [re.compile('new\s*(\w+)\s*\\(\s*\\)'), 'new \\1()'],
-    [re.compile('(.+?)\\->push_back\\((.+)\\);'), 'array_push(\\1, \\2);'],
+    [re.compile(r'DataStorage::shared\(\).get<(\w+)>'), r'DataStorage::shared()->get\1'],
+    [re.compile(r'\.str\(\)'), r''],
+    [re.compile(r'for\s*\(auto (.+?)\s*:\s*(.+?)\s*\)'), r'foreach($\2 as $\1)'],
+    [re.compile(r'for\s*\(auto& (.+?)\s*:\s*(.+?)\s*\)'), r'foreach($\2 as $\1)'],
+    [re.compile(r'for\s*\(auto&&\s*\[(\w+),\s*(\w+)\]\s*:\s*(.+)\)'), r'foreach ($\3 as $\1 => $\2)'],
+    [re.compile(r'auto (\w+)'), r'$\1'],
+    [re.compile(r'auto& (\w+)'), r'$\1'],
+    [re.compile(r'void (\w+)'), r'$\1'],
+    [re.compile(r'int (\w+)'), r'$\1'],
+    [re.compile(r'bool (\w+)'), r'$\1'],
+    [re.compile(r'\((\w+) (\w+)\)'), r'($\2)'],
+    [re.compile(r'\(const (\w+)\& (\w+)\)'), r'($\2)'],
+    [re.compile(r'\(const (\w+)\* (\w+)\)'), r'($\2)'],
+    [re.compile(r'\((\w+)\* (\w+)\)'), r'($\2)'],
+    [re.compile(r'(\w+)\ (\w+),'), r'$\2,'],
+    [re.compile(r'(\w+)\& (\w+),'), r'$\2,'],
+    [re.compile(r'(\w+)\* (\w+),'), r'$\2,'],
+    [re.compile(r'const (\w+)\* (\w+)'), r'$\2'],
+    [re.compile(r'const (\w+)\& (\w+)'), r'$\2'],
+    [re.compile(r'float (\w+)'), r'$\1'],
+    [re.compile(r'std::string (\w+)'), r'$\1'],
+    [re.compile(r'this->'), r'$this->'],
+    [re.compile(r':const'), r''],
+    [re.compile(r'(\w+)::(\w+)'), r'\1::$\2'],
+    [re.compile(r'(\w+)::(\w+)\)'), r'\1::$\2)'],
+    [re.compile(r'(\w+)::(\w+)\.'), r'\1::$\2.'],
+    [re.compile(r'(\w+)::(\w+)->'), r'\1::$\2->'],
+    [re.compile(r'(\w+)::(\w+)\]'), r'\1::$\2]'],
+    [re.compile(r'(\w+)::\$(\w+)\((\w*)\)'), r'\1::\2(\3)'],
+    [re.compile(r'function \$(\w+)'), r'function \1'],
+    [re.compile(r'\.at\((.*?)\)'), r'[\1]'],
+    [re.compile(r'(\w+)\.'), r'\1->'],
+    [re.compile(r'(\w+)\(\)\.'), r'\1()->'],
+    [re.compile(r'(\w+)\]\.'), r'\1]->'],
+    [re.compile(r'&(\w+)'), r'\1'],
+    [re.compile(r'\$if\('), r'if('],
+    [re.compile(r'delete (\w+);'), r''],
+    [re.compile(r'([-0-9])->([-0-9])f\b'), r'\1.\2'],
+    [re.compile(r'assert\(.+\);'), r''],
+    [re.compile(r'make_intrusive<(\w+)>\(\s*\)'), r'new \1()'],
+    [re.compile(r'new\s*(\w+)\s*\(\s*\)'), r'new \1()'],
+    [re.compile(r'(.+?)\->push_back\((.+)\);'), r'array_push(\1, \2);'],
 ]
 
 
@@ -468,20 +444,20 @@ def convert_function_to_php(func, parser, function_args):
     ]
 
     repl = [
-        ['$if(', 'if('],
-        ['function $', 'function '],
-        ['($int)', '(int)'],
-        ['time(nullptr)', 'time()'],
-        ['$$', '$'],
-        ['std::$max', 'max'],
-        ['std::$min', 'min'],
-        ['std::$round', 'round'],
-        ['in_list(', 'in_array('],
-        ['in_map', 'array_key_exists'],
-        ['list_push', 'array_push'],
-        ['list_size', 'count'],
-        ['map_size', 'count'],
-        ['nullptr', 'null'],
+        [re.compile('$if('), r'if('],
+        [re.compile('function $'), r'function '],
+        [re.compile('($int)'), r'(int)'],
+        [re.compile('time(nullptr)'), r'time()'],
+        [re.compile('$$'), r'$'],
+        [re.compile('std::$max'), r'max'],
+        [re.compile('std::$min'), r'min'],
+        [re.compile('std::$round'), r'round'],
+        [re.compile('in_list('), r'in_array('],
+        [re.compile('in_map'), r'array_key_exists'],
+        [re.compile('list_push'), r'array_push'],
+        [re.compile('list_size'), r'count'],
+        [re.compile('map_size'), r'count'],
+        [re.compile('nullptr'), r'null'],
     ]
 
     for reg in regs:
@@ -509,6 +485,17 @@ def convert_function_to_php(func, parser, function_args):
     return func
 
 
+generated_functions = [
+    'serialize',
+    'deserialize',
+    'get_type',
+    'shared',
+    '__toString',
+    'str',
+    'int',
+    'set',
+    's_to_int',
+]
 # format(name, initialize_list, functions, imports)
 _pattern_file = {}
 _pattern_file['xml'] = '''<?php
