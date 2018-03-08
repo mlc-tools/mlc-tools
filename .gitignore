@@ -6,6 +6,8 @@
 /simple_test/build_json/
 
 /test_serialize/build/
+/test_serialize/build_xml/
+/test_serialize/build_json/
 /test_serialize/generated_cpp/
 /test_serialize/generated_py/
 /test_serialize/generated_php/

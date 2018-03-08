@@ -395,6 +395,8 @@ def convert_function_to_python(func, parser):
         ['std.round', 'round'],
         ['std.min', 'min'],
         ['std.max', 'max'],
+        ['!= None', 'is not None'],
+        ['== None', 'is None'],
     ]
 
     for reg in regs:
@@ -438,6 +440,8 @@ def convert_function_to_python(func, parser):
     func = func.replace('\n                        \n', '\n')
     if 'DataStorage' in func:
         func = get_tabs(2) + 'from DataStorage import DataStorage\n' + func
+    if 'Factory' in func:
+        func = get_tabs(2) + 'from Factory import Factory\n' + func
     for cls in parser.classes:
         if cls.name in func:
             func = get_tabs(2) + 'from {0} import {0}\n'.format(cls.name) + func
@@ -460,10 +464,16 @@ class Factory:
         root = ET.fromstring(string)
         type = root.tag
         command = Factory.build(type)
-        if command != None:
+        if command is not None:
             command.deserialize(root)
-        return command'''
+        return command
 
+    @staticmethod
+    def serialize_command(command):
+        root = ET.Element(command.get_type())
+        command.serialize(root)
+        return ET.tostring(root)
+'''
 _factory['json'] = '''import json
 {0}
 class Factory:
@@ -476,9 +486,17 @@ class Factory:
         dictionary = json.loads(string)
         for key in dictionary:
             command = Factory.build(key)
-            if command != None:
+            if command is not None:
                 command.deserialize(dictionary[key])
-            return command'''
+            return command
+
+    @staticmethod
+    def serialize_command(command):
+        js = dict()
+        js[command.get_type()] = dict()
+        command.serialize(js[command.get_type()])
+        return json.dumps(js)
+'''
 
 _pattern_file = {}
 _pattern_file['xml'] = '''import xml.etree.ElementTree as ET

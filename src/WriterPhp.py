@@ -250,26 +250,67 @@ class WriterPhp(Writer):
 
     def save_config_file(self):
         content = '''<?php\n
-$MG_XML = 1;
-$MG_JSON = 2;
-$MG_SERIALIZE_FORMAT = $MG_{};
-\n?>
+        $MG_XML = 1;
+        $MG_JSON = 2;
+        $MG_SERIALIZE_FORMAT = $MG_{};
+        \n?>
         '''.format(self.serialize_format.upper())
         self.save_file('config.php', content)
 
     def create_factory(self):
         pattern = '''<?php
 
-class Factory
-__begin__
-    static function build($type)
-    __begin__
-        {0}
-    __end__
-__end__;
+        class Factory
+        __begin__
+            static function build($type)
+            __begin__
+                require_once "$type.php";
+                return new $type;
+            __end__
 
-?>'''
-        factory = pattern.format('require_once "$type.php"; \n return new $type;')
+            {0}
+
+        __end__;
+
+        ?>'''
+
+        factory_methods = {}
+        factory_methods['xml'] = '''static function create_command($payload)
+        {
+            $xml     = simplexml_load_string($payload);
+            $class   = $xml->getName();
+            require_once "$class.php";
+            $command = new $class;
+            $command->deserialize($xml);
+            return $command;
+        }
+
+        static function serialize_command($command)
+        {
+            $xml = simplexml_load_string('<'.$command->get_type().'/>');
+            $command->serialize($xml);
+            return $xml->asXML();
+        }'''
+
+        factory_methods['json'] = '''static function create_command($payload)
+        {
+            $json    = json_decode($payload);
+            $class   = key($json);
+            require_once "$class.php";
+            $command = new $class;
+            $command->deserialize($json->$class);
+            return $command;
+        }
+
+        static function serialize_command($command)
+        {
+            $type = $command->get_type();
+            $json = json_decode('{"'.$type.'": {}}');
+            $command->serialize($json->$type);
+            return json_encode($json);
+        }'''
+
+        factory = pattern.format(factory_methods[self.serialize_format])
         self.save_file('Factory.php', factory)
 
     def create_visitor_acceptors(self):
@@ -315,6 +356,7 @@ __end__;
     def prepare_file(self, body):
         body = body.replace('__begin__', '{')
         body = body.replace('__end__', '}')
+        body = body.replace('::TYPE', '::$TYPE')
 
         tabs = 0
         lines = body.split('\n')
@@ -437,27 +479,27 @@ def convert_function_to_php(func, parser, function_args):
     }
 
     regs2 = [
-        ['->\\$(\w+)\\(', '->\\1('],
-        ['([-0-9]*)->([-0-9]*)f\\b', '\\1.\\2'],
-        ['([-0-9]*)->f\\b', '\\1.0'],
-        [re.compile('\\$return\s'), 'return'],
+        [re.compile(r'->\$(\w+)\('), r'->\1('],
+        [re.compile(r'([-0-9]*)->([-0-9]*)f\b'), r'\1.\2'],
+        [re.compile(r'([-0-9]*)->f\\b'), r'\1.0'],
+        [re.compile(r'\$return\s'), r'return'],
     ]
 
     repl = [
-        [re.compile('$if('), r'if('],
-        [re.compile('function $'), r'function '],
-        [re.compile('($int)'), r'(int)'],
-        [re.compile('time(nullptr)'), r'time()'],
-        [re.compile('$$'), r'$'],
-        [re.compile('std::$max'), r'max'],
-        [re.compile('std::$min'), r'min'],
-        [re.compile('std::$round'), r'round'],
-        [re.compile('in_list('), r'in_array('],
-        [re.compile('in_map'), r'array_key_exists'],
-        [re.compile('list_push'), r'array_push'],
-        [re.compile('list_size'), r'count'],
-        [re.compile('map_size'), r'count'],
-        [re.compile('nullptr'), r'null'],
+        ['$if(', 'if('],
+        ['function $', 'function '],
+        ['($int)', '(int)'],
+        ['time(nullptr)', 'time()'],
+        ['$$', '$'],
+        ['std::$max', 'max'],
+        ['std::$min', 'min'],
+        ['std::$round', 'round'],
+        ['in_list(', 'in_array('],
+        ['in_map', 'array_key_exists'],
+        ['list_push', 'array_push'],
+        ['list_size', 'count'],
+        ['map_size', 'count'],
+        ['nullptr', 'null'],
     ]
 
     for reg in regs:

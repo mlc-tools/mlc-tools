@@ -31,6 +31,7 @@ class AllTests<SerializedObject>
         result = logger->add_result(FunctionTest::tests(logger), "Function tests") && result;
         result = logger->add_result(DataUnit::tests(logger), "Static data") && result;
         result = logger->add_result(AllTypes::tests(logger), "AllTypes tests") && result;
+        result = logger->add_result(TestFactory::tests(logger), "TestFactory tests") && result;
 
         return result;
     }
@@ -309,8 +310,30 @@ class TestUser1<SerializedObject>
     bool result = true
 }
 
+class TestFactory<SerializedObject>
+{
+    function bool tests(Logger* logger):static
+    {
+        bool result = true;
+        result = TestFactory::test(logger) && result;
+        return result;
+    }
 
+    function bool test(Logger* logger):static
+    {
+        bool result = true;
+        auto command = new RequestBar();
+        auto string = Factory::serialize_command(command);
 
+        auto command2 = Factory::create_command(string);
+        result = logger->add_result(command2 != nullptr, " - TestFactory: commnd_2 deserialized") && result;
+        if(result)
+        {
+            result = logger->add_result(command2->get_type() == command->get_type(), " - TestFactory: commnd_type == commnd2_type deserialized") && result;
+        }
+        return result;
+    }
+}
 
 
 

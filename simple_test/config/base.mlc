@@ -1,8 +1,8 @@
-class model/ModelBase<SerializedObject>:set_function:abstract
+class model/ModelBase<SerializedObject>:abstract
 {
 }
 
-class model/ModelCity<ModelBase>:set_function
+class model/ModelCity<ModelBase>
 {
 	int id
 	int owner

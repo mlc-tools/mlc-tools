@@ -7,10 +7,8 @@ root = os.path.dirname(os.path.abspath(__file__)) + '/..'
 
 
 def execute(command):
-    p = subprocess.Popen(command, shell=True)
-    (output, err) = p.communicate()
-    p.wait()
-    return 0 if err is None else err
+    res = os.system(command)
+    return res
 
 
 def generate(lang, protocol):
@@ -55,15 +53,16 @@ def run(protocol):
     generate('php', protocol)
     generate('cpp', protocol)
     command = '''
-        cd {}/test_serialize;
+        cd {0}/test_serialize;
         python step_0.py;
         php step_1.php;
-        mkdir build; cd build; cmake ..; make -j8 install; cd ..; ./step_2;
+        mkdir build_{1}; cd build_{1}; cmake ..; make -j8 install; cd ..; ./step_2;
         python step_3.py;
-        '''.format(root)
+        '''.format(root, protocol)
     command = command.replace('\n', '')
     if 0 != execute(command):
         clean()
+        print 'Error'
         exit(1)
 
     clean()
