@@ -5,15 +5,16 @@ from DataParser import DataParser
 from WriterCpp import WriterCpp
 from WriterPython import WriterPython
 from WriterPhp import WriterPhp
+from WriterJavaScript import WriterJavaScript
 from Copyright import Copyright
 from Error import Log
 import os
 
 
 def validate_arg_language(language):
-    if language not in ['cpp', 'py', 'php']:
+    if language not in ['cpp', 'py', 'php', 'js']:
         Log.error('Unknown language (-l : %s)' % language)
-        Log.error('Please use any from [cpp, py, php]')
+        Log.error('Please use any from [cpp, py, php, js]')
         exit(-1)
 
 
@@ -111,6 +112,8 @@ def main():
         writer = WriterPython(parser, serialize_format)
     elif language == 'php':
         writer = WriterPhp(parser, serialize_format)
+    elif language == 'js':
+        writer = WriterJavaScript(parser, serialize_format)
     if not only_data:
         writer.generate()
     writer.save_generated_classes(out_directory)

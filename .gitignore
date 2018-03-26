@@ -1,6 +1,7 @@
 /simple_test/generated_cpp/
 /simple_test/generated_py/
 /simple_test/generated_php/
+/simple_test/generated_js/
 /simple_test/build/
 /simple_test/build_xml/
 /simple_test/build_json/
@@ -11,6 +12,7 @@
 /test_serialize/generated_cpp/
 /test_serialize/generated_py/
 /test_serialize/generated_php/
+/test_serialize/generated_js/
 /test_serialize/data.py.xml
 /test_serialize/data.php.xml
 /test_serialize/data.cpp.xml
@@ -34,3 +36,5 @@ mlc.sln
 /out
 mlc.sublime-project
 mlc.sublime-workspace
+
+/javascript
