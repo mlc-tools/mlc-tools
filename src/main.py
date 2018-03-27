@@ -116,7 +116,6 @@ def main():
         writer = WriterJavaScript(parser, serialize_format)
     if not only_data:
         writer.generate()
-    writer.save_generated_classes(out_directory)
     if not only_data:
         writer.save_config_file()
 
@@ -129,9 +128,10 @@ def main():
             if class_.is_storage:
                 classes.append(class_)
         data_parser = DataParser(classes, serialize_format, data_directory)
-        data_parser.flush(out_data_directory)
+        data_parser.flush(out_data_directory, writer)
         if not only_data:
             writer.create_data_storage()
+    writer.save_generated_classes(out_directory)
 
     if not only_data:
         writer.remove_non_actual_files()

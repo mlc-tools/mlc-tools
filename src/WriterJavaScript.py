@@ -1,8 +1,8 @@
 from Writer import Writer
 from Function import Function
 from Class import Class
-from DataStorageCreators import DataStoragePhpXml
-from DataStorageCreators import DataStoragePhpJson
+# from DataStorageCreators import DataStoragePhpXml
+from DataStorageCreators import DataStorageJavaScriptJson
 from Error import Error
 import re
 from Object import AccessSpecifier
@@ -35,9 +35,15 @@ Logger.prototype.add_result = function(result, message) {
     print(result + ': ' + message);
     return result;
 }
+DataStorage.shared().initialize(DATA_CONTENT_STRING);
 AllTests.run(new Logger());
         '''
         Writer.save_file(self, 'all.js', self.buffer)
+
+    def save_data(self, path, content):
+        content = content.split('\n')
+        content = '\\\n'.join(content)
+        self.buffer += "var DATA_CONTENT_STRING = '" + content + "';"
 
     def write_class(self, cls, flags):
         global _pattern_file
@@ -338,10 +344,10 @@ AllTests.run(new Logger());
         pass
 
     def create_data_storage_class(self, name, classes):
-        if self.serialize_format == 'xml':
-            return DataStoragePhpXml(name, classes, self.parser)
-        else:
-            return DataStoragePhpJson(name, classes, self.parser)
+        # if self.serialize_format == 'xml':
+        #     return DataStoragePhpXml(name, classes, self.parser)
+        # else:
+        return DataStorageJavaScriptJson(name, classes, self.parser)
 
     def prepare_file(self, body):
         body = body.replace('__begin__', '{')
@@ -477,7 +483,7 @@ regs = [
     [re.compile('in_list\s*\\(\s*(.+),\s*(.+)\s*\\)'), r'(\1 in \2)'],
     [re.compile(r'list_push\s*\(\s*(.+),\s*(.+)\s*\)'), r'\1.push(\2)'],
     [re.compile(r'list_size\s*\(\s*(.+)\s*\)'), r'\1.length'],
-    [re.compile(r'map_size\s*\(\s*(.+)\s*\)'), r'Object.keys(\1).length'],
+    [re.compile(r'map_size\s*\(\s*(.+?)\s*\)'), r'Object.keys(\1).length'],
     [re.compile(r'Factory::create\((\w+)\)'), r'factory_create(\1)'],
     [re.compile(r'Factory::serialize_command\((\w+)\)'), r'factory_serialize_command(\1)'],
     [re.compile(r'Factory::create_command\((\w+)\)'), r'factory_create_command(\1)'],

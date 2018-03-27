@@ -27,7 +27,7 @@ $(OWNER)$(FIELD) = json["$(FIELD)"];
 json["$(FIELD)"] = {};
 $(OWNER)$(FIELD).serialize(json["$(FIELD)"]);
 #deserialize:
-$(OWNER)$(FIELD) = factory_create($(TYPE));
+$(OWNER)$(FIELD) = factory_create("$(TYPE)");
 $(OWNER)$(FIELD).deserialize(json["$(FIELD)"]);
 
 #pointer
@@ -43,7 +43,7 @@ if($(OWNER)$(FIELD))
 if("$(FIELD)" in json)
 {
     var type = Object.keys(json)[0];
-    $(OWNER)$(FIELD) = factory_create($type);
+    $(OWNER)$(FIELD) = factory_create(type);
     $(OWNER)$(FIELD).deserialize(json["$(FIELD)"][type]);
 }
 
@@ -77,7 +77,7 @@ for(var item in $(OWNER)$(FIELD))
 #deserialize:
 for(var item in json["$(FIELD)"])
 {
-    var obj = factory_create($(TYPE));
+    var obj = factory_create("$(TYPE)");
     obj.deserialize(item);
     $(OWNER)$(FIELD).push($obj);
 }
@@ -118,9 +118,10 @@ for(var data in $(OWNER)$(FIELD))
     $json[$(FIELD)].push(data.name);
 }
 #deserialize:
-for(var name in json["$(FIELD)"])
+var arr_$(FIELD) = "$(FIELD)";
+for(var i in arr_$(FIELD))
 {
-    var data = DataStorage.shared().get$(ARG_0)(name);
+    var data = DataStorage.shared().get$(ARG_0)(arr_$(FIELD)[i]);
     $(OWNER)$(FIELD).push(data);
 }
 

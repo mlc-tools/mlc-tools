@@ -19,14 +19,15 @@ class DataParser:
             self._parse_json(data_directory)
         self._validate()
 
-    def flush(self, out_data_directory):
+    def flush(self, out_data_directory, writer):
         buffer = ''
         file = 'data.' + self.format
         if self.format == 'xml':
             buffer = self._flush_xml(out_data_directory)
         elif self.format == 'json':
             buffer = self._flush_json(out_data_directory)
-        fileutils.write(out_data_directory + file, buffer)
+        writer.save_data(out_data_directory + file, buffer);
+        # fileutils.write(out_data_directory + file, buffer)
 
     def _parse_xml(self, data_directory):
         files = fileutils.get_files_list(data_directory)

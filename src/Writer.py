@@ -91,6 +91,9 @@ class Writer:
     def prepare_file(self, body):
         return body
 
+    def save_data(self, path, content):
+        self.save_file(path, content)
+            
     def save_file(self, filename, string):
         string = self.parser.copyright_text + self.prepare_file(string)
         filename = self.out_directory + filename

@@ -159,6 +159,12 @@ class DataStoragePython(DataStorage):
         object.access = AccessSpecifier.private
         self.members.append(object)
 
+    def get_deserialize_args(self):
+        pass
+
+    def get_deserialize_pattern(self):
+        pass
+
     def create_deserialize(self):
         function = Function()
         function.name = 'deserialize'
@@ -210,6 +216,15 @@ class DataStoragePhp(DataStorage):
         self.members.append(object)
 
         self.create_deserialize()
+        
+    def create_deserialize(self):
+        pass
+
+    def get_getter_pattern(self):
+        pass
+    
+    def get_load_all_pattern(self):
+        pass
 
     def create_getters(self, classes):
         for class_ in classes:
@@ -228,6 +243,64 @@ class DataStoragePhp(DataStorage):
                 function.operations.append(self.get_load_all_pattern())
                 function.operations[0] = function.operations[0].replace('@{array}', map_name)
                 function.operations[0] = function.operations[0].replace('@{type}', class_.name)
+                self.functions.append(function)
+
+class DataStorageJavaScript(DataStorage):
+
+    def __init__(self, *args):
+        DataStorage.__init__(self, *args)
+
+        self.create_deserialize()
+
+        object = Object()
+        object.type = self.name
+        object.name = '__instance'
+        object.initial_value = 'null';
+        object.is_static = True
+        object.access = AccessSpecifier.private
+        self.members.append(object)
+
+    def get_deserialize_args(self):
+        pass
+
+    def get_deserialize_pattern(self):
+        pass
+
+    def create_deserialize(self):
+        function = Function()
+        function.name = 'deserialize'
+        function.args.append(self.get_deserialize_args())
+        for member in self.members:
+            if member.type != 'map':
+                continue
+            pattern = self.get_deserialize_pattern()
+            function.operations.append(pattern.format(member.name, member.template_args[1].name))
+
+        self.functions.append(function)
+
+    def create_shared_method(self):
+        function = Function()
+        function.name = 'shared'
+        function.args.append(['', ''])
+        function.return_type = self.name
+        function.is_static = True
+        function.operations.append('if(!{}.__instance)@('.format(self.name))
+        function.operations.append('    {0}.__instance = new {0}()'.format(self.name))
+        function.operations.append('@)')
+        function.operations.append('return {}.__instance'.format(self.name))
+        self.functions.append(function)
+
+    def create_getters(self, classes):
+        for class_ in classes:
+            if class_.is_storage and (class_.side == self.parser.side or class_.side == 'both'):
+                map_name = get_data_list_name(get_data_name(class_.name))
+                function = Function()
+                function.name = 'get' + class_.name
+                function.args.append(['name', ''])
+                function.operations.append('if(!this._loaded && !(name in this.{}))@('.format(map_name))
+                function.operations.append('    this.{}[name] = new {}();'.format(map_name, class_.name))
+                function.operations.append('@)')
+                function.operations.append('return this.{}[name];'.format(map_name))
                 self.functions.append(function)
 
 
@@ -488,3 +561,34 @@ class DataStoragePhpJson(DataStoragePhp):
                 }
             }
             '''
+
+
+class DataStorageJavaScriptJson(DataStorageJavaScript):
+    """docstring for DataStoragePythonXml"""
+    
+    def __init__(self, *args):
+        DataStorageJavaScript.__init__(self, *args)
+    
+    def add_initialize_function_operations(self, function):
+        function.operations.append('var json = JSON.parse(buffer);')
+        function.operations.append('this.deserialize(json);')
+        function.operations.append('this._loaded = true;')
+    
+    def get_deserialize_pattern(self):
+        return '''
+        var array = '{0}' in js ? js['{0}'] : [];
+        for(var i=0; i<array.length; ++i)
+        @(
+            var json_child = array[i];
+            var name = json_child['key'];
+            var value = json_child['value'];
+            if(!(name in this.units))
+            @(
+                this.{0}[name] = new {1}();
+            @)
+            this.{0}[name].deserialize(value);
+        @)
+        '''
+    
+    def get_deserialize_args(self):
+        return ['js', '']
