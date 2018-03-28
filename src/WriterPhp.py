@@ -494,6 +494,7 @@ def convert_function_to_php(func, parser, function_args):
         ['std::$max', 'max'],
         ['std::$min', 'min'],
         ['std::$round', 'round'],
+        ['std::$floor', 'floor'],
         ['in_list(', 'in_array('],
         ['in_map', 'array_key_exists'],
         ['list_push', 'array_push'],

@@ -393,6 +393,7 @@ def convert_function_to_python(func, parser):
         ['false', 'False'],
         ['nullptr', 'None'],
         ['std.round', 'round'],
+        ['std.floor', 'math.floor'],
         ['std.min', 'min'],
         ['std.max', 'max'],
         ['!= None', 'is not None'],
