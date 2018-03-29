@@ -30,7 +30,9 @@ class WriterJavaScript(Writer):
         self.create_visitor_acceptors()
         
         self.buffer += '''
-/**/
+/*
+ * Tests:
+ */
 Logger.prototype.add_result = function(result, message) {
     print(result + ': ' + message);
     return result;
@@ -56,13 +58,14 @@ AllTests.run(new Logger());
                 if member.initial_value is not None and member.name == '_value':
                     member.initial_value = cls.members[0].initial_value
 
-        declaration_list = ''
-        initialization_list = ''
+        static_list = ''
+        nonstatic_list = ''
         for object in cls.members:
-            declare, init = self.write_object(object)
-            declaration_list += declare + '\n'
-            if init:
-                initialization_list += init + '\n'
+            init = self.write_object(object)
+            if object.is_static:
+                static_list += init + '\n'
+            else:
+                nonstatic_list += init + '\n'
 
         self.create_serialization_function(cls, SERIALIZATION)
         self.create_serialization_function(cls, DESERIALIZATION)
@@ -76,7 +79,7 @@ AllTests.run(new Logger());
         if cls.behaviors:
             parent = '{}.prototype.__proto__ = {}.prototype;'.format(cls.name, cls.behaviors[0].name)
 
-        out = pattern.format(name, parent, declaration_list, functions, '', initialization_list)
+        out = pattern.format(name, nonstatic_list, parent, static_list, functions, '')
         self.current_class = None
         return {flags: out}
 
@@ -107,8 +110,6 @@ AllTests.run(new Logger());
         return out
 
     def write_object(self, object):
-        out_declaration = ''
-        out_init = ''
         value = object.initial_value
         if value is None:
             type = object.type
@@ -125,8 +126,10 @@ AllTests.run(new Logger());
             elif type == "map":
                 value = "{}"
             else:
-                if self.parser.find_class(object.type):
+                if self.parser.find_class(object.type) and not object.is_link:
                     value = 'new {}();'.format(object.type)
+                else:
+                    value = 'null';
                     # out_init = 'new {}();'.format(object.name, object.type)
 
         # accesses = {
@@ -142,10 +145,10 @@ AllTests.run(new Logger());
         if object.is_static:
             out_declaration = '{0}.{1} = {2}'
         else:
-            out_declaration = '{0}.prototype.{1} = {2}'
+            out_declaration = 'this.{1} = {2}'
             
         out_declaration = out_declaration.format(self.current_class.name, object.name, convertInitializeValue(value))
-        return out_declaration, out_init
+        return out_declaration
 
     def _get_filename_of_class(self, cls):
         return cls.name + ".js"
@@ -182,29 +185,28 @@ AllTests.run(new Logger());
         pass
 
     def build_map_serialization(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args, serialization_type):
-        # key = obj_template_args[0]
-        # value = obj_template_args[1]
-        # key_type = key.name if isinstance(key, Class) else key.type
-        # value_type = value.name if isinstance(value, Class) else value.type
-        # str = self.serialize_protocol[serialization_type]['map'][0]
-        # _value_is_pointer = value.is_pointer
-        # if value_type not in self.parser.simple_types:
-        #     value_declararion = '$value = new {}();'.format(value_type)
-        # else:
-        #     value_declararion = ''
-        # a0 = obj_name
-        # a1 = self.build_serialize_operation('key', key_type, None, serialization_type, key.template_args, False, '$', key.is_link)
-        # a2 = self.build_serialize_operation('value', value_type, None, serialization_type, value.template_args, _value_is_pointer, '$', False)
-        # a1 = a1.split('\n')
-        # for index, a in enumerate(a1):
-        #     a1[index] = a
-        # a1 = '\n'.join(a1)
-        # a2 = a2.split('\n')
-        # for index, a in enumerate(a2):
-        #     a2[index] = a
-        # a2 = '\n'.join(a2)
-        # return str.format(a0, a1, a2, '{}', 'this.', value_declararion) + '\n'
-        return ''
+        key = obj_template_args[0]
+        value = obj_template_args[1]
+        key_type = key.name if isinstance(key, Class) else key.type
+        value_type = value.name if isinstance(value, Class) else value.type
+        str = self.serialize_protocol[serialization_type]['map'][0]
+        _value_is_pointer = value.is_pointer
+        if value_type not in self.parser.simple_types:
+            value_declararion = 'value = new {}();'.format(value_type)
+        else:
+            value_declararion = ''
+        a0 = obj_name
+        a1 = self.build_serialize_operation('key', key_type, None, serialization_type, key.template_args, False, '', key.is_link)
+        a2 = self.build_serialize_operation('value', value_type, None, serialization_type, value.template_args, _value_is_pointer, '', False)
+        a1 = a1.split('\n')
+        for index, a in enumerate(a1):
+            a1[index] = a
+        a1 = '\n'.join(a1)
+        a2 = a2.split('\n')
+        for index, a in enumerate(a2):
+            a2[index] = a
+        a2 = '\n'.join(a2)
+        return str.format(a0, a1, a2, '{}', 'this.', value_declararion) + '\n'
 
     def build_serialize_operation(self, obj_name, obj_type, obj_value, serialization_type, obj_template_args,
                                   obj_is_pointer, owner='this.', is_link=False):
@@ -432,10 +434,9 @@ regs = [
     [re.compile(r'({(?:>[^{}]+|(?:3))*})'), r''],
     [re.compile(r'DataStorage::shared\(\).get<(\w+)>'), r'DataStorage.shared().get\1'],
     [re.compile(r'\.str\(\)'), r''],
-    # for (auto pair : map) {... { ... {} ...} ...}
-    [re.compile(r'\bfor\s*\s*\(\s*\w+&&\s*\[(\w+),\s*(\w+)\]\s*:\s*([->.\w\d]+)\s*\)[\s\S]*?{'), r'for(var \1 in \3)\n{\n\2 = \3[\1]'],
+    [re.compile(r'\bfor\s*\s*\(\s*\w+&&\s*\[(\w+),\s*(\w+)\]\s*:\s*([->.\w\d]+)\s*\)[\s\S]*?{'), r'for(var \1 in \3)\n{\n\2 = \3[\1];'],
     [re.compile(r'\bfor\s*\(\w+&\s*(\w+)\s*:\s*([->.\w\d]+)\)'), r'for(var \1 in \2)'],
-    [re.compile(r'\bfor\s*\(\w+\s*(\w+)\s*:\s*([->.\d\w]+)\)'), r'for(var \1 in \2)'],
+    [re.compile(r'\bfor\s*\(\w+\s*(\w+)\s*:\s*([->.\d\w]+)\)[\s\S]+?{'), r'for(var \1_index in \2)\n@(\n\1=\2[\1_index];'],
     # [re.compile(r'for\s*\(auto& (.+?)\s*:\s*(.+?)\s*\)'), r'foreach($\2 as $\1)'],
     [re.compile(r'auto (\w+)'), r'var \1'],
     [re.compile(r'auto& (\w+)'), r'var \1'],
@@ -538,16 +539,15 @@ _pattern_file = {}
 _pattern_file['xml'] = '''
 function {0}()
 @(
-@)
-
-//parent class
+//members
 {1}
-
-//members:
+@)
+//parent class
 {2}
-
-//functions
+//static members:
 {3}
+//functions
+{4}
 
 '''
 _pattern_file['json'] = _pattern_file['xml']

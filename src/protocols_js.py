@@ -118,7 +118,7 @@ for(var data in $(OWNER)$(FIELD))
     $json[$(FIELD)].push(data.name);
 }
 #deserialize:
-var arr_$(FIELD) = "$(FIELD)";
+var arr_$(FIELD) = json["$(FIELD)"];
 for(var i in arr_$(FIELD))
 {
     var data = DataStorage.shared().get$(ARG_0)(arr_$(FIELD)[i]);
@@ -146,8 +146,9 @@ var json_cache = json;
 if("$(FIELD)" in json)
 {
     var arr = json["$(FIELD)"];
-    for(json in arr)
+    for(var index in arr)
     {
+        var json = arr[index];
         $(VALUE)
         $(KEY_SERIALIZE)
         var map_key = key;
