@@ -19,12 +19,10 @@ def convertInitializeValue(value):
     return value
 
 
-functions_cache = {}
-
-
 class WriterPhp(Writer):
 
     def __init__(self, parser, serialize_format):
+        self.functions_cache = {}
         Writer.__init__(self, parser, serialize_format)
 
     def save_generated_classes(self, out_directory):
@@ -84,13 +82,12 @@ class WriterPhp(Writer):
         return {flags: out}
 
     def write_function(self, cls, function):
-        global functions_cache
-        if cls.name not in functions_cache:
-            functions_cache[cls.name] = []
-        if function.name in functions_cache[cls.name]:
+        if cls.name not in self.functions_cache:
+            self.functions_cache[cls.name] = []
+        if function.name in self.functions_cache[cls.name]:
             Error.warning(Error.DUBLICATE_METHODS, cls.name, function.name)
             return ''
-        functions_cache[cls.name].append(function.name)
+        self.functions_cache[cls.name].append(function.name)
         convert = function.name not in generated_functions and self.current_class.name != 'DataStorage'
 
         out = '''function {0}({1})

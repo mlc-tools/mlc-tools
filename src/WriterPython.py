@@ -330,7 +330,10 @@ class WriterPython(Writer):
                 tabs = True
             is_static = False
         result.append('')
-        return '\n'.join(result)
+        text = '\n'.join(result)
+        if re.search(r'\bET\.', text):
+            text = 'import xml.etree.ElementTree as ET\n' + text
+        return text
 
     def create_data_storage(self):
         storage = self.create_data_storage_class('DataStorage', self.parser.classes)
@@ -388,6 +391,8 @@ def convert_function_to_python(func, parser):
         ['->', '.'],
         ['::', '.'],
         ['&&', ' and '],
+        ['  and  ', ' and '],
+        ['  or  ', ' or '],
         ['||', ' or '],
         ['true', 'True'],
         ['false', 'False'],
@@ -441,7 +446,7 @@ def convert_function_to_python(func, parser):
     func = func.replace('\n                        \n', '\n')
     if 'DataStorage' in func:
         func = get_tabs(2) + 'from DataStorage import DataStorage\n' + func
-    if 'Factory' in func:
+    if re.search('\bFactory\n', func):
         func = get_tabs(2) + 'from Factory import Factory\n' + func
     for cls in parser.classes:
         if cls.name in func:
@@ -500,7 +505,7 @@ class Factory:
 '''
 
 _pattern_file = {}
-_pattern_file['xml'] = '''import xml.etree.ElementTree as ET
+_pattern_file['xml'] = '''
 {3}\nclass {0}:
 {5}
 

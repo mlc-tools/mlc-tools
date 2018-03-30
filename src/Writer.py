@@ -96,7 +96,7 @@ class Writer:
         filename = self.out_directory + filename
         self.created_files.append(filename)
         exist = fileutils.isfile(filename)
-        if fileutils.write(filename, string.strip()):
+        if fileutils.write(filename, string):
             msg = ' Create: {}' if not exist else ' Overwriting: {}'
             Log.debug(msg.format(filename))
 
