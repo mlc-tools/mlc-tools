@@ -35,3 +35,7 @@ mlc.sln
 /test
 mlc.sublime-project
 mlc.sublime-workspace
+
+/dist
+/build
+/mlc_tools.egg-info
