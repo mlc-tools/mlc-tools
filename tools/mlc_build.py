@@ -17,7 +17,7 @@ def simple_test():
         out_path_postfix = lang
         if lang == 'cpp':
             out_path_postfix = lang + '/' + protocol
-        command = '''python {0}/src/main.py
+        command = '''python {0}/mlc_tools/main.py
             -i {0}/simple_test/config
             -o {0}/simple_test/generated_{3}
             -data {0}/simple_test/data_{2}

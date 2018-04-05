@@ -15,7 +15,7 @@ def generate(lang, protocol):
     global root
 
     out_path_postfix = lang
-    command = '''python {0}/src/main.py
+    command = '''python {0}/mlc_tools/main.py
         -i {0}/test_serialize
         -o {0}/test_serialize/generated_{3}
         -l {1}

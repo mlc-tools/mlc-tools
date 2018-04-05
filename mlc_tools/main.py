@@ -8,34 +8,48 @@ from WriterPhp import WriterPhp
 from Copyright import Copyright
 from Error import Log
 import os
+from version import __version__
 
 
 class Generator:
 
-    def __init__(self, **kwargs):
+    def __init__(self, configs_directory='', **kwargs):
 
         def get(arg, default=None):
             return kwargs[arg] if arg in kwargs else default
 
-        def get_bool(arg):
+        def get_bool(arg, default='yes'):
             return get(arg) == 'yes'
 
-        Log.use_colors = get_bool('use_colors')
-        Log.disable_logs = get_bool('disable_logs')
+        Log.use_colors = get_bool('use_colors', 'no')
+        Log.disable_logs = get_bool('disable_logs', 'no')
 
-        self.configs_directory = get('configs_directory')
+        self.configs_directory = configs_directory
         self.out_directory = get('out_directory')
         self.data_directory = get('data_directory')
         self.out_data_directory = get('out_data_directory')
         self.path_to_protocols = get('path_to_protocols')
         self.language = get('language')
         self.serialize_format = get('serialize_format')
-        self.only_data = get_bool('only_data')
+        self.only_data = get_bool('only_data', 'no')
         self.namespace = get('namespace', 'mg')
         self.side = get('side', 'both')
         self.php_validate = get_bool('php_validate')
         self.test_script = get('test_script')
         self.test_script_args = get('test_script_args')
+
+    @staticmethod
+    def check_version(requere):
+        v = __version__.split('.')
+        p = requere.split('.')
+        result = True
+        if len(p) >= 1:
+            result = p[0] == v[0]
+        if len(p) >= 2:
+            result = p[1] == v[1]
+        if len(p) >= 3:
+            result = p[2] == v[2]
+        return result
 
     def parse_args(self):
         parser = argparse.ArgumentParser()
@@ -156,18 +170,8 @@ class Generator:
         if not self.only_data:
             self.writer.save_config_file()
 
-        if self.data_directory:
-            classes = []
-            for class_ in self.parser.classes:
-                if class_.is_storage:
-                    classes.append(class_)
-            for class_ in self.parser.classes_for_data:
-                if class_.is_storage:
-                    classes.append(class_)
-            self.data_parser = DataParser(classes, self.serialize_format, self.data_directory)
-            self.data_parser.flush(self.out_data_directory)
-            if not self.only_data:
-                self.writer.create_data_storage()
+        if not self.only_data:
+            self.writer.create_data_storage()
 
         self.writer.remove_non_actual_files()
         Log.message('mlc(lang: {}, format: {} side: {}) generate successful'.format(self.language, self.serialize_format, self.side))
@@ -234,7 +238,7 @@ def main():
 
 
 def test():
-    gen = Generator(configs_directory='../simple_test/config', validate_php=False)
+    gen = Generator('../simple_test/config', validate_php=False)
     gen.generate('py', 'xml', '../test/gen_xml_py/')
     gen.generate('py', 'json', '../test/gen_json_py/')
     gen.generate('cpp', 'xml', '../test/gen_xml_cpp/')
@@ -247,3 +251,4 @@ def test():
 
 if __name__ == '__main__':
     main()
+    # test()
