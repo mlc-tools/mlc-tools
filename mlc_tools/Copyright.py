@@ -9,4 +9,6 @@ class Copyright:
         filename = configs_path + 'copyright.txt'
         if isfile(filename):
             self.text = open(filename).read()
-            self.text += '\n'
+            self.text = self.text.strip()
+            if self.text:
+                self.text += '\n'

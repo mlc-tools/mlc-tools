@@ -385,6 +385,7 @@ class WriterPhp(Writer):
         body = body.replace('for(', 'for (')
         body = body.replace('if(', 'if (')
         body = body.replace('  extends', ' extends')
+        body = body.strip()
         return body
 
     def create_data_storage(self):

@@ -205,7 +205,11 @@ class Generator:
             self.data_parser = DataParser(classes, self.serialize_format, self.data_directory)
             self.data_parser.flush(self.out_data_directory)
 
-    def run_test(self):
+    def run_test(self, test_script=None, test_script_args=None):
+        if test_script is not None:
+            self.test_script = test_script
+        if test_script_args is not None:
+            self.test_script_args = test_script_args
         if self.test_script and os.path.isfile(self.test_script):
             Log.message('Run test (%s):' % self.test_script)
             if os.system('python {} {}'.format(self.test_script, self.test_script_args)) != 0:

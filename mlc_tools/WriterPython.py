@@ -167,7 +167,7 @@ class WriterPython(Writer):
 
             body += self.build_serialize_operation(obj.name, obj.type, convertInitializeValue(obj.initial_value),
                                                    serialize_type, obj.template_args, obj.is_pointer, 'self.', obj.is_link)
-        use_factory = 'Factory.build' in body
+        use_factory = re.search(r'\bFactory\b', body) is not None
         use_data_storage = 'DataStorage.shared()' in body
         imports = ''
         if serialize_type == DESERIALIZATION:
@@ -446,7 +446,7 @@ def convert_function_to_python(func, parser):
     func = func.replace('\n                        \n', '\n')
     if 'DataStorage' in func:
         func = get_tabs(2) + 'from DataStorage import DataStorage\n' + func
-    if re.search('\bFactory\n', func):
+    if re.search(r'\bFactory\b', func):
         func = get_tabs(2) + 'from Factory import Factory\n' + func
     for cls in parser.classes:
         if cls.name in func:
