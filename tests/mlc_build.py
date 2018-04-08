@@ -1,15 +1,28 @@
 import os
 import subprocess
-from mlc_tools import Generator
+import inspect
+import sys
+
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+sys.path.insert(0, parentdir)
+print parentdir
+
+from mlc_tools_ import Generator
+
+
+def get_root():
+    return os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + '/..')
 
 
 def simple_test():
-    generator = Generator(configs_directory='simple_test/config', side='client', disable_logs='yes')
+    simple_test = get_root() + '/tests/simple_test/'
+    generator = Generator(configs_directory=simple_test + 'config', side='client', disable_logs='yes')
 
     def run(lang, format):
-        generator.generate(lang, format, 'simple_test/generated_%s' % (lang if lang != 'cpp' else lang + '/' + format))
-        generator.generate_data('simple_test/data_%s/' % format, 'simple_test/assets')
-        generator.run_test('simple_test/test_%s.py' % lang, format)
+        generator.generate(lang, format, simple_test + 'generated_%s' % (lang if lang != 'cpp' else lang + '/' + format))
+        generator.generate_data(simple_test + 'data_%s/' % format, simple_test + 'assets')
+        generator.run_test(simple_test + 'test_%s.py' % lang, format)
         print '-----------------------------------------'
         print '|  test with params [{}, {}] finished'.format(lang, format)
         print '-----------------------------------------'
@@ -30,8 +43,8 @@ def test_serialize():
         p.wait()
         return 0 if err is None else err
 
-    root = os.path.dirname(os.path.abspath(__file__)) + ''
-    command = 'python {}/test_serialize/run.py'.format(root)
+    root = get_root()
+    command = 'python {}/tests/test_serialize/run.py'.format(root)
     if 0 != execute(command):
         exit(1)
 
