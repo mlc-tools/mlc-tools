@@ -126,6 +126,7 @@ class Generator:
                  validate_php=False,
                  path_to_protocols=None,
                  only_data=None,
+                 gen_data_storage=True
                  ):
         if path_to_protocols is not None:
             self.path_to_protocols = path_to_protocols
@@ -170,7 +171,7 @@ class Generator:
         if not self.only_data:
             self.writer.save_config_file()
 
-        if not self.only_data:
+        if gen_data_storage:
             self.writer.create_data_storage()
 
         self.writer.remove_non_actual_files()
