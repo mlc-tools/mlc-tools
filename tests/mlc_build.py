@@ -8,7 +8,7 @@ parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 print parentdir
 
-from mlc_tools_ import Generator
+from mlc_tools import Generator
 
 
 def get_root():
