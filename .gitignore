@@ -1,40 +1,37 @@
-/simple_test/generated_cpp/
-/simple_test/generated_py/
-/simple_test/generated_php/
-/simple_test/build/
-/simple_test/build_xml/
-/simple_test/build_json/
+tests/simple_test/generated_cpp/
+tests/simple_test/generated_py/
+tests/simple_test/generated_php/
+tests/simple_test/build/
+tests/simple_test/build_xml/
+tests/simple_test/build_json/
+tests/simple_test/mlc_tools_test.xcodeproj
+tests/simple_test/assets/
 
-/test_serialize/build/
-/test_serialize/build_xml/
-/test_serialize/build_json/
-/test_serialize/generated_cpp/
-/test_serialize/generated_py/
-/test_serialize/generated_php/
-/test_serialize/data.py.xml
-/test_serialize/data.php.xml
-/test_serialize/data.cpp.xml
-/test_serialize/step_2
-/test_serialize/step_2.exe
+tests/test_serialize/build/
+tests/test_serialize/build_xml/
+tests/test_serialize/build_json/
+tests/test_serialize/generated_cpp/
+tests/test_serialize/generated_py/
+tests/test_serialize/generated_php/
+tests/test_serialize/data.py.xml
+tests/test_serialize/data.php.xml
+tests/test_serialize/data.cpp.xml
+tests/test_serialize/step_2
+tests/test_serialize/step_2.exe
 
 
 /.idea/
 /.sublime/
 
-*.pyc
 .DS_Store
+*.pyc
 *.pyproj
+*.suo
+*.sublime-project
+*.sublime-workspace
 
-simple_test/mlc_tools_test.xcodeproj
-.vs/mlc/v14/.suo
-simple_test/assets/
-php_tests/gen/
-php_tests/gen_data/
 mlc.sln
 /out
-/test
-mlc.sublime-project
-mlc.sublime-workspace
 
 /dist
 /build
