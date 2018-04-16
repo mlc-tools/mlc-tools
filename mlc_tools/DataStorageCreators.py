@@ -192,6 +192,7 @@ class DataStoragePython(DataStorage):
                 function.operations.append('if not self._loaded and name not in self.{}:'.format(map_name))
                 function.operations.append('    from {0} import {0}'.format(class_.name))
                 function.operations.append('    self.{}[name] = {}()'.format(map_name, class_.name))
+                function.operations.append('    self.{}[name].name = name'.format(map_name))
                 function.operations.append('return self.{}[name]'.format(map_name))
                 self.functions.append(function)
 
@@ -266,7 +267,7 @@ class DataStoragePythonXml(DataStoragePython):
         function.operations.append('root = ET.fromstring(buffer)')
         function.operations.append('self.deserialize(root)')
         function.operations.append('self._loaded = True')
-        
+
     def get_deserialize_pattern(self):
         return '''
         map = xml.find('{0}')
@@ -277,7 +278,7 @@ class DataStoragePythonXml(DataStoragePython):
                 from {1} import {1}
                 self.{0}[key] = {1}()
             self.{0}[key].deserialize(xml_value)'''
-    
+
     def get_deserialize_args(self):
         return ['xml', '']
 
@@ -293,7 +294,7 @@ class DataStoragePythonJson(DataStoragePython):
         function.operations.append('js = json.loads(buffer)')
         function.operations.append('self.deserialize(js)')
         function.operations.append('self._loaded = True')
-        
+
     def get_deserialize_pattern(self):
         return '''
         map = js['{0}'] if '{0}' in js else []
