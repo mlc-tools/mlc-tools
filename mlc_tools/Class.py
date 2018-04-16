@@ -39,7 +39,6 @@ class Class(Object):
             k = self.name.rindex('/')
             self.group = self.name[0:k]
             self.name = self.name[k + 1:]
-        print self.name, self.is_numeric
 
     def parse_body(self, parser, body):
         parser.parse(body)
