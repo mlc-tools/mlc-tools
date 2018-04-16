@@ -930,6 +930,9 @@ class WriterCpp(Writer):
         shift = 0
         cast = 'int'
         values = []
+
+        def get_enum_value(cls, index):
+            return '(1 << {})'.format(index) if not cls.is_numeric else str(index)
         for m in cls.members:
             if len(m.name):
                 continue
@@ -939,7 +942,7 @@ class WriterCpp(Writer):
             m.is_const = True
             if m.initial_value is None:
                 if cast == 'int':
-                    m.initial_value = '(1 << {})'.format(shift)
+                    m.initial_value = get_enum_value(cls, shift)
             values.append(1 << shift)
             shift += 1
 

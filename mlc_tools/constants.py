@@ -21,6 +21,7 @@ class Modifier:
     link = ':link'
     storage = ":storage"
     private = ":private"
+    numeric = ":numeric"
 
     client = ':client'
     server = ':server'

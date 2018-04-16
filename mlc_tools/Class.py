@@ -16,6 +16,7 @@ class Class(Object):
         self.is_serialized = False
         self.is_visitor = False
         self.is_storage = False
+        self.is_numeric = False
         self.generate_set_function = False
         self.type = 'class'
         self.group = ''
@@ -38,6 +39,7 @@ class Class(Object):
             k = self.name.rindex('/')
             self.group = self.name[0:k]
             self.name = self.name[k + 1:]
+        print self.name, self.is_numeric
 
     def parse_body(self, parser, body):
         parser.parse(body)
@@ -69,6 +71,7 @@ class Class(Object):
         self.is_serialized = self.is_serialized or Modifier.serialized in string
         self.is_visitor = self.is_visitor or Modifier.visitor in string
         self.is_storage = self.is_storage or Modifier.storage in string
+        self.is_numeric = self.is_numeric or Modifier.numeric in string
         self.generate_set_function = self.generate_set_function or Modifier.set_function in string
         if Modifier.server in string:
             self.side = Modifier.side_server
@@ -82,6 +85,7 @@ class Class(Object):
         string = re.sub(Modifier.visitor, '', string)
         string = re.sub(Modifier.storage, '', string)
         string = re.sub(Modifier.set_function, '', string)
+        string = re.sub(Modifier.numeric, '', string)
         return string
 
     def _generate_setters_function(self, parser):

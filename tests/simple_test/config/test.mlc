@@ -148,7 +148,7 @@ class Response<SerializedObject>:visitor
 {
 }
 
-enum TestEnum
+enum TestEnum:numeric
 {
     value1
     value2
