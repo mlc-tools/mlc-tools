@@ -24,6 +24,14 @@ void list_push(std::vector<T>& list, const I& t)
     list.push_back(t);
 }
 
+template <class T, class I>
+void list_remove(std::vector<T>& list, const I& t)
+{
+    auto iter = std::find(list.begin(), list.end(), t);
+    if(iter != list.end())
+        list.erase(iter);
+}
+
 template <class T>
 int list_size(const std::vector<T>& vector)
 {
