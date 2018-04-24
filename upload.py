@@ -23,7 +23,7 @@ def main():
     if 0 != os.system('twine upload dist/mlc-tools-{}.tar.gz'.format(version)):
         print 'Error: twine upload'
         exit(-1)
-    if 0 != os.system('pip install mlc_tools --upgrade --no-cache'):
+    if 0 != os.system('pip install mlc_tools --upgrade --no-cache --user'):
         print 'Error: install mlc_tools by pip'
         exit(-1)
 

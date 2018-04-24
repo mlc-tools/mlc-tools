@@ -14,6 +14,10 @@ def convertInitializeValue(value):
         return 'True'
     if value == 'false':
         return 'False'
+    if value == 'nullptr':
+        return 'None'
+    if isinstance(value, str) and '::' in value:
+        value = value.replace('::', '.')
     return value
 
 
@@ -61,6 +65,10 @@ class WriterPython(Writer):
             name += '(' + cls.behaviors[0].name + ')'
             imports += 'from {0} import {0}'.format(cls.behaviors[0].name)
             init_behavior = '        {0}.__init__(self)'.format(cls.behaviors[0].name)
+        for obj in cls.members:
+            type_class = self.parser.find_class(obj.type)
+            if type_class and type_class.type == 'enum':
+                imports += '\nfrom {0} import {0}'.format(type_class.name)
 
         out = pattern.format(name, initialize_list, functions, imports, init_behavior, static_list)
         self.current_class = None
@@ -333,6 +341,7 @@ class WriterPython(Writer):
         text = '\n'.join(result)
         if re.search(r'\bET\.', text):
             text = 'import xml.etree.ElementTree as ET\n' + text
+        text = '#!/usr/bin/env python\n# -*- coding: utf-8 -*-\n' + text
         return text
 
     def create_data_storage(self):
