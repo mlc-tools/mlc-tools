@@ -41,15 +41,14 @@ class Generator:
     @staticmethod
     def check_version(requere):
         v = __version__.split('.')
-        p = requere.split('.')
-        result = True
-        if len(p) >= 1:
-            result = p[0] == v[0]
-        if len(p) >= 2:
-            result = p[1] == v[1]
-        if len(p) >= 3:
-            result = p[2] == v[2]
-        return result
+        r = requere.split('.')
+        for i in xrange(3):
+            if len(r) >= i + 1:
+                if r[i] != v[i]:
+                    rr = int(r[i])
+                    vv = int(v[i])
+                    return -1 if vv < rr else 1
+        return 0
 
     def parse_args(self):
         parser = argparse.ArgumentParser()

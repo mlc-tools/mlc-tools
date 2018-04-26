@@ -11,7 +11,7 @@ def main():
     version = version[version.find("'") + 1:]
     version = version[:version.find("'")]
 
-    if 0 != os.system('python setup.py install'):
+    if 0 != os.system('python setup.py install --user'):
         print 'Error: install'
         exit(-1)
 

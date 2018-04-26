@@ -17,9 +17,6 @@ def main():
     if 0 != os.system('python setup.py sdist'):
         print 'Error: sdist'
         exit(-1)
-    if 0 != os.system('python setup.py install'):
-        print 'Error: install'
-        exit(-1)
     if 0 != os.system('twine upload dist/mlc-tools-{}.tar.gz'.format(version)):
         print 'Error: twine upload'
         exit(-1)
