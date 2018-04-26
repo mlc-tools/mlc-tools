@@ -105,7 +105,7 @@ class Generator:
         Log.disable_logs = args.disable_logs.lower() == 'yes'
 
     def _parse(self):
-        self.parser = Parser(self.side, self.language == 'cpp')
+        self.parser = Parser(self.side)
         self.parser.set_configs_directory(self.configs_directory)
         files = fileutils.get_files_list(self.configs_directory)
         for file in files:
@@ -242,6 +242,11 @@ def main():
     gen.generate_data()
 
 
+def test_game_s():
+    generator = Generator('/Work/survival/config')
+    generator.generate('py', 'xml', '/Work/survival/client/generated/web', 'client')
+
+
 def test():
     gen = Generator('../simple_test/config', validate_php=False)
     gen.generate('py', 'xml', '../test/gen_xml_py/')
@@ -257,3 +262,4 @@ def test():
 if __name__ == '__main__':
     main()
     # test()
+    # test_game_s()

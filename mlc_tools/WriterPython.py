@@ -25,12 +25,13 @@ class WriterPython(Writer):
 
     def __init__(self, parser, serialize_format):
         Writer.__init__(self, parser, serialize_format)
+        self.save_visitors = False
         self.loaded_functions = {}
 
     def save_generated_classes(self, out_directory):
         Writer.save_generated_classes(self, out_directory)
-        self.create_factory()
         self.create_visitor_acceptors()
+        self.create_factory()
 
     def write_class(self, cls, flags):
         global _pattern_file
@@ -101,6 +102,13 @@ class WriterPython(Writer):
             ops = convert_function_to_python(ops, self.parser)
         else:
             ops = '        ' + '\n        '.join(function.operations)
+            
+        if cls.behaviors and cls.behaviors[0].name.startswith('IVisitor') and function.args and len(function.args[0]) > 1:
+            ctx_name = function.args[0][1]
+            ctx_name = ctx_name[0].lower() + ctx_name[1:]
+            ctx_name = ctx_name.replace('*', '')
+            name = 'visit_' + ctx_name
+
 
         if not ops.split():
             ops = '        pass'
@@ -276,6 +284,7 @@ class WriterPython(Writer):
         self.save_file('Factory.py', factory)
 
     def create_visitor_acceptors(self):
+        self.save_visitors = True
         pattern = _pattern_visitor
         line = '        elif ctx.__class__ == {0}:\n            self.visit_{1}(ctx)\n'
         line_import = 'from {0} import {0}\n'
@@ -352,6 +361,11 @@ class WriterPython(Writer):
 
     def create_init_file(self):
         self.save_file('__init__.py', '')
+        
+    def save_file(self, filename, string):
+        if not self.save_visitors and filename.startswith('IVisitor'):
+            return
+        Writer.save_file(self, filename, string)
 
     def convert_to_enum(self, cls, use_type='string'):
         Writer.convert_to_enum(self, cls, use_type)
