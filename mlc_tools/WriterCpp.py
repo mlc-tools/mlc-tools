@@ -203,7 +203,7 @@ class WriterCpp(Writer):
             type_ = convert_type(type_)
             if len(arg.template_args):
                 type_ = self.build_type_str(arg)
-            elif arg.is_link:
+            elif arg.is_pointer and arg.is_const:
                 type_ = 'const {}* '.format(type_)
             else:
                 if arg.is_pointer:
@@ -214,7 +214,7 @@ class WriterCpp(Writer):
         args = ', '.join(args)
         type_ = object_.type
         if object_.is_pointer:
-            if not object_.is_link:
+            if not (object_.is_pointer and object_.is_const):
                 f = '{}*'
                 class_ = self.parser.find_class(object_.type)
                 if class_:

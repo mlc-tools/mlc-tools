@@ -38,7 +38,6 @@ class Generator:
         self.test_script = get('test_script')
         self.test_script_args = get('test_script_args')
         self.generate_tests = get_bool('generate_tests')
-        
 
     @staticmethod
     def check_version(requere):
@@ -249,8 +248,9 @@ def main():
 
 
 def test_game_s():
-    generator = Generator('/Work/survival/config', generate_tests='yes')
-    generator.generate('py', 'xml', '/Work/survival/client/generated/web', 'client')
+    game_root = '/work/survival_2d/'
+    generator = Generator(game_root + 'config', generate_tests='yes')
+    generator.generate('cpp', 'xml', game_root + 'client/generated/web', 'client')
 
 
 def test():
@@ -266,6 +266,6 @@ def test():
     gen.generate_data('../simple_test/data_xml', '../test/assets', 'json')
 
 if __name__ == '__main__':
-    main()
+    # main()
     # test()
-    # test_game_s()
+    test_game_s()
