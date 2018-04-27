@@ -22,6 +22,7 @@ class Modifier:
     storage = ":storage"
     private = ":private"
     numeric = ":numeric"
+    test = ":test"
 
     client = ':client'
     server = ':server'

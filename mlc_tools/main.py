@@ -37,6 +37,8 @@ class Generator:
         self.php_validate = get_bool('php_validate')
         self.test_script = get('test_script')
         self.test_script_args = get('test_script_args')
+        self.generate_tests = get_bool('generate_tests')
+        
 
     @staticmethod
     def check_version(requere):
@@ -85,6 +87,8 @@ class Generator:
                             required=False, default='')
         parser.add_argument('-disable_logs', type=str, help='Disabling logs to output',
                             required=False, default='no')
+        parser.add_argument('-generate_tests', type=str, help='Generate classes marked as :test',
+                            required=False, default='yes')
         args = parser.parse_args()
 
         self.configs_directory = fileutils.normalize_path(args.i)
@@ -100,11 +104,12 @@ class Generator:
         self.php_validate = args.php_validate.lower() == 'yes'
         self.test_script = args.test_script
         self.test_script_args = args.test_script_args
+        self.generate_tests = args.generate_tests
         Log.use_colors = args.use_colors.lower() == 'yes'
         Log.disable_logs = args.disable_logs.lower() == 'yes'
 
     def _parse(self):
-        self.parser = Parser(self.side)
+        self.parser = Parser(self.side, self.generate_tests)
         self.parser.set_configs_directory(self.configs_directory)
         files = fileutils.get_files_list(self.configs_directory)
         for file in files:

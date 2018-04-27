@@ -48,7 +48,7 @@ def find_body(text):
 
 class Parser:
 
-    def __init__(self, side, generate_visitors=True):
+    def __init__(self, side, generate_tests):
         self.classes = []
         self.classes_for_data = []
         self.objects = []
@@ -56,9 +56,9 @@ class Parser:
         self.side = side
         self.copyright_text = ''
         self.simple_types = ["int", "float", "bool", "string"]
-        self.generate_visitors = generate_visitors
         self.is_validate_php_features = True
         self.configs_root = ''
+        self.generate_tests = generate_tests
         return
 
     def set_configs_directory(self, path):
@@ -120,11 +120,10 @@ class Parser:
             if cls.type == 'class':
                 cls.add_get_type_function()
 
-        if self.generate_visitors:
-            for cls in self.classes:
-                if cls.is_visitor and self.get_type_of_visitor(cls) != cls.name:
-                    if cls.name.find('IVisitor') != 0:
-                        self.create_visitor_class(cls)
+        for cls in self.classes:
+            if cls.is_visitor and self.get_type_of_visitor(cls) != cls.name:
+                if cls.name.find('IVisitor') != 0:
+                    self.create_visitor_class(cls)
 
         for cls in self.classes:
             behaviors = []
@@ -135,12 +134,11 @@ class Parser:
                 behaviors.append(c)
             cls.behaviors = behaviors
 
-        if self.generate_visitors:
-            for cls in self.classes:
-                cls.is_serialized = self.is_serialised(cls)
-                cls.is_visitor = self.is_visitor(cls)
-                if cls.is_visitor and cls.name != self.get_type_of_visitor(cls):
-                    self._append_visit_function(cls)
+        for cls in self.classes:
+            cls.is_serialized = self.is_serialised(cls)
+            cls.is_visitor = self.is_visitor(cls)
+            if cls.is_visitor and cls.name != self.get_type_of_visitor(cls):
+                self._append_visit_function(cls)
 
         for cls in self.classes:
             for member in cls.members:
@@ -187,8 +185,10 @@ class Parser:
             if cls.is_storage:
                 self.classes_for_data.append(cls)
             return text
+        if not self.generate_tests and cls.is_test:
+            return text
 
-        cls.parse_body(Parser(self.side), body)
+        cls.parse_body(Parser(self.side, False), body)
         if self.find_class(cls.name):
             Error.exit(Error.DUBLICATE_CLASS, cls.name)
         self.classes.append(cls)
@@ -280,7 +280,7 @@ class Parser:
         cls.parse(header)
         if not self.is_side(cls.side):
             return text
-        cls.parse_body(Parser(self.side), body)
+        cls.parse_body(Parser(self.side, False), body)
         self.classes.append(cls)
         return text
 
