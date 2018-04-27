@@ -32,13 +32,13 @@ def convert_return_type(parser, type_object):
         if '*' in type_object and 'const ' not in type_object:
             t = re.sub('\*', '', type_object)
             if parser.find_class(t):
-                result = 'IntrusivePtr<{}>'.format(t)
+                result = 'intrusive_ptr<{}>'.format(t)
     else:
         result = type_object.type
         if (type_object.is_link or type_object.is_const) and parser.find_class(type_object.type):
             result = '{}*'.format(type_object.type)
         elif type_object.is_pointer and parser.find_class(type_object.type):
-            result = 'IntrusivePtr<{}>'.format(type_object.type)
+            result = 'intrusive_ptr<{}>'.format(type_object.type)
         if type_object.is_const:
             result = 'const ' + result
     if result == 'string':
@@ -69,7 +69,7 @@ def convert_type(type_):
             if type_.is_const:
                 s = s + '*'
             else:
-                s = 'IntrusivePtr<%s>' % s
+                s = 'intrusive_ptr<%s>' % s
         if type_.is_const:
             s = 'const ' + s
         return s
@@ -93,6 +93,7 @@ def get_include_file(parser, class_, filename):
     types['std::vector<int>'] = '<vector>'
     types['std::vector<intrusive_ptr<CommandBase>>'] = '<vector>'
     types['std::istream'] = '<istream>'
+    types['intrusive_ptr'] = '"IntrusivePtr.h"'
     if filename in types:
         return types[filename]
     if 'std::map' in filename:
@@ -207,7 +208,7 @@ class WriterCpp(Writer):
                 type_ = 'const {}* '.format(type_)
             else:
                 if arg.is_pointer:
-                    type_ = 'IntrusivePtr<{}>'.format(type_)
+                    type_ = 'intrusive_ptr<{}>'.format(type_)
                 if arg.is_const:
                     type_ = 'const ' + type_
             args.append(type_)
@@ -219,7 +220,7 @@ class WriterCpp(Writer):
                 class_ = self.parser.find_class(object_.type)
                 if class_:
                     if class_.is_serialized:
-                        f = 'IntrusivePtr<{}>'
+                        f = 'intrusive_ptr<{}>'
             else:
                 f = '{}*'
 
@@ -366,7 +367,7 @@ class WriterCpp(Writer):
         self._current_class = None
         if class_.type == 'class':
             pattern = '''#include "{0}.h"
-                         # include "Generics.h"{4}
+                         #include "Generics.h"{4}
 
                          namespace {3}
                          __begin__{5}{6}
@@ -375,7 +376,7 @@ class WriterCpp(Writer):
                          {1}__end__'''
         else:
             pattern = '''#include "{0}.h"
-                         # include "Generics.h"{4}
+                         #include "Generics.h"{4}
 
                          namespace {3}
                          __begin__
@@ -663,7 +664,7 @@ class WriterCpp(Writer):
         a3 = key_str
         a4 = self.build_type_str(value)
         if value.is_pointer:
-            a4 = 'IntrusivePtr<{}>'.format(value_type)
+            a4 = 'intrusive_ptr<{}>'.format(value_type)
         return pattern.format(a0, a1, a2, a3, a4)
 
     def add_accept_method(self, class_):
@@ -731,7 +732,7 @@ class WriterCpp(Writer):
             type_ = re.sub('&', '', type_).strip()
             include_types[type_] = 1
             if t.is_pointer:
-                include_types['IntrusivePtr'] = 1
+                include_types['intrusive_ptr'] = 1
             for arg in t.template_args:
                 type_ = arg.name if isinstance(arg, Class) else arg.type
                 if arg.is_pointer:
@@ -739,7 +740,7 @@ class WriterCpp(Writer):
                         include_types[type_] = 1
                     if flags == FLAG_HPP:
                         include_types[type_] = 1
-                    type_ = 'IntrusivePtr'
+                    type_ = 'intrusive_ptr'
                 include_types[type_] = 1
 
         for f in class_.functions:
@@ -751,7 +752,7 @@ class WriterCpp(Writer):
                     typename = re.sub('const', '', type_string).strip()
                     typename = re.sub('\*', '', typename).strip()
                     typename = re.sub('&', '', typename).strip()
-                    if 'IntrusivePtr' in typename:
+                    if 'intrusive_ptr' in typename:
                         return
                     if 'CommandBase' in typename:
                         include_types['CommandBase'] = 1
