@@ -35,7 +35,6 @@ class WriterPython(Writer):
 
     def write_class(self, cls, flags):
         global _pattern_file
-        out = ""
         pattern = _pattern_file[self.serialize_format]
         self.current_class = cls
 
@@ -102,13 +101,14 @@ class WriterPython(Writer):
             ops = convert_function_to_python(ops, self.parser)
         else:
             ops = '        ' + '\n        '.join(function.operations)
-            
-        if cls.behaviors and cls.behaviors[0].name.startswith('IVisitor') and function.args and len(function.args[0]) > 1:
+
+        if name == 'visit' and \
+                ((cls.behaviors and cls.behaviors[0].name.startswith('IVisitor')) or cls.name.startswith('IVisitor'))\
+                and function.args and len(function.args[0]) > 1:
             ctx_name = function.args[0][1]
             ctx_name = ctx_name[0].lower() + ctx_name[1:]
             ctx_name = ctx_name.replace('*', '')
             name = 'visit_' + ctx_name
-
 
         if not ops.split():
             ops = '        pass'
@@ -116,7 +116,7 @@ class WriterPython(Writer):
 
         return out
 
-    def write_object(self, object):
+    def write_object(self, object, flags=None):
         imports = ''
         if object.name == 'from':
             object.name = 'from_'
@@ -151,13 +151,13 @@ class WriterPython(Writer):
         out = out.format(object.name, convertInitializeValue(value))
         return imports + out
 
-    def _getImports(self, cls):
+    def _get_imports(self, cls):
         return ""
 
     def _get_filename_of_class(self, cls):
         return cls.name + ".py"
 
-    def get_serialiation_function_args(self):
+    def get_serialization_function_args(self):
         if self.serialize_format == 'xml':
             return '(self, xml)'
         return '(self, dictionary)'
@@ -169,9 +169,9 @@ class WriterPython(Writer):
             if func.name == function.name:
                 return
 
-        body = self.get_serialiation_function_args() + ':\n$(import)'
+        body = self.get_serialization_function_args() + ':\n$(import)'
         if cls.behaviors:
-            body += ('        {0}.{1}' + self.get_serialiation_function_args() + '\n').format(cls.behaviors[0].name,
+            body += ('        {0}.{1}' + self.get_serialization_function_args() + '\n').format(cls.behaviors[0].name,
                                                                                               function.name)
         for obj in cls.members:
             if obj.is_runtime:
@@ -240,7 +240,7 @@ class WriterPython(Writer):
                 if type == "map":
                     if len(obj_template_args) != 2:
                         print "map should have 2 arguments"
-                        exit - 1
+                        exit(-1)
                     return self.build_map_serialization(obj_name, obj_type, obj_value, obj_is_pointer,
                                                         obj_template_args, serialization_type)
                 else:

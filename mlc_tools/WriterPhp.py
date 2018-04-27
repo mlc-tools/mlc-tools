@@ -23,6 +23,7 @@ class WriterPhp(Writer):
 
     def __init__(self, parser, serialize_format):
         self.functions_cache = {}
+        self.save_visitors = False
         Writer.__init__(self, parser, serialize_format)
 
     def save_generated_classes(self, out_directory):
@@ -84,6 +85,14 @@ class WriterPhp(Writer):
     def write_function(self, cls, function):
         if cls.name not in self.functions_cache:
             self.functions_cache[cls.name] = []
+        if function.name == 'visit' and \
+                ((cls.behaviors and cls.behaviors[0].name.startswith('IVisitor')) or cls.name.startswith('IVisitor'))\
+                and function.args and len(function.args[0]) > 1:
+            ctx_name = function.args[0][1]
+            ctx_name = ctx_name[0].lower() + ctx_name[1:]
+            ctx_name = ctx_name.replace('*', '')
+            function.name = 'visit_' + ctx_name
+
         if function.name in self.functions_cache[cls.name]:
             Error.warning(Error.DUBLICATE_METHODS, cls.name, function.name)
             return ''
@@ -311,6 +320,7 @@ class WriterPhp(Writer):
         self.save_file('Factory.php', factory)
 
     def create_visitor_acceptors(self):
+        self.save_visitors = True
         pattern = _pattern_visitor
         line = 'else if($ctx->get_type() == {0}::$TYPE)\n@(\n$this->visit_{1}($ctx);\n@)\n'
         line_import = 'require_once "{0}.php";\n'
@@ -422,6 +432,11 @@ class WriterPhp(Writer):
         function = Function()
         function.name = 'deserialize'
         cls.functions.append(function)
+
+    def save_file(self, filename, string):
+        if not self.save_visitors and filename.startswith('IVisitor'):
+            return
+        Writer.save_file(self, filename, string)
 
 
 regs = [
