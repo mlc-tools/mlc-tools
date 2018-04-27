@@ -3,6 +3,7 @@ from Class import Class
 from Function import Function
 from protocols import protocols
 from Error import Error
+from ObserverCreater import ObserverPatterGenerator
 
 
 def _is_class(line):
@@ -60,6 +61,12 @@ class Parser:
         self.configs_root = ''
         self.generate_tests = generate_tests
         return
+    
+    def generate_patterns(self):
+        self.classes.append(ObserverPatterGenerator.get_mock())
+        
+    def save_patterns(self, writer, language):
+        ObserverPatterGenerator.generate(language, writer)
 
     def set_configs_directory(self, path):
         self.configs_root = path
@@ -117,7 +124,7 @@ class Parser:
                 self.objects.remove(object_)
 
         for cls in self.classes:
-            if cls.type == 'class':
+            if cls.type == 'class' and cls.auto_generated:
                 cls.add_get_type_function()
 
         for cls in self.classes:

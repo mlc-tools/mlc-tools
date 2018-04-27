@@ -122,7 +122,7 @@ def is_class_has_cpp_definitions(class_):
         if not function.is_abstract:
             return True
     for member in class_.members:
-        if member.initial_valueis is not None:
+        if member.initial_value is not None:
             return True
     return False
 
@@ -477,6 +477,8 @@ class WriterCpp(Writer):
                 self.convert_to_enum(class_)
 
         for class_ in classes:
+            if not class_.auto_generated:
+                continue
             dictionary = self.write_class(class_, FLAG_HPP)
             if len(dictionary) > 0:
                 filename = class_.name + '.h'
@@ -484,7 +486,8 @@ class WriterCpp(Writer):
                     filename = class_.group + '/' + filename
                 self.files[filename] = dictionary[FLAG_HPP]
         for class_ in classes:
-            # if not class_.is_abstract:
+            if not class_.auto_generated:
+                continue
             dictionary = self.write_class(class_, FLAG_CPP)
             if len(dictionary) > 0:
                 filename = class_.name + '.cpp'
@@ -501,6 +504,8 @@ class WriterCpp(Writer):
         return out
 
     def add_methods(self, class_):
+        if not class_.auto_generated:
+            return class_
         if class_.is_serialized or class_.type == 'enum':
             have = False
             for function in class_.functions:

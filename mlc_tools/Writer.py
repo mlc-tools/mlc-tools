@@ -78,6 +78,8 @@ class Writer:
         for class_ in classes:
             if class_.type == 'enum':
                 self.convert_to_enum(class_)
+            if not class_.auto_generated:
+                continue
             dictionary = self.write_class(class_, flags)
             filepath = self._get_filename_of_class(class_)
             self.files[filepath] = dictionary[flags]

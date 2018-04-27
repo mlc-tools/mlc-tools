@@ -22,6 +22,7 @@ class Class(Object):
         self.type = 'class'
         self.group = ''
         self.side = 'both'
+        self.auto_generated = True
         self._linked = False
 
     def parse(self, line):
@@ -43,8 +44,8 @@ class Class(Object):
 
     def parse_body(self, parser, body):
         parser.parse(body)
-        if len(parser.classes) > 0:
-            print 'Not supported inbody classes'
+        # if len(parser.classes) > 0:
+        #     print self.name, 'Not supported inbody classes'
         self.members = parser.objects
         self.functions = parser.functions
         return

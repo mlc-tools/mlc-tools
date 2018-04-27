@@ -111,6 +111,7 @@ class Generator:
     def _parse(self):
         self.parser = Parser(self.side, self.generate_tests)
         self.parser.set_configs_directory(self.configs_directory)
+        self.parser.generate_patterns()
         files = fileutils.get_files_list(self.configs_directory)
         for file in files:
             if file.endswith('.mlc'):
@@ -178,6 +179,7 @@ class Generator:
         if gen_data_storage:
             self.writer.create_data_storage()
 
+        self.parser.save_patterns(self.writer, self.language)
         self.writer.remove_non_actual_files()
         Log.message('mlc(lang: {}, format: {} side: {}) generate successful'.format(self.language, self.serialize_format, self.side))
 
@@ -247,7 +249,7 @@ def main():
 
 
 def test_game_s():
-    generator = Generator('/Work/survival/config')
+    generator = Generator('/Work/survival/config', generate_tests='yes')
     generator.generate('py', 'xml', '/Work/survival/client/generated/web', 'client')
 
 
