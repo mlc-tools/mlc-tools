@@ -272,6 +272,12 @@ class FunctionTest<SerializedObject>
             result = result && true;
         else
             result = false;
+
+        if(true)
+            result = result && true;
+        else if(false)
+            result = false;
+
         logger->add_result(result, "IF-ELSE");
         return result;
     }

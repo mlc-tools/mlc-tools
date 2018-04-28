@@ -172,7 +172,7 @@ class WriterPython(Writer):
         body = self.get_serialization_function_args() + ':\n$(import)'
         if cls.behaviors:
             body += ('        {0}.{1}' + self.get_serialization_function_args() + '\n').format(cls.behaviors[0].name,
-                                                                                              function.name)
+                                                                                               function.name)
         for obj in cls.members:
             if obj.is_runtime:
                 continue
@@ -361,7 +361,7 @@ class WriterPython(Writer):
 
     def create_init_file(self):
         self.save_file('__init__.py', '')
-        
+
     def save_file(self, filename, string):
         if not self.save_visitors and filename.startswith('IVisitor'):
             return
@@ -378,9 +378,9 @@ regs = [
     [re.compile('for\s*\\(\s*\w+\s*(\w+)=(\w+);\s*\w+<(\w+);\s*\w+\\+=(\w)\s*\\)'), 'for \\1 in xrange(\\2, \\3, \\4):'],
     [re.compile('for\s*\\(\s*\w+\s*(\w+)=(\w+);\s*\w+>(\w+);\s*\w+-=(\w)\s*\\)'), 'for \\1 in xrange(\\2, \\3, -\\4):'],
     [re.compile('for\s*\\(auto&&\s*\\[(\w+),\s*(\w+)\\]\s*:\s*(.+)\\)'), 'for \\1, \\2 in \\3.iteritems():'],
+    [re.compile(r'else\s+if\s*\(\s*(.+)\s*\)'), r'elif \1:'],
     [re.compile('if\s*\\(\s*(.+)\s*\\)'), 'if \\1:'],
     [re.compile('if\s*!(.+):'), 'if not (\\1):'],
-    [re.compile('else if'), 'elif:'],
     [re.compile('else'), 'else:'],
     [re.compile('in_map\s*\\(\s*(.+),\s*(.+)\s*\\)'), '(\\1 in \\2)'],
     [re.compile('in_list\s*\\(\s*(.+),\s*(.+)\s*\\)'), '(\\1 in \\2)'],
@@ -456,7 +456,7 @@ def convert_function_to_python(func, parser):
         if next_tab:
             next_tab = False
             tabs -= 1
-        if (line.startswith('for') or line.startswith('if') or line.startswith('else')) \
+        if (line.startswith('for') or line.startswith('if') or line.startswith('else') or line.startswith('elif')) \
                 and (i < len(lines) - 1 and '{' not in line and '{' not in lines[i + 1]):
             next_tab = True
 
