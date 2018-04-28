@@ -680,29 +680,30 @@ class WriterCpp(Writer):
         class_.functions.append(function)
 
     def add_equal_methods(self, class_):
-        function = Function()
-        function.name = 'operator =='
-        function.return_type = 'bool'
-        function.args.append(['rhs', 'const ' + class_.name + '&'])
-        function.is_const = True
-        function.link()
-        fbody_line = 'result = result && {0} == rhs.{0};'
-        function.operations.append('bool result = true;')
-        for m in class_.members:
-            if m.is_static or m.is_const:
-                continue
-            function.operations.append(fbody_line.format(m.name))
-        function.operations.append('return result;')
-        class_.functions.append(function)
+        # function = Function()
+        # function.name = 'operator =='
+        # function.return_type = 'bool'
+        # function.args.append(['rhs', 'const ' + class_.name + '&'])
+        # function.is_const = True
+        # function.link()
+        # fbody_line = 'result = result && {0} == rhs.{0};'
+        # function.operations.append('bool result = true;')
+        # for m in class_.members:
+        #     if m.is_static or m.is_const:
+        #         continue
+        #     function.operations.append(fbody_line.format(m.name))
+        # function.operations.append('return result;')
+        # class_.functions.append(function)
 
-        function = Function()
-        function.name = 'operator !='
-        function.return_type = 'bool'
-        function.args.append(['rhs', 'const ' + class_.name + '&'])
-        function.is_const = True
-        function.operations.append('return !(*this == rhs);')
-        function.link()
-        class_.functions.append(function)
+        # function = Function()
+        # function.name = 'operator !='
+        # function.return_type = 'bool'
+        # function.args.append(['rhs', 'const ' + class_.name + '&'])
+        # function.is_const = True
+        # function.operations.append('return !(*this == rhs);')
+        # function.link()
+        # class_.functions.append(function)
+        pass
 
     def _find_includes(self, class_, flags):
         out = ''
