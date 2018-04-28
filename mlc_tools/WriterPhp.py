@@ -364,6 +364,7 @@ class WriterPhp(Writer):
         body = body.replace('__begin__', '{')
         body = body.replace('__end__', '}')
         body = body.replace('::TYPE', '::$TYPE')
+        body = body.replace('nullptr', 'null')
 
         tabs = 0
         lines = body.split('\n')
@@ -513,7 +514,6 @@ def convert_function_to_php(func, parser, function_args):
         ['list_push', 'array_push'],
         ['list_size', 'count'],
         ['map_size', 'count'],
-        ['nullptr', 'null'],
     ]
 
     for reg in regs:

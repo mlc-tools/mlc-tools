@@ -266,6 +266,6 @@ def test():
     gen.generate_data('../simple_test/data_xml', '../test/assets', 'json')
 
 if __name__ == '__main__':
-    # main()
+    main()
     # test()
-    test_game_s()
+    # test_game_s()

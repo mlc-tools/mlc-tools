@@ -56,6 +56,16 @@ class Object:
 
         self.parse_type()
 
+        if self.initial_value is None:
+            if self.type == 'int':
+                self.initial_value = "0"
+            elif self.type == 'float':
+                self.initial_value = "0.0"
+            elif self.type == 'bool':
+                self.initial_value = "false"
+            elif self.is_pointer:
+                self.initial_value = "nullptr"
+
     def parse_type(self):
         l = self.type.find('<')
         r = self.type.rindex('>', l) if l != -1 else -1

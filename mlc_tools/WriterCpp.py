@@ -691,7 +691,6 @@ class WriterCpp(Writer):
         for m in class_.members:
             if m.is_static or m.is_const or m.type == 'Observable':
                 continue
-            print m.type
             function.operations.append(fbody_line.format(m.name))
         function.operations.append('return result;')
         class_.functions.append(function)
