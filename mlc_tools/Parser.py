@@ -4,6 +4,7 @@ from Function import Function
 from protocols import protocols
 from Error import Error
 from ObserverCreater import ObserverPatterGenerator
+from TestClass import Test
 
 
 def _is_class(line):
@@ -61,10 +62,10 @@ class Parser:
         self.configs_root = ''
         self.generate_tests = generate_tests
         return
-    
+
     def generate_patterns(self):
         self.classes.append(ObserverPatterGenerator.get_mock())
-        
+
     def save_patterns(self, writer, language):
         ObserverPatterGenerator.generate(language, writer)
 
@@ -122,6 +123,16 @@ class Parser:
                 object_.name = object_name
                 class_.members.append(object_)
                 self.objects.remove(object_)
+
+        if self.generate_tests:
+            generator = Test(self)
+            tests = []
+            for cls in self.classes:
+                test = generator.generate_test_interface(cls)
+                if test:
+                    tests.append(test)
+            self.classes.extend(tests)
+            self.classes.append(generator.generate_all_tests_class())
 
         for cls in self.classes:
             if cls.type == 'class' and cls.auto_generated:
