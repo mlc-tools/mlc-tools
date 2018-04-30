@@ -107,10 +107,10 @@ class tests/Logger:test
         if(result)
             this->success_count += 1;
         this->result = this->result && result;
-        this->log(result, message);
+        this->print_log(result, message);
         return result;
     }
-    function void log(bool result, string message):abstract
+    function void print_log(bool result, string message):abstract
 }
 
 class tests/TestCase<SerializedObject>:test
