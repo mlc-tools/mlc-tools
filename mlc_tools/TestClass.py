@@ -8,6 +8,7 @@ class Test:
     def __init__(self, parser):
         self.tests = []
         self.parser = parser
+        self.parser.parse(base_classes)
 
     def generate_test_interface(self, cls):
         if len(cls.functions) == 0 or cls.is_test:
@@ -41,8 +42,8 @@ class Test:
             name = func.name
             if name == 'initialize' or name == 'execute':
                 continue
-            function.operations.append('this->logger->add_result(this->{0}(), " - [{1}] tested");'.format(name, name[5:]))
-            function.operations.append('this->logger->add_result(true, "---------------------------------------------------------");'.format(name, name[5:]))
+            function.operations.append('this->logger->push(this->{0}(), " - [{1}] tested");'.format(name, name[5:]))
+            function.operations.append('this->logger->push(true, "---------------------------------------------------------");'.format(name, name[5:]))
 
         function.operations.append('return this->logger->result;')
 
@@ -87,9 +88,42 @@ class Test:
         test_all.functions.append(function)
         for test in test_all.members:
             var_name = test.name
-            function.operations.append('this->logger->add_result(true, "Test case [\" + this->{0}.get_type() + \"] started");'.format(var_name))
+            function.operations.append('this->logger->push(true, "Test case [\" + this->{0}.get_type() + \"] started");'.format(var_name))
             function.operations.append(
-                'this->logger->add_result(this->{0}.execute(), "Test case [\" + this->{0}.get_type() + \"] finished\\n");'.format(var_name))
+                'this->logger->push(this->{0}.execute(), "Test case [\" + this->{0}.get_type() + \"] finished\\n");'.format(var_name))
         function.operations.append('return this->logger->result;')
 
         return test_all
+
+base_classes = '''
+class tests/Logger:test
+{
+    bool result = true
+    int tests_count
+    int success_count
+    function bool push(bool result, string message)
+    {
+        this->tests_count += 1;
+        if(result)
+            this->success_count += 1;
+        this->result = this->result && result;
+        this->log(result, message);
+        return result;
+    }
+    function void log(bool result, string message):abstract
+}
+
+class tests/TestCase<SerializedObject>:test
+{
+    Logger*:runtime logger
+
+    function void initialize(Logger* logger)
+    {
+        this->logger = logger;
+    }
+    function bool execute()
+    {
+        return false;
+    }
+}
+'''
