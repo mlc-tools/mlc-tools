@@ -852,10 +852,6 @@ class WriterCpp(Writer):
                     continue
                 if 'throw Exception' in operation:
                     includes += '\n#include "Exception.h"'
-                if 'std::sqrt' in operation:
-                    includes += '\n#include <cmath>'
-                if 'std::round' in operation:
-                    includes += '\n#include <cmath>'
                 if 'DataStorage::shared()' in operation:
                     includes += '\n#include {}'.\
                         format(get_include_file(self.parser, self._current_class, 'DataStorage'))

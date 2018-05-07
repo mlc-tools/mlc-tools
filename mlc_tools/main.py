@@ -37,7 +37,7 @@ class Generator:
         self.php_validate = get_bool('php_validate')
         self.test_script = get('test_script')
         self.test_script_args = get('test_script_args')
-        self.generate_tests = get_bool('generate_tests')
+        self.generate_tests = get_bool('generate_tests', 'no')
 
     @staticmethod
     def check_version(requere):

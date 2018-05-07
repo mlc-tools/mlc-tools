@@ -20,7 +20,7 @@ namespace @{namespace}
         : _lock_counter(0)
         {
         }
-        
+
         template<class T, class M, class ...P>
         void add(T* object, M method, P&&... placeholders)
         {
@@ -34,7 +34,7 @@ namespace @{namespace}
                 _listeners[tag] = std::bind(method, object, std::forward<P>(placeholders)...);
             }
         }
-        
+
         template<class T, class F>
         void add_lambda(T* object, F lambda)
         {
@@ -48,7 +48,7 @@ namespace @{namespace}
                 _listeners[tag] = lambda;
             }
         }
-        
+
         template<class ...T>
         void notify(T&&... args)
         {
@@ -65,14 +65,14 @@ namespace @{namespace}
                 unlock();
             }
         }
-        
+
         template<class T>
         void remove(T* object)
         {
             auto tag = reinterpret_cast<long>(object);
             remove(tag);
         }
-        
+
         void remove(long tag)
         {
             auto iter = _listeners.find( tag );
@@ -89,12 +89,12 @@ namespace @{namespace}
         {
             return _lock_counter != 0;
         }
-        
+
         void lock()
         {
             ++_lock_counter;
         }
-         
+
         void unlock()
         {
             --_lock_counter;
@@ -152,7 +152,7 @@ class @{name}:
             return str(type(obj)) == "<type 'instance'>"
 
         if isclass(object):
-            object.func(*args)
+            func(object, *args)
         else:
             func(*args)
 
@@ -186,11 +186,11 @@ php = '''<?php
 
 
 class ObserverPatterGenerator:
-    
+
     @staticmethod
     def get_observable_name():
         return 'Observable'
-    
+
     @staticmethod
     def get_mock():
         cls = Class()
@@ -217,4 +217,3 @@ class ObserverPatterGenerator:
             text = text.replace('@{namespace}', writer.namespace)
         text = text.replace('@{name}', ObserverPatterGenerator.get_observable_name())
         writer.save_file(filename, text)
-

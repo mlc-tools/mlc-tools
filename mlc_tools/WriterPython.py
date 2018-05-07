@@ -380,13 +380,21 @@ regs = [
     [re.compile('for\s*\\(auto&&\s*\\[(\w+),\s*(\w+)\\]\s*:\s*(.+)\\)'), 'for \\1, \\2 in \\3.iteritems():'],
     [re.compile(r'else\s+if\s*\(\s*(.+)\s*\)'), r'elif \1:'],
     [re.compile('if\s*\\(\s*(.+)\s*\\)'), 'if \\1:'],
-    [re.compile('if\s*!(.+):'), 'if not (\\1):'],
+    [re.compile('if\s*!(.+):'), 'if not \\1:'],
     [re.compile('else'), 'else:'],
     [re.compile('in_map\s*\\(\s*(.+),\s*(.+)\s*\\)'), '(\\1 in \\2)'],
     [re.compile('in_list\s*\\(\s*(.+),\s*(.+)\s*\\)'), '(\\1 in \\2)'],
     [re.compile('list_push\s*\\(\s*(.+),\s*(.+)\s*\\)'), '\\1.append(\\2)'],
+    [re.compile('list_remove\s*\\(\s*(.+),\s*(.+)\s*\\)'), '\\1.remove(\\2)'],
+    [re.compile(r'list_clear\s*\(\s*(.+)\s*\)'), r'\1 = list()'],
     [re.compile('list_size\s*\\('), 'len('],
     [re.compile('map_size\s*\\('), 'len('],
+    [re.compile(r'string_empty\((.+?)\)'), r'len(\1) == 0'],
+    [re.compile(r'string_size\((.+?)\)'), r'len(\1)'],
+    [re.compile(r'(\w+)\s+(\w+);'), r'\2 = \1()'],
+    [re.compile(r'(\w+) = return\(\)'), r'return \1'],
+    # False = return()
+    [re.compile(r'std::vector<\w+>\s+(\w+);'), r'\1 = list()'],
     [re.compile('auto (\w+)'), '\\1'],
     [re.compile('string (\w+)'), '\\1'],
     [re.compile('int (\w+)'), '\\1'],
@@ -396,7 +404,7 @@ regs = [
     [re.compile('\+\+(\w+)'), '\\1 += 1'],
     [re.compile('delete (\w+);'), 'pass'],
     [re.compile('&(\w+)'), '\\1'],
-    [re.compile('!(\w+)'), 'not \\1'],
+    [re.compile(r'!(\w+)'), r'not \1'],
     [re.compile('make_intrusive<(\w+)>\\(\\)'), '\\1()'],
     [re.compile('new\s*(\w+)\s*\\(\s*\\)'), '\\1()'],
     [re.compile('assert\\(.+\\);'), ''],
@@ -404,6 +412,10 @@ regs = [
     [re.compile('([-0-9]+)\\.([-0-9]*)f'), '\\1.\\2'],
     [re.compile(';'), ''],
     [re.compile('([*+-/\s])log\\((.+?)\\)'), '\\1math.log(\\2)'],
+    [re.compile(r'random_float\(\)'), 'random.random()'],
+    [re.compile(r'random_int\(([\w\.\->]+)?,(\s*[\w\.\->]+)?\)'), r'random.randint(\1, \2-1)'],
+    [re.compile(r'\bthis\b'), r'self'],
+    [re.compile(r', std::placeholders::_\d'), r''],
 ]
 
 
@@ -421,7 +433,10 @@ def convert_function_to_python(func, parser):
         ['false', 'False'],
         ['nullptr', 'None'],
         ['std.round', 'round'],
+        ['std.fabs', 'abs'],
+        ['std.ceil', 'math.ceil'],
         ['std.floor', 'math.floor'],
+        ['std.sqrt', 'math.sqrt'],
         ['std.min', 'min'],
         ['std.max', 'max'],
         ['!= None', 'is not None'],
@@ -476,6 +491,8 @@ def convert_function_to_python(func, parser):
             func = get_tabs(2) + 'from {0} import {0}\n'.format(cls.name) + func
     if 'math.' in func:
         func = get_tabs(2) + 'import math\n' + func
+    if 'random.' in func:
+        func = get_tabs(2) + 'import random\n' + func
 
     return func
 
