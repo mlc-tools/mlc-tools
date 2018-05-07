@@ -20,7 +20,7 @@
 #include <fstream>
 #include "config.h"
 #include "AllTests.h"
-#include "Logger.h"
+#include "tests/Logger.h"
 
 extern intrusive_ptr<mg::CommandBase> createCommand(const std::string& payload);
 std::string root = "../../";
@@ -45,10 +45,9 @@ bool test_serialization();
 class Logger : public mg::Logger
 {
 public:
-    virtual bool add_result(bool result, const std::string& message) override
+    virtual void print_log(bool result, const std::string& message) override
     {
         std::cout << message << " " << (result? "Ok" : "Fail") << std::endl;
-        return result;
     }
 };
 
@@ -64,14 +63,14 @@ int main(int argc, char ** args)
 
 	initialize_data_storage();
 
-	auto logger = make_intrusive<Logger>();
+	Logger logger;
 
 	result = test_serialization() && result;
 	result = test_enum() && result;
 	result = test_visitor() && result;
 	result = test_side() && result;
 	result = test_all_types() && result;
-	result = mg::AllTests::run(logger) && result;
+	result = mg::AllTests::run(&logger) && result;
 
 	std::cout << "Execute results = " << (result ? "Ok" : "Fail") << std::endl;
 	return result ? 0 : -1;

@@ -18,20 +18,15 @@ class SerializedObject:serialized
 	}
 }
 
-class Logger<SerializedObject>
-{
-    function bool add_result(bool result, string message):abstract
-}
-
 class AllTests<SerializedObject>
 {
     function bool run(Logger* logger):static
     {
         bool result = true;
-        result = logger->add_result(FunctionTest::tests(logger), "Function tests") && result;
-        result = logger->add_result(DataUnit::tests(logger), "Static data") && result;
-        result = logger->add_result(AllTypes::tests(logger), "AllTypes tests") && result;
-        result = logger->add_result(TestFactory::tests(logger), "TestFactory tests") && result;
+        result = logger->push(FunctionTest::tests(logger), "Function tests") && result;
+        result = logger->push(DataUnit::tests(logger), "Static data") && result;
+        result = logger->push(AllTypes::tests(logger), "AllTypes tests") && result;
+        result = logger->push(TestFactory::tests(logger), "TestFactory tests") && result;
 
         return result;
     }
@@ -188,13 +183,13 @@ class FunctionTest<SerializedObject>
         return result;
     }
 
-    function bool test_create_objects(Logger* loger):static
+    function bool test_create_objects(Logger* logger):static
     {
         auto pointer = new FunctionTest();
         pointer->initialize();
         auto result = pointer->initialized;
         result = result && pointer->data_unit != nullptr;
-        loger->add_result(result, "Create new object in function");
+        logger->push(result, "Create new object in function");
         return result;
     }
 
@@ -209,7 +204,7 @@ class FunctionTest<SerializedObject>
             ++index;
         }
         result = result && index == count;
-        logger->add_result(result, "FOR(AUTO& PAIR : MAP)");
+        logger->push(result, "FOR(AUTO& PAIR : MAP)");
 
         index = 0;
         for(auto&& [name, unit] : units)
@@ -217,7 +212,7 @@ class FunctionTest<SerializedObject>
             ++index;
         }
         result = result && index == count;
-        logger->add_result(result, "FOR(AUTO&& [NAME, UNIT] : UNITS)");
+        logger->push(result, "FOR(AUTO&& [NAME, UNIT] : UNITS)");
 
         index = 0;
         for(int i=0; i<count; ++i)
@@ -225,7 +220,7 @@ class FunctionTest<SerializedObject>
             ++index;
         }
         result = result && index == count;
-        logger->add_result(result, "FOR(int i=0; i<count; ++i)");
+        logger->push(result, "FOR(int i=0; i<count; ++i)");
 
         index = 0;
         for(int i=count; i>0; --i)
@@ -233,7 +228,7 @@ class FunctionTest<SerializedObject>
             ++index;
         }
         result = result && index == count;
-        logger->add_result(result, "FOR(int i=count; i>0; --i)");
+        logger->push(result, "FOR(int i=count; i>0; --i)");
 
         index = 0;
         auto count2 = count*2;
@@ -242,7 +237,7 @@ class FunctionTest<SerializedObject>
             ++index;
         }
         result = result && index == count;
-        logger->add_result(result, "FOR(int i=0; i<count*2; i+=2)");
+        logger->push(result, "FOR(int i=0; i<count*2; i+=2)");
 
         return result;
     }
@@ -278,7 +273,7 @@ class FunctionTest<SerializedObject>
         else if(false)
             result = false;
 
-        logger->add_result(result, "IF-ELSE");
+        logger->push(result, "IF-ELSE");
         return result;
     }
 
@@ -295,14 +290,14 @@ class FunctionTest<SerializedObject>
         result = result && map_size(pointer->map) == 1;
         result = result && in_map(1, pointer->map);
 
-        logger->add_result(result, "std functions");
+        logger->push(result, "std functions");
         return result;
     }
 
     function bool test_1(Logger* logger):static {
         auto user = new TestUser1();
 		auto result = FunctionTest::test_1_1(user);
-		logger->add_result(result, "Functions: test 1");
+		logger->push(result, "Functions: test 1");
 		return result;
 	}
     function bool test_1_1(TestUser1* user):static {
@@ -332,10 +327,10 @@ class TestFactory<SerializedObject>
         auto string = Factory::serialize_command(command);
 
         auto command2 = Factory::create_command(string);
-        result = logger->add_result(command2 != nullptr, " - TestFactory: commnd_2 deserialized") && result;
+        result = logger->push(command2 != nullptr, " - TestFactory: commnd_2 deserialized") && result;
         if(result)
         {
-            result = logger->add_result(command2->get_type() == command->get_type(), " - TestFactory: commnd_type == commnd2_type deserialized") && result;
+            result = logger->push(command2->get_type() == command->get_type(), " - TestFactory: commnd_type == commnd2_type deserialized") && result;
         }
         return result;
     }
