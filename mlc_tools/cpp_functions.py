@@ -62,6 +62,7 @@ int random_int(int min, int max);
 '''
 cpp_functions = '''
 #include "mg_extensions.h"
+#include <cstdlib>
 
 float random_float()
 {
