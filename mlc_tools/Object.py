@@ -100,8 +100,13 @@ class Object:
         self.is_link = self.is_link or Modifier.link in string
         self.is_const = self.is_const or Modifier.const in string
         self.is_const = self.is_const or self.is_link
+
         if Modifier.private in string:
             self.access = AccessSpecifier.private
+        if Modifier.protected in string:
+            self.access = AccessSpecifier.protected
+        if Modifier.public in string:
+            self.access = AccessSpecifier.public
 
         string = re.sub(Modifier.server, '', string)
         string = re.sub(Modifier.client, '', string)
@@ -111,6 +116,8 @@ class Object:
         string = re.sub(Modifier.key, '', string)
         string = re.sub(Modifier.link, '', string)
         string = re.sub(Modifier.private, '', string)
+        string = re.sub(Modifier.protected, '', string)
+        string = re.sub(Modifier.public, '', string)
 
         if args:
             string = string[0:l] + args + string[l:]

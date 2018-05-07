@@ -248,9 +248,9 @@ def main():
 
 
 def test_game_s():
-    game_root = '/work/survival_2d/'
+    game_root = '/Work/survival/'
     generator = Generator(game_root + 'config', generate_tests='yes')
-    generator.generate('cpp', 'xml', game_root + 'client/generated/web', 'client')
+    generator.generate('cpp', 'xml', game_root + 'tests/cpp/web', 'client')
 
 
 def test():

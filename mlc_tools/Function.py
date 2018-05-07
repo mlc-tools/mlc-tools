@@ -1,6 +1,6 @@
 import re
 from constants import Modifier
-from Object import Object
+from Object import Object, AccessSpecifier
 
 
 class Function:
@@ -16,6 +16,7 @@ class Function:
         self.is_abstract = False
         self.is_template = False
         self.side = 'both'
+        self.access = AccessSpecifier.public
 
     def parse(self, line):
         line = line.strip()
@@ -66,7 +67,7 @@ class Function:
                     name = string[index + 1:].strip()
                     self.args.append([name, type_])
                     return True
-                
+
                 if not (p('*', arg) or p('&', arg) or p(' ', arg)):
                     exit(-1)
 
@@ -131,10 +132,20 @@ class Function:
         self.is_static = self.is_static or Modifier.static in string
         self.is_const = self.is_const or Modifier.const in string
 
+        if Modifier.private in string:
+            self.access = AccessSpecifier.private
+        if Modifier.protected in string:
+            self.access = AccessSpecifier.protected
+        if Modifier.public in string:
+            self.access = AccessSpecifier.public
+
         string = re.sub(Modifier.server, '', string)
         string = re.sub(Modifier.client, '', string)
         string = re.sub(Modifier.external, '', string)
         string = re.sub(Modifier.static, '', string)
         string = re.sub(Modifier.const, '', string)
         string = re.sub(Modifier.abstract, '', string)
+        string = re.sub(Modifier.private, '', string)
+        string = re.sub(Modifier.protected, '', string)
+        string = re.sub(Modifier.public, '', string)
         return string

@@ -1,5 +1,5 @@
 from Class import Class
-from Object import Object
+from Object import Object, AccessSpecifier
 from Function import Function
 
 
@@ -21,7 +21,7 @@ class Test:
         generated_functions = []
         for func in cls.functions:
             ignored = ['visit']
-            if func.name not in ignored:
+            if func.name not in ignored and func.access == AccessSpecifier.public:
                 self.add_function(test, 'test_' + func.name)
                 generated_functions.append('test_' + func.name)
 
@@ -44,6 +44,7 @@ class Test:
                 continue
             function.operations.append('this->logger->push(this->{0}(), " - [{1}] tested");'.format(name, name[5:]))
             function.operations.append('this->logger->push(true, "---------------------------------------------------------");'.format(name, name[5:]))
+            function.operations.append('this->logger->methods_count += 1;')
 
         function.operations.append('return this->logger->result;')
 
@@ -91,6 +92,7 @@ class Test:
             function.operations.append('this->logger->push(true, "Test case [\" + this->{0}.get_type() + \"] started");'.format(var_name))
             function.operations.append(
                 'this->logger->push(this->{0}.execute(), "Test case [\" + this->{0}.get_type() + \"] finished\\n");'.format(var_name))
+            function.operations.append('this->logger->class_count += 1;')
         function.operations.append('return this->logger->result;')
 
         return test_all
@@ -101,6 +103,8 @@ class tests/Logger:test
     bool result = true
     int tests_count
     int success_count
+    int class_count = 0
+    int methods_count = 0
     function bool push(bool result, string message)
     {
         this->tests_count += 1;

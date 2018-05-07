@@ -21,6 +21,8 @@ class Modifier:
     link = ':link'
     storage = ":storage"
     private = ":private"
+    protected = ":protected"
+    public = ":public"
     numeric = ":numeric"
     test = ":test"
 

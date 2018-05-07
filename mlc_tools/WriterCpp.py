@@ -498,10 +498,21 @@ class WriterCpp(Writer):
 
     def write_functions(self, functions, flags):
         out = {FLAG_CPP: '', FLAG_HPP: ''}
-        for function in functions:
-            if function.is_abstract and flags == FLAG_CPP:
-                continue
-            out = add_dict(out, self.write_function(function, flags))
+        accesses = {
+            AccessSpecifier.public: 'public: ',
+            AccessSpecifier.protected: 'protected: ',
+            AccessSpecifier.private: 'private: ',
+        }
+        for access in accesses:
+            add = flags == FLAG_HPP
+            for function in functions:
+                if function.is_abstract and flags == FLAG_CPP:
+                    continue
+                if add:
+                    out[flags] += accesses[access] + '\n'
+                    add = False
+                if function.access == access:
+                    out = add_dict(out, self.write_function(function, flags))
         return out
 
     def add_methods(self, class_):
