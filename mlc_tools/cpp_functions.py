@@ -6,6 +6,7 @@ hpp_functions = '''
 #include <vector>
 #include <cmath>
 #include <string>
+#include <algorithm>
 
 template <class K, class T, class P>
 bool in_map(const K& element, const std::map<T, P>& map)
