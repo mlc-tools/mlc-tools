@@ -63,6 +63,8 @@ class Object:
                 self.initial_value = "0.0"
             elif self.type == 'bool':
                 self.initial_value = "false"
+            elif self.type == 'string':
+                self.initial_value = '""'
             elif self.is_pointer:
                 self.initial_value = "nullptr"
 
