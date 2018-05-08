@@ -389,7 +389,7 @@ regs = [
     [re.compile(r'list_clear\s*\(\s*(.+)\s*\)'), r'\1 = list()'],
     [re.compile('list_size\s*\\('), 'len('],
     [re.compile('map_size\s*\\('), 'len('],
-    [re.compile(r'string_empty\((.+?)\)'), r'len(\1) == 0'],
+    [re.compile(r'string_empty\((.+?)\)'), r'(not (\1))'],
     [re.compile(r'string_size\((.+?)\)'), r'len(\1)'],
     [re.compile(r'(\w+)\s+(\w+);'), r'\2 = \1()'],
     [re.compile(r'(\w+) = return\(\)'), r'return \1'],
@@ -405,6 +405,7 @@ regs = [
     [re.compile('delete (\w+);'), 'pass'],
     [re.compile('&(\w+)'), '\\1'],
     [re.compile(r'!(\w+)'), r'not \1'],
+    [re.compile(r'!\('), r'not ('],
     [re.compile('make_intrusive<(\w+)>\\(\\)'), '\\1()'],
     [re.compile('new\s*(\w+)\s*\\(\s*\\)'), '\\1()'],
     [re.compile('assert\\(.+\\);'), ''],
@@ -416,6 +417,7 @@ regs = [
     [re.compile(r'random_int\(([\w\.\->]+)?,(\s*[\w\.\->]+)?\)'), r'random.randint(\1, \2-1)'],
     [re.compile(r'\bthis\b'), r'self'],
     [re.compile(r', std::placeholders::_\d'), r''],
+    [re.compile(r'dynamic_pointer_cast_intrusive<\w+>\((.+?)\)'), r'\1'],
 ]
 
 
