@@ -10,6 +10,14 @@ class Test:
         self.parser = parser
         self.parser.parse(base_classes)
 
+    def get_member_name(self, cls_name):
+        name_ = ''
+        for i, ch in enumerate(cls_name):
+            if ch.isupper() and i > 0:
+                name_ += '_'
+            name_ += ch.lower()
+        return name_
+
     def generate_test_interface(self, cls):
         if len(cls.functions) == 0 or cls.is_test:
             return None
@@ -67,7 +75,7 @@ class Test:
 
         for test in self.tests:
             if self.parser.find_class(test.name[1:]):
-                var_name = test.name[1:]
+                var_name = self.get_member_name(test.name[1:])
                 member = Object()
                 member.type = test.name[1:]
                 member.name = var_name
@@ -80,7 +88,7 @@ class Test:
         test_all.functions.append(function)
         function.operations.append('this->logger = logger;')
         for test in test_all.members:
-            var_name = test.name
+            var_name = self.get_member_name(test.name)
             function.operations.append('this->{}.initialize(logger);'.format(var_name))
 
         function = Function()
@@ -88,7 +96,7 @@ class Test:
         function.return_type = 'bool'
         test_all.functions.append(function)
         for test in test_all.members:
-            var_name = test.name
+            var_name = self.get_member_name(test.name)
             function.operations.append('this->logger->push(true, "Test case [\" + this->{0}.get_type() + \"] started");'.format(var_name))
             function.operations.append(
                 'this->logger->push(this->{0}.execute(), "Test case [\" + this->{0}.get_type() + \"] finished\\n");'.format(var_name))

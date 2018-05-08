@@ -70,6 +70,10 @@ class WriterPython(Writer):
             if type_class and type_class.type == 'enum':
                 imports += '\nfrom {0} import {0}'.format(type_class.name)
 
+        for imp in imports.split('\n'):
+            functions = functions.replace(imp, '')
+            initialize_list = initialize_list.replace(imp, '')
+
         out = pattern.format(name, initialize_list, functions, imports, init_behavior, static_list)
         self.current_class = None
         return {flags: out}
@@ -261,6 +265,8 @@ class WriterPython(Writer):
         fstr = self.serialize_protocol[serialization_type][type][index]
         str = fstr.format(obj_name, obj_type, obj_value, '{}', owner,
                           obj_template_args[0].type if len(obj_template_args) > 0 else 'unknown_arg')
+        str = re.sub(r'([\w\.]+?)\s*!=\s*False', r'(\1)', str)
+        str = re.sub(r'([\w\.]+?)\s*==\s*False', r'not (\1)', str)
         return '        ' + str + '\n'
 
     def save_config_file(self):
@@ -273,7 +279,7 @@ class WriterPython(Writer):
     def create_factory(self):
         global _factory
         pattern = _factory[self.serialize_format]
-        line = '        if type == "{0}": return {0}.{0}()\n'
+        line = '        if type == "{0}":\n            return {0}.{0}()\n'
         line_import = 'import {0}\n'
         creates = ''
         imports = ''
@@ -356,7 +362,7 @@ class WriterPython(Writer):
     def create_data_storage(self):
         storage = self.create_data_storage_class('DataStorage', self.parser.classes)
         content = self.write_class(storage, 0)[0]
-        content = self.prepare_file(content)
+        # content = self.prepare_file(content)
         self.save_file(storage.name + '.py', content)
 
     def create_init_file(self):
@@ -371,53 +377,55 @@ class WriterPython(Writer):
         Writer.convert_to_enum(self, cls, use_type)
 
 regs = [
-    [re.compile('DataStorage::shared\(\).get<(\w+)>'), 'DataStorage::shared().get\\1'],
-    [re.compile('for\s*\\(\s*\w+[\s&\*]*(\w+)\s*:\s*(.+)\s*\\)'), 'for \\1 in \\2:'],
-    [re.compile('for\s*\\(\s*\w+\s*(\w+)=(\w+);\s*\w+<(\w+);\s*\\+\\+\w+\s*\\)'), 'for \\1 in xrange(\\2, \\3):'],
-    [re.compile('for\s*\\(\s*\w+\s*(\w+)=(\w+);\s*\w+>(\w+);\s*--\w+\s*\\)'), 'for \\1 in xrange(\\2, \\3, -1):'],
-    [re.compile('for\s*\\(\s*\w+\s*(\w+)=(\w+);\s*\w+<(\w+);\s*\w+\\+=(\w)\s*\\)'), 'for \\1 in xrange(\\2, \\3, \\4):'],
-    [re.compile('for\s*\\(\s*\w+\s*(\w+)=(\w+);\s*\w+>(\w+);\s*\w+-=(\w)\s*\\)'), 'for \\1 in xrange(\\2, \\3, -\\4):'],
-    [re.compile('for\s*\\(auto&&\s*\\[(\w+),\s*(\w+)\\]\s*:\s*(.+)\\)'), 'for \\1, \\2 in \\3.iteritems():'],
+    [re.compile(r'DataStorage::shared\(\).get<(\w+)>'), r'DataStorage::shared().get\1'],
+    [re.compile(r'for\s*\(\s*\w+[\s&\*]*(\w+)\s*:\s*(.+)\s*\)'), r'for \1 in \2:'],
+    [re.compile(r'for\s*\(\s*\w+\s*(\w+)=(\w+);\s*\w+<(\w+);\s*\+\+\w+\s*\)'), r'for \1 in xrange(\2, \3):'],
+    [re.compile(r'for\s*\(\s*\w+\s*(\w+)=(\w+);\s*\w+>(\w+);\s*--\w+\s*\)'), r'for \1 in xrange(\2, \3, -1):'],
+    [re.compile(r'for\s*\(\s*\w+\s*(\w+)=(\w+);\s*\w+<(\w+);\s*\w+\+=(\w)\s*\)'), r'for \1 in xrange(\2, \3, \4):'],
+    [re.compile(r'for\s*\(\s*\w+\s*(\w+)=(\w+);\s*\w+>(\w+);\s*\w+-=(\w)\s*\)'), r'for \1 in xrange(\2, \3, -\4):'],
+    [re.compile(r'for\s*\(auto&&\s*\[(\w+),\s*(\w+)\]\s*:\s*(.+)\)'), r'for \1, \2 in \3.iteritems():'],
     [re.compile(r'else\s+if\s*\(\s*(.+)\s*\)'), r'elif \1:'],
-    [re.compile('if\s*\\(\s*(.+)\s*\\)'), 'if \\1:'],
-    [re.compile('if\s*!(.+):'), 'if not \\1:'],
-    [re.compile('else'), 'else:'],
-    [re.compile('in_map\s*\\(\s*(.+),\s*(.+)\s*\\)'), '(\\1 in \\2)'],
-    [re.compile('in_list\s*\\(\s*(.+),\s*(.+)\s*\\)'), '(\\1 in \\2)'],
-    [re.compile('list_push\s*\\(\s*(.+),\s*(.+)\s*\\)'), '\\1.append(\\2)'],
-    [re.compile('list_remove\s*\\(\s*(.+),\s*(.+)\s*\\)'), '\\1.remove(\\2)'],
+    [re.compile(r'if\s*\(\s*(.+)\s*\)'), r'if \1:'],
+    [re.compile(r'if\s*!(.+):'), r'if not \1:'],
+    [re.compile(r'else'), r'else:'],
+    [re.compile(r'in_map\s*\(\s*(.+),\s*(.+)\s*\)'), r'(\1 in \2)'],
+    [re.compile(r'in_list\s*\(\s*(.+),\s*(.+)\s*\)'), r'(\1 in \2)'],
+    [re.compile(r'list_push\s*\(\s*(.+),\s*(.+)\s*\)'), r'\1.append(\2)'],
+    [re.compile(r'list_remove\s*\(\s*(.+),\s*(.+)\s*\)'), r'\1.remove(\2)'],
     [re.compile(r'list_clear\s*\(\s*(.+)\s*\)'), r'\1 = list()'],
-    [re.compile('list_size\s*\\('), 'len('],
-    [re.compile('map_size\s*\\('), 'len('],
+    [re.compile(r'list_size\s*\('), r'len('],
+    [re.compile(r'map_size\s*\('), r'len('],
     [re.compile(r'string_empty\((.+?)\)'), r'(not (\1))'],
     [re.compile(r'string_size\((.+?)\)'), r'len(\1)'],
     [re.compile(r'(\w+)\s+(\w+);'), r'\2 = \1()'],
     [re.compile(r'(\w+) = return\(\)'), r'return \1'],
     # False = return()
     [re.compile(r'std::vector<\w+>\s+(\w+);'), r'\1 = list()'],
-    [re.compile('auto (\w+)'), '\\1'],
-    [re.compile('string (\w+)'), '\\1'],
-    [re.compile('int (\w+)'), '\\1'],
-    [re.compile('float (\w+)'), '\\1'],
-    [re.compile('bool (\w+)'), '\\1'],
-    [re.compile('(\w)->'), '\\1.'],
-    [re.compile('\+\+(\w+)'), '\\1 += 1'],
-    [re.compile('delete (\w+);'), 'pass'],
-    [re.compile('&(\w+)'), '\\1'],
+    [re.compile(r'auto (\w+)'), r'\1'],
+    [re.compile(r'string (\w+)'), r'\1'],
+    [re.compile(r'int (\w+)'), r'\1'],
+    [re.compile(r'float (\w+)'), r'\1'],
+    [re.compile(r'bool (\w+)'), r'\1'],
+    [re.compile(r'(\w)->'), r'\1.'],
+    [re.compile(r'\+\+(\w+)'), r'\1 += 1'],
+    [re.compile(r'delete (\w*);'), 'pass'],
+    [re.compile(r'&(\w+)'), r'\1'],
     [re.compile(r'!(\w+)'), r'not \1'],
     [re.compile(r'!\('), r'not ('],
-    [re.compile('make_intrusive<(\w+)>\\(\\)'), '\\1()'],
-    [re.compile('new\s*(\w+)\s*\\(\s*\\)'), '\\1()'],
-    [re.compile('assert\\(.+\\);'), ''],
-    [re.compile('([-0-9]+)\\.f'), '\\1.0'],
-    [re.compile('([-0-9]+)\\.([-0-9]*)f'), '\\1.\\2'],
-    [re.compile(';'), ''],
-    [re.compile('([*+-/\s])log\\((.+?)\\)'), '\\1math.log(\\2)'],
+    [re.compile(r'make_intrusive<(\w+)>\(\)'), r'\1()'],
+    [re.compile(r'new\s*(\w+)\s*\(\s*\)'), r'\1()'],
+    [re.compile(r'assert\(.+\);'), r''],
+    [re.compile(r'([-0-9]+)\.f'), r'\1.0'],
+    [re.compile(r'([-0-9]+)\.([-0-9]*)f'), r'\1.\2'],
+    [re.compile(r';'), r''],
+    [re.compile(r'([*+-/\s])log\((.+?)\)'), r'\1math.log(\2)'],
     [re.compile(r'random_float\(\)'), 'random.random()'],
     [re.compile(r'random_int\(([\w\.\->]+)?,(\s*[\w\.\->]+)?\)'), r'random.randint(\1, \2-1)'],
     [re.compile(r'\bthis\b'), r'self'],
     [re.compile(r', std::placeholders::_\d'), r''],
     [re.compile(r'dynamic_pointer_cast_intrusive<\w+>\((.+?)\)'), r'\1'],
+    [re.compile(r'([\w\.]+?)\s*!=\s*False'), r'(\1)'],
+    [re.compile(r'([\w\.]+?)\s*==\s*False'), r'not (\1)'],
 ]
 
 
@@ -428,9 +436,9 @@ def convert_function_to_python(func, parser):
         ['->', '.'],
         ['::', '.'],
         ['&&', ' and '],
+        ['||', ' or '],
         ['  and  ', ' and '],
         ['  or  ', ' or '],
-        ['||', ' or '],
         ['true', 'True'],
         ['false', 'False'],
         ['nullptr', 'None'],
@@ -489,7 +497,8 @@ def convert_function_to_python(func, parser):
     if re.search(r'\bFactory\b', func):
         func = get_tabs(2) + 'from Factory import Factory\n' + func
     for cls in parser.classes:
-        if cls.name in func:
+        need = re.search(r'\b' + cls.name + r'\b', func) is not None
+        if need:
             func = get_tabs(2) + 'from {0} import {0}\n'.format(cls.name) + func
     if 'math.' in func:
         func = get_tabs(2) + 'import math\n' + func
@@ -500,8 +509,7 @@ def convert_function_to_python(func, parser):
 
 
 _factory = {}
-_factory['xml'] = '''import xml.etree.ElementTree as ET
-{0}
+_factory['xml'] = '''{0}
 class Factory:
     @staticmethod
     def build(type):

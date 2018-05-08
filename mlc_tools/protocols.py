@@ -466,7 +466,7 @@ $(OWNER)$(FIELD) = int(float(xml.get("$(FIELD)")))
 #serialize:
 #with default value:
 if $(OWNER)$(FIELD) != $(DEFAULT_VALUE):
-            xml.set("$(FIELD)", "yes" if $(OWNER)$(FIELD) else "no" )
+            xml.set("$(FIELD)", "yes" if $(OWNER)$(FIELD) else "no")
 #without default value:
 xml.set("$(FIELD)", str($(OWNER)$(FIELD)))
 #deserialize:
