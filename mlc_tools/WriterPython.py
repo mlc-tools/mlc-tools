@@ -428,9 +428,12 @@ regs = [
     [re.compile(r'([\w\.]+?)\s*==\s*False'), r'not (\1)'],
 ]
 
+regs_class_names = {}
+
 
 def convert_function_to_python(func, parser):
     global regs
+    global regs_class_names
     repl = [
         ['this.', 'self.'],
         ['->', '.'],
@@ -497,7 +500,10 @@ def convert_function_to_python(func, parser):
     if re.search(r'\bFactory\b', func):
         func = get_tabs(2) + 'from Factory import Factory\n' + func
     for cls in parser.classes:
-        need = re.search(r'\b' + cls.name + r'\b', func) is not None
+        if cls.name not in regs_class_names:
+            regs_class_names[cls.name] = re.compile('\b{}\b'.format(cls.name))
+        pattern = regs_class_names[cls.name]
+        need = re.search(pattern, func) is not None
         if need:
             func = get_tabs(2) + 'from {0} import {0}\n'.format(cls.name) + func
     if 'math.' in func:

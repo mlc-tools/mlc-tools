@@ -247,12 +247,6 @@ def main():
     gen.generate_data()
 
 
-def test_game_s():
-    game_root = '/Work/survival/'
-    generator = Generator(game_root + 'config', generate_tests='yes')
-    generator.generate('cpp', 'xml', game_root + 'tests/cpp/web', 'client')
-
-
 def test():
     gen = Generator('../simple_test/config', validate_php=False)
     gen.generate('py', 'xml', '../test/gen_xml_py/')
@@ -268,4 +262,3 @@ def test():
 if __name__ == '__main__':
     main()
     # test()
-    # test_game_s()
