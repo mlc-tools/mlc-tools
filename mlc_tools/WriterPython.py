@@ -501,7 +501,7 @@ def convert_function_to_python(func, parser):
         func = get_tabs(2) + 'from Factory import Factory\n' + func
     for cls in parser.classes:
         if cls.name not in regs_class_names:
-            regs_class_names[cls.name] = re.compile('\b{}\b'.format(cls.name))
+            regs_class_names[cls.name] = re.compile(r'\b{}\b'.format(cls.name))
         pattern = regs_class_names[cls.name]
         need = re.search(pattern, func) is not None
         if need:

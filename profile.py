@@ -7,6 +7,12 @@ def test_game_s():
     generator.generate('py', 'xml', game_root + 'tests/python/web', 'client')
 
 
+def test_game_m():
+    game_root = '/work/marines/'
+    generator = Generator(game_root + 'config', generate_tests='yes')
+    generator.generate('py', 'xml', game_root + 'server/tests/lib/mg', 'client')
+
+
 def profile():
     def get_profile_(function):
         """ Returns performance statistics (as a string) for the given function.
@@ -27,6 +33,7 @@ def profile():
         s = open(id).read()
         os.remove(id)
         return s
-    print get_profile_(test_game_s)
+    print get_profile_(test_game_m)
 
-profile()
+# profile()
+test_game_m()
