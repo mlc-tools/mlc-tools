@@ -842,7 +842,7 @@ class WriterCpp(Writer):
             out += '\n#include "IntrusivePtr.h"'
         if flags == FLAG_CPP:
             out += '\n#include "Factory.h"'
-            out += pattern.format(get_include_file(self.parser, self._current_class, 'mg_extensions'))
+            out += pattern.format(get_include_file(self.parser, self._current_class, self.get_namespace() + '_extensions'))
             out += '\n#include <algorithm>'
 
         out = out.split('\n')
@@ -936,8 +936,13 @@ class WriterCpp(Writer):
         configs.append('\n#define {0}_SERIALIZE_FORMAT {0}_{1}'.format(self.get_namespace().upper(), self.serialize_format.upper()))
         filename_config = 'config.h' if self.get_namespace() == 'mg' else '{}_config.h'.format(self.get_namespace())
         self.save_file(filename_config, pattern.format(self.get_namespace(), '\n'.join(configs)))
-        self.save_file("{}_extensions.h".format(self.get_namespace()), hpp_functions)
-        self.save_file("{}_extensions.cpp".format(self.get_namespace()), cpp_functions)
+        hpp = hpp_functions
+        cpp = cpp_functions
+        hpp = hpp.replace('@{namespace}', self.get_namespace())
+        cpp = cpp.replace('@{namespace}', self.get_namespace())
+        cpp = cpp.replace('@{header_file}', "{}_extensions.h".format(self.get_namespace()))
+        self.save_file("{}_extensions.h".format(self.get_namespace()), hpp)
+        self.save_file("{}_extensions.cpp".format(self.get_namespace()), cpp)
 
     def convert_to_enum(self, cls):
         shift = 0

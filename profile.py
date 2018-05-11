@@ -9,8 +9,12 @@ def test_game_s():
 
 def test_game_m():
     game_root = '/work/marines/'
-    generator = Generator(game_root + 'config', generate_tests='yes')
+    generator = Generator(game_root + 'config', generate_tests='no')
+    generator.generate('cpp', 'xml', game_root + 'client/generated/web', 'client')
     generator.generate('py', 'xml', game_root + 'server/tests/lib/mg', 'client')
+
+    generator = Generator(game_root + 'config_battle', generate_tests='no', namespace='photon')
+    generator.generate('cpp', 'json', game_root + 'client/generated/photon', 'client')
 
 
 def profile():
