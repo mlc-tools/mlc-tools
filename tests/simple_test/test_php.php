@@ -2,6 +2,7 @@
 
 require_once 'generated_php/DataStorage.php';
 require_once 'generated_php/AllTests.php';
+require_once 'generated_php/Logger.php';
 
 $file = 'data.xml';
 if (count($argv) > 1) {
@@ -13,14 +14,13 @@ $file = realpath(dirname(__FILE__))."/assets/$file";
 DataStorage::$PATH_TO_DATA = $file;
 DataStorage::shared()->loadAllDataUnits();
 
-class Logger {
-	function add_result($result, $message) {
+class LoggerImpl extends Logger {
+	function print_log($result, $message) {
 		echo ("\n$message: " .($result?"Ok":"Fail"));
-		return $result;
 	}
 };
 
-$logger = new Logger();
+$logger = new LoggerImpl();
 
 $result = true;
 $result = AllTests::run($logger) and $result;

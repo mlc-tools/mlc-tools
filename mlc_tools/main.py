@@ -87,7 +87,7 @@ class Generator:
         parser.add_argument('-disable_logs', type=str, help='Disabling logs to output',
                             required=False, default='no')
         parser.add_argument('-generate_tests', type=str, help='Generate classes marked as :test',
-                            required=False, default='yes')
+                            required=False, default='no')
         args = parser.parse_args()
 
         self.configs_directory = fileutils.normalize_path(args.i)

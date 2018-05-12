@@ -1,14 +1,14 @@
 from generated_py.AllTests import AllTests
 from generated_py.DataStorage import DataStorage
+from generated_py.Logger import Logger
 import os.path as fs
 import sys
 
 
-class Loger:
+class LoggerImpl(Logger):
 
-    def add_result(self, result, message):
+    def print_log(self, result, message):
         print '{}: {}'.format(message, result)
-        return result
 
 
 def initialize_data_storage(protocol):
@@ -20,8 +20,8 @@ def initialize_data_storage(protocol):
 def main(argv):
     initialize_data_storage(argv[1] if len(argv) > 1 else 'xml')
 
-    loger = Loger()
-    result = AllTests.run(loger)
+    logger = LoggerImpl()
+    result = AllTests.run(logger)
     exit(0 if result else -1)
 
 
