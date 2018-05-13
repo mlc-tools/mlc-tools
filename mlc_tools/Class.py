@@ -49,6 +49,22 @@ class Class(Object):
         for member in parser.objects:
             if parser.find_class(member.type):
                 member.type = self.name + member.type
+            for i, arg in enumerate(member.template_args):
+                if parser.find_class(arg):
+                    member.template_args[i] = self.name + member.template_args[i]
+
+        for func in parser.functions:
+            if parser.find_class(func.return_type):
+                func.return_type = self.name + func.return_type
+            for arg in func.args:
+                if parser.find_class(arg[1]):
+                    arg[1] = self.name + arg[1]
+
+            for cls in parser.classes:
+                pattern = re.compile(r'\b{}\b'.format(cls.name))
+                repl = self.name + cls.name
+                for i, op in enumerate(func.operations):
+                    func.operations[i] = re.sub(pattern, repl, op)
         for cls in parser.classes:
             cls.name = self.name + cls.name
             cls.group = self.group
