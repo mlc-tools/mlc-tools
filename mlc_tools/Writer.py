@@ -1,6 +1,6 @@
-import fileutils
-from Object import *
-from Error import Log
+from . import fileutils
+from .Object import *
+from .Error import Log
 
 
 def add_dict(inDict, toDict):

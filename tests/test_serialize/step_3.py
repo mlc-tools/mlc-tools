@@ -18,6 +18,6 @@ data1 = TestData()
 data1.initialize()
 
 if data0.equal(data1):
-    print 'Ok'
+    print('Ok')
 else:
-    print 'Failed'
+    print('Failed')

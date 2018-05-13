@@ -1,6 +1,6 @@
-from Class import Class
-from Object import Object, AccessSpecifier
-from Function import Function
+from .Class import Class
+from .Object import Object, AccessSpecifier
+from .Function import Function
 
 
 class Test:

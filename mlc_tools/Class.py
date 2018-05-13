@@ -1,8 +1,8 @@
 import re
-from Object import *
-from Function import Function
-import constants
-from constants import Modifier
+from . import constants
+from .Object import *
+from .Function import Function
+from .constants import Modifier
 
 
 class Class(Object):
@@ -45,7 +45,7 @@ class Class(Object):
     def parse_body(self, parser, body):
         parser.parse(body)
         # if len(parser.classes) > 0:
-        #     print self.name, 'Not supported inbody classes'
+        #     print(self.name, 'Not supported inbody classes')
         self.members = parser.objects
         self.functions = parser.functions
         return

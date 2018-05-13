@@ -10,8 +10,15 @@ data.initialize()
 if MG_SERIALIZE_FORMAT == MG_XML:
     root = ET.Element('data')
     data.serialize(root)
-    string = ET.tostring(root)
-    open('data.py.xml', 'w').write(string)
+    string = str(ET.tostring(root))
+    string = string.strip()
+    string = string.replace('\\n', '\n')
+    string = string.replace('\\t', '\t')
+    if string.startswith("b'"):
+        string = string[2:]
+    if string.endswith("'"):
+        string = string[0:-1]
+    open('data.py.xml', 'w').write(str(string))
 else:
     dict_ = {}
     data.serialize(dict_)

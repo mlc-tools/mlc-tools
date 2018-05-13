@@ -8,7 +8,7 @@ import sys
 class LoggerImpl(Logger):
 
     def print_log(self, result, message):
-        print '{}: {}'.format(message, result)
+        print('{}: {}'.format(message, result))
 
 
 def initialize_data_storage(protocol):

@@ -1,14 +1,15 @@
-import fileutils
-import argparse
-from Parser import Parser
-from DataParser import DataParser
-from WriterCpp import WriterCpp
-from WriterPython import WriterPython
-from WriterPhp import WriterPhp
-from Copyright import Copyright
-from Error import Log
+from . import fileutils
+from .Parser import Parser
+from .DataParser import DataParser
+from .WriterCpp import WriterCpp
+from .WriterPython import WriterPython
+from .WriterPhp import WriterPhp
+from .Copyright import Copyright
+from .Error import Log
+from .version import __version__
 import os
-from version import __version__
+import sys
+import argparse
 
 
 class Generator:
@@ -43,7 +44,7 @@ class Generator:
     def check_version(requere):
         v = __version__.split('.')
         r = requere.split('.')
-        for i in xrange(3):
+        for i in range(3):
             if len(r) >= i + 1:
                 if r[i] != v[i]:
                     rr = int(r[i])
@@ -218,7 +219,8 @@ class Generator:
             self.test_script_args = test_script_args
         if self.test_script and os.path.isfile(self.test_script):
             Log.message('Run test (%s):' % self.test_script)
-            if os.system('python {} {}'.format(self.test_script, self.test_script_args)) != 0:
+            python = 'python3' if sys.version_info[0] == 3 else 'python'
+            if os.system('{} {} {}'.format(python, self.test_script, self.test_script_args)) != 0:
                 exit(1)
 
     def validate_arg_language(self):
@@ -248,7 +250,7 @@ def main():
 
 
 def test():
-    gen = Generator('../simple_test/config', validate_php=False)
+    gen = Generator('../simple_test/config', validate_php=False, generate_tests='yes')
     gen.generate('py', 'xml', '../test/gen_xml_py/')
     gen.generate('py', 'json', '../test/gen_json_py/')
     gen.generate('cpp', 'xml', '../test/gen_xml_cpp/')

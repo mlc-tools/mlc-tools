@@ -1,5 +1,5 @@
-from protocols_php import php_xml
-from protocols_php import php_json
+from .protocols_php import php_xml
+from .protocols_php import php_json
 
 cpp_xml = '''
 #int
@@ -579,7 +579,7 @@ arr = ET.SubElement(xml, '$(FIELD)')
 #deserialize:
 arr = xml.find('$(FIELD)')
         if arr is not None:
-            from $(TYPE) import $(TYPE)
+            from .$(TYPE) import $(TYPE)
             for xml_child in arr:
                 obj = $(TYPE)()
                 obj.deserialize(xml_child)
@@ -593,7 +593,7 @@ if $(OWNER)$(FIELD):
             $(OWNER)$(FIELD).serialize(xml_child)
 #deserialize:
 xml_child = xml.find('$(FIELD)')
-        from $(TYPE) import $(TYPE)
+        from .$(TYPE) import $(TYPE)
         if xml_child is not None:
             $(OWNER)$(FIELD) = $(TYPE)()
             $(OWNER)$(FIELD).deserialize(xml_child)
@@ -616,14 +616,14 @@ arr = xml.find('$(FIELD)')
 
 #link
 #serialize:
-from $(TYPE) import $(TYPE)
+from .$(TYPE) import $(TYPE)
         if isinstance($(OWNER)$(FIELD), $(TYPE)):
             xml.set("$(FIELD)", $(OWNER)$(FIELD).name)
         else:
             xml.set("$(FIELD)", $(OWNER)$(FIELD))
 #deserialize:
 name_$(FIELD) = xml.get("$(FIELD)")
-        from $(TYPE) import $(TYPE)
+        from .$(TYPE) import $(TYPE)
         $(OWNER)$(FIELD) = DataStorage.shared().get$(TYPE)(name_$(FIELD))
 
 #list<link>
@@ -728,7 +728,7 @@ if $(OWNER)$(FIELD):
             dictionary["$(FIELD)"] = dict
 #deserialize
 if '$(FIELD)' in dictionary:
-            from $(TYPE) import $(TYPE)
+            from .$(TYPE) import $(TYPE)
             $(OWNER)$(FIELD) = $(TYPE)()
             $(OWNER)$(FIELD).deserialize(dictionary['$(FIELD)'])
 
@@ -743,7 +743,7 @@ dictionary['$(FIELD)'] = []
 #deserialize
 arr = dictionary['$(FIELD)']
         size = len(arr)
-        for index in xrange(size):
+        for index in range(size):
             for key, value in arr[index].iteritems():
                 obj = Factory.build(key)
                 $(OWNER)$(FIELD).append(obj)
@@ -753,9 +753,9 @@ arr = dictionary['$(FIELD)']
 
 #link
 #serialize:
-from $(TYPE) import $(TYPE)
+from .$(TYPE) import $(TYPE)
         if isinstance($(OWNER)$(FIELD), $(TYPE)):
-            from $(TYPE) import $(TYPE)
+            from .$(TYPE) import $(TYPE)
             dictionary['$(FIELD)'] = $(OWNER)$(FIELD).name
         else:
             dictionary['$(FIELD)'] = $(OWNER)$(FIELD)

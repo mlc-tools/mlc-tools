@@ -1,9 +1,9 @@
 import xml.etree.ElementTree as ET
-import fileutils
 import xml.dom.minidom
-from DataStorageCreators import *
-from Error import Error
 import json
+from . import fileutils
+from .DataStorageCreators import *
+from .Error import Error
 
 
 class DataParser:
@@ -20,13 +20,13 @@ class DataParser:
         self._validate()
 
     def flush(self, out_data_directory):
-        buffer = ''
+        buffer_ = ''
         file = 'data.' + self.format
         if self.format == 'xml':
-            buffer = self._flush_xml(out_data_directory)
+            buffer_ = self._flush_xml(out_data_directory)
         elif self.format == 'json':
-            buffer = self._flush_json(out_data_directory)
-        fileutils.write(out_data_directory + file, buffer)
+            buffer_ = self._flush_json(out_data_directory)
+        fileutils.write(out_data_directory + file, buffer_)
 
     def _parse_xml(self, data_directory):
         files = fileutils.get_files_list(data_directory)
@@ -86,7 +86,7 @@ class DataParser:
                 valid = class_.is_storage
                 break
         if not valid:
-            print 'Unknown data type [{}]->[{}]. please check configuration. File: [{}]'.format(type, class_name, file)
+            print('Unknown data type [{}]->[{}]. please check configuration. File: [{}]'.format(type, class_name, file))
             exit(-1)
 
     def _flush_xml(self, out_data_directory):
@@ -100,15 +100,24 @@ class DataParser:
                 object.tag = 'value'
                 pair.append(object)
 
-        buffer = ET.tostring(root)
-        xml_ = xml.dom.minidom.parseString(buffer)
-        buffer = xml_.toprettyxml(encoding='utf-8')
-        lines = buffer.split('\n')
-        buffer = ''
+        buffer_ = ET.tostring(root)
+        xml_ = xml.dom.minidom.parseString(buffer_)
+        buffer_ = str(xml_.toprettyxml(encoding='utf-8'))
+        lines = buffer_.split('\n')
+
+        buffer_ = ''
         for line in lines:
             if line.strip():
-                buffer += line + '\n'
-        return buffer
+                buffer_ += line + '\n'
+        buffer_ = buffer_.strip()
+        buffer_ = buffer_.replace('\\t', '\t')
+        buffer_ = buffer_.replace('\\n', '\n')
+        if buffer_.startswith("b'"):
+            buffer_ = buffer_[2:]
+        if buffer_.endswith("'"):
+            buffer_ = buffer_[0:-1]
+
+        return buffer_
 
     def _flush_json(self, out_data_directory):
         dict_ = {}

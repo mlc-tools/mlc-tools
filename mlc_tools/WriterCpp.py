@@ -1,15 +1,15 @@
 import re
-from Writer import Writer
-from Writer import add_dict
-from Class import Class
-from Object import Object
-from Function import Function
-from DataStorageCreators import DataStorageCppXml
-from DataStorageCreators import DataStorageCppJson
-from Error import Error
-import constants
-from cpp_functions import cpp_functions, hpp_functions
-from Object import AccessSpecifier
+from . import constants
+from .Writer import Writer
+from .Writer import add_dict
+from .Class import Class
+from .Object import Object
+from .Function import Function
+from .DataStorageCreators import DataStorageCppXml
+from .DataStorageCreators import DataStorageCppJson
+from .Error import Error
+from .cpp_functions import cpp_functions, hpp_functions
+from .Object import AccessSpecifier
 
 FLAG_HPP = 2
 FLAG_CPP = 4
@@ -882,7 +882,7 @@ class WriterCpp(Writer):
 
         def get_tabs(count):
             out = ''
-            for i in xrange(count):
+            for i in range(count):
                 out += '\t'
             return out
 

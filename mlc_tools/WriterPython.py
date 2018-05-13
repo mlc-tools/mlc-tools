@@ -1,9 +1,10 @@
-from Writer import Writer
-from Function import Function
-from Class import Class
-from DataStorageCreators import DataStoragePythonXml
-from DataStorageCreators import DataStoragePythonJson
+from .Writer import Writer
+from .Function import Function
+from .Class import Class
+from .DataStorageCreators import DataStoragePythonXml
+from .DataStorageCreators import DataStoragePythonJson
 import re
+import sys
 
 SERIALIZATION = 0
 DESERIALIZATION = 1
@@ -63,12 +64,12 @@ class WriterPython(Writer):
         name = cls.name
         if cls.behaviors:
             name += '(' + cls.behaviors[0].name + ')'
-            imports += 'from {0} import {0}'.format(cls.behaviors[0].name)
+            imports += 'from .{0} import {0}'.format(cls.behaviors[0].name)
             init_behavior = '        {0}.__init__(self)'.format(cls.behaviors[0].name)
         for obj in cls.members:
             type_class = self.parser.find_class(obj.type)
             if type_class and type_class.type == 'enum':
-                imports += '\nfrom {0} import {0}'.format(type_class.name)
+                imports += '\nfrom .{0} import {0}'.format(type_class.name)
 
         for imp in imports.split('\n'):
             functions = functions.replace(imp, '')
@@ -144,7 +145,7 @@ class WriterPython(Writer):
             else:
                 if self.parser.find_class(object.type):
                     value = object.type + '()'
-                    imports += 'from {0} import {0}\n        '.format(object.type)
+                    imports += 'from .{0} import {0}\n        '.format(object.type)
         if value and value.endswith('f'):
             value = value[0:-1] + '0'
 
@@ -192,9 +193,9 @@ class WriterPython(Writer):
         imports = ''
         if serialize_type == DESERIALIZATION:
             if use_factory:
-                imports += '        from Factory import Factory\n'
+                imports += '        from .Factory import Factory\n'
             if use_data_storage:
-                imports += '        from DataStorage import DataStorage\n'
+                imports += '        from .DataStorage import DataStorage\n'
         body = body.replace('$(import)', imports)
 
         body += '        return'
@@ -243,7 +244,7 @@ class WriterPython(Writer):
             if len(obj_template_args) > 0:
                 if type == "map":
                     if len(obj_template_args) != 2:
-                        print "map should have 2 arguments"
+                        print("map should have 2 arguments")
                         exit(-1)
                     return self.build_map_serialization(obj_name, obj_type, obj_value, obj_is_pointer,
                                                         obj_template_args, serialization_type)
@@ -280,7 +281,7 @@ class WriterPython(Writer):
         global _factory
         pattern = _factory[self.serialize_format]
         line = '        if type == "{0}":\n            return {0}.{0}()\n'
-        line_import = 'import {0}\n'
+        line_import = 'from . import {0}\n'
         creates = ''
         imports = ''
         for cls in self.parser.classes:
@@ -293,7 +294,7 @@ class WriterPython(Writer):
         self.save_visitors = True
         pattern = _pattern_visitor
         line = '        elif ctx.__class__ == {0}:\n            self.visit_{1}(ctx)\n'
-        line_import = 'from {0} import {0}\n'
+        line_import = 'from .{0} import {0}\n'
         line_visit = '''\n    def visit_{0}(self, ctx):\n        pass\n'''
         base_visitors = {}
         for cls in self.parser.classes:
@@ -379,11 +380,12 @@ class WriterPython(Writer):
 regs = [
     [re.compile(r'DataStorage::shared\(\).get<(\w+)>'), r'DataStorage::shared().get\1'],
     [re.compile(r'for\s*\(\s*\w+[\s&\*]*(\w+)\s*:\s*(.+)\s*\)'), r'for \1 in \2:'],
-    [re.compile(r'for\s*\(\s*\w+\s*(\w+)=(\w+);\s*\w+<(\w+);\s*\+\+\w+\s*\)'), r'for \1 in xrange(\2, \3):'],
-    [re.compile(r'for\s*\(\s*\w+\s*(\w+)=(\w+);\s*\w+>(\w+);\s*--\w+\s*\)'), r'for \1 in xrange(\2, \3, -1):'],
-    [re.compile(r'for\s*\(\s*\w+\s*(\w+)=(\w+);\s*\w+<(\w+);\s*\w+\+=(\w)\s*\)'), r'for \1 in xrange(\2, \3, \4):'],
-    [re.compile(r'for\s*\(\s*\w+\s*(\w+)=(\w+);\s*\w+>(\w+);\s*\w+-=(\w)\s*\)'), r'for \1 in xrange(\2, \3, -\4):'],
-    [re.compile(r'for\s*\(auto&&\s*\[(\w+),\s*(\w+)\]\s*:\s*(.+)\)'), r'for \1, \2 in \3.iteritems():'],
+    [re.compile(r'for\s*\(\s*\w+\s*(\w+)=(\w+);\s*\w+<(\w+);\s*\+\+\w+\s*\)'), r'for \1 in range(\2, \3):'],
+    [re.compile(r'for\s*\(\s*\w+\s*(\w+)=(\w+);\s*\w+>(\w+);\s*--\w+\s*\)'), r'for \1 in range(\2, \3, -1):'],
+    [re.compile(r'for\s*\(\s*\w+\s*(\w+)=(\w+);\s*\w+<(\w+);\s*\w+\+=(\w)\s*\)'), r'for \1 in range(\2, \3, \4):'],
+    [re.compile(r'for\s*\(\s*\w+\s*(\w+)=(\w+);\s*\w+>(\w+);\s*\w+-=(\w)\s*\)'), r'for \1 in range(\2, \3, -\4):'],
+    [re.compile(r'for\s*\(auto&&\s*\[(\w+),\s*(\w+)\]\s*:\s*(.+)\)'),
+     r'for \1, \2 in \3.items():' if sys.version_info[0] == 3 else r'for \1, \2 in \3.iteritems():'],
     [re.compile(r'else\s+if\s*\(\s*(.+)\s*\)'), r'elif \1:'],
     [re.compile(r'if\s*\(\s*(.+)\s*\)'), r'if \1:'],
     [re.compile(r'if\s*!(.+):'), r'if not \1:'],
@@ -464,7 +466,7 @@ def convert_function_to_python(func, parser):
 
     def get_tabs(count):
         r = ''
-        for i in xrange(count):
+        for i in range(count):
             r += '    '
         return r
 
@@ -496,16 +498,16 @@ def convert_function_to_python(func, parser):
     func = func.replace('\n                    \n', '\n')
     func = func.replace('\n                        \n', '\n')
     if 'DataStorage' in func:
-        func = get_tabs(2) + 'from DataStorage import DataStorage\n' + func
+        func = get_tabs(2) + 'from .DataStorage import DataStorage\n' + func
     if re.search(r'\bFactory\b', func):
-        func = get_tabs(2) + 'from Factory import Factory\n' + func
+        func = get_tabs(2) + 'from .Factory import Factory\n' + func
     for cls in parser.classes:
         if cls.name not in regs_class_names:
             regs_class_names[cls.name] = re.compile(r'\b{}\b'.format(cls.name))
         pattern = regs_class_names[cls.name]
         need = re.search(pattern, func) is not None
         if need:
-            func = get_tabs(2) + 'from {0} import {0}\n'.format(cls.name) + func
+            func = get_tabs(2) + 'from .{0} import {0}\n'.format(cls.name) + func
     if 'math.' in func:
         func = get_tabs(2) + 'import math\n' + func
     if 'random.' in func:

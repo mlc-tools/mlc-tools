@@ -1,7 +1,7 @@
-from Class import Class
-from Object import Object
-from Function import Function
-from Object import AccessSpecifier
+from .Class import Class
+from .Object import Object
+from .Function import Function
+from .Object import AccessSpecifier
 
 
 def get_data_name(name):
@@ -86,7 +86,7 @@ class DataStorage(Class):
         function.name = 'initialize'
         function.return_type = 'void'
         function.is_const = True
-        function.args.append(['buffer', 'string'])
+        function.args.append(['buffer_', 'string'])
         self.add_initialize_function_operations(function)
         self.functions.append(function)
         self.create_getters(classes)
@@ -190,7 +190,7 @@ class DataStoragePython(DataStorage):
                 function.name = 'get' + class_.name
                 function.args.append(['name', ''])
                 function.operations.append('if not self._loaded and name not in self.{}:'.format(map_name))
-                function.operations.append('    from {0} import {0}'.format(class_.name))
+                function.operations.append('    from .{0} import {0}'.format(class_.name))
                 function.operations.append('    self.{}[name] = {}()'.format(map_name, class_.name))
                 function.operations.append('    self.{}[name].name = name'.format(map_name))
                 function.operations.append('return self.{}[name]'.format(map_name))
@@ -239,7 +239,7 @@ class DataStorageCppXml(DataStorageCpp):
 
     def add_initialize_function_operations(self, function):
         function.operations.append('pugi::xml_document doc;')
-        function.operations.append('doc.load(buffer.c_str());')
+        function.operations.append('doc.load(buffer_.c_str());')
         function.operations.append('const_cast<{}*>(this)->deserialize(doc.root().first_child());'.format(self.name))
         function.operations.append('const_cast<{}*>(this)->_loaded = doc.root() != nullptr;'.format(self.name))
 
@@ -252,7 +252,7 @@ class DataStorageCppJson(DataStorageCpp):
     def add_initialize_function_operations(self, function):
         function.operations.append('Json::Value json;')
         function.operations.append('Json::Reader reader;')
-        function.operations.append('reader.parse(buffer, json);')
+        function.operations.append('reader.parse(buffer_, json);')
         function.operations.append('const_cast<{}*>(this)->deserialize(json);'.format(self.name))
         function.operations.append('const_cast<{}*>(this)->_loaded = true;'.format(self.name))
 
@@ -264,7 +264,7 @@ class DataStoragePythonXml(DataStoragePython):
         DataStoragePython.__init__(self, *args)
 
     def add_initialize_function_operations(self, function):
-        function.operations.append('root = ET.fromstring(buffer)')
+        function.operations.append('root = ET.fromstring(buffer_)')
         function.operations.append('self.deserialize(root)')
         function.operations.append('self._loaded = True')
 
@@ -275,7 +275,7 @@ class DataStoragePythonXml(DataStoragePython):
             key = xml_child.get('key')
             xml_value = xml_child.find('value')
             if key not in self.{0}:
-                from {1} import {1}
+                from .{1} import {1}
                 self.{0}[key] = {1}()
             self.{0}[key].deserialize(xml_value)'''
 
@@ -291,7 +291,7 @@ class DataStoragePythonJson(DataStoragePython):
 
     def add_initialize_function_operations(self, function):
         function.operations.append('import json')
-        function.operations.append('js = json.loads(buffer)')
+        function.operations.append('js = json.loads(buffer_)')
         function.operations.append('self.deserialize(js)')
         function.operations.append('self._loaded = True')
 
@@ -302,7 +302,7 @@ class DataStoragePythonJson(DataStoragePython):
             key = json_child['key']
             value = json_child['value']
             if key not in self.{0}:
-                from {1} import {1}
+                from .{1} import {1}
                 self.{0}[key] = {1}()
             self.{0}[key].deserialize(value)'''
 
@@ -344,7 +344,7 @@ class DataStoragePhpXml(DataStoragePhp):
         self.functions.append(function)
 
     def add_initialize_function_operations(self, function):
-        function.operations.append('$root = simplexml_load_string(buffer);')
+        function.operations.append('$root = simplexml_load_string(buffer_);')
         function.operations.append('$this->deserialize(root);')
         function.operations.append('$this->_loaded = true;')
 
@@ -434,7 +434,7 @@ class DataStoragePhpJson(DataStoragePhp):
         self.functions.append(function)
 
     def add_initialize_function_operations(self, function):
-        function.operations.append('$json = json_decode(buffer);')
+        function.operations.append('$json = json_decode(buffer_);')
         function.operations.append('$this->deserialize(json);')
         function.operations.append('$this->_loaded = true;')
 

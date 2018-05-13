@@ -1,5 +1,5 @@
 import re
-from constants import Modifier
+from .constants import Modifier
 
 
 class AccessSpecifier:

@@ -1,5 +1,4 @@
-from Class import Class
-import fileutils
+from .Class import Class
 
 
 cpp = '''

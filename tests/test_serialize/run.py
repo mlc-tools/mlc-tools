@@ -1,7 +1,13 @@
 import os
 import shutil
-import subprocess
+import sys
+import inspect
 
+currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.abspath(currentdir + '/../../')
+sys.path.insert(0, parentdir)
+
+from mlc_tools import Generator
 
 root = os.path.dirname(os.path.abspath(__file__)) + '/..'
 
@@ -13,21 +19,9 @@ def execute(command):
 
 def generate(lang, protocol):
     global root
-
-    out_path_postfix = lang
-    command = '''python {0}/../mlc_tools/main.py
-        -i {0}/test_serialize
-        -o {0}/test_serialize/generated_{3}
-        -l {1}
-        -f {2}
-        -php_validate yes
-        -use_colors no
-        -side client
-        -disable_logs no
-        '''.format(root, lang, protocol, out_path_postfix)
-    command = command.replace('\n', '')
-    if 0 != execute(command):
-        exit(1)
+    test_dir = root + '/test_serialize/'
+    generator = Generator(configs_directory=test_dir, side='client', disable_logs='no', generate_tests='no')
+    generator.generate(lang, protocol, test_dir + 'generated_%s' % lang)
 
 
 def clean():
@@ -52,17 +46,18 @@ def run(protocol):
     generate('py', protocol)
     generate('php', protocol)
     generate('cpp', protocol)
+    python = 'python3' if sys.version_info[0] == 3 else 'python'
     command = '''
         cd {0}/test_serialize;
-        python step_0.py;
+        {2} step_0.py;
         php step_1.php;
         mkdir build_{1}; cd build_{1}; cmake ..; make -j8 install; cd ..; ./step_2;
-        python step_3.py;
-        '''.format(root, protocol)
+        {2} step_3.py;
+        '''.format(root, protocol, python)
     command = command.replace('\n', '')
     if 0 != execute(command):
         clean()
-        print 'Error'
+        print('Error')
         exit(1)
 
     clean()

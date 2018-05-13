@@ -1,10 +1,11 @@
-from Object import Object
-from Class import Class
-from Function import Function
-from protocols import protocols
-from Error import Error
-from ObserverCreater import ObserverPatterGenerator
-from TestClass import Test
+from .Object import Object
+from .Class import Class
+from .Function import Function
+from .protocols import protocols
+from .Error import Error
+from .ObserverCreater import ObserverPatterGenerator
+from .TestClass import Test
+import sys
 
 
 def _is_class(line):
@@ -340,12 +341,14 @@ class Parser:
         return text
 
     def parse_serialize_protocol(self, path):
-        buffer = open(self.configs_root + path).read()
-        self._parse_serialize_protocol(buffer)
+        buffer_ = open(self.configs_root + path).read()
+        self._parse_serialize_protocol(buffer_)
 
     def load_default_serialize_protocol(self, language, serialize_format):
-        buffer = protocols[language][serialize_format]
-        self._parse_serialize_protocol(buffer)
+        buffer_ = protocols[language][serialize_format]
+        if sys.version_info[0] == 3 and language == 'py':
+            buffer_ = buffer_.replace('iteritems', 'items')
+        self._parse_serialize_protocol(buffer_)
         pass
 
     def _parse_serialize_protocol(self, buffer):
@@ -369,7 +372,7 @@ class Parser:
         serialize_protocol = list()
         serialize_protocol.append({})
         serialize_protocol.append({})
-        for x in xrange(2):
+        for x in range(2):
             for type_ in supported_types:
                 simple = type_ in self.simple_types
                 p0 = self._load_protocol(lines, x, type_, True if simple else None, optional=type_ == 'list<enum>')
@@ -427,11 +430,11 @@ class Parser:
         pattern = pattern.replace('$(__begin____end__)', '{3}')
 
         if not pattern and not optional:
-            print 'cannot find pattern for args:'
-            print type, stypes[serialize_type], initial_value
-            print 'in_type', in_type
-            print 'in_serialize', in_serialize
-            print 'in_initial_value', in_initial_value
-            print def_
+            print('cannot find pattern for args:')
+            print(type, stypes[serialize_type], initial_value)
+            print('in_type', in_type)
+            print('in_serialize', in_serialize)
+            print('in_initial_value', in_initial_value)
+            print(def_)
             exit(-1)
         return pattern

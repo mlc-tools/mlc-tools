@@ -1,11 +1,11 @@
-from Writer import Writer
-from Function import Function
-from Class import Class
-from DataStorageCreators import DataStoragePhpXml
-from DataStorageCreators import DataStoragePhpJson
-from Error import Error
+from .Writer import Writer
+from .Function import Function
+from .Class import Class
+from .DataStorageCreators import DataStoragePhpXml
+from .DataStorageCreators import DataStoragePhpJson
+from .Error import Error
+from .Object import AccessSpecifier
 import re
-from Object import AccessSpecifier
 
 SERIALIZATION = 0
 DESERIALIZATION = 1
@@ -372,7 +372,7 @@ class WriterPhp(Writer):
 
         def get_tabs(count):
             out = ''
-            for i in xrange(count):
+            for i in range(count):
                 out += '\t'
             return out
 
@@ -386,9 +386,9 @@ class WriterPhp(Writer):
                 tabs += 1
             body.append(line)
         body = '\n'.join(body)
-        for i in xrange(10):
+        for i in range(10):
             tabs = '\n'
-            for k in xrange(i):
+            for k in range(i):
                 tabs += '\t'
             tabs += '{'
             body = body.replace(tabs, ' {')

@@ -1,6 +1,6 @@
 import re
-from constants import Modifier
-from Object import Object, AccessSpecifier
+from .constants import Modifier
+from .Object import Object, AccessSpecifier
 
 
 class Function:
@@ -111,7 +111,7 @@ class Function:
                         counters[div] = 0
                     counters[div] += 1 if ch == div[0] else -1
             if counter() < 0:
-                print 'error parsing function "{}" body'.format(self.name)
+                print('error parsing function "{}" body'.format(self.name))
                 exit(-1)
             operation += ch
             if counter() == 0 and ch in ';}':
