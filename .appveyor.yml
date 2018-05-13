@@ -28,8 +28,8 @@ install:
 
 build_script:
     # скрипт сборки проекта:
-    - python mlc_tools.main -i tests/simple_test/config -o tests/simple_test/generated_cpp/xml -f xml -l cpp -side server -data tests/simple_test/data_xml -data_out tests/simple_test/assets -generate_tests yes
-    - python mlc_tools.main -i tests/simple_test/config -o tests/simple_test/generated_cpp/json -f json -l cpp -side client -data tests/simple_test/data_json -data_out tests/simple_test/assets -generate_tests yes
+    - python -m mlc_tools.main -i tests/simple_test/config -o tests/simple_test/generated_cpp/xml -f xml -l cpp -side server -data tests/simple_test/data_xml -data_out tests/simple_test/assets -generate_tests yes
+    - python -m mlc_tools.main -i tests/simple_test/config -o tests/simple_test/generated_cpp/json -f json -l cpp -side client -data tests/simple_test/data_json -data_out tests/simple_test/assets -generate_tests yes
     - cd tests/simple_test
     - mkdir build
     - cd build
