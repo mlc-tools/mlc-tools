@@ -210,6 +210,8 @@ class Parser:
         cls.parse_body(Parser(self.side, False), body)
         if self.find_class(cls.name):
             Error.exit(Error.DUBLICATE_CLASS, cls.name)
+        for inner_cls in cls.inner_classes:
+            self.classes.append(inner_cls)
         self.classes.append(cls)
         return text
 
