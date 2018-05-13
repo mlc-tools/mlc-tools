@@ -483,13 +483,15 @@ regs = [
     [re.compile(r'make_intrusive<(\w+)>\(\s*\)'), r'new \1()'],
     [re.compile(r'new\s*(\w+)\s*\(\s*\)'), r'new \1()'],
     [re.compile(r'(.+?)\->push_back\((.+)\);'), r'array_push(\1, \2);'],
+    [re.compile(r'(".*?")\s*\+'), r'\1.'],
+    [re.compile(r'\+\s*(".*?")'), r'.\1'],
 ]
 
 
 def convert_function_to_php(func, parser, function_args):
     global regs
     variables = {
-        '\$(\w+)'
+        r'\$(\w+)'
     }
 
     regs2 = [

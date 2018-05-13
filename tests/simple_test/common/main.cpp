@@ -21,6 +21,7 @@
 #include "config.h"
 #include "AllTests.h"
 #include "tests/Logger.h"
+#include "tests/RunAllTests.h"
 
 extern intrusive_ptr<mg::CommandBase> createCommand(const std::string& payload);
 std::string root = "../../";
@@ -71,6 +72,11 @@ int main(int argc, char ** args)
 	result = test_side() && result;
 	result = test_all_types() && result;
 	result = mg::AllTests::run(&logger) && result;
+
+    mg::RunAllTests test;
+    test.initialize(&logger);
+    result = test.execute() && result;
+
 
 	std::cout << "Execute results = " << (result ? "Ok" : "Fail") << std::endl;
 	return result ? 0 : -1;
