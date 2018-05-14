@@ -481,10 +481,14 @@ regs = [
     [re.compile(r'([-0-9])->([-0-9])f\b'), r'\1.\2'],
     [re.compile(r'assert\(.+\);'), r''],
     [re.compile(r'make_intrusive<(\w+)>\(\s*\)'), r'new \1()'],
+    [re.compile(r'dynamic_pointer_cast_intrusive<\w+>\((.+?)\)'), r'\1'],
     [re.compile(r'new\s*(\w+)\s*\(\s*\)'), r'new \1()'],
     [re.compile(r'(.+?)\->push_back\((.+)\);'), r'array_push(\1, \2);'],
     [re.compile(r'(".*?")\s*\+'), r'\1.'],
     [re.compile(r'\+\s*(".*?")'), r'.\1'],
+    [re.compile(r'(\w+)\s+(\w+);'), r'$\2 = new \1();'],
+    [re.compile(r'\$(\w+) = new return\(\);'), r'return \1;'],
+    [re.compile(r'std::vector<\w+>\s+(\w+);'), r'$\1 = array();'],
 ]
 
 

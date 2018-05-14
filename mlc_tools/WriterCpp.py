@@ -30,7 +30,7 @@ def convert_return_type(parser, type_object):
     result = type_object
     if isinstance(type_object, str):
         if '*' in type_object and 'const ' not in type_object:
-            t = re.sub('\*', '', type_object)
+            t = re.sub(r'\*', '', type_object)
             if parser.find_class(t):
                 result = 'intrusive_ptr<{}>'.format(t)
     else:
@@ -449,10 +449,10 @@ class WriterCpp(Writer):
             for operation in function.operations:
                 convert_c17_toc14 = True
                 if convert_c17_toc14:
-                    reg = ['for\s*\\(auto&&\s*\\[(\w+),\s*(\w+)\\]\s*:\s*(.+)\\)\s*{',
-                           '''for (auto&& pair : \\3) \n{ \nauto& \\1 = pair.first; \nauto& \\2 = pair.second;
-                           (void)\\1; //don't generate 'Unused variable' warning
-                           (void)\\2; //don't generate 'Unused variable' warning''']
+                    reg = [re.compile(r'for\s*\(auto&&\s*\[(\w+),\s*(\w+)\]\s*:\s*(.+)\)\s*{'),
+                           r'''for (auto&& pair : \3) \n{ \nauto& \1 = pair.first; \nauto& \2 = pair.second;
+                           (void)\1; //don't generate 'Unused variable' warning
+                           (void)\2; //don't generate 'Unused variable' warning''']
 
                     operation2 = re.sub(reg[0], reg[1], operation)
                     if operation2 != operation:
