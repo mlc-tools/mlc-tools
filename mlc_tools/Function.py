@@ -14,7 +14,6 @@ class Function:
         self.is_external = False
         self.is_static = False
         self.is_abstract = False
-        self.is_template = False
         self.side = 'both'
         self.access = AccessSpecifier.public
 
@@ -100,9 +99,6 @@ class Function:
             for div in counters:
                 sum += counters[div]
             return sum
-
-        if self.name == 'compute_position':
-            self.name = self.name
 
         for ch in body:
             for div in dividers:
