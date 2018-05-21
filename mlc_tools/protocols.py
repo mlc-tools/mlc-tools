@@ -671,12 +671,14 @@ py_json = '''
 #int, bool, float, string
 #serialize:
 #with default value:
-if $(OWNER)$(FIELD) != $(DEFAULT_VALUE): dictionary["$(FIELD)"] = $(OWNER)$(FIELD)
+if $(OWNER)$(FIELD) != $(DEFAULT_VALUE):
+            dictionary["$(FIELD)"] = $(OWNER)$(FIELD)
 #without default value:
 dictionary["$(FIELD)"] = $(OWNER)$(FIELD)
 #deserialize
 #with default value:
-if "$(FIELD)" in dictionary: $(OWNER)$(FIELD) = dictionary["$(FIELD)"]
+if "$(FIELD)" in dictionary:
+            $(OWNER)$(FIELD) = dictionary["$(FIELD)"]
 #without default value:
 $(OWNER)$(FIELD) = dictionary["$(FIELD)"]
 
@@ -714,7 +716,8 @@ arr_$(FIELD) = []
             arr_$(FIELD).append(dict)
         dictionary['$(FIELD)'] = arr_$(FIELD)
 #deserialize
-arr_$(FIELD) = dictionary['$(FIELD)']
+from .$(TYPE) import $(TYPE)
+        arr_$(FIELD) = dictionary['$(FIELD)']
         for dict in arr_$(FIELD):
             obj = $(TYPE)()
             obj.deserialize(dict)

@@ -4,7 +4,10 @@ from mlc_tools.main import Generator
 def test_game_s():
     game_root = '/Work/survival/'
     generator = Generator(game_root + 'config', generate_tests='yes')
-    generator.generate('py', 'xml', game_root + 'tests/python/web', 'client')
+    generator.generate('py', 'json', game_root + 'tests/python/web', 'client')
+    generator.generate('cpp', 'json', game_root + 'tests/cpp/web', 'client')
+    generator.generate('cpp', 'json', game_root + 'client/generated/web', 'client')
+    generator.generate_data(game_root + '/config/data', game_root + '/tests/data')
 
 
 def test_game_m():
@@ -40,4 +43,4 @@ def profile():
     print get_profile_(test_game_m)
 
 # profile()
-test_game_m()
+test_game_s()
