@@ -4,6 +4,7 @@ from .DataParser import DataParser
 from .WriterCpp import WriterCpp
 from .WriterPython import WriterPython
 from .WriterPhp import WriterPhp
+from .WriterJava import WriterJava
 from .Copyright import Copyright
 from .Error import Log
 from .version import __version__
@@ -170,6 +171,9 @@ class Generator:
             self.writer = WriterPython(self.parser, self.serialize_format)
         elif self.language == 'php':
             self.writer = WriterPhp(self.parser, self.serialize_format)
+        elif self.language == 'java':
+            self.writer = WriterJava(self.parser, self.serialize_format)
+
         if not self.only_data:
             self.writer.generate()
         self.writer.save_generated_classes(self.out_directory)
@@ -224,7 +228,7 @@ class Generator:
                 exit(1)
 
     def validate_arg_language(self):
-        if self.language not in ['cpp', 'py', 'php']:
+        if self.language not in ['cpp', 'py', 'php', 'java']:
             Log.error('Unknown language (-l : %s)' % self.language)
             Log.error('Please use any from [cpp, py, php]')
             exit(-1)

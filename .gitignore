@@ -19,6 +19,12 @@ tests/test_serialize/data.cpp.xml
 tests/test_serialize/step_2
 tests/test_serialize/step_2.exe
 
+tests/java/bin
+tests/java/gen
+tests/java/.idea
+tests/java/out
+*.iml
+
 
 /.idea/
 /.sublime/

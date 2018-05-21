@@ -183,6 +183,11 @@ php = '''<?php
 ?>
 '''
 
+java = '''
+//TODO
+
+'''
+
 
 class ObserverPatterGenerator:
 
@@ -204,11 +209,13 @@ class ObserverPatterGenerator:
             'cpp': cpp,
             'py': python,
             'php': php,
+            'java': java,
         }
         files = {
             'cpp': ObserverPatterGenerator.get_observable_name() + '.h',
             'py': ObserverPatterGenerator.get_observable_name() + '.py',
             'php': ObserverPatterGenerator.get_observable_name() + '.php',
+            'java': ObserverPatterGenerator.get_observable_name() + '.java',
         }
         text = dictionary[language]
         filename = files[language]

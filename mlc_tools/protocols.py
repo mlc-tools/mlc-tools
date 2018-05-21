@@ -1,5 +1,7 @@
 from .protocols_php import php_xml
 from .protocols_php import php_json
+from .protocols_java import java_xml
+from .protocols_java import java_json
 
 cpp_xml = '''
 #int
@@ -811,3 +813,4 @@ protocols = {}
 protocols['cpp'] = {'xml': cpp_xml, 'json': cpp_json}
 protocols['py'] = {'xml': py_xml, 'json': py_json}
 protocols['php'] = {'xml': php_xml, 'json': php_json}
+protocols['java'] = {'xml': java_xml, 'json': java_json}
