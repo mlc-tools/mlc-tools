@@ -5,7 +5,7 @@ def test_game_s():
     game_root = '/Work/survival/'
     generator = Generator(game_root + 'config', generate_tests='yes')
     generator.generate('py', 'json', game_root + 'tests/python/web', 'client')
-    generator.generate('cpp', 'json', game_root + 'tests/cpp/web', 'client')
+    generator.generate('cpp', 'json', game_root + 'tests/cpp/web', 'client', generate_intrusive='yes')
     generator.generate('cpp', 'json', game_root + 'client/generated/web', 'client')
     generator.generate_data(game_root + '/config/data', game_root + '/tests/data')
 

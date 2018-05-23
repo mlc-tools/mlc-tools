@@ -30,7 +30,7 @@ void Acceptor::visit(mg::RequestBar* ctx)
 bool test0()
 {
     Acceptor acceptor;
-    make_intrusive<mg::Request>()->accept(&acceptor);
+    mg::make_intrusive<mg::Request>()->accept(&acceptor);
     auto result = true;
     result = result && acceptor.base;
     result = result && !acceptor.foo;
@@ -41,7 +41,7 @@ bool test0()
 bool test1()
 {
     Acceptor acceptor;
-    make_intrusive<mg::RequestFoo>()->accept(&acceptor);
+    mg::make_intrusive<mg::RequestFoo>()->accept(&acceptor);
     auto result = true;
     result = result && !acceptor.base;
     result = result && acceptor.foo;
@@ -52,7 +52,7 @@ bool test1()
 bool test2()
 {
     Acceptor acceptor;
-    make_intrusive<mg::RequestBar>()->accept(&acceptor);
+    mg::make_intrusive<mg::RequestBar>()->accept(&acceptor);
     auto result = true;
     result = result && !acceptor.base;
     result = result && !acceptor.foo;
@@ -63,7 +63,7 @@ bool test2()
 bool test3()
 {
     Acceptor acceptor;
-    intrusive_ptr<mg::Request> base = make_intrusive<mg::RequestFoo>();
+    mg::intrusive_ptr<mg::Request> base = mg::make_intrusive<mg::RequestFoo>();
     base->accept(&acceptor);
 
     auto result = true;
@@ -76,7 +76,7 @@ bool test3()
 bool test4()
 {
     Acceptor acceptor;
-    intrusive_ptr<mg::Request> base = make_intrusive<mg::RequestBar>();
+    mg::intrusive_ptr<mg::Request> base = mg::make_intrusive<mg::RequestBar>();
     base->accept(&acceptor);
 
     auto result = true;

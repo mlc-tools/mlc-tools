@@ -258,23 +258,23 @@ cpp_json = '''
 #with default value:
 if($(FIELD) != $(DEFAULT_VALUE))
 {
-    ::set(json,"$(FIELD)",$(FIELD));
+    mg::set(json,"$(FIELD)",$(FIELD));
 }
 #without default value:
-::set(json,"$(FIELD)",$(FIELD));
+mg::set(json,"$(FIELD)",$(FIELD));
 
 #deserialize:
 #with default value:
 if(json.isMember("$(FIELD)"))
 {
-    $(FIELD) = ::get<$(TYPE)>(json["$(FIELD)"]);
+    $(FIELD) = mg::get<$(TYPE)>(json["$(FIELD)"]);
 }
 else
 {
     $(FIELD) = $(DEFAULT_VALUE);
 }
 #without default value:
-$(FIELD) = ::get<$(TYPE)>(json["$(FIELD)"]);
+$(FIELD) = mg::get<$(TYPE)>(json["$(FIELD)"]);
 
 
 #serialized
@@ -312,7 +312,7 @@ auto& arr_$(FIELD) = json["$(FIELD)"];
 for(int i = 0; i < arr_$(FIELD).size(); ++i)
 {
     $(FIELD).emplace_back();
-    $(FIELD).back() = ::get<$(ARG_0)>(arr_$(FIELD)[i]);
+    $(FIELD).back() = mg::get<$(ARG_0)>(arr_$(FIELD)[i]);
 }
 
 #list<int>, list<float>, list<string>
@@ -321,14 +321,14 @@ auto& arr_$(FIELD) = json["$(FIELD)"];
 int i_$(FIELD)=0;
 for(const auto& t : $(FIELD))
 {
-    ::set(arr_$(FIELD)[i_$(FIELD)++], t);
+    mg::set(arr_$(FIELD)[i_$(FIELD)++], t);
 }
 #deserialize:
 auto& arr_$(FIELD) = json["$(FIELD)"];
 for(int i = 0; i < arr_$(FIELD).size(); ++i)
 {
     $(FIELD).emplace_back();
-    $(FIELD).back() = ::get<$(ARG_0)>(arr_$(FIELD)[i]);
+    $(FIELD).back() = mg::get<$(ARG_0)>(arr_$(FIELD)[i]);
 }
 
 
@@ -371,9 +371,9 @@ for(int i = 0; i < size_$(FIELD); ++i)
 
 #link
 #serialize:
-::set(json,"$(FIELD)",$(FIELD)->name);
+mg::set(json,"$(FIELD)",$(FIELD)->name);
 #deserialize:
-$(FIELD) = DataStorage::shared().get<$(TYPE)>(::get<std::string>(json["$(FIELD)"]));
+$(FIELD) = DataStorage::shared().get<$(TYPE)>(mg::get<std::string>(json["$(FIELD)"]));
 
 
 #list<link>
@@ -381,14 +381,13 @@ $(FIELD) = DataStorage::shared().get<$(TYPE)>(::get<std::string>(json["$(FIELD)"
 auto& arr_$(FIELD) = json["$(FIELD)"];
 for(auto& item : $(FIELD))
 {
-    auto index = arr_$(FIELD).size();
     arr_$(FIELD).append(item->name);
 }
 #deserialize:
 auto& arr_$(FIELD) = json["$(FIELD)"];
 for(auto item : arr_$(FIELD))
 {
-    auto name = ::get<std::string>(item);
+    auto name = mg::get<std::string>(item);
     auto data = DataStorage::shared().get<$(ARG_0)>(name);
     $(FIELD).push_back(data);
 }
@@ -421,9 +420,9 @@ for(unsigned int i = 0; i < size_$(FIELD); ++i)
 
 #enum
 #serialize:
-::set(json, "$(FIELD)", $(FIELD).str());
+mg::set(json, "$(FIELD)", $(FIELD).str());
 #deserialize:
-$(FIELD) = ::get<std::string>(json["$(FIELD)"]);
+$(FIELD) = mg::get<std::string>(json["$(FIELD)"]);
 
 #list<enum>
 #serialize:
@@ -431,13 +430,13 @@ auto& arr_$(FIELD) = json["$(FIELD)"];
 int i_$(FIELD)=0;
 for(const auto& t : $(FIELD))
 {
-    ::set(arr_$(FIELD)[i_$(FIELD)++], t.str());
+    mg::set(arr_$(FIELD)[i_$(FIELD)++], t.str());
 }
 #deserialize:
 auto& arr_$(FIELD) = json["$(FIELD)"];
 for(int i = 0; i < arr_$(FIELD).size(); ++i)
 {
-    $(FIELD).emplace_back(::get<std::string>(arr_$(FIELD)[i]));
+    $(FIELD).emplace_back(mg::get<std::string>(arr_$(FIELD)[i]));
 }
 '''
 

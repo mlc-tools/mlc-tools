@@ -8,7 +8,7 @@ from .Function import Function
 from .DataStorageCreators import DataStorageCppXml
 from .DataStorageCreators import DataStorageCppJson
 from .Error import Error
-from .cpp_functions import cpp_functions, hpp_functions
+from .cpp_extension import cpp_files
 from .Object import AccessSpecifier
 
 FLAG_HPP = 2
@@ -79,7 +79,7 @@ def convert_type(type_):
     return type_
 
 
-def get_include_file(parser, class_, filename):
+def get_include_file(parser, class_, filename, namespace):
     types = dict()
     types['list'] = '<vector>'
     types['vector'] = '<vector>'
@@ -93,12 +93,18 @@ def get_include_file(parser, class_, filename):
     types['std::vector<int>'] = '<vector>'
     types['std::vector<intrusive_ptr<CommandBase>>'] = '<vector>'
     types['std::istream'] = '<istream>'
-    types['intrusive_ptr'] = '"IntrusivePtr.h"'
+    types['intrusive_ptr'] = '"intrusive_ptr.h"'
     if filename in types:
         return types[filename]
     if 'std::map' in filename:
         return '<map>'
-    if filename in ['DataStorage', 'mg_extensions']:
+    root_classes = ['DataStorage', 'Observable']
+    for pair in cpp_files:
+        file = pair[0].replace('@{namespace}', namespace)
+        file = file.replace('.h', '')
+        file = file.replace('.cpp', '')
+        root_classes.append(file)
+    if filename in root_classes:
         back = ''
         backs = len(class_.group.split('/')) if class_.group else 0
         for i in range(backs):
@@ -366,8 +372,7 @@ class WriterCpp(Writer):
 
         self._current_class = None
         if class_.type == 'class':
-            pattern = '''#include "{0}.h"
-                         #include "Generics.h"{4}
+            pattern = '''#include "{0}.h"{4}
 
                          namespace {3}
                          __begin__{5}{6}
@@ -375,8 +380,7 @@ class WriterCpp(Writer):
                          {7}
                          {1}__end__'''
         else:
-            pattern = '''#include "{0}.h"
-                         #include "Generics.h"{4}
+            pattern = '''#include "{0}.h"{4}
 
                          namespace {3}
                          __begin__
@@ -829,7 +833,7 @@ class WriterCpp(Writer):
             if t == self._current_class.name:
                 continue
             if need_include(t):
-                out += pattern.format(get_include_file(self.parser, self._current_class, t))
+                out += pattern.format(get_include_file(self.parser, self._current_class, t, self.get_namespace()))
 
             # else:
             #     continue
@@ -839,10 +843,10 @@ class WriterCpp(Writer):
             #     forward_declarations += str
 
         if flags == FLAG_HPP:
-            out += '\n#include "IntrusivePtr.h"'
+            out += pattern.format(get_include_file(self.parser, self._current_class, 'intrusive_ptr', self.get_namespace()))
         if flags == FLAG_CPP:
-            out += '\n#include "Factory.h"'
-            out += pattern.format(get_include_file(self.parser, self._current_class, self.get_namespace() + '_extensions'))
+            out += pattern.format(get_include_file(self.parser, self._current_class, 'Factory', self.get_namespace()))
+            out += pattern.format(get_include_file(self.parser, self._current_class, self.get_namespace() + '_extensions', self.get_namespace()))
             out += '\n#include <algorithm>'
 
         out = out.split('\n')
@@ -865,14 +869,14 @@ class WriterCpp(Writer):
                     includes += '\n#include "Exception.h"'
                 if 'DataStorage::shared()' in operation:
                     includes += '\n#include {}'.\
-                        format(get_include_file(self.parser, self._current_class, 'DataStorage'))
+                        format(get_include_file(self.parser, self._current_class, 'DataStorage', self.get_namespace()))
                 for type_ in self.parser.classes:
                     if type_.name in operation:
                         a = '"{}.h"'.format(type_.name)
                         b = '"{}.h"'.format(type_.name)
                         if a not in includes and b not in includes:
                             includes += '\n#include {0}'.\
-                                format(get_include_file(self.parser, self._current_class, type_.name))
+                                format(get_include_file(self.parser, self._current_class, type_.name, self.get_namespace()))
         return includes
 
     def prepare_file(self, body):
@@ -936,13 +940,14 @@ class WriterCpp(Writer):
         configs.append('\n#define {0}_SERIALIZE_FORMAT {0}_{1}'.format(self.get_namespace().upper(), self.serialize_format.upper()))
         filename_config = 'config.h' if self.get_namespace() == 'mg' else '{}_config.h'.format(self.get_namespace())
         self.save_file(filename_config, pattern.format(self.get_namespace(), '\n'.join(configs)))
-        hpp = hpp_functions
-        cpp = cpp_functions
-        hpp = hpp.replace('@{namespace}', self.get_namespace())
-        cpp = cpp.replace('@{namespace}', self.get_namespace())
-        cpp = cpp.replace('@{header_file}', "{}_extensions.h".format(self.get_namespace()))
-        self.save_file("{}_extensions.h".format(self.get_namespace()), hpp)
-        self.save_file("{}_extensions.cpp".format(self.get_namespace()), cpp)
+
+        for pair in cpp_files:
+            filename = pair[0]
+            content = pair[1]
+            content = content.replace('@{namespace}', self.get_namespace())
+            filename = filename.replace('@{namespace}', self.get_namespace())
+            if not filename.startswith('intrusive_ptr') or self.parser.generate_intrusive:
+                self.save_file(filename, content)
 
     def convert_to_enum(self, cls):
         shift = 0

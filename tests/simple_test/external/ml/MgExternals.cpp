@@ -12,23 +12,22 @@
 #include "core/CommandBase.h"
 #include "Factory.h"
 #include <sstream>
-#include "ml/Generics.h"
 #include "config.h"
 
 
 
 #if MG_SERIALIZE_FORMAT == MG_XML
 
-intrusive_ptr<mg::CommandBase> createCommand(const pugi::xml_node& xml)
+mg::intrusive_ptr<mg::CommandBase> createCommand(const pugi::xml_node& xml)
 {
 	auto type = xml.name();
-	auto command = Factory::shared().build<mg::CommandBase>(type);
+	auto command = mg::Factory::shared().build<mg::CommandBase>(type);
 	if (command != nullptr)
 		command->deserialize(xml);
 	return command;
 }
 
-intrusive_ptr<mg::CommandBase> createCommand(const std::string& payload)
+mg::intrusive_ptr<mg::CommandBase> createCommand(const std::string& payload)
 {
 	pugi::xml_document doc;
 	doc.load(payload.c_str());
@@ -58,16 +57,16 @@ void deserialize(mg::SerializedObject* object, const std::string& payload)
 
 #elif MG_SERIALIZE_FORMAT == MG_JSON
 
-intrusive_ptr<mg::CommandBase> createCommand(const Json::Value& json)
+mg::intrusive_ptr<mg::CommandBase> createCommand(const Json::Value& json)
 {
 	auto type = json.getMemberNames()[0];
-	auto command = Factory::shared().build<mg::CommandBase>(type);
+	auto command = mg::Factory::shared().build<mg::CommandBase>(type);
 	if (command != nullptr)
 		command->deserialize(json[type]);
 	return command;
 }
 
-intrusive_ptr<mg::CommandBase> createCommand(const std::string& payload)
+mg::intrusive_ptr<mg::CommandBase> createCommand(const std::string& payload)
 {
 	Json::Value json;
 	Json::Reader reader;

@@ -2,8 +2,8 @@
 #include "AllTypes.h"
 #include <stdlib.h>
 #include <iostream>
-#include "ml/Generics.h"
 #include <cmath>
+#include "mg_extensions.h"
 
 extern std::string getSerializedString(const mg::SerializedObject* object);
 extern void deserialize(mg::SerializedObject* object, const std::string& payload);
@@ -48,17 +48,17 @@ bool test_all_types()
 	for (int i = 0; i < 2; ++i)
 		objA.bool_string_map[static_cast<bool>(i)] = rand_str();
 	for (int i = 0; i < count; ++i)
-		objA.string_string_map[toStr(i)] = rand_str();
+		objA.string_string_map[mg::toStr(i)] = rand_str();
 	for (int i = 0; i < count; ++i)
-		objA.string_int_map[toStr(i)] = i;
+		objA.string_int_map[mg::toStr(i)] = i;
 	for (int i = 0; i < count; ++i)
-		objA.string_float_map[toStr(i)] = static_cast<float>(i);
+		objA.string_float_map[mg::toStr(i)] = static_cast<float>(i);
 	for (int i = 0; i < 2; ++i)
-		objA.string_bool_map[toStr(i)] = static_cast<bool>(i);
+		objA.string_bool_map[mg::toStr(i)] = static_cast<bool>(i);
 
 	objA.object.value = rand();
 	
-	objA.object_ptr = make_intrusive<mg::AllTypesChildren>();
+	objA.object_ptr = mg::make_intrusive<mg::AllTypesChildren>();
 	objA.object_ptr->value = rand();
 	
 	for (int i = 0; i < count; ++i)
@@ -69,7 +69,7 @@ bool test_all_types()
 	}
 	for (int i = 0; i < count; ++i)
 	{
-		auto object_ptr = make_intrusive<mg::AllTypesChildren>();
+		auto object_ptr = mg::make_intrusive<mg::AllTypesChildren>();
 		object_ptr->value = rand();
 		objA.object_ptr_list.push_back(object_ptr);
 	}
@@ -77,13 +77,13 @@ bool test_all_types()
 	{
 		mg::AllTypesChildren object;
 		object.value = rand();
-		objA.object_map[toStr(i)] = object;
+		objA.object_map[mg::toStr(i)] = object;
 	}
 	for (int i = 0; i < count; ++i)
 	{
-		auto object_ptr = make_intrusive<mg::AllTypesChildren>();
+		auto object_ptr = mg::make_intrusive<mg::AllTypesChildren>();
 		object_ptr->value = rand();
-		objA.object_ptr_map[toStr(i)] = object_ptr;
+		objA.object_ptr_map[mg::toStr(i)] = object_ptr;
 	}
 
     auto str = getSerializedString(&objA);

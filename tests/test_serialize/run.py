@@ -20,7 +20,7 @@ def execute(command):
 def generate(lang, protocol):
     global root
     test_dir = root + '/test_serialize/'
-    generator = Generator(configs_directory=test_dir, side='client', disable_logs='no', generate_tests='no')
+    generator = Generator(configs_directory=test_dir, side='client', disable_logs='no', generate_tests='no', generate_intrusive='yes')
     generator.generate(lang, protocol, test_dir + 'generated_%s' % lang)
 
 

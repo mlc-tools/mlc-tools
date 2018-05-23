@@ -10,7 +10,6 @@
 /******************************************************************************/
 #include "core/CommandBase.h"
 #include "TestEnum.h"
-#include "IntrusivePtr.h"
 #include "tests/Visitor.h"
 #include "tests/Side.h"
 #include "tests/enum.h"
@@ -23,7 +22,7 @@
 #include "tests/Logger.h"
 #include "tests/RunAllTests.h"
 
-extern intrusive_ptr<mg::CommandBase> createCommand(const std::string& payload);
+extern mg::intrusive_ptr<mg::CommandBase> createCommand(const std::string& payload);
 std::string root = "../../";
 void initialize_data_storage()
 {
@@ -88,7 +87,7 @@ bool test_serialization()
 	int test_user_id = 123;
 	int test_time = 1231235245;
 
-	auto command = make_intrusive<mg::CommandBase>();
+	auto command = mg::make_intrusive<mg::CommandBase>();
 	command->user_id = test_user_id;
 	command->current_time = test_time;
 	auto buffer = command->getSerializedString();

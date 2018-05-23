@@ -39,6 +39,7 @@ class Generator:
         self.test_script = get('test_script')
         self.test_script_args = get('test_script_args')
         self.generate_tests = get_bool('generate_tests', 'no')
+        self.generate_intrusive = get_bool('generate_intrusive', 'no')
 
     @staticmethod
     def check_version(requere):
@@ -87,7 +88,7 @@ class Generator:
                             required=False, default='')
         parser.add_argument('-disable_logs', type=str, help='Disabling logs to output',
                             required=False, default='no')
-        parser.add_argument('-generate_tests', type=str, help='Generate classes marked as :test',
+        parser.add_argument('-generate_intrusive', type=str, help='Generate intrusive_ptr class',
                             required=False, default='no')
         args = parser.parse_args()
 
@@ -105,11 +106,12 @@ class Generator:
         self.test_script = args.test_script
         self.test_script_args = args.test_script_args
         self.generate_tests = args.generate_tests
+        self.generate_intrusive = args.generate_intrusive
         Log.use_colors = args.use_colors.lower() == 'yes'
         Log.disable_logs = args.disable_logs.lower() == 'yes'
 
     def _parse(self):
-        self.parser = Parser(self.side, self.generate_tests)
+        self.parser = Parser(self.side, self.generate_tests, self.generate_intrusive)
         self.parser.set_configs_directory(self.configs_directory)
         self.parser.generate_patterns()
         files = fileutils.get_files_list(self.configs_directory)
@@ -131,7 +133,8 @@ class Generator:
                  validate_php=False,
                  path_to_protocols=None,
                  only_data=None,
-                 gen_data_storage=True
+                 gen_data_storage=True,
+                 generate_intrusive=None
                  ):
         if path_to_protocols is not None:
             self.path_to_protocols = path_to_protocols
@@ -149,6 +152,8 @@ class Generator:
             self.side = side
         if validate_php is not None:
             self.validate_php = validate_php
+        if generate_intrusive is not None:
+            self.generate_intrusive = generate_intrusive
         self.configs_directory = fileutils.normalize_path(self.configs_directory)
         self.out_directory = fileutils.normalize_path(self.out_directory)
 
