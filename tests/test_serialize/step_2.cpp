@@ -13,7 +13,7 @@ int main()
 	doc.load_file("data.php.xml");
 	auto root = doc.root().first_child();
 
-	auto data = make_intrusive<mg::TestData>();
+	auto data = mg::make_intrusive<mg::TestData>();
 	data->deserialize(root);
 
 	pugi::xml_document doc2;
@@ -29,7 +29,7 @@ int main()
 					   (std::istreambuf_iterator<char>()));
 	reader.parse(buffer, json);
 
-	auto data = make_intrusive<mg::TestData>();
+	auto data = mg::make_intrusive<mg::TestData>();
 	data->deserialize(json);
 
 	Json::Value json2;
