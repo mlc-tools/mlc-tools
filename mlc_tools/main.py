@@ -88,6 +88,8 @@ class Generator:
                             required=False, default='')
         parser.add_argument('-disable_logs', type=str, help='Disabling logs to output',
                             required=False, default='no')
+        parser.add_argument('-generate_tests', type=str, help='Generate test classes',
+                            required=False, default='no')
         parser.add_argument('-generate_intrusive', type=str, help='Generate intrusive_ptr class',
                             required=False, default='no')
         args = parser.parse_args()
