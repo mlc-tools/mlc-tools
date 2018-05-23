@@ -640,6 +640,12 @@ namespace @{namespace}
         }
     #endif
 
+        template <class TType>
+        static intrusive_ptr<TType> create_command(const std::string& payload)
+        {
+            return dynamic_pointer_cast_intrusive<TType>(create_command(payload));
+        }
+
     private:
         std::map<std::string, intrusive_ptr<IObject>> _builders;
     };
