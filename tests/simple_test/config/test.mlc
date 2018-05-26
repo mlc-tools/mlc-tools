@@ -180,6 +180,7 @@ class FunctionTest<SerializedObject>
         result = FunctionTest::test_if_(logger) && result;
         result = FunctionTest::std_functions(logger) && result;
         result = FunctionTest::test_1(logger) && result;
+        result = FunctionTest::test_while(logger) && result;
         return result;
     }
 
@@ -239,6 +240,22 @@ class FunctionTest<SerializedObject>
         result = result && index == count;
         logger->push(result, "FOR(int i=0; i<count*2; i+=2)");
 
+        return result;
+    }
+
+    function bool test_while(Logger* logger):static
+    {
+        auto result = true;
+        std::vector<int> test_vector;
+
+        int index = 0;
+        while(index < 10)
+        {
+            list_push(test_vector, index);
+            index++;
+        }
+        result = list_size(test_vector) == 10;
+        logger->push(result, "while index < 10");
         return result;
     }
 
