@@ -30,6 +30,8 @@ class Class(Object):
         line = line.strip()
         if self.type in line:
             line = line[len(self.type):]
+        elif 'interface' in line:
+            line = line[len('interface'):]
         line = self.find_modifiers(line)
         type_ = self.type
         self.type = ''

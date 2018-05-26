@@ -1,4 +1,4 @@
-class model/ModelBase<SerializedObject>:abstract
+interface model/ModelBase<SerializedObject>
 {
 }
 

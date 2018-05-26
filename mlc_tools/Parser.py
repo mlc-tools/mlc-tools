@@ -12,6 +12,10 @@ def _is_class(line):
     return line.strip().find('class') == 0
 
 
+def _is_interface(line):
+    return line.strip().find('interface') == 0
+
+
 def _is_functon(line):
     return line.strip().find('function') == 0
 
@@ -93,7 +97,9 @@ class Parser:
         while len(text) > 0:
             text = text.strip()
             if _is_class(text):
-                text = self._create_class(text)
+                text = self._create_class(text, False)
+            elif _is_interface(text):
+                text = self._create_class(text, True)
             elif _is_enum(text):
                 text = self._create_enum_class(text)
             elif _is_functon(text):
@@ -196,10 +202,12 @@ class Parser:
                 self._convert_template_args(args[-1])
         member.template_args = args
 
-    def _create_class(self, text):
+    def _create_class(self, text, is_abstract):
         body, header, text = find_body(text)
         cls = Class()
         cls.parse(header)
+        if is_abstract:
+            cls.is_abstract = True
 
         if not self.is_side(cls.side):
             if cls.is_storage:
