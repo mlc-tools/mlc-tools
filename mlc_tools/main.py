@@ -20,7 +20,12 @@ class Generator:
             return kwargs[arg] if arg in kwargs else default
 
         def get_bool(arg, default='yes'):
-            return get(arg) == 'yes'
+            value = get(arg)
+            if not value:
+                return False
+            if isinstance(value, str):
+                return get(arg) == 'yes'
+            return bool(value)
 
         Log.use_colors = get_bool('use_colors', 'no')
         Log.disable_logs = get_bool('disable_logs', 'no')

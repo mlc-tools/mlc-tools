@@ -16,7 +16,7 @@ def get_root():
 
 def simple_test():
     simple_test = get_root() + '/tests/simple_test/'
-    generator = Generator(configs_directory=simple_test + 'config', side='client', disable_logs='no', generate_tests='yes', generate_intrusive='yes')
+    generator = Generator(configs_directory=simple_test + 'config', side='client', disable_logs=False, generate_tests=True, generate_intrusive=True)
 
     def run(lang, format):
         generator.generate(lang, format, simple_test + 'generated_%s' % (lang if lang != 'cpp' else lang + '/' + format))
