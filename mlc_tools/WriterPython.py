@@ -403,7 +403,7 @@ regs = [
     [re.compile(r'(\w+)\s+(\w+);'), r'\2 = \1()'],
     [re.compile(r'(\w+) = return\(\)'), r'return \1'],
     # False = return()
-    [re.compile(r'std::vector<\w+>\s+(\w+);'), r'\1 = list()'],
+    [re.compile(r'std::vector<.+>\s+(\w+)'), r'\1 = list()'],
     [re.compile(r'auto (\w+)'), r'\1'],
     [re.compile(r'string (\w+)'), r'\1'],
     [re.compile(r'int (\w+)'), r'\1'],
@@ -424,7 +424,7 @@ regs = [
     [re.compile(r';'), r''],
     [re.compile(r'([*+-/\s])log\((.+?)\)'), r'\1math.log(\2)'],
     [re.compile(r'random_float\(\)'), 'random.random()'],
-    [re.compile(r'random_int\(([\w\.\->]+)?,(\s*[\w\.\->]+)?\)'), r'random.randint(\1, \2-1)'],
+    [re.compile(r'random_int\((.+)?,\s*(.+)?\)'), r'random.randint(\1, \2 - 1)'],
     [re.compile(r'\bthis\b'), r'self'],
     [re.compile(r', std::placeholders::_\d'), r''],
     [re.compile(r'dynamic_pointer_cast_intrusive<\w+>\((.+?)\)'), r'\1'],
