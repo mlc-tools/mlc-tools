@@ -1,12 +1,11 @@
 from setuptools import setup, find_packages
-from os.path import join, dirname
 import mlc_tools.version
 
 setup(
     name='mlc-tools',
     version=mlc_tools.__version__,
     packages=find_packages(),
-    long_description=open(join(dirname(__file__), 'README.rst')).read(),
+    long_description="mlc-tools",
     install_requires=[
     ]
     # entry_points={
