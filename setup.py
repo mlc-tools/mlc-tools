@@ -6,8 +6,7 @@ setup(
     name='mlc-tools',
     version=mlc_tools.__version__,
     packages=find_packages(),
-    long_description=open(join(dirname(__file__), 'README.md')).read(),
-    long_description_content_type='text/markdown',
+    long_description=open(join(dirname(__file__), 'README.rst')).read(),
     install_requires=[
     ]
     # entry_points={
@@ -16,6 +15,3 @@ setup(
     # },
     # test_suite='tests'
 )
-
-
-# find_packages(package_dir)

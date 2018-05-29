@@ -179,7 +179,14 @@ class @{name}:
 '''
 
 php = '''<?php
-//TODO
+class Observable{
+    public function add($object, $functor){
+    }
+    public function remove($object){
+    }
+    public function notify(...$args){
+    }
+}
 ?>
 '''
 

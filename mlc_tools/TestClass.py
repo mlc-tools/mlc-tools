@@ -28,7 +28,7 @@ class Test:
         test.behaviors.append('TestCase')
         generated_functions = []
         for func in cls.functions:
-            ignored = ['visit']
+            ignored = ['visit', 'accept']
             if func.name not in ignored and func.access == AccessSpecifier.public:
                 self.add_function(test, 'test_' + func.name)
                 generated_functions.append('test_' + func.name)

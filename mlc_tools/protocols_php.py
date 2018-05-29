@@ -276,6 +276,7 @@ foreach($json->$(FIELD) as $item)
 $json->$(FIELD) = array();
 foreach($(OWNER)$(FIELD) as $t)
 {
+    $type       = $t->get_type();
     $obj        = json_decode("{}");
     $obj->$type = json_decode("{}");
     $t->serialize($obj->$type);
@@ -350,6 +351,8 @@ $json = $json_cache;
 #serialize:
 $json->$(FIELD) = $(OWNER)$(FIELD);
 #deserialize:
-$(OWNER)$(FIELD) = (string)($json->$(FIELD));
-
+if(isset($json->$(FIELD)))
+{
+    $(OWNER)$(FIELD) = (string)($json->$(FIELD));
+}
 '''

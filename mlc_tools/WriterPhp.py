@@ -16,6 +16,9 @@ def convertInitializeValue(value):
         value = '$' + value
     if value is None:
         value = 'null'
+    if isinstance(value, str):
+        pattern = re.compile(r'(\w+)::(\w+)')
+        value = re.sub(pattern, r'\1::$\2', value)
     return value
 
 
@@ -141,6 +144,11 @@ class WriterPhp(Writer):
                 if self.parser.find_class(object.type):
                     value = 'null'
                     out_init = '$this->{} = new {}();'.format(object.name, object.type)
+        else:
+            cls = self.parser.find_class(object.type)
+            if cls and cls.type == 'enum':
+                value = None
+                out_init = '$this->{} = {};'.format(object.name, convertInitializeValue(object.initial_value))
 
         accesses = {
             AccessSpecifier.public: 'public',
