@@ -217,9 +217,11 @@ $(OWNER)$(FIELD) = $json->$(FIELD);
 $json->$(FIELD) = json_decode("{}");
 $(OWNER)$(FIELD)->serialize($json->$(FIELD));
 #deserialize:
-$(OWNER)$(FIELD) = new $(TYPE);
-$(OWNER)$(FIELD)->deserialize($json->$(FIELD));
-
+if(isset($json->$(FIELD)))
+{
+    $(OWNER)$(FIELD) = new $(TYPE);
+    $(OWNER)$(FIELD)->deserialize($json->$(FIELD));
+}
 #pointer
 #serialize
 if($(OWNER)$(FIELD))

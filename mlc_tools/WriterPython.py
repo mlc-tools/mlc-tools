@@ -380,10 +380,10 @@ class WriterPython(Writer):
 regs = [
     [re.compile(r'DataStorage::shared\(\).get<(\w+)>'), r'DataStorage::shared().get\1'],
     [re.compile(r'for\s*\(\s*\w+[\s&\*]*(\w+)\s*:\s*(.+)\s*\)'), r'for \1 in \2:'],
-    [re.compile(r'for\s*\(\s*\w+\s*(\w+)=(\w+);\s*\w+<(\w+);\s*\+\+\w+\s*\)'), r'for \1 in range(\2, \3):'],
-    [re.compile(r'for\s*\(\s*\w+\s*(\w+)=(\w+);\s*\w+>(\w+);\s*--\w+\s*\)'), r'for \1 in range(\2, \3, -1):'],
-    [re.compile(r'for\s*\(\s*\w+\s*(\w+)=(\w+);\s*\w+<(\w+);\s*\w+\+=(\w)\s*\)'), r'for \1 in range(\2, \3, \4):'],
-    [re.compile(r'for\s*\(\s*\w+\s*(\w+)=(\w+);\s*\w+>(\w+);\s*\w+-=(\w)\s*\)'), r'for \1 in range(\2, \3, -\4):'],
+    [re.compile(r'for\s*\(\s*\w+\s*(\w+)=(\w+);\s*\w+<(\w+);\s*\+\+\w+\s*\)'), r'for \1 in range(\2, int(\3)):'],
+    [re.compile(r'for\s*\(\s*\w+\s*(\w+)=(\w+);\s*\w+>(\w+);\s*--\w+\s*\)'), r'for \1 in range(\2, int(\3), -1):'],
+    [re.compile(r'for\s*\(\s*\w+\s*(\w+)=(\w+);\s*\w+<(\w+);\s*\w+\+=(\w)\s*\)'), r'for \1 in range(\2, int(\3), \4):'],
+    [re.compile(r'for\s*\(\s*\w+\s*(\w+)=(\w+);\s*\w+>(\w+);\s*\w+-=(\w)\s*\)'), r'for \1 in range(\2, int(\3), -\4):'],
     [re.compile(r'for\s*\(auto&&\s*\[(\w+),\s*(\w+)\]\s*:\s*(.+)\)'),
      r'for \1, \2 in \3.items():' if sys.version_info[0] == 3 else r'for \1, \2 in \3.iteritems():'],
     [re.compile(r'\bwhile\s*\((.+)\)'), r'while(\1):'],
@@ -404,7 +404,7 @@ regs = [
     [re.compile(r'(\w+) = return\(\)'), r'return \1'],
     # False = return()
     [re.compile(r'std::vector<.+>\s+(\w+)'), r'\1 = list()'],
-    [re.compile(r'auto (\w+)'), r'\1'],
+    [re.compile(r'auto\&* (\w+)'), r'\1'],
     [re.compile(r'string (\w+)'), r'\1'],
     [re.compile(r'int (\w+)'), r'\1'],
     [re.compile(r'float (\w+)'), r'\1'],

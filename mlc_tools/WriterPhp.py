@@ -321,7 +321,7 @@ class WriterPhp(Writer):
             $type = $command->get_type();
             $json = json_decode('{"'.$type.'": {}}');
             $command->serialize($json->$type);
-            return json_encode($json);
+            return json_encode($json, JSON_PRETTY_PRINT);
         }'''
 
         factory = pattern.format(factory_methods[self.serialize_format])
@@ -451,8 +451,8 @@ class WriterPhp(Writer):
 regs = [
     [re.compile(r'DataStorage::shared\(\).get<(\w+)>'), r'DataStorage::shared()->get\1'],
     [re.compile(r'\.str\(\)'), r''],
-    [re.compile(r'for\s*\(auto (.+?)\s*:\s*(.+?)\s*\)'), r'foreach($\2 as $\1)'],
-    [re.compile(r'for\s*\(auto& (.+?)\s*:\s*(.+?)\s*\)'), r'foreach($\2 as $\1)'],
+    [re.compile(r'for\s*\(auto (.+?)\s*:\s*(.+)\s*\)'), r'foreach($\2 as $\1)'],
+    [re.compile(r'for\s*\(auto& (.+?)\s*:\s*(.+)\s*\)'), r'foreach($\2 as $\1)'],
     [re.compile(r'for\s*\(auto&&\s*\[(\w+),\s*(\w+)\]\s*:\s*(.+)\)'), r'foreach ($\3 as $\1 => $\2)'],
     [re.compile(r'auto (\w+)'), r'$\1'],
     [re.compile(r'auto& (\w+)'), r'$\1'],
@@ -470,13 +470,14 @@ regs = [
     [re.compile(r'const (\w+)\& (\w+)'), r'$\2'],
     [re.compile(r'float (\w+)'), r'$\1'],
     [re.compile(r'std::string (\w+)'), r'$\1'],
-    [re.compile(r'this->'), r'$this->'],
+    [re.compile(r'\bthis\b'), r'$this'],
     [re.compile(r':const'), r''],
     [re.compile(r'(\w+)::(\w+)'), r'\1::$\2'],
     [re.compile(r'(\w+)::(\w+)\)'), r'\1::$\2)'],
     [re.compile(r'(\w+)::(\w+)\.'), r'\1::$\2.'],
     [re.compile(r'(\w+)::(\w+)->'), r'\1::$\2->'],
     [re.compile(r'(\w+)::(\w+)\]'), r'\1::$\2]'],
+    [re.compile(r'(\w+)::\$(\w+)\('), r'\1::\2('],
     [re.compile(r'(\w+)::\$(\w+)\((\w*)\)'), r'\1::\2(\3)'],
     [re.compile(r'function \$(\w+)'), r'function \1'],
     [re.compile(r'\.at\((.*?)\)'), r'[\1]'],
@@ -485,7 +486,7 @@ regs = [
     [re.compile(r'(\w+)\]\.'), r'\1]->'],
     [re.compile(r'&(\w+)'), r'\1'],
     [re.compile(r'\$if\('), r'if('],
-    [re.compile(r'delete (\w+);'), r''],
+    [re.compile(r'delete \$(\w+);'), r''],
     [re.compile(r'([-0-9])->([-0-9])f\b'), r'\1.\2'],
     [re.compile(r'assert\(.+\);'), r''],
     [re.compile(r'make_intrusive<(\w+)>\(\s*\)'), r'new \1()'],
@@ -497,6 +498,7 @@ regs = [
     [re.compile(r'(\w+)\s+(\w+);'), r'$\2 = new \1();'],
     [re.compile(r'\$(\w+) = new return\(\);'), r'return \1;'],
     [re.compile(r'std::\$vector<.+?>\s+(\w+);'), r'$\1 = array();'],
+
 ]
 
 
@@ -511,6 +513,12 @@ def convert_function_to_php(func, parser, function_args):
         [re.compile(r'([-0-9]*)->([-0-9]*)f\b'), r'\1.\2'],
         [re.compile(r'([-0-9]*)->f\\b'), r'\1.0'],
         [re.compile(r'\$return\s'), r'return'],
+        [re.compile(r'(\$.+)->add\((\$.+),\s*(\w+)::\$(\w+),\s*std::\$placeholders::\$_\d\);'), r'\1->add(\2, array(\2, "\4"));'],
+        [re.compile(r'list_remove\((\$.+?),\s*(\$.+?)\);'), r'unset(\1[array_search(\2, \1)]);'],
+        [re.compile(r'list_clear\((.+?)\);'), r'\1 = array();'],
+        [re.compile(r'string_empty\((.+?)\)'), r'(count(\1) == 0)'],
+        [re.compile(r'random_float\(\)'), r'(mt_rand() * 1.0 / mt_getrandmax())'],
+        [re.compile(r'random_int\((.+?),\s*(.+)\)'), r'mt_rand(\1, \2-1)'],
     ]
 
     repl = [
@@ -519,10 +527,14 @@ def convert_function_to_php(func, parser, function_args):
         ['($int)', '(int)'],
         ['time(nullptr)', 'time()'],
         ['$$', '$'],
-        ['std::$max', 'max'],
-        ['std::$min', 'min'],
-        ['std::$round', 'round'],
-        ['std::$floor', 'floor'],
+        ['std::max', 'max'],
+        ['std::min', 'min'],
+        ['std::round', 'round'],
+        ['std::floor', 'floor'],
+        ['std::fabs', 'abs'],
+        ['std::ceil', 'ceil'],
+        ['std::sqrt', 'sqrt'],
+
         ['in_list(', 'in_array('],
         ['in_map', 'array_key_exists'],
         ['list_push', 'array_push'],

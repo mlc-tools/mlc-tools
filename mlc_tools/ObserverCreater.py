@@ -180,13 +180,26 @@ class @{name}:
 
 php = '''<?php
 class Observable{
-    public function add($object, $functor){
+    private $listeners = array();
+    private $objects = array();
+
+    public function add($object, $callback){
+        array_push($this->listeners, $callback);
+        array_push($this->objects, $object);
     }
     public function remove($object){
+        $index = array_search($object, $this->objects);
+        if($index !== false){
+            unset($this->listeners[$index]);
+            unset($this->objects[$index]);
+        }
     }
-    public function notify(...$args){
+    public function notify(...$arg){
+        foreach($this->listeners as $listener){
+            $listener(...$arg);
+        }
     }
-}
+};
 ?>
 '''
 
