@@ -690,7 +690,7 @@ class WriterCpp(Writer):
         function.name = 'accept'
         function.return_type = 'void'
         function.args.append(['visitor', visitor + '*'])
-        function.operations.append('visitor->visit( this );')
+        function.operations.append('visitor->visit(this);')
         function.link()
         class_.functions.append(function)
 

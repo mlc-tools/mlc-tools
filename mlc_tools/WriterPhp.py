@@ -39,6 +39,8 @@ class WriterPhp(Writer):
         out = ""
         pattern = _pattern_file[self.serialize_format]
         self.current_class = cls
+        if cls.is_visitor:
+            self.add_accept_method(cls)
 
         if cls.type == 'enum':
             for member in cls.members:
@@ -361,6 +363,18 @@ class WriterPhp(Writer):
             body = body.replace('@(', '{')
             body = body.replace('@)', '}')
             self.save_file(name + '.php', body)
+
+    def add_accept_method(self, cls):
+        visitor = self.parser.get_type_of_visitor(cls)
+        if visitor == cls.name:
+            return
+        function = Function()
+        function.name = 'accept'
+        function.return_type = 'void'
+        function.args.append(['visitor', visitor + '*'])
+        function.operations.append('visitor->visit(this);')
+        function.link()
+        cls.functions.append(function)
 
     def create_data_storage_class(self, name, classes):
         if self.serialize_format == 'xml':
