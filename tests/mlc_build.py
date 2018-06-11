@@ -38,15 +38,14 @@ def simple_test():
 def test_serialize():
 
     def execute(command):
-        p = subprocess.Popen(command, shell=True)
-        (output, err) = p.communicate()
-        p.wait()
-        return 0 if err is None else err
+        p = os.system(command)
+        return p
 
     root = get_root()
     python = 'python3' if sys.version_info[0] == 3 else 'python'
     command = '{} {}/tests/test_serialize/run.py'.format(python, root)
-    if 0 != execute(command):
+    result = execute(command)
+    if 0 != result:
         exit(1)
 
 

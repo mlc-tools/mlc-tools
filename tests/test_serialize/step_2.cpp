@@ -4,7 +4,7 @@
 #include "pugixml/pugixml.hpp"
 #include "jsoncpp/json.h"
 #include "generated_cpp/TestData.h"
-#include "generated_cpp/config.h"
+#include "generated_cpp/mg_config.h"
 
 int main()
 {
