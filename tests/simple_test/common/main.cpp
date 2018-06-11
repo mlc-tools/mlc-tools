@@ -17,7 +17,7 @@
 #include <iostream>
 #include "DataStorage.h"
 #include <fstream>
-#include "config.h"
+#include "mg_config.h"
 #include "AllTests.h"
 #include "tests/Logger.h"
 #include "tests/RunAllTests.h"

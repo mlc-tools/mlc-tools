@@ -55,7 +55,7 @@ def find_body(text):
 
 class Parser:
 
-    def __init__(self, side, generate_tests, generate_intrusive):
+    def __init__(self, side, generate_tests, generate_intrusive, generate_factory):
         self.classes = []
         self.classes_for_data = []
         self.objects = []
@@ -67,6 +67,7 @@ class Parser:
         self.configs_root = ''
         self.generate_tests = generate_tests
         self.generate_intrusive = generate_intrusive
+        self.generate_factory = generate_factory
         return
 
     def generate_patterns(self):
@@ -216,7 +217,7 @@ class Parser:
         if not self.generate_tests and cls.is_test:
             return text
 
-        cls.parse_body(Parser(self.side, False, False), body)
+        cls.parse_body(Parser(self.side, False, False, False), body)
         if self.find_class(cls.name):
             Error.exit(Error.DUBLICATE_CLASS, cls.name)
         for inner_cls in cls.inner_classes:
@@ -310,7 +311,7 @@ class Parser:
         cls.parse(header)
         if not self.is_side(cls.side):
             return text
-        cls.parse_body(Parser(self.side, False, False), body)
+        cls.parse_body(Parser(self.side, False, False, False), body)
         self.classes.append(cls)
         return text
 

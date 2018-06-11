@@ -12,7 +12,7 @@
 #include "core/CommandBase.h"
 #include "Factory.h"
 #include <sstream>
-#include "config.h"
+#include "mg_config.h"
 
 
 

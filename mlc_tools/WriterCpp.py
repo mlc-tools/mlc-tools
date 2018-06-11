@@ -594,7 +594,9 @@ class WriterCpp(Writer):
 
     def _build_serialize_operation_enum(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args,
                                         serialization_type):
-        return self.serialize_protocol[serialization_type]['enum'][0].format(obj_name)
+        pattern = self.serialize_protocol[serialization_type]['enum'][0].format(obj_name)
+        pattern = pattern.replace('@__begin__namespace__end__', self.namespace)
+        return pattern
 
     def _build_serialize_operation(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args,
                                    serialization_type, is_link=False):
@@ -642,6 +644,7 @@ class WriterCpp(Writer):
             if type_ not in self.serialize_protocol[serialization_type]:
                 Error.exit(Error.UNKNOWN_SERIALISED_TYPE, type_, obj_type)
             pattern = self.serialize_protocol[serialization_type][type_][index]
+            pattern = pattern.replace('@__begin__namespace__end__', self.namespace)
             string = pattern.format(obj_name, convert_type(obj_type), obj_value, '{', '}', *template_args)
         return string
 
@@ -938,15 +941,17 @@ class WriterCpp(Writer):
         configs.append('#define {}_JSON 1'.format(self.get_namespace().upper()))
         configs.append('#define {}_XML 2'.format(self.get_namespace().upper()))
         configs.append('\n#define {0}_SERIALIZE_FORMAT {0}_{1}'.format(self.get_namespace().upper(), self.serialize_format.upper()))
-        filename_config = 'config.h' if self.get_namespace() == 'mg' else '{}_config.h'.format(self.get_namespace())
+        filename_config = '{}_config.h'.format(self.get_namespace())
         self.save_file(filename_config, pattern.format(self.get_namespace(), '\n'.join(configs)))
 
         for pair in cpp_files:
             filename = pair[0]
             content = pair[1]
             content = content.replace('@{namespace}', self.get_namespace())
+            content = content.replace('@{namespace_upper}', self.get_namespace().upper())
             filename = filename.replace('@{namespace}', self.get_namespace())
-            if not filename.startswith('intrusive_ptr') or self.parser.generate_intrusive:
+            if (not filename.startswith('intrusive_ptr.') or self.parser.generate_intrusive) and \
+                    (not filename.startswith('Factory.') or self.parser.generate_factory):
                 self.save_file(filename, content)
 
     def convert_to_enum(self, cls):

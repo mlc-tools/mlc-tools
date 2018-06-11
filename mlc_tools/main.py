@@ -45,6 +45,7 @@ class Generator:
         self.test_script_args = get('test_script_args')
         self.generate_tests = get_bool('generate_tests', 'no')
         self.generate_intrusive = get_bool('generate_intrusive', 'no')
+        self.generate_factory = get_bool('generate_factory', 'yes')
 
     @staticmethod
     def check_version(requere):
@@ -95,8 +96,10 @@ class Generator:
                             required=False, default='no')
         parser.add_argument('-generate_tests', type=str, help='Generate test classes',
                             required=False, default='no')
-        parser.add_argument('-generate_intrusive', type=str, help='Generate intrusive_ptr class',
+        parser.add_argument('-generate_intrusive', type=str, help='Generate intrusive_ptr class (only c++)',
                             required=False, default='no')
+        parser.add_argument('-generate_factory', type=str, help='Generate Factory class (only c++)',
+                            required=False, default='yes')
         args = parser.parse_args()
 
         self.configs_directory = fileutils.normalize_path(args.i)
@@ -114,11 +117,12 @@ class Generator:
         self.test_script_args = args.test_script_args
         self.generate_tests = args.generate_tests
         self.generate_intrusive = args.generate_intrusive
+        self.generate_factory = args.generate_factory
         Log.use_colors = args.use_colors.lower() == 'yes'
         Log.disable_logs = args.disable_logs.lower() == 'yes'
 
     def _parse(self):
-        self.parser = Parser(self.side, self.generate_tests, self.generate_intrusive)
+        self.parser = Parser(self.side, self.generate_tests, self.generate_intrusive, self.generate_factory)
         self.parser.set_configs_directory(self.configs_directory)
         self.parser.generate_patterns()
         files = fileutils.get_files_list(self.configs_directory)
@@ -141,7 +145,8 @@ class Generator:
                  path_to_protocols=None,
                  only_data=None,
                  gen_data_storage=True,
-                 generate_intrusive=None
+                 generate_intrusive=None,
+                 generate_factory=None
                  ):
         if path_to_protocols is not None:
             self.path_to_protocols = path_to_protocols
@@ -161,6 +166,8 @@ class Generator:
             self.validate_php = validate_php
         if generate_intrusive is not None:
             self.generate_intrusive = generate_intrusive
+        if generate_factory is not None:
+            self.generate_factory = generate_factory
         self.configs_directory = fileutils.normalize_path(self.configs_directory)
         self.out_directory = fileutils.normalize_path(self.out_directory)
 

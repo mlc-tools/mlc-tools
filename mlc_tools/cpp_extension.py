@@ -7,11 +7,11 @@ functions_hpp = '''
 #include <cmath>
 #include <string>
 #include <algorithm>
-#include "config.h"
+#include "@{namespace}_config.h"
 
-#if MG_SERIALIZE_FORMAT == MG_XML
+#if @{namespace_upper}_SERIALIZE_FORMAT == @{namespace_upper}_XML
 #   include "pugixml/pugixml.hpp"
-#elif MG_SERIALIZE_FORMAT == MG_JSON
+#elif @{namespace_upper}_SERIALIZE_FORMAT == @{namespace_upper}_JSON
 #   include "jsoncpp/json.h"
 #endif
 
@@ -72,7 +72,7 @@ namespace @{namespace}
     template <typename T> T strTo(const std::string &value);
     template <typename T> std::string toStr(T value);
 
-#if MG_SERIALIZE_FORMAT == MG_XML
+#if @{namespace_upper}_SERIALIZE_FORMAT == @{namespace_upper}_XML
 
     //XML
     template <class T> void set(pugi::xml_attribute& xml, T value);
@@ -91,7 +91,7 @@ namespace @{namespace}
         return 0;
     }
 
-#elif MG_SERIALIZE_FORMAT == MG_JSON
+#elif @{namespace_upper}_SERIALIZE_FORMAT == @{namespace_upper}_JSON
 
     //JSON
     template <class T> void set(Json::Value& json, T value);
@@ -270,7 +270,7 @@ namespace @{namespace}
         return floatToStr( value );
     }
 
-#if MG_SERIALIZE_FORMAT == MG_XML
+#if @{namespace_upper}_SERIALIZE_FORMAT == @{namespace_upper}_XML
 
     //XML
     template <> void set(pugi::xml_attribute& xml, int8_t value) { xml.set_value(value); }
@@ -297,7 +297,7 @@ namespace @{namespace}
     template <> float get(const pugi::xml_attribute& xml) { return xml.as_float(); }
     template <> std::string get(const pugi::xml_attribute& xml) { return xml.as_string(); }
 
-#elif MG_SERIALIZE_FORMAT == MG_JSON
+#elif @{namespace_upper}_SERIALIZE_FORMAT == @{namespace_upper}_JSON
 
     //JSON
     template <> void set( Json::Value& json, int8_t value ) { json = value; }
@@ -527,9 +527,9 @@ factory_hpp = '''#ifndef __@{namespace}_Factory_h__
 #include <assert.h>
 #include "intrusive_ptr.h"
 #include "SerializedObject.h"
-#include "config.h"
+#include "@{namespace}_config.h"
 
-#if MG_SERIALIZE_FORMAT == MG_JSON
+#if @{namespace_upper}_SERIALIZE_FORMAT == @{namespace_upper}_JSON
 #   include "jsoncpp/json.h"
 #else
 #   include <sstream>
@@ -595,7 +595,7 @@ namespace @{namespace}
             return result;
         };
 
-    #if MG_SERIALIZE_FORMAT == MG_JSON
+    #if @{namespace_upper}_SERIALIZE_FORMAT == @{namespace_upper}_JSON
         static std::string serialize_command(intrusive_ptr<TRef> command)
         {
             Json::Value json;
