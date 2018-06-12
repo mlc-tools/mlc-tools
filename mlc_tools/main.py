@@ -46,6 +46,12 @@ class Generator:
         self.generate_tests = get_bool('generate_tests', 'no')
         self.generate_intrusive = get_bool('generate_intrusive', 'no')
         self.generate_factory = get_bool('generate_factory', 'yes')
+        self.filter_code = None
+        self.filter_data = None
+
+    def set_filter(self, filter_code=None, filter_data=None):
+        self.filter_code = filter_code
+        self.filter_data = filter_data
 
     @staticmethod
     def check_version(requere):
@@ -128,6 +134,8 @@ class Generator:
         files = fileutils.get_files_list(self.configs_directory)
         for file in files:
             if file.endswith('.mlc'):
+                if self.filter_code is not None and not self.filter_code(file):
+                    continue
                 text = open(self.configs_directory + file).read()
                 self.parser.parse(text)
         self.parser.link()
@@ -228,7 +236,7 @@ class Generator:
             for class_ in self.parser.classes_for_data:
                 if class_.is_storage:
                     classes.append(class_)
-            self.data_parser = DataParser(classes, self.serialize_format, self.data_directory)
+            self.data_parser = DataParser(classes, self.serialize_format, self.data_directory, self.filter_data)
             self.data_parser.flush(self.out_data_directory)
 
     def run_test(self, test_script=None, test_script_args=None):

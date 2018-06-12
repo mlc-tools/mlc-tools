@@ -8,10 +8,11 @@ from .Error import Error
 
 class DataParser:
 
-    def __init__(self, classes, format, data_directory):
+    def __init__(self, classes, format, data_directory, filter):
         self.objects = {}
         self.format = format
         self.classes = classes
+        self.filter = filter
 
         if self.format == 'xml':
             self._parse_xml(data_directory)
@@ -32,6 +33,8 @@ class DataParser:
         files = fileutils.get_files_list(data_directory)
         for file in files:
             if not file.endswith('.xml'):
+                continue
+            if self.filter is not None and not self.filter(file):
                 continue
             file = data_directory + file
             try:
@@ -57,6 +60,8 @@ class DataParser:
         files = fileutils.get_files_list(data_directory)
         for file in files:
             if not file.endswith('.json'):
+                continue
+            if self.filter is not None and not self.filter(file):
                 continue
             file = data_directory + file
             root = json.loads(open(file).read())
