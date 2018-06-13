@@ -10,7 +10,7 @@
 /******************************************************************************/
 
 #include "core/CommandBase.h"
-#include "Factory.h"
+#include "mg_Factory.h"
 #include <sstream>
 #include "mg_config.h"
 

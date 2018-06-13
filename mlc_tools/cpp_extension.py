@@ -662,5 +662,5 @@ cpp_files = [
     ['@{namespace}_extensions.cpp', functions_cpp],
     ['intrusive_ptr.h', intrusive_hpp],
     ['intrusive_ptr.cpp', intrusive_cpp],
-    ['Factory.h', factory_hpp],
+    ['@{namespace}_Factory.h', factory_hpp],
 ]

@@ -848,7 +848,7 @@ class WriterCpp(Writer):
         if flags == FLAG_HPP:
             out += pattern.format(get_include_file(self.parser, self._current_class, 'intrusive_ptr', self.get_namespace()))
         if flags == FLAG_CPP:
-            out += pattern.format(get_include_file(self.parser, self._current_class, 'Factory', self.get_namespace()))
+            out += pattern.format(get_include_file(self.parser, self._current_class, self.get_namespace() + '_Factory', self.get_namespace()))
             out += pattern.format(get_include_file(self.parser, self._current_class, self.get_namespace() + '_extensions', self.get_namespace()))
             out += '\n#include <algorithm>'
 
@@ -951,7 +951,7 @@ class WriterCpp(Writer):
             content = content.replace('@{namespace_upper}', self.get_namespace().upper())
             filename = filename.replace('@{namespace}', self.get_namespace())
             if (not filename.startswith('intrusive_ptr.') or self.parser.generate_intrusive) and \
-                    (not filename.startswith('Factory.') or self.parser.generate_factory):
+                    (not filename.startswith(self.get_namespace() + '_Factory.') or self.parser.generate_factory):
                 self.save_file(filename, content)
 
     def convert_to_enum(self, cls):
