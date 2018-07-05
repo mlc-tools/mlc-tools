@@ -626,7 +626,11 @@ namespace @{namespace}
 
             std::stringstream stream;
             pugi::xml_writer_stream writer(stream);
+        #ifdef NDEBUG
             doc.save(writer, "", pugi::format_no_declaration | pugi::format_raw, pugi::xml_encoding::encoding_utf8);
+        #else
+            doc.save(writer, PUGIXML_TEXT(" "), pugi::format_no_declaration | pugi::format_indent, pugi::xml_encoding::encoding_utf8);
+        #endif
             return stream.str();
         }
         static intrusive_ptr<TRef> create_command(const std::string& payload)
