@@ -512,7 +512,8 @@ regs = [
     [re.compile(r'(\w+)\s+(\w+);'), r'$\2 = new \1();'],
     [re.compile(r'\$(\w+) = new return\(\);'), r'return \1;'],
     [re.compile(r'std::\$vector<.+?>\s+(\w+);'), r'$\1 = array();'],
-
+    [re.compile(r'\bstrTo<(\w+)>'), r'(\1)'],
+    [re.compile(r'\btoStr\b'), r'(str)'],
 ]
 
 
