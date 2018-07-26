@@ -311,13 +311,15 @@ class FunctionTest<SerializedObject>
         return result;
     }
 
-    function bool test_1(Logger* logger):static {
+    function bool test_1(Logger* logger):static
+    {
         auto user = new TestUser1();
 		auto result = FunctionTest::test_1_1(user);
 		logger->push(result, "Functions: test 1");
 		return result;
 	}
-    function bool test_1_1(TestUser1* user):static {
+    function bool test_1_1(TestUser1* user):static
+    {
 		auto result = user->result;
 		return result;
 	}

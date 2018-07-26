@@ -10,8 +10,8 @@ class AccessSpecifier:
 
 class Object:
 
-    def __init__(self):
-        self.type = ''
+    def __init__(self, type_=''):
+        self.type = type_
         self.template_args = []
         self.name = ''
         self.initial_value = None
@@ -125,3 +125,6 @@ class Object:
             string = string[0:l] + args + string[l:]
 
         return string
+
+Object.VOID = Object('void')
+Object.BOOL = Object('bool')

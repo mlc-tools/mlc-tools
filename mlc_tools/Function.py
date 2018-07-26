@@ -7,7 +7,7 @@ class Function:
 
     def __init__(self):
         self.operations = []
-        self.return_type = ''
+        self.return_type = Object()
         self.name = ''
         self.args = []
         self.is_const = False
@@ -70,10 +70,17 @@ class Function:
 
                 if not (p('*', arg) or p('&', arg) or p(' ', arg)):
                     exit(-1)
+        
+        line = line[:line.find('(')] + line[line.rfind(')')+1:]
+        line = line.replace(';', '')
+        line = re.sub(r'{.*}', '', line)
+        k = line.rfind(' ')
+        return_s = line[:k].strip()
+        name_s = line[k:].strip()
 
-        line = self._find_modifiers(line)
-        line = line[0:line.find('(')].strip()
-        self.return_type, self.name = line.split(' ')
+        self.return_type = return_s
+        name_s = self._find_modifiers(name_s)
+        self.name = name_s
         return
 
     def get_return_type(self):

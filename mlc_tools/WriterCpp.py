@@ -61,7 +61,9 @@ def convert_type(type_):
         if type_.template_args:
             s += '<'
             for i, arg in enumerate(type_.template_args):
-                s += convert_type(arg)
+                obj = Object()
+                obj.parse(arg)
+                s += convert_type(obj)
                 if i < len(type_.template_args) - 1:
                     s += ', '
             s += '>'
@@ -347,7 +349,7 @@ class WriterCpp(Writer):
 
         pattern = '{3}\nnamespace {0}\n__begin__{2}\n\n{1}__end__//namespace {0}'.\
             format(self.get_namespace(), pattern, forward_declarations, forward_declarations_out)
-        pattern = '#ifndef __{3}_{0}_h__\n#define __{3}_{0}_h__\n{2}\n\n{1}\n\n#endif //#ifndef __{3}_{0}_h__'.\
+        pattern = '#ifndef __{3}_{0}_h__\n#define __{3}_{0}_h__\n{2}\n{1}\n\n#endif //#ifndef __{3}_{0}_h__'.\
             format(class_.name, pattern, includes, self.get_namespace())
 
         out[FLAG_HPP] += pattern.format('class', class_.name, behaviors, objects[FLAG_HPP],
@@ -571,7 +573,7 @@ class WriterCpp(Writer):
         if serialization_type == DESERIALIZATION:
             function.name = 'deserialize'
             function.args.append(self.get_serialization_object_arg(serialization_type))
-        function.return_type = 'void'
+        function.return_type = Object.VOID
         function.link()
 
         for behabior in class_.behaviors:
@@ -691,7 +693,7 @@ class WriterCpp(Writer):
             return
         function = Function()
         function.name = 'accept'
-        function.return_type = 'void'
+        function.return_type = Object.VOID
         function.args.append(['visitor', visitor + '*'])
         function.operations.append('visitor->visit(this);')
         function.link()
@@ -700,7 +702,7 @@ class WriterCpp(Writer):
     def add_equal_methods(self, class_):
         function = Function()
         function.name = 'operator =='
-        function.return_type = 'bool'
+        function.return_type = Object.BOOL
         function.args.append(['rhs', 'const ' + class_.name + '&'])
         function.is_const = True
         function.link()
@@ -715,7 +717,7 @@ class WriterCpp(Writer):
 
         function = Function()
         function.name = 'operator !='
-        function.return_type = 'bool'
+        function.return_type = Object.BOOL
         function.args.append(['rhs', 'const ' + class_.name + '&'])
         function.is_const = True
         function.operations.append('return !(*this == rhs);')
@@ -976,7 +978,8 @@ class WriterCpp(Writer):
 
         def add_function(type_, name, args, const):
             function = Function()
-            function.return_type = type_
+            function.return_type = Object()
+            function.return_type.parse(type_)
             function.name = name
             function.args = args
             function.is_const = const
@@ -1062,7 +1065,9 @@ class WriterCpp(Writer):
         return values
 
 regs = [
-    [re.compile('new\s*(\w+)\s*\\(\s*\\)'), 'make_intrusive<\\1>()'],
+    (re.compile(r'new\s*(\w+)\s*\(\s*\)'), r'make_intrusive<\1>()'),
+    (re.compile(r'\blist<([<>\w\s\*&]+)>\s*(\w+)'), r'std::vector<\1> \2'),
+    (re.compile(r'\bmap<([\w\s\*&]+),\s*([<>\w\s\*&]+)>\s*(\w+)'), r'std::map<\1, \2> \3'),
 ]
 
 

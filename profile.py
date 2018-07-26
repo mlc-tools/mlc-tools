@@ -11,13 +11,12 @@ def test_game_s():
 
 
 def test_game_m():
-    game_root = '/work/marines/'
-    generator = Generator(game_root + 'config', generate_tests='no')
-    generator.generate('cpp', 'xml', game_root + 'client/generated/web', 'client')
-    generator.generate('py', 'xml', game_root + 'server/tests/lib/mg', 'client')
-
-    generator = Generator(game_root + 'config_battle', generate_tests='no', namespace='photon')
-    generator.generate('cpp', 'json', game_root + 'client/generated/photon', 'client')
+    project_root = '/Work/gushchin/marines/'
+    generator = Generator(project_root + 'config', generate_tests='no', generate_intrusive='no', generate_factory='yes')
+    generator.generate('cpp', 'xml', project_root + '/client/project_marines/generated/web', 'client')
+    generator.generate('php', 'xml', project_root + '/server/mg', 'server')
+    generator.generate('py', 'xml', project_root + '/tests/server/lib/mg', 'client')
+    generator.generate('py', 'xml', project_root + '/tests/server/lib/mg_server', 'server')
 
 
 def profile():
@@ -43,4 +42,4 @@ def profile():
     print get_profile_(test_game_m)
 
 # profile()
-test_game_s()
+test_game_m()
