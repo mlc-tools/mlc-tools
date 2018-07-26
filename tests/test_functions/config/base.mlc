@@ -37,6 +37,7 @@ class Test<SerializedObject>
         this->test_6();
         this->test_7();
         this->test_8(0);
+        this->test_9();
     }
     function void tests_const():const
     {
@@ -82,6 +83,11 @@ class Test<SerializedObject>
     }
 
     function ReturnValue& test_7()
+    {
+        return this->r0;
+    }
+
+    function ReturnValue& test_9(int i=0)
     {
         return this->r0;
     }

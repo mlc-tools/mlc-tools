@@ -472,7 +472,7 @@ class WriterCpp(Writer):
 
             args = list()
             for arg in function.args:
-                args.append(_convert_argument_type(convert_type(arg[1])) + ' ' + arg[0])
+                args.append(_convert_argument_type(convert_type(arg[1])) + ' ' + re.sub(r'\s*=\s*.+', r'', arg[0]))
             args = ', '.join(args)
             out[FLAG_CPP] = fstr.format(convert_return_type(self.parser, convert_type(function.get_return_type())),
                                         function.name, args, body, self._current_class.name, is_const)
