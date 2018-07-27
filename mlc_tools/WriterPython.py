@@ -404,6 +404,8 @@ regs = [
     [re.compile(r'(\w+) = return\(\)'), r'return \1'],
     # False = return()
     [re.compile(r'std::vector<.+>\s+(\w+)'), r'\1 = list()'],
+    [re.compile(r'\blist<.+>\s+(\w+)'), r'\1 = list()'],
+    (re.compile(r'\bmap<([\w\s\*&]+),\s*([<>\w\s\*&]+)>\s*(\w+)'), r'\3 = dict()'),
     [re.compile(r'auto\&* (\w+)'), r'\1'],
     [re.compile(r'string (\w+)'), r'\1'],
     [re.compile(r'int (\w+)'), r'\1'],
@@ -430,6 +432,8 @@ regs = [
     [re.compile(r'dynamic_pointer_cast_intrusive<\w+>\((.+?)\)'), r'\1'],
     [re.compile(r'([\w\.]+?)\s*!=\s*False'), r'(\1)'],
     [re.compile(r'([\w\.]+?)\s*==\s*False'), r'not (\1)'],
+    [re.compile(r'\bstrTo<(\w+)>\((.+?)\)'), r'\1(\2)'],
+    [re.compile(r'\btoStr\(.+?\)'), r'str(\1)'],
 ]
 
 regs_class_names = {}
@@ -572,7 +576,7 @@ _pattern_file['xml'] = '''
     def __init__(self):\n{4}\n{1}\n        pass
 {2}'''
 
-_pattern_file['json'] = '''import json
+_pattern_file['json'] = '''
 {3}
 class {0}:
 {5}

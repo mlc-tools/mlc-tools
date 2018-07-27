@@ -35,6 +35,25 @@ def simple_test():
     run('php', 'xml')
 
 
+def test_functions():
+    root = get_root() + '/tests/test_functions/'
+    generator = Generator(configs_directory=root + 'config', generate_intrusive=True, generate_factory=True)
+
+    def run(lang, format):
+        generator.generate(lang, format, root + 'generated_%s' % (lang if lang != 'cpp' else lang + '/' + format))
+        generator.run_test(root + 'test_%s.py' % lang, format)
+        print('-----------------------------------------')
+        print('|  test with params [{}, {}] finished'.format(lang, format))
+        print('-----------------------------------------')
+
+    run('py', 'json')
+    run('py', 'xml')
+    run('cpp', 'json')
+    run('cpp', 'xml')
+    run('php', 'json')
+    run('php', 'xml')
+
+
 def test_serialize():
 
     def execute(command):
@@ -52,3 +71,4 @@ def test_serialize():
 if __name__ == '__main__':
     simple_test()
     test_serialize()
+    test_functions()
