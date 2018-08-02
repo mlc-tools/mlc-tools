@@ -28,6 +28,7 @@ tests/*/build*
 
 .DS_Store
 *.pyc
+*.db
 *.pyproj
 *.suo
 *.sublime-project

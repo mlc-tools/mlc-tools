@@ -1,0 +1,90 @@
+class SerializedObject:serialized
+{
+    int _reference_counter:runtime = 1
+    function int retain()
+    {
+        this->_reference_counter += 1;
+        return this->_reference_counter;
+    }
+    function int release()
+    {
+        this->_reference_counter -= 1;
+        auto c = this->_reference_counter;
+        if( c == 0)
+        {
+            delete this;
+        }
+        return c;
+    }
+}
+
+class DataBase<SerializedObject>
+{
+    function void connect(string host, string database, string user, string password):abstract
+    function list<list<string>> query_all(string query):abstract
+    function list<string> query_one(string query):abstract
+}
+
+class TestDataBase<ITestDataBase>
+{
+    DataBase*:static db
+    list<list<string>>:runtime response_all
+    list<string>:runtime response_one
+
+    function bool test_connect()
+    {
+        return true;
+    }
+    function bool test_query_all()
+    {
+        TestDataBase::db->connect("localhost", "test_database", "root", "112358");
+        TestDataBase::db->query_all("CREATE TABLE IF NOT EXISTS test_db (id int, data text)");
+        TestDataBase::db->query_all("INSERT INTO test_db VALUES (1, 'test_data 1');");
+        TestDataBase::db->query_all("INSERT INTO test_db VALUES (2, 'test_data 2');");
+        TestDataBase::db->query_all("INSERT INTO test_db VALUES (3, 'test_data 3');");
+        this->response_all = TestDataBase::db->query_all("SELECT * FROM test_db");
+        auto result = this->log_all();
+        TestDataBase::db->query_all("DROP TABLE test_db");
+
+        return result == "Response table:\n\t[1, test_data 1, ]\n\t[2, test_data 2, ]\n\t[3, test_data 3, ]\n";
+    }
+    function bool test_query_one()
+    {
+        TestDataBase::db->connect("localhost", "test_database", "root", "112358");
+        TestDataBase::db->query_one("CREATE TABLE IF NOT EXISTS test_db (id int, data text)");
+        TestDataBase::db->query_one("INSERT INTO test_db VALUES (1, 'test_data');");
+        this->response_one = TestDataBase::db->query_one("SELECT * FROM test_db WHERE id=1");
+        auto result = this->log_one();
+        TestDataBase::db->query_one("DROP TABLE test_db");
+
+        return result == "Response row: [1, test_data, ]\n";
+    }
+
+    function string log_all()
+    {
+        std::string result = "Response table:\n";
+        for(auto& row : this->response_all)
+        {
+            result = std::strcat(result, "\t[");
+            for(auto& cell : row)
+            {
+                result = std::strcat(result, cell + ", ");
+            }
+            result = std::strcat(result, "]\n");
+        }
+        this->logger->print_log(true, result);
+        return result;
+    }
+
+    function string log_one()
+    {
+        std::string result = "Response row: [";
+        for(auto& cell : this->response_one)
+        {
+            result = std::strcat(result, cell + ", ");
+        }
+        result = std::strcat(result, "]\n");
+        this->logger->print_log(true, result);
+        return result;
+    }
+}
