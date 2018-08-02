@@ -10,6 +10,7 @@ from .DataStorageCreators import DataStorageCppJson
 from .Error import Error
 from .cpp_extension import cpp_files
 from .Object import AccessSpecifier
+from .regex import RegexPatternCpp
 
 FLAG_HPP = 2
 FLAG_CPP = 4
@@ -30,7 +31,7 @@ def convert_return_type(parser, type_object):
     result = type_object
     if isinstance(type_object, str):
         if '*' in type_object and 'const ' not in type_object:
-            t = re.sub(r'\*', '', type_object)
+            t = type_object.replace(r'\*', '')
             if parser.find_class(t):
                 result = 'intrusive_ptr<{}>'.format(t)
     else:
@@ -178,8 +179,6 @@ def _create_constructor_function_cpp(parser, class_):
 
     pattern = '{0}::{0}(){1}\n__begin__{2}\n\n__end__\n'
     string = pattern.format(class_.name, initialize, initialize2)
-    string = re.sub('__begin__', '{', string)
-    string = re.sub('__end__', '}', string)
     return string
 
 
@@ -190,8 +189,6 @@ def _create_destructor_function_cpp(class_):
         return ''
     pattern = '{0}::~{0}()\n__begin__\n__end__\n'
     string = pattern.format(class_.name)
-    string = re.sub('__begin__', '{', string)
-    string = re.sub('__end__', '}', string)
     return string
 
 
@@ -349,8 +346,6 @@ class WriterCpp(Writer):
 
         out[FLAG_HPP] += pattern.format('class', class_.name, behaviors, objects[FLAG_HPP],
                                         functions[FLAG_HPP], constructor, destructor)
-        out[FLAG_HPP] = re.sub('__begin__', '{', out[FLAG_HPP])
-        out[FLAG_HPP] = re.sub('__end__', '}', out[FLAG_HPP])
         return out
 
     def _write_class_cpp(self, class_):
@@ -408,8 +403,6 @@ class WriterCpp(Writer):
 
         out[FLAG_CPP] += pattern.format(class_.name, functions[FLAG_CPP], constructor, self.get_namespace(),
                                         includes, objects[FLAG_CPP], registration, destructor)
-        out[FLAG_CPP] = re.sub('__begin__', '{', out[FLAG_CPP])
-        out[FLAG_CPP] = re.sub('__end__', '}', out[FLAG_CPP])
         return out
 
     def write_function(self, function, flags):
@@ -449,13 +442,9 @@ class WriterCpp(Writer):
             body = ''
             for operation in function.operations:
                 convert_c17_toc14 = True
-                if convert_c17_toc14:
-                    reg = [re.compile(r'for\s*\(auto&&\s*\[(\w+),\s*(\w+)\]\s*:\s*(.+)\)\s*{'),
-                           r'''for (auto&& pair : \3) \n{ \nauto& \1 = pair.first; \nauto& \2 = pair.second;
-                           (void)\1; //don't generate 'Unused variable' warning
-                           (void)\2; //don't generate 'Unused variable' warning''']
-
-                    operation2 = re.sub(reg[0], reg[1], operation)
+                if operation and convert_c17_toc14:
+                    reg = RegexPatternCpp.convert_c17_to_c14
+                    operation2 = reg[0].sub(reg[1], operation)
                     if operation2 != operation:
                         operation = operation2
                 operation = operation.replace('std::round', 'round')
@@ -467,7 +456,7 @@ class WriterCpp(Writer):
 
             args = list()
             for arg in function.args:
-                args.append(_convert_argument_type(convert_type(arg[1])) + ' ' + re.sub(r'\s*=\s*.+', r'', arg[0]))
+                args.append(_convert_argument_type(convert_type(arg[1])) + ' ' + RegexPatternCpp.FUNC_ARGS[0].sub(RegexPatternCpp.FUNC_ARGS[1], arg[0]))
             args = ', '.join(args)
             out[FLAG_CPP] = fstr.format(convert_return_type(self.parser, convert_type(function.get_return_type())),
                                         function.name, args, body, self._current_class.name, is_const)
@@ -742,9 +731,9 @@ class WriterCpp(Writer):
             include_types[t.name] = 1
         for t in class_.members:
             type_ = t.type
-            type_ = re.sub('const', '', type_).strip()
-            type_ = re.sub('\*', '', type_).strip()
-            type_ = re.sub('&', '', type_).strip()
+            type_ = type_.replace('const', '').strip()
+            type_ = type_.replace('*', '').strip()
+            type_ = type_.replace('&', '').strip()
             include_types[type_] = 1
             if t.is_pointer:
                 include_types['intrusive_ptr'] = 1
@@ -764,9 +753,9 @@ class WriterCpp(Writer):
                     is_pointer_ = '*' in type_string
                     is_ref_ = '&' in type_string
 
-                    typename = re.sub('const', '', type_string).strip()
-                    typename = re.sub('\*', '', typename).strip()
-                    typename = re.sub('&', '', typename).strip()
+                    typename = type_string.replace('const', '').strip()
+                    typename = typename.replace('*', '').strip()
+                    typename = typename.replace('&', '').strip()
                     if 'intrusive_ptr' in typename:
                         return
                     if 'CommandBase' in typename:
@@ -802,10 +791,10 @@ class WriterCpp(Writer):
 
             if not f.is_template:
                 type_ = f.get_return_type().type
-                type_ = re.sub('const', '', type_).strip()
-                type_ = re.sub('\*', '', type_).strip()
-                type_ = re.sub('&', '', type_).strip()
-                type_ = re.sub('std::', '', type_).strip()
+                type_ = type_.replace('const', '').strip()
+                type_ = type_.replace('*', '').strip()
+                type_ = type_.replace('&', '').strip()
+                type_ = type_.replace('std::', '').strip()
                 include_types[type_] = 1
 
         forward_declarations_out = ''
@@ -881,6 +870,9 @@ class WriterCpp(Writer):
 
     def prepare_file(self, body):
         tabs = 0
+        body = body.replace('__begin__', '{')
+        body = body.replace('__end__', '}')
+
         lines = body.split('\n')
         body = list()
 
@@ -1059,16 +1051,8 @@ class WriterCpp(Writer):
         cls.members.append(value)
         return values
 
-regs = [
-    (re.compile(r'new\s*(\w+)\s*\(\s*\)'), r'make_intrusive<\1>()'),
-    (re.compile(r'\blist<([<:>\w\s\*&]+)>\s*(\w+)'), r'std::vector<\1> \2'),
-    (re.compile(r'\bmap<([<:>\w\s\*&]+),\s*([<:>\w\s\*&]+)>\s*(\w+)'), r'std::map<\1, \2> \3'),
-    (re.compile(r'std::strcat\((.+?),\s*(.+?)\)'), r'(std::string(\1) + std::string(\2))'),
-]
-
 
 def convert_function_to_cpp(func, parser):
-    global regs
-    for reg in regs:
-        func = re.sub(reg[0], reg[1], func)
+    for reg in RegexPatternCpp.FUNCTION:
+        func = reg[0].sub(reg[1], func)
     return func

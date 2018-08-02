@@ -108,15 +108,15 @@ class Class(Object):
         if Modifier.client in string:
             self.side = Modifier.side_client
 
-        string = re.sub(Modifier.server, '', string)
-        string = re.sub(Modifier.client, '', string)
-        string = re.sub(Modifier.abstract, '', string)
-        string = re.sub(Modifier.serialized, '', string)
-        string = re.sub(Modifier.visitor, '', string)
-        string = re.sub(Modifier.storage, '', string)
-        string = re.sub(Modifier.set_function, '', string)
-        string = re.sub(Modifier.numeric, '', string)
-        string = re.sub(Modifier.test, '', string)
+        string = string.replace(Modifier.server, '')
+        string = string.replace(Modifier.client, '')
+        string = string.replace(Modifier.abstract, '')
+        string = string.replace(Modifier.serialized, '')
+        string = string.replace(Modifier.visitor, '')
+        string = string.replace(Modifier.storage, '')
+        string = string.replace(Modifier.set_function, '')
+        string = string.replace(Modifier.numeric, '')
+        string = string.replace(Modifier.test, '')
         return string
 
     def _generate_setters_function(self, parser):

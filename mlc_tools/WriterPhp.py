@@ -5,6 +5,7 @@ from .DataStorageCreators import DataStoragePhpXml
 from .DataStorageCreators import DataStoragePhpJson
 from .Error import Error
 from .Object import AccessSpecifier
+from .regex import RegexPatternPhp
 import re
 
 SERIALIZATION = 0
@@ -17,8 +18,7 @@ def convertInitializeValue(value):
     if value is None:
         value = 'null'
     if isinstance(value, str):
-        pattern = re.compile(r'(\w+)::(\w+)')
-        value = re.sub(pattern, r'\1::$\2', value)
+        value = RegexPatternPhp.INITIALIZE[0].sub(RegexPatternPhp.INITIALIZE[1], value)
     return value
 
 
@@ -462,84 +462,9 @@ class WriterPhp(Writer):
         Writer.save_file(self, filename, string)
 
 
-regs = (
-    (re.compile(r'DataStorage::shared\(\).get<(\w+)>'), r'DataStorage::shared()->get\1'),
-    (re.compile(r'\.str\(\)'), r''),
-    (re.compile(r'for\s*\(auto (.+?)\s*:\s*(.+)\s*\)'), r'foreach($\2 as $\1)'),
-    (re.compile(r'for\s*\(auto& (.+?)\s*:\s*(.+)\s*\)'), r'foreach($\2 as $\1)'),
-    (re.compile(r'for\s*\(auto&&\s*\[(\w+),\s*(\w+)\]\s*:\s*(.+)\)'), r'foreach ($\3 as $\1 => $\2)'),
-    (re.compile(r'auto (\w+)'), r'$\1'),
-    (re.compile(r'auto& (\w+)'), r'$\1'),
-    (re.compile(r'void (\w+)'), r'$\1'),
-    (re.compile(r'int (\w+)'), r'$\1'),
-    (re.compile(r'bool (\w+)'), r'$\1'),
-    (re.compile(r'\((\w+) (\w+)\)'), r'($\2)'),
-    (re.compile(r'\(const (\w+)\& (\w+)\)'), r'($\2)'),
-    (re.compile(r'\(const (\w+)\* (\w+)\)'), r'($\2)'),
-    (re.compile(r'\((\w+)\* (\w+)\)'), r'($\2)'),
-    (re.compile(r'(\w+)\ (\w+),'), r'$\2,'),
-    (re.compile(r'(\w+)\& (\w+),'), r'$\2,'),
-    (re.compile(r'(\w+)\* (\w+),'), r'$\2,'),
-    (re.compile(r'const (\w+)\* (\w+)'), r'$\2'),
-    (re.compile(r'const (\w+)\& (\w+)'), r'$\2'),
-    (re.compile(r'float (\w+)'), r'$\1'),
-    (re.compile(r'std::string (\w+)'), r'$\1'),
-    (re.compile(r'\bthis\b'), r'$this'),
-    (re.compile(r':const'), r''),
-    (re.compile(r'(\w+)::(\w+)'), r'\1::$\2'),
-    (re.compile(r'(\w+)::(\w+)\)'), r'\1::$\2)'),
-    (re.compile(r'(\w+)::(\w+)\.'), r'\1::$\2.'),
-    (re.compile(r'(\w+)::(\w+)->'), r'\1::$\2->'),
-    (re.compile(r'(\w+)::(\w+)\]'), r'\1::$\2]'),
-    (re.compile(r'(\w+)::\$(\w+)\('), r'\1::\2('),
-    (re.compile(r'(\w+)::\$(\w+)\((\w*)\)'), r'\1::\2(\3)'),
-    (re.compile(r'function \$(\w+)'), r'function \1'),
-    (re.compile(r'\.at\((.*?)\)'), r'[\1]'),
-    (re.compile(r'(\w+)\.'), r'\1->'),
-    (re.compile(r'(\w+)\(\)\.'), r'\1()->'),
-    (re.compile(r'(\w+)\]\.'), r'\1]->'),
-    (re.compile(r'&(\w+)'), r'\1'),
-    (re.compile(r'\$if\('), r'if('),
-    (re.compile(r'delete \$(\w+);'), r''),
-    (re.compile(r'([-0-9])->([-0-9])f\b'), r'\1.\2'),
-    (re.compile(r'assert\(.+\);'), r''),
-    (re.compile(r'make_intrusive<(\w+)>\(\s*\)'), r'new \1()'),
-    (re.compile(r'dynamic_pointer_cast_intrusive<\w+>\((.+?)\)'), r'\1'),
-    (re.compile(r'new\s*(\w+)\s*\(\s*\)'), r'new \1()'),
-    (re.compile(r'(.+?)\->push_back\((.+)\);'), r'array_push(\1, \2);'),
-    (re.compile(r'(\w+)\s+(\w+);'), r'$\2 = new \1();'),
-    (re.compile(r'\$(\w+) = new return\(\);'), r'return \1;'),
-    (re.compile(r'std::\$vector<.+?>\s+(\w+)'), r'$\1 = array()'),
-    (re.compile(r'\blist<.+>\s+(\w+)'), r'$\1 = array()'),
-    (re.compile(r'\bmap<([<:>\w\s\*&\$]+),\s*([<:>\w\s\*&\$]+)>\s*(\w+)'), r'$\3 = array()'),
-    (re.compile(r'\bstrTo<(\w+)>'), r'(\1)'),
-    (re.compile(r'\btoStr\b'), r'(str)'),
-    (re.compile(r'(@{__string_\d+__})\s*\+'), r'\1.'),
-    (re.compile(r'\+\s*(@{__string_\d+__})'), r'.\1'),
-)
-
-regs2 = (
-    (re.compile(r'->\$(\w+)\('), r'->\1('),
-    (re.compile(r'([-0-9]*)->([-0-9]*)f\b'), r'\1.\2'),
-    (re.compile(r'([-0-9]*)->f\\b'), r'\1.0'),
-    (re.compile(r'\$return\s'), r'return'),
-    (re.compile(r'(\$.+)->add\((\$.+),\s*(\w+)::\$(\w+),\s*std::\$placeholders::\$_\d\);'), r'\1->add(\2, array(\2, "\4"));'),
-    (re.compile(r'list_remove\((\$.+?),\s*(\$.+?)\);'), r'unset(\1[array_search(\2, \1)]);'),
-    (re.compile(r'list_clear\((.+?)\);'), r'\1 = array();'),
-    (re.compile(r'string_empty\((.+?)\)'), r'(count(\1) == 0)'),
-    (re.compile(r'random_float\(\)'), r'(mt_rand() * 1.0 / mt_getrandmax())'),
-    (re.compile(r'random_int\((.+?),\s*(.+)\)'), r'mt_rand(\1, \2-1)'),
-    (re.compile(r'std::strcat\((.+?),\s*(.+?)\)'), r'((\1).(\2))'),
-)
-
-
 def convert_function_to_php(func, parser, function_args):
-    global regs
-    global regs2
-    variables = {
-        r'\$(\w+)'
-    }
-
+    if not func and not function_args:
+        return func
     repl = (
         ('$if(', 'if('),
         ('function $', 'function '),
@@ -575,20 +500,27 @@ def convert_function_to_php(func, parser, function_args):
             p = func[r]
             r += 1
 
-    for reg in regs:
-        func = re.sub(reg[0], reg[1], func)
+    for reg in RegexPatternPhp.FUNCTION:
+        func = reg[0].sub(reg[1], func)
 
-    for key in variables:
-        arr = re.findall(key, function_args + '\n' + func)
+    for key in RegexPatternPhp.VARIABLES:
+        patterns_dict = RegexPatternPhp.VARIABLES[key]
+        arr = key.findall(function_args + '\n' + func)
         for var in arr:
             for ch in ' +-*\\=([<>\t\n!':
                 func = func.replace(ch + var, ch + '$' + var)
-            func = re.sub('^' + var, '$' + var, func)
+
+            pattern = '^' + var
+            if pattern not in patterns_dict:
+                patterns_dict[pattern] = re.compile(pattern)
+            pattern = patterns_dict[pattern]
+
+            func = pattern.sub('$' + var, func)
             for ch in ['->']:
                 func = func.replace(ch + '$' + var, ch + var)
 
-    for reg in regs2:
-        func = re.sub(reg[0], reg[1], func)
+    for reg in RegexPatternPhp.FUNCTION_2:
+        func = reg[0].sub(reg[1], func)
 
     for reg in repl:
         func = func.replace(reg[0], reg[1])

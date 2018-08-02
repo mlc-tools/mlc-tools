@@ -70,8 +70,8 @@ class Function:
 
                 if not (p('*', arg) or p('&', arg) or p(' ', arg)):
                     exit(-1)
-        
-        line = line[:line.find('(')] + line[line.rfind(')')+1:]
+
+        line = line[:line.find('(')] + line[line.rfind(')') + 1:]
         line = line.replace(';', '')
         line = re.sub(r'{.*}', '', line)
         k = line.rfind(' ')
@@ -143,13 +143,13 @@ class Function:
         if Modifier.public in string:
             self.access = AccessSpecifier.public
 
-        string = re.sub(Modifier.server, '', string)
-        string = re.sub(Modifier.client, '', string)
-        string = re.sub(Modifier.external, '', string)
-        string = re.sub(Modifier.static, '', string)
-        string = re.sub(Modifier.const, '', string)
-        string = re.sub(Modifier.abstract, '', string)
-        string = re.sub(Modifier.private, '', string)
-        string = re.sub(Modifier.protected, '', string)
-        string = re.sub(Modifier.public, '', string)
+        string = string.replace(Modifier.server, '')
+        string = string.replace(Modifier.client, '')
+        string = string.replace(Modifier.external, '')
+        string = string.replace(Modifier.static, '')
+        string = string.replace(Modifier.const, '')
+        string = string.replace(Modifier.abstract, '')
+        string = string.replace(Modifier.private, '')
+        string = string.replace(Modifier.protected, '')
+        string = string.replace(Modifier.public, '')
         return string
