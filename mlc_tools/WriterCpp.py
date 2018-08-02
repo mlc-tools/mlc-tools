@@ -1061,8 +1061,8 @@ class WriterCpp(Writer):
 
 regs = [
     (re.compile(r'new\s*(\w+)\s*\(\s*\)'), r'make_intrusive<\1>()'),
-    (re.compile(r'\blist<([<>\w\s\*&]+)>\s*(\w+)'), r'std::vector<\1> \2'),
-    (re.compile(r'\bmap<([\w\s\*&]+),\s*([<>\w\s\*&]+)>\s*(\w+)'), r'std::map<\1, \2> \3'),
+    (re.compile(r'\blist<([<:>\w\s\*&]+)>\s*(\w+)'), r'std::vector<\1> \2'),
+    (re.compile(r'\bmap<([<:>\w\s\*&]+),\s*([<:>\w\s\*&]+)>\s*(\w+)'), r'std::map<\1, \2> \3'),
     (re.compile(r'std::strcat\((.+?),\s*(.+?)\)'), r'(std::string(\1) + std::string(\2))'),
 ]
 

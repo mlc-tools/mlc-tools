@@ -405,7 +405,7 @@ regs = (
     (re.compile(r'std::vector<.+>\s+(\w+)'), r'\1 = list()'),
     (re.compile(r'std::string\s+(\w+)'), r'\1'),
     (re.compile(r'\blist<.+>\s+(\w+)'), r'\1 = list()'),
-    (re.compile(r'\bmap<([\w\s\*&]+),\s*([<>\w\s\*&]+)>\s*(\w+)'), r'\3 = dict()'),
+    (re.compile(r'\bmap<([<:>\w\s\*&]+),\s*([<:>\w\s\*&]+)>\s*(\w+)'), r'\3 = dict()'),
     (re.compile(r'auto\&* (\w+)'), r'\1'),
     (re.compile(r'string (\w+)'), r'\1'),
     (re.compile(r'int (\w+)'), r'\1'),
