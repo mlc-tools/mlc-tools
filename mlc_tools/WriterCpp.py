@@ -283,16 +283,11 @@ class WriterCpp(Writer):
                 if object_.initial_value is None and self._current_class.type != 'enum':
                     Error.exit(Error.STATIS_MEMBER_SHOULD_HAVE_INITIALISATION, self._current_class.name, object_.name)
                 if self._current_class.type == 'enum':
-                    pattern = '{4}{0} {2}::{1}'
+                    pattern = '{0} {2}::{1}'
                 else:
-                    pattern = '{4}{0} {2}::{1} = {3}'
+                    pattern = '{0} {2}::{1} = {3}'
                 pattern += ';\n'
-                modifier = ''
-                if object_.is_const:
-                    modifier = 'const '
-                out[flags] += pattern.format(
-                    convert_type(object_), object_.name,
-                    self._current_class.name, object_.initial_value, modifier)
+                out[flags] += pattern.format(convert_type(object_), object_.name, self._current_class.name, object_.initial_value)
                 pass
         return out
 
