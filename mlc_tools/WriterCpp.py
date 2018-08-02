@@ -291,7 +291,7 @@ class WriterCpp(Writer):
                 if object_.is_const:
                     modifier = 'const '
                 out[flags] += pattern.format(
-                    convert_type(object_.type), object_.name,
+                    convert_type(object_), object_.name,
                     self._current_class.name, object_.initial_value, modifier)
                 pass
         return out
