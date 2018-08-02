@@ -462,102 +462,118 @@ class WriterPhp(Writer):
         Writer.save_file(self, filename, string)
 
 
-regs = [
-    [re.compile(r'DataStorage::shared\(\).get<(\w+)>'), r'DataStorage::shared()->get\1'],
-    [re.compile(r'\.str\(\)'), r''],
-    [re.compile(r'for\s*\(auto (.+?)\s*:\s*(.+)\s*\)'), r'foreach($\2 as $\1)'],
-    [re.compile(r'for\s*\(auto& (.+?)\s*:\s*(.+)\s*\)'), r'foreach($\2 as $\1)'],
-    [re.compile(r'for\s*\(auto&&\s*\[(\w+),\s*(\w+)\]\s*:\s*(.+)\)'), r'foreach ($\3 as $\1 => $\2)'],
-    [re.compile(r'auto (\w+)'), r'$\1'],
-    [re.compile(r'auto& (\w+)'), r'$\1'],
-    [re.compile(r'void (\w+)'), r'$\1'],
-    [re.compile(r'int (\w+)'), r'$\1'],
-    [re.compile(r'bool (\w+)'), r'$\1'],
-    [re.compile(r'\((\w+) (\w+)\)'), r'($\2)'],
-    [re.compile(r'\(const (\w+)\& (\w+)\)'), r'($\2)'],
-    [re.compile(r'\(const (\w+)\* (\w+)\)'), r'($\2)'],
-    [re.compile(r'\((\w+)\* (\w+)\)'), r'($\2)'],
-    [re.compile(r'(\w+)\ (\w+),'), r'$\2,'],
-    [re.compile(r'(\w+)\& (\w+),'), r'$\2,'],
-    [re.compile(r'(\w+)\* (\w+),'), r'$\2,'],
-    [re.compile(r'const (\w+)\* (\w+)'), r'$\2'],
-    [re.compile(r'const (\w+)\& (\w+)'), r'$\2'],
-    [re.compile(r'float (\w+)'), r'$\1'],
-    [re.compile(r'std::string (\w+)'), r'$\1'],
-    [re.compile(r'\bthis\b'), r'$this'],
-    [re.compile(r':const'), r''],
-    [re.compile(r'(\w+)::(\w+)'), r'\1::$\2'],
-    [re.compile(r'(\w+)::(\w+)\)'), r'\1::$\2)'],
-    [re.compile(r'(\w+)::(\w+)\.'), r'\1::$\2.'],
-    [re.compile(r'(\w+)::(\w+)->'), r'\1::$\2->'],
-    [re.compile(r'(\w+)::(\w+)\]'), r'\1::$\2]'],
-    [re.compile(r'(\w+)::\$(\w+)\('), r'\1::\2('],
-    [re.compile(r'(\w+)::\$(\w+)\((\w*)\)'), r'\1::\2(\3)'],
-    [re.compile(r'function \$(\w+)'), r'function \1'],
-    [re.compile(r'\.at\((.*?)\)'), r'[\1]'],
-    [re.compile(r'(\w+)\.'), r'\1->'],
-    [re.compile(r'(\w+)\(\)\.'), r'\1()->'],
-    [re.compile(r'(\w+)\]\.'), r'\1]->'],
-    [re.compile(r'&(\w+)'), r'\1'],
-    [re.compile(r'\$if\('), r'if('],
-    [re.compile(r'delete \$(\w+);'), r''],
-    [re.compile(r'([-0-9])->([-0-9])f\b'), r'\1.\2'],
-    [re.compile(r'assert\(.+\);'), r''],
-    [re.compile(r'make_intrusive<(\w+)>\(\s*\)'), r'new \1()'],
-    [re.compile(r'dynamic_pointer_cast_intrusive<\w+>\((.+?)\)'), r'\1'],
-    [re.compile(r'new\s*(\w+)\s*\(\s*\)'), r'new \1()'],
-    [re.compile(r'(.+?)\->push_back\((.+)\);'), r'array_push(\1, \2);'],
-    [re.compile(r'(".*?")\s*\+'), r'\1.'],
-    [re.compile(r'\+\s*(".*?")'), r'.\1'],
-    [re.compile(r'(\w+)\s+(\w+);'), r'$\2 = new \1();'],
-    [re.compile(r'\$(\w+) = new return\(\);'), r'return \1;'],
-    [re.compile(r'std::\$vector<.+?>\s+(\w+)'), r'$\1 = array()'],
-    [re.compile(r'\blist<.+>\s+(\w+)'), r'$\1 = array()'],
+regs = (
+    (re.compile(r'DataStorage::shared\(\).get<(\w+)>'), r'DataStorage::shared()->get\1'),
+    (re.compile(r'\.str\(\)'), r''),
+    (re.compile(r'for\s*\(auto (.+?)\s*:\s*(.+)\s*\)'), r'foreach($\2 as $\1)'),
+    (re.compile(r'for\s*\(auto& (.+?)\s*:\s*(.+)\s*\)'), r'foreach($\2 as $\1)'),
+    (re.compile(r'for\s*\(auto&&\s*\[(\w+),\s*(\w+)\]\s*:\s*(.+)\)'), r'foreach ($\3 as $\1 => $\2)'),
+    (re.compile(r'auto (\w+)'), r'$\1'),
+    (re.compile(r'auto& (\w+)'), r'$\1'),
+    (re.compile(r'void (\w+)'), r'$\1'),
+    (re.compile(r'int (\w+)'), r'$\1'),
+    (re.compile(r'bool (\w+)'), r'$\1'),
+    (re.compile(r'\((\w+) (\w+)\)'), r'($\2)'),
+    (re.compile(r'\(const (\w+)\& (\w+)\)'), r'($\2)'),
+    (re.compile(r'\(const (\w+)\* (\w+)\)'), r'($\2)'),
+    (re.compile(r'\((\w+)\* (\w+)\)'), r'($\2)'),
+    (re.compile(r'(\w+)\ (\w+),'), r'$\2,'),
+    (re.compile(r'(\w+)\& (\w+),'), r'$\2,'),
+    (re.compile(r'(\w+)\* (\w+),'), r'$\2,'),
+    (re.compile(r'const (\w+)\* (\w+)'), r'$\2'),
+    (re.compile(r'const (\w+)\& (\w+)'), r'$\2'),
+    (re.compile(r'float (\w+)'), r'$\1'),
+    (re.compile(r'std::string (\w+)'), r'$\1'),
+    (re.compile(r'\bthis\b'), r'$this'),
+    (re.compile(r':const'), r''),
+    (re.compile(r'(\w+)::(\w+)'), r'\1::$\2'),
+    (re.compile(r'(\w+)::(\w+)\)'), r'\1::$\2)'),
+    (re.compile(r'(\w+)::(\w+)\.'), r'\1::$\2.'),
+    (re.compile(r'(\w+)::(\w+)->'), r'\1::$\2->'),
+    (re.compile(r'(\w+)::(\w+)\]'), r'\1::$\2]'),
+    (re.compile(r'(\w+)::\$(\w+)\('), r'\1::\2('),
+    (re.compile(r'(\w+)::\$(\w+)\((\w*)\)'), r'\1::\2(\3)'),
+    (re.compile(r'function \$(\w+)'), r'function \1'),
+    (re.compile(r'\.at\((.*?)\)'), r'[\1]'),
+    (re.compile(r'(\w+)\.'), r'\1->'),
+    (re.compile(r'(\w+)\(\)\.'), r'\1()->'),
+    (re.compile(r'(\w+)\]\.'), r'\1]->'),
+    (re.compile(r'&(\w+)'), r'\1'),
+    (re.compile(r'\$if\('), r'if('),
+    (re.compile(r'delete \$(\w+);'), r''),
+    (re.compile(r'([-0-9])->([-0-9])f\b'), r'\1.\2'),
+    (re.compile(r'assert\(.+\);'), r''),
+    (re.compile(r'make_intrusive<(\w+)>\(\s*\)'), r'new \1()'),
+    (re.compile(r'dynamic_pointer_cast_intrusive<\w+>\((.+?)\)'), r'\1'),
+    (re.compile(r'new\s*(\w+)\s*\(\s*\)'), r'new \1()'),
+    (re.compile(r'(.+?)\->push_back\((.+)\);'), r'array_push(\1, \2);'),
+    (re.compile(r'(\w+)\s+(\w+);'), r'$\2 = new \1();'),
+    (re.compile(r'\$(\w+) = new return\(\);'), r'return \1;'),
+    (re.compile(r'std::\$vector<.+?>\s+(\w+)'), r'$\1 = array()'),
+    (re.compile(r'\blist<.+>\s+(\w+)'), r'$\1 = array()'),
     (re.compile(r'\bmap<([\w\s\*&]+),\s*([<>\w\s\*&]+)>\s*(\w+)'), r'$\3 = array()'),
-    [re.compile(r'\bstrTo<(\w+)>'), r'(\1)'],
-    [re.compile(r'\btoStr\b'), r'(str)'],
-]
+    (re.compile(r'\bstrTo<(\w+)>'), r'(\1)'),
+    (re.compile(r'\btoStr\b'), r'(str)'),
+    (re.compile(r'(@{__string_\d+__})\s*\+'), r'\1.'),
+    (re.compile(r'\+\s*(@{__string_\d+__})'), r'.\1'),
+)
+
+regs2 = (
+    (re.compile(r'->\$(\w+)\('), r'->\1('),
+    (re.compile(r'([-0-9]*)->([-0-9]*)f\b'), r'\1.\2'),
+    (re.compile(r'([-0-9]*)->f\\b'), r'\1.0'),
+    (re.compile(r'\$return\s'), r'return'),
+    (re.compile(r'(\$.+)->add\((\$.+),\s*(\w+)::\$(\w+),\s*std::\$placeholders::\$_\d\);'), r'\1->add(\2, array(\2, "\4"));'),
+    (re.compile(r'list_remove\((\$.+?),\s*(\$.+?)\);'), r'unset(\1[array_search(\2, \1)]);'),
+    (re.compile(r'list_clear\((.+?)\);'), r'\1 = array();'),
+    (re.compile(r'string_empty\((.+?)\)'), r'(count(\1) == 0)'),
+    (re.compile(r'random_float\(\)'), r'(mt_rand() * 1.0 / mt_getrandmax())'),
+    (re.compile(r'random_int\((.+?),\s*(.+)\)'), r'mt_rand(\1, \2-1)'),
+    (re.compile(r'std::strcat\((.+?),\s*(.+?)\)'), r'((\1).(\2))'),
+)
 
 
 def convert_function_to_php(func, parser, function_args):
     global regs
+    global regs2
     variables = {
         r'\$(\w+)'
     }
 
-    regs2 = [
-        [re.compile(r'->\$(\w+)\('), r'->\1('],
-        [re.compile(r'([-0-9]*)->([-0-9]*)f\b'), r'\1.\2'],
-        [re.compile(r'([-0-9]*)->f\\b'), r'\1.0'],
-        [re.compile(r'\$return\s'), r'return'],
-        [re.compile(r'(\$.+)->add\((\$.+),\s*(\w+)::\$(\w+),\s*std::\$placeholders::\$_\d\);'), r'\1->add(\2, array(\2, "\4"));'],
-        [re.compile(r'list_remove\((\$.+?),\s*(\$.+?)\);'), r'unset(\1[array_search(\2, \1)]);'],
-        [re.compile(r'list_clear\((.+?)\);'), r'\1 = array();'],
-        [re.compile(r'string_empty\((.+?)\)'), r'(count(\1) == 0)'],
-        [re.compile(r'random_float\(\)'), r'(mt_rand() * 1.0 / mt_getrandmax())'],
-        [re.compile(r'random_int\((.+?),\s*(.+)\)'), r'mt_rand(\1, \2-1)'],
-    ]
+    repl = (
+        ('$if(', 'if('),
+        ('function $', 'function '),
+        ('($int)', '(int)'),
+        ('time(nullptr)', 'time()'),
+        ('$$', '$'),
+        ('std::max', 'max'),
+        ('std::min', 'min'),
+        ('std::round', 'round'),
+        ('std::floor', 'floor'),
+        ('std::fabs', 'abs'),
+        ('std::ceil', 'ceil'),
+        ('std::sqrt', 'sqrt'),
+        ('in_list(', 'in_array('),
+        ('in_map', 'array_key_exists'),
+        ('list_push', 'array_push'),
+        ('list_size', 'count'),
+        ('map_size', 'count'),
+    )
 
-    repl = [
-        ['$if(', 'if('],
-        ['function $', 'function '],
-        ['($int)', '(int)'],
-        ['time(nullptr)', 'time()'],
-        ['$$', '$'],
-        ['std::max', 'max'],
-        ['std::min', 'min'],
-        ['std::round', 'round'],
-        ['std::floor', 'floor'],
-        ['std::fabs', 'abs'],
-        ['std::ceil', 'ceil'],
-        ['std::sqrt', 'sqrt'],
-
-        ['in_list(', 'in_array('],
-        ['in_map', 'array_key_exists'],
-        ['list_push', 'array_push'],
-        ['list_size', 'count'],
-        ['map_size', 'count'],
-    ]
+    strings = []
+    string_pattern = '@{__string_%d__}'
+    while '"' in func:
+        l = func.index('"')
+        r = l + 1
+        p = ''
+        while r < len(func):
+            if func[r] == '"' and p != '\\':
+                string = func[l:r + 1]
+                func = func[:l] + string_pattern % len(strings) + func[r + 1:]
+                strings.append(string)
+                break
+            p = func[r]
+            r += 1
 
     for reg in regs:
         func = re.sub(reg[0], reg[1], func)
@@ -577,6 +593,9 @@ def convert_function_to_php(func, parser, function_args):
     for reg in repl:
         func = func.replace(reg[0], reg[1])
 
+    for i, string in enumerate(strings):
+        func = func.replace(string_pattern % i, string)
+
     for cls in parser.classes:
         if cls.name in func:
             func = 'require_once "{}.php";\n'.format(cls.name) + func
@@ -584,7 +603,7 @@ def convert_function_to_php(func, parser, function_args):
     return func
 
 
-generated_functions = [
+generated_functions = (
     'serialize',
     'deserialize',
     'get_type',
@@ -594,7 +613,7 @@ generated_functions = [
     'int',
     'set',
     's_to_int',
-]
+)
 # format(name, initialize_list, functions, imports)
 _pattern_file = {}
 _pattern_file['xml'] = '''<?php

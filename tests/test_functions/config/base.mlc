@@ -38,6 +38,7 @@ class Test<SerializedObject>
         this->test_7();
         this->test_8(0);
         this->test_9();
+        this->test_10();
     }
     function void tests_const():const
     {
@@ -90,6 +91,12 @@ class Test<SerializedObject>
     function ReturnValue& test_9(int i=0)
     {
         return this->r0;
+    }
+
+    function list<list<string>> test_10()
+    {
+        std::vector<std::vector<std::string>> result;
+        return result;
     }
 
     //from live

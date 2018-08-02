@@ -1,4 +1,4 @@
-#include "generated_cpp/xml/Test.h"
+#include "Test.h"
 
 
 int main()

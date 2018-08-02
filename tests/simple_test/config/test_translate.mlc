@@ -1,0 +1,26 @@
+class Translates<SerializedObject>
+{
+    function void dummy_function()
+    {
+
+    }
+}
+class TestTranslates<ITestTranslates>
+{
+    function bool test_dummy_function()
+    {
+        return true;
+    }
+    function bool test_strcat()
+    {
+        std::string a = "a";
+        std::string b = "b";
+        std::string c = std::strcat(a, b);
+        return c == "ab";
+    }
+    function bool test_strcat2()
+    {
+        std::string c = std::strcat("a", "b");
+        return c == "ab";
+    }
+}
