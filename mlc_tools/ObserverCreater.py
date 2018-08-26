@@ -11,41 +11,38 @@ cpp = '''
 
 namespace @{namespace}
 {
-    template<class R, class ...A>
-    class @{name}
+    template<class R> class Observable;
+
+    template<class R, class... A>
+    class Observable<R(A...)>
     {
     public:
-        @{name}()
-        : _lock_counter(0)
+        Observable()
+        : _threadId(std::this_thread::get_id())
+        , _lock_counter(0)
         {
         }
 
-        template<class T, class M, class ...P>
-        void add(T* object, M method, P&&... placeholders)
+        template<class T, class M, class... P>
+        typename std::enable_if<std::is_member_function_pointer<M>::value>::type
+        add(T object, M method, P&&... placeholders)
         {
-            auto tag = reinterpret_cast<long>(object);
+            auto tag = get_tag(object);
             if(is_locked())
-            {
                 _listeners_to_add[tag] = std::bind(method, object, std::forward<P>(placeholders)...);
-            }
             else
-            {
                 _listeners[tag] = std::bind(method, object, std::forward<P>(placeholders)...);
-            }
         }
 
         template<class T, class F>
-        void add_lambda(T* object, F lambda)
+        typename std::enable_if<!std::is_member_function_pointer<F>::value || std::is_function<F>::value>::type
+        add(T object, F lambda)
         {
-            auto tag = reinterpret_cast<long>(object);
+            auto tag = get_tag(object);
             if(is_locked())
-            {
                 _listeners_to_add[tag] = lambda;
-            }
             else
-            {
                 _listeners[tag] = lambda;
-            }
         }
 
         template<class ...T>
@@ -57,9 +54,7 @@ namespace @{namespace}
                 for(auto p : _listeners)
                 {
                     if(_listeners_to_remove.count(p.first) == 0)
-                    {
                         p.second(std::forward<T>(args)...);
-                    }
                 }
                 unlock();
             }
@@ -68,8 +63,17 @@ namespace @{namespace}
         template<class T>
         void remove(T* object)
         {
-            auto tag = reinterpret_cast<long>(object);
-            remove(tag);
+            remove(get_tag(object));
+        }
+
+    private:
+        template<class T> typename std::enable_if<std::is_pointer<T>::value, long>::type get_tag(T t)
+        {
+            return reinterpret_cast<long>(t);
+        }
+        template<class T> typename std::enable_if<std::is_integral<T>::value, long>::type get_tag(T t)
+        {
+            return static_cast<long>(t);
         }
 
         void remove(long tag)
@@ -83,19 +87,21 @@ namespace @{namespace}
                     _listeners.erase( iter );
             }
         }
-    private:
         bool is_locked() const
         {
+            assert(_threadId == std::this_thread::get_id());
             return _lock_counter != 0;
         }
 
         void lock()
         {
+            assert(_threadId == std::this_thread::get_id());
             ++_lock_counter;
         }
 
         void unlock()
         {
+            assert(_threadId == std::this_thread::get_id());
             --_lock_counter;
             assert(_lock_counter >= 0);
             if(!is_locked())
@@ -110,9 +116,10 @@ namespace @{namespace}
             }
         }
     private:
+        std::thread::id _threadId;
         int _lock_counter;
-        std::map<long, std::function<R(A...)>> _listeners;
-        std::map<long, std::function<R(A...)>> _listeners_to_add;
+        std::unordered_map<long, std::function<R(A...)>> _listeners;
+        std::unordered_map<long, std::function<R(A...)>> _listeners_to_add;
         std::set<long> _listeners_to_remove;
     };
 }
