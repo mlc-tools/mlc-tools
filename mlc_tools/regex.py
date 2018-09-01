@@ -61,7 +61,7 @@ class RegexPatternPython:
         (re.compile(r'([\w\.]+?)\s*!=\s*False'), r'(\1)'),
         (re.compile(r'([\w\.]+?)\s*==\s*False'), r'not (\1)'),
         (re.compile(r'\bstrTo<(\w+)>\((.+?)\)'), r'\1(\2)'),
-        (re.compile(r'\btoStr\(.+?\)'), r'str(\1)'),
+        (re.compile(r'\btoStr\((.+?)\)'), r'str(\1)'),
         (re.compile(r'std::strcat\((.+?),\s*(.+?)\)'), r'((\1)+(\2))'),
     )
     regs_class_names = {}

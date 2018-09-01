@@ -78,6 +78,8 @@ def convert_type(type_):
         return s
     else:
         # TODO: add error
+        print('TODO: add error')
+        print(type_)
         exit(-1)
     return type_
 

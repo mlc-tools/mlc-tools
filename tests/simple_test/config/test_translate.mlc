@@ -52,4 +52,10 @@ class TestTranslates<ITestTranslates>
         
         return true;
     }
+    function bool test_to_str()
+    {
+        int a = 1;
+        std::string s = "1";
+        return toStr(a) == s;
+    }
 }

@@ -69,6 +69,8 @@ class Function:
                     return True
 
                 if not (p('*', arg) or p('&', arg) or p(' ', arg)):
+                    print('TODO: exit - 1. Function 1')
+                    print('Parsed line: [%s]' % line)
                     exit(-1)
 
         line = line[:line.find('(')] + line[line.rfind(')') + 1:]

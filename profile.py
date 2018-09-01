@@ -13,10 +13,10 @@ def test_game_s():
 def test_game_m():
     project_root = '/Work/gushchin/marines/'
     generator = Generator(project_root + 'config', generate_tests='no', generate_intrusive='no', generate_factory='yes')
-    generator.generate('cpp', 'xml', project_root + '/client/project_marines/generated/web', 'client')
-    generator.generate('php', 'xml', project_root + '/server/mg', 'server')
+    # generator.generate('cpp', 'xml', project_root + '/client/project_marines/generated/web', 'client')
+    # generator.generate('php', 'xml', project_root + '/server/mg', 'server')
     generator.generate('py', 'xml', project_root + '/tests/server/lib/mg', 'client')
-    generator.generate('py', 'xml', project_root + '/tests/server/lib/mg_server', 'server')
+    # generator.generate('py', 'xml', project_root + '/tests/server/lib/mg_server', 'server')
 
 
 def profile():
@@ -39,7 +39,7 @@ def profile():
         s = open(id).read()
         os.remove(id)
         return s
-    print get_profile_(test_game_m)
+    print(get_profile_(test_game_m))
 
 # profile()
 test_game_m()

@@ -48,10 +48,14 @@ class Generator:
         self.generate_factory = get_bool('generate_factory', 'yes')
         self.filter_code = None
         self.filter_data = None
+        self.custom_generator = None
 
     def set_filter(self, filter_code=None, filter_data=None):
         self.filter_code = filter_code
         self.filter_data = filter_data
+
+    def set_custom_generator(self, custom_generator):
+        self.custom_generator = custom_generator
 
     @staticmethod
     def check_version(requere):
@@ -138,6 +142,11 @@ class Generator:
                     continue
                 text = open(self.configs_directory + file).read()
                 self.parser.parse(text)
+
+        if self.custom_generator:
+            generator = self.custom_generator()
+            generator.generate(self.parser)
+
         self.parser.link()
         if self.php_validate:
             self.parser.validate_php_features()
@@ -248,6 +257,7 @@ class Generator:
             Log.message('Run test (%s):' % self.test_script)
             python = 'python3' if sys.version_info[0] == 3 else 'python'
             if os.system('{} {} {}'.format(python, self.test_script, self.test_script_args)) != 0:
+                print('TODO: exit - 1. main.py 1')
                 exit(1)
 
     def validate_arg_language(self):
