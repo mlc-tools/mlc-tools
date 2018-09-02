@@ -506,9 +506,24 @@ def convert_function_to_php(func, parser, function_args):
     for key in RegexPatternPhp.VARIABLES:
         patterns_dict = RegexPatternPhp.VARIABLES[key]
         arr = key.findall(function_args + '\n' + func)
+        dividers = ' +-*\\=()[]<>\t\n!,.;'
         for var in arr:
-            for ch in ' +-*\\=([<>\t\n!':
-                func = func.replace(ch + var, ch + '$' + var)
+            for ch in dividers:
+                i = 0
+                while i < len(func):
+                    replace = False
+                    full = ch + var
+                    start = func.find(full, i)
+                    if start == -1:
+                        break
+                    next = start + len(full)
+                    i = next
+                    if next < len(func):
+                        replace = func[next] in dividers
+                    if not replace:
+                        continue
+                    # func = func.replace(ch + var, ch + '$' + var)
+                    func = func[:start] + (ch + '$' + var) + func[next:]
 
             pattern = '^' + var
             if pattern not in patterns_dict:

@@ -39,6 +39,9 @@ class Test<SerializedObject>
         this->test_8(0);
         this->test_9();
         this->test_10();
+
+        map<std::string, int> some_map;
+        this->test_11(some_map);
     }
     function void tests_const():const
     {
@@ -97,6 +100,11 @@ class Test<SerializedObject>
     {
         std::vector<std::vector<std::string>> result;
         return result;
+    }
+
+    function map<string, int> test_11(map<string, int> some_map)
+    {
+        return some_map;
     }
 
     //from live

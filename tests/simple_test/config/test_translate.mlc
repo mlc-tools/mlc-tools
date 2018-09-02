@@ -49,7 +49,7 @@ class TestTranslates<ITestTranslates>
         m1[0] = nullptr;
         m2[""] = "";
         m3[""] = new Translates();
-        
+
         return true;
     }
     function bool test_to_str()
@@ -57,5 +57,19 @@ class TestTranslates<ITestTranslates>
         int a = 1;
         std::string s = "1";
         return toStr(a) == s;
+    }
+    function bool test_at()
+    {
+        bool result = true;
+
+        list<int> vector;
+        list_push(vector, 1);
+        result = vector.at(0) == 1;
+
+        map<int, int> map;
+        map[0] = 1;
+        result = map.at(0) == 1;
+
+        return result;
     }
 }

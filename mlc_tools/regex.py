@@ -63,6 +63,7 @@ class RegexPatternPython:
         (re.compile(r'\bstrTo<(\w+)>\((.+?)\)'), r'\1(\2)'),
         (re.compile(r'\btoStr\((.+?)\)'), r'str(\1)'),
         (re.compile(r'std::strcat\((.+?),\s*(.+?)\)'), r'((\1)+(\2))'),
+        (re.compile(r'\.at\((.*?)\)'), r'[\1]'),
     )
     regs_class_names = {}
 
@@ -146,7 +147,7 @@ class RegexPatternPhp:
         (re.compile(r'\blist<.+>\s+(\w+)'), r'$\1 = array()'),
         (re.compile(r'\bmap<([<:>\w\s\*&\$]+),\s*([<:>\w\s\*&\$]+)>\s*(\w+)'), r'$\3 = array()'),
         (re.compile(r'\bstrTo<(\w+)>'), r'(\1)'),
-        (re.compile(r'\btoStr\b'), r'(str)'),
+        (re.compile(r'\btoStr\b'), r'(string)'),
         (re.compile(r'(@{__string_\d+__})\s*\+'), r'\1.'),
         (re.compile(r'\+\s*(@{__string_\d+__})'), r'.\1'),
     )
@@ -186,4 +187,5 @@ class RegexPatternCpp:
         (re.compile(r'\blist<([<:>\w\s\*&]+)>\s*(\w+)'), r'std::vector<\1> \2'),
         (re.compile(r'\bmap<([<:>\w\s\*&]+),\s*([<:>\w\s\*&]+)>\s*(\w+)'), r'std::map<\1, \2> \3'),
         (re.compile(r'std::strcat\((.+?),\s*(.+?)\)'), r'(std::string(\1) + std::string(\2))'),
+        (re.compile(r'std::std::'), r'std::'),
     ]

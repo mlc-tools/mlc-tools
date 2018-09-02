@@ -57,6 +57,14 @@ def convert_type(type_):
         types['Observer'] = 'Observer<std::function<void()>>'
         if type_ in types:
             return types[type_]
+        if '<' in type_ and '>' in type_ and not type_.startswith('template'):
+            object = Object()
+            object.parse(type_)
+            args = []
+            for arg in object.template_args:
+                args.append(convert_type(arg))
+            result = '{}<{}>'.format(convert_type(object.type), ', '.join(args))
+            return result
     elif isinstance(type_, Object):
         s = convert_type(type_.type)
         if type_.template_args:
@@ -101,7 +109,7 @@ def get_include_file(parser, class_, filename, namespace):
     types['intrusive_ptr'] = '"intrusive_ptr.h"'
     if filename in types:
         return types[filename]
-    if 'std::map' in filename:
+    if 'map<' in filename:
         return '<map>'
     root_classes = ['DataStorage', 'Observable']
     for pair in cpp_files:
