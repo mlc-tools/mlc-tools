@@ -527,14 +527,6 @@ class WriterCpp(Writer):
             if not have:
                 self.add_serialization(class_, SERIALIZATION)
                 self.add_serialization(class_, DESERIALIZATION)
-        if class_.is_visitor:
-            have = False
-            for function in class_.functions:
-                if function.name == 'accept':
-                    have = True
-                    break
-            if not have:
-                self.add_accept_method(class_)
         if not class_.is_abstract:
             have = False
             for function in class_.functions:
@@ -680,18 +672,6 @@ class WriterCpp(Writer):
         if value.is_pointer:
             a4 = 'intrusive_ptr<{}>'.format(value_type)
         return pattern.format(a0, a1, a2, a3, a4)
-
-    def add_accept_method(self, class_):
-        visitor = self.parser.get_type_of_visitor(class_)
-        if visitor == class_.name:
-            return
-        function = Function()
-        function.name = 'accept'
-        function.return_type = Object.VOID
-        function.args.append(['visitor', visitor + '*'])
-        function.operations.append('visitor->visit(this);')
-        function.link()
-        class_.functions.append(function)
 
     def add_equal_methods(self, class_):
         function = Function()

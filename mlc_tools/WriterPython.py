@@ -40,7 +40,6 @@ class WriterPython(Writer):
         global _pattern_file
         pattern = _pattern_file[self.serialize_format]
         self.current_class = cls
-        self.add_accept_method(cls)
 
         if cls.type == 'enum':
             for member in cls.members:
@@ -326,21 +325,7 @@ class WriterPython(Writer):
             name = 'IVisitor{}'.format(parent.name)
             body = pattern.format(imports, lines, visits, name)
             self.save_file(name + '.py', body)
-            
-    def add_accept_method(self, cls):
-        if not cls.is_visitor:
-            return
-        visitor = self.parser.get_type_of_visitor(cls)
-        if not visitor or visitor == cls.name:
-            return
-        function = Function()
-        function.name = 'accept'
-        function.return_type = Object.VOID
-        function.args.append(['visitor', visitor + '*'])
-        function.operations.append('visitor->visit(this);')
-        function.link()
-        cls.functions.append(function)
-        
+                    
     def create_data_storage_class(self, name, classes):
         if self.serialize_format == 'xml':
             return DataStoragePythonXml(name, classes, self.parser)

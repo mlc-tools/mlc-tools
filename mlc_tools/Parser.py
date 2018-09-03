@@ -166,6 +166,7 @@ class Parser:
             cls.is_visitor = self.is_visitor(cls)
             if cls.is_visitor and cls.name != self.get_type_of_visitor(cls):
                 self._append_visit_function(cls)
+            self.add_accept_method(cls)
 
         for cls in self.classes:
             for member in cls.members:
@@ -327,6 +328,21 @@ class Parser:
             visitor.is_visitor = True
             visitor.side = cls.side
             self.classes.append(visitor)
+    
+    def add_accept_method(self, cls):
+        if not cls.is_visitor:
+            return
+        visitor = self.get_type_of_visitor(cls)
+        if not visitor or visitor == cls.name:
+            return
+        function = Function()
+        function.name = 'accept'
+        function.return_type = Object.VOID
+        function.args.append(['visitor', visitor + '*'])
+        function.operations.append('visitor->visit(this);')
+        function.link()
+        cls.functions.append(function)
+        
 
     def _create_declaration(self, text):
         lines = text.split("\n")
