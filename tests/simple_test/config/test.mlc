@@ -139,6 +139,54 @@ class RequestBar<Request>
 {
 }
 
+class RequestAcceptor<IVisitorRequest>
+{
+    int base = 0
+    int foo = 0
+    int bar = 0
+    function void visit(Request* ctx)
+    {
+        this->base += 1;
+    }
+    function void visit(RequestAcceptor* ctx)
+    {
+        this->base += 1;
+    }
+    function void visit(RequestFoo* ctx)
+    {
+        this->foo += 1;
+    }
+    function void visit(RequestBar* ctx)
+    {
+        this->bar += 1;
+    }
+}
+
+class TestRequestAcceptor<ITestRequestAcceptor>
+{
+    Request* request
+    function bool test_visitor()
+    {
+        RequestAcceptor acceptor;
+
+        bool result = true;
+        this->request = new RequestFoo();
+        this->request->accept(&acceptor);
+        result = result && acceptor.foo == 1;
+        result = result && acceptor.bar == 0;
+        result = result && acceptor.base == 0;
+
+        acceptor.foo = 0;
+        this->request = new RequestBar();
+        this->request->accept(&acceptor);
+        result = result && acceptor.foo == 0;
+        result = result && acceptor.bar == 1;
+        result = result && acceptor.base == 0;
+
+        return result;
+    }
+}
+
 class Response<SerializedObject>:visitor
 {
 }

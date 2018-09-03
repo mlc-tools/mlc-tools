@@ -10,7 +10,6 @@
 /******************************************************************************/
 #include "core/CommandBase.h"
 #include "TestEnum.h"
-#include "tests/Visitor.h"
 #include "tests/Side.h"
 #include "tests/enum.h"
 #include "tests/TestSerializeAllTypes.h"
@@ -67,7 +66,6 @@ int main(int argc, char ** args)
 
 	result = test_serialization() && result;
 	result = test_enum() && result;
-	result = test_visitor() && result;
 	result = test_side() && result;
 	result = test_all_types() && result;
 	result = mg::AllTests::run(&logger) && result;
