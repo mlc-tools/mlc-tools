@@ -81,7 +81,7 @@ if($xml->$(FIELD))
 }
 
 
-#list<int>, list<bool>, list<float>, list<string>
+#list<int>, list<float>, list<string>
 #serialize:
 $xml_list = $xml->addChild("$(FIELD)");
 foreach($(OWNER)$(FIELD) as $item)
@@ -93,7 +93,23 @@ if($xml->$(FIELD))
 {
     foreach($xml->$(FIELD)->item as $item)
     {
-        array_push($(OWNER)$(FIELD), $item["value"]);
+        array_push($(OWNER)$(FIELD), ($(ARG_0))$item["value"]);
+    }
+}
+#list<bool>
+#serialize:
+$xml_list = $xml->addChild("$(FIELD)");
+foreach($(OWNER)$(FIELD) as $item)
+{
+    $xml_list->addChild("item")->addAttribute("value", $item ? 'yes' : 'no');
+}
+#deserialize:
+if($xml->$(FIELD))
+{
+    foreach($xml->$(FIELD)->item as $item)
+    {
+        $value = strtolower((string)$item["value"]);
+        array_push($(OWNER)$(FIELD), ($value == 'true' || $value == 'yes'));
     }
 }
 

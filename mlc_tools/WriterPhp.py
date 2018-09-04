@@ -225,6 +225,7 @@ class WriterPhp(Writer):
             index = 1
         type = obj_type
         cls = self.parser.find_class(type)
+        arg_0 = obj_template_args[0].type if len(obj_template_args) > 0 else 'unknown_arg'
         if cls and cls.type == 'enum':
             type = 'enum'
         elif obj_type not in self.simple_types and type != "list" and type != "map":
@@ -255,12 +256,12 @@ class WriterPhp(Writer):
                         type = "list<pointer>"
                     elif arg.type == 'enum':
                         type = 'list<string>'
+                        arg_0 = 'string'
                     else:
                         type = "list<serialized>"
                         obj_type = arg_type
         fstr = self.serialize_protocol[serialization_type][type][index]
-        return fstr.format(obj_name, obj_type, obj_value, '{}', owner,
-                           obj_template_args[0].type if len(obj_template_args) > 0 else 'unknown_arg')
+        return fstr.format(obj_name, obj_type, obj_value, '{}', owner, arg_0)
 
     def save_config_file(self):
         content = '''<?php\n
