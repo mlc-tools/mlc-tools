@@ -528,7 +528,8 @@ arr = ET.SubElement(xml, '$(FIELD)')
         for obj in $(OWNER)$(FIELD):
             ET.SubElement(arr, 'item').set('value', str(obj))
 #deserialize:
-arr = xml.find('$(FIELD)')
+$(OWNER)$(FIELD) = list()
+        arr = xml.find('$(FIELD)')
         if arr is not None:
             for obj in arr:
                 $(OWNER)$(FIELD).append(int(float(obj.get('value'))))
@@ -539,7 +540,8 @@ arr = ET.SubElement(xml, '$(FIELD)')
         for obj in $(OWNER)$(FIELD):
             ET.SubElement(arr, 'item').set('value', str(obj))
 #deserialize:
-arr = xml.find('$(FIELD)')
+$(OWNER)$(FIELD) = list()
+        arr = xml.find('$(FIELD)')
         if arr is not None:
             for obj in arr:
                 value = obj.get('value')
@@ -552,7 +554,8 @@ arr = ET.SubElement(xml, '$(FIELD)')
         for obj in $(OWNER)$(FIELD):
             ET.SubElement(arr, 'item').set('value', str(obj))
 #deserialize:
-arr = xml.find('$(FIELD)')
+$(OWNER)$(FIELD) = list()
+        arr = xml.find('$(FIELD)')
         if arr is not None:
             for obj in arr:
                 $(OWNER)$(FIELD).append(float(obj.get('value')))
@@ -563,7 +566,8 @@ arr = ET.SubElement(xml, '$(FIELD)')
         for obj in $(OWNER)$(FIELD):
             ET.SubElement(arr, 'item').set('value', str(obj))
 #deserialize:
-arr = xml.find('$(FIELD)')
+$(OWNER)$(FIELD) = list()
+        arr = xml.find('$(FIELD)')
         if arr is not None:
             for obj in arr:
                 $(OWNER)$(FIELD).append(str(obj.get('value')))
@@ -576,7 +580,8 @@ arr = ET.SubElement(xml, '$(FIELD)')
             item = ET.SubElement(arr, 'item')
             obj.serialize(item)
 #deserialize:
-arr = xml.find('$(FIELD)')
+$(OWNER)$(FIELD) = list()
+        arr = xml.find('$(FIELD)')
         if arr is not None:
             from .$(TYPE) import $(TYPE)
             for xml_child in arr:
@@ -605,7 +610,8 @@ arr = ET.SubElement(xml, '$(FIELD)')
             item = ET.SubElement(arr, t.get_type())
             t.serialize(item)
 #deserialize:
-arr = xml.find('$(FIELD)')
+$(OWNER)$(FIELD) = list()
+        arr = xml.find('$(FIELD)')
         if arr is not None:
             for xml_item in arr:
                 type = xml_item.tag
@@ -632,7 +638,8 @@ arr_$(FIELD) = ET.SubElement(xml, '$(FIELD)')
             item = ET.SubElement(arr_$(FIELD), 'item')
             item.set("value", t.name)
 #deserialize:
-arr = xml.find('$(FIELD)')
+$(OWNER)$(FIELD) = list()
+        arr = xml.find('$(FIELD)')
         if arr is not None:
             for xml_item in arr:
                 name = xml_item.get('value')
@@ -702,7 +709,8 @@ arr_$(FIELD) = []
             arr_$(FIELD).append(obj)
         dictionary['$(FIELD)'] = arr_$(FIELD)
 #deserialize
-arr_$(FIELD) = dictionary['$(FIELD)']
+$(OWNER)$(FIELD) = list()
+        arr_$(FIELD) = dictionary['$(FIELD)']
         for obj in arr_$(FIELD):
             $(OWNER)$(FIELD).append(obj)
 
@@ -715,7 +723,8 @@ arr_$(FIELD) = []
             arr_$(FIELD).append(dict)
         dictionary['$(FIELD)'] = arr_$(FIELD)
 #deserialize
-from .$(TYPE) import $(TYPE)
+$(OWNER)$(FIELD) = list()
+        from .$(TYPE) import $(TYPE)
         arr_$(FIELD) = dictionary['$(FIELD)']
         for dict in arr_$(FIELD):
             obj = $(TYPE)()
@@ -743,7 +752,8 @@ dictionary['$(FIELD)'] = []
             arr[-1][t.get_type()] = $({})
             t.serialize(arr[-1][t.get_type()])
 #deserialize
-arr = dictionary['$(FIELD)']
+$(OWNER)$(FIELD) = list()
+        arr = dictionary['$(FIELD)']
         size = len(arr)
         for index in range(size):
             for key, value in arr[index].iteritems():
@@ -773,7 +783,8 @@ dictionary['$(FIELD)'] = []
         for t in $(OWNER)$(FIELD):
             arr.append(t.name)
 #deserialize:
-arr = dictionary['$(FIELD)']
+$(OWNER)$(FIELD) = list()
+        arr = dictionary['$(FIELD)']
         for name in arr:
             data = DataStorage.shared().get$(ARG_0)(name)
             $(OWNER)$(FIELD).append(data)

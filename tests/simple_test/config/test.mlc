@@ -403,9 +403,32 @@ class TestFactory<SerializedObject>
     }
 }
 
+class DataComplexMap<SerializedObject>:storage
+{
+    string name
+    map<int, list<float>> complex_map
+    function void foo()
+    {
+    }
+}
 
-
-
+class TestDataComplexMap<ITestDataComplexMap>:tests
+{
+    function bool test_foo()
+    {
+        return true;
+    }
+    function bool test_deserialize()
+    {
+        auto data = DataStorage::shared().get<DataComplexMap>("test");
+        bool result = true;
+        result = result && map_size(data->complex_map) == 1;
+        result = result && list_size(data->complex_map.at(1)) == 2;
+        result = result && data->complex_map.at(1)[0] == 1;
+        result = result && data->complex_map.at(1)[1] == 2;
+        return result;
+    }
+}
 
 
 

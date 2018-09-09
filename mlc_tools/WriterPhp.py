@@ -201,8 +201,16 @@ class WriterPhp(Writer):
         value_type = value.name if isinstance(value, Class) else value.type
         str = self.serialize_protocol[serialization_type]['map'][0]
         _value_is_pointer = value.is_pointer
+        
+        def get_create_type_operation(type_):
+            types = {
+                'list': 'array',
+                'map': 'array',
+            }
+            return types[type_] if type_ in types else 'new ' + type_
+        
         if value_type not in self.parser.simple_types:
-            value_declararion = '$value = new {}();'.format(value_type)
+            value_declararion = '$value = {}();'.format(get_create_type_operation(value_type))
         else:
             value_declararion = ''
         a0 = obj_name
