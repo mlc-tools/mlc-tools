@@ -20,6 +20,7 @@ class SerializedObject:serialized
 
 class ReturnValue<SerializedObject>
 {
+    int f_value
 }
 
 class Test<SerializedObject>
@@ -117,6 +118,15 @@ class Test<SerializedObject>
     function string get_id():const:client
     {
         return "";
+    }
+
+    function void test_001()
+    {
+        auto test2 = new ReturnValue();
+        test2->f_value = 0;
+
+        ReturnValue test3;
+        test3.f_value = 0;
     }
 }
 
