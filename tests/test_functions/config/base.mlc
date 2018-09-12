@@ -43,6 +43,8 @@ class Test<SerializedObject>
 
         map<std::string, int> some_map;
         this->test_11(some_map);
+        this->test_001();
+        this->test_002();
     }
     function void tests_const():const
     {
@@ -127,6 +129,15 @@ class Test<SerializedObject>
 
         ReturnValue test3;
         test3.f_value = 0;
+    }
+
+    function void test_002()
+    {
+        map<int, intrusive_ptr<ReturnValue>> value;
+        this->_002(value);
+    }
+    function void _002(map<int, ReturnValue*>:const map)
+    {
     }
 }
 

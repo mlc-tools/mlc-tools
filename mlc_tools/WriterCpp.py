@@ -62,8 +62,15 @@ def convert_type(type_):
             object.parse(type_)
             args = []
             for arg in object.template_args:
-                args.append(convert_type(arg))
+                obj = Object()
+                obj.parse(arg)
+                args.append(convert_type(obj))
             result = '{}<{}>'.format(convert_type(object.type), ', '.join(args))
+            if object.is_const:
+                if object.is_pointer:
+                    result = 'const %s' % result
+                else:
+                    result = 'const %s&' % result
             return result
     elif isinstance(type_, Object):
         s = convert_type(type_.type)

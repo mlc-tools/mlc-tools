@@ -14,9 +14,11 @@ def test_game_m():
     project_root = '/Work/gushchin/marines/'
     generator = Generator(project_root + 'config', generate_tests='yes', generate_intrusive='no', generate_factory='yes')
     # generator.generate('cpp', 'xml', project_root + '/client/project_marines/generated/web', 'client')
-    generator.generate('php', 'xml', project_root + '/server/mg', 'server')
+    # generator.generate('php', 'xml', project_root + '/server/mg', 'server')
     # generator.generate('py', 'xml', project_root + '/tests/server/lib/mg', 'client')
     # generator.generate('py', 'xml', project_root + '/tests/server/lib/mg_server', 'server')
+    # tests
+    generator.generate('cpp', 'xml', project_root + '/tests/unit_tests/cpp/generated', 'client')
 
 
 def profile():
