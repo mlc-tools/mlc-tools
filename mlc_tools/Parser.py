@@ -140,6 +140,7 @@ class Parser:
                 test = generator.generate_test_interface(cls)
                 if test:
                     tests.append(test)
+            generator.generate_base_classes()
             self.classes.extend(tests)
             self.classes.append(generator.generate_all_tests_class())
 
@@ -328,7 +329,7 @@ class Parser:
             visitor.is_visitor = True
             visitor.side = cls.side
             self.classes.append(visitor)
-    
+
     def add_accept_method(self, cls):
         if not cls.is_visitor:
             return
@@ -342,7 +343,6 @@ class Parser:
         function.operations.append('visitor->visit(this);')
         function.link()
         cls.functions.append(function)
-        
 
     def _create_declaration(self, text):
         lines = text.split("\n")
