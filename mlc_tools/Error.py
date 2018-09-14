@@ -22,8 +22,7 @@ class Log:
 
     @staticmethod
     def error(msg):
-        if not Log.disable_logs:
-            print(Color.red + msg + Color.endc) if Log.use_colors else msg
+        print(Color.red + msg + Color.endc) if Log.use_colors else msg
 
     @staticmethod
     def warning(msg):
