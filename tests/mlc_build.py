@@ -63,10 +63,16 @@ def test_serialize():
     if 0 != result:
         exit(1)
 
+def unit_tests_generator():
+    root = get_root() + '/tests/unit_tests_generator/'
+    generator = Generator(configs_directory=root, generate_intrusive=True, generate_factory=True, generate_tests=True)
+    run_tests(generator, root)
+    
 
 if __name__ == '__main__':
     simple_test()
     test_serialize()
     test_functions()
+    unit_tests_generator()
     # Dont run this test in CI
     # test_database()

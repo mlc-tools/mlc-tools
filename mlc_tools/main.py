@@ -259,6 +259,8 @@ class Generator:
             if os.system('{} {} {}'.format(python, self.test_script, self.test_script_args)) != 0:
                 print('TODO: exit - 1. main.py 1')
                 exit(1)
+        if not os.path.isfile(self.test_script):
+            Log.warning('Test script (%s) not founded' % self.test_script)
 
     def validate_arg_language(self):
         if self.language not in ['cpp', 'py', 'php']:
