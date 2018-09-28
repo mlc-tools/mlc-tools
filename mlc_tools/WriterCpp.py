@@ -167,7 +167,10 @@ def _create_constructor_function_hpp(class_):
 def _create_destructor_function_hpp(class_):
     if class_.type == 'enum':
         return ''
-    pattern = 'virtual ~{0}()'.format(class_.name)
+    virtual = 'virtual '
+    if not class_.is_virtual and len(class_.behaviors) == 0 and len(class_.subclasses) == 0:
+        virtual = ''
+    pattern = '{0}~{1}()'.format(virtual, class_.name)
     if not is_class_has_cpp_definitions(class_):
         pattern += '{}'
     pattern += ';\n'
@@ -433,7 +436,7 @@ class WriterCpp(Writer):
             for arg in function.args:
                 args.append(_convert_argument_type(convert_type(arg[1])) + ' ' + arg[0])
             args = ', '.join(args)
-            modifier = 'virtual '
+            modifier = 'virtual ' if function.is_virtual else ''
             if function.is_static:
                 modifier = 'static '
             if function.name == self._current_class.name or \
@@ -441,7 +444,7 @@ class WriterCpp(Writer):
                function.is_template:
                 modifier = ''
             is_override = ''
-            if self.parser.is_function_override(self._current_class, function):
+            if function.is_virtual and self.parser.is_function_override(self._current_class, function):
                 is_override = ' override'
             is_const = ''
             if function.is_const:

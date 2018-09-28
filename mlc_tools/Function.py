@@ -15,6 +15,7 @@ class Function:
         self.is_static = False
         self.is_abstract = False
         self.is_template = False
+        self.is_virtual = False
         self.side = 'both'
         self.access = AccessSpecifier.public
 
@@ -137,6 +138,7 @@ class Function:
         self.is_abstract = self.is_abstract or Modifier.abstract in string
         self.is_static = self.is_static or Modifier.static in string
         self.is_const = self.is_const or Modifier.const in string
+        self.is_virtual = self.is_virtual or Modifier.virtual in string
 
         if Modifier.private in string:
             self.access = AccessSpecifier.private
@@ -154,4 +156,5 @@ class Function:
         string = string.replace(Modifier.private, '')
         string = string.replace(Modifier.protected, '')
         string = string.replace(Modifier.public, '')
+        string = string.replace(Modifier.virtual, '')
         return string

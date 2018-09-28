@@ -10,6 +10,7 @@ class Class(Object):
     def __init__(self):
         Object.__init__(self)
         self.behaviors = []
+        self.subclasses = []
         self.members = []
         self.functions = []
         self.is_abstract = False
@@ -19,6 +20,7 @@ class Class(Object):
         self.is_numeric = False
         self.is_test = False
         self.is_inline = False
+        self.is_virtual = False
         self.generate_set_function = False
         self.type = 'class'
         self.group = ''
@@ -86,15 +88,35 @@ class Class(Object):
         if self.generate_set_function:
             self._generate_setters_function(parser)
             self._generate_getters_function(parser)
+
+        for func in self.functions:
+            func.is_virtual = self.is_virtual or func.is_virtual or self._has_equal_function_in_subclasses(func)
+
         if not self.is_abstract:
             for function in self.functions:
                 if function.is_abstract:
                     self.is_abstract = True
+                    function.is_virtual = True
                     break
             for parent in self.behaviors:
                 parent.on_linked(parser)
 
         self._linked = True
+
+    def _has_equal_function_in_subclasses(self, function):
+        for subclass in self.subclasses:
+            for func in subclass.functions:
+                equal = True
+                equal = equal and func.name == function.name
+                # equal = equal and func.args == function.args
+                equal = equal and func.return_type.type == function.return_type.type
+                if equal:
+                    func.is_virtual = True
+                    return True
+        for subclass in self.subclasses:
+            if subclass._has_equal_function_in_subclasses(function):
+                return True
+        return False
 
     def find_modifiers(self, string):
         self.is_abstract = self.is_abstract or Modifier.abstract in string
@@ -104,6 +126,7 @@ class Class(Object):
         self.is_numeric = self.is_numeric or Modifier.numeric in string
         self.is_test = self.is_test or Modifier.test in string
         self.is_inline = self.is_inline or Modifier.inline in string
+        self.is_virtual = self.is_virtual or Modifier.virtual in string
         self.generate_set_function = self.generate_set_function or Modifier.set_function in string
         if Modifier.server in string:
             self.side = Modifier.side_server
@@ -120,6 +143,7 @@ class Class(Object):
         string = string.replace(Modifier.numeric, '')
         string = string.replace(Modifier.test, '')
         string = string.replace(Modifier.inline, '')
+        string = string.replace(Modifier.virtual, '')
         return string
 
     def _generate_setters_function(self, parser):

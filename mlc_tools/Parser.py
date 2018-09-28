@@ -86,12 +86,12 @@ class Parser:
 
     def parse(self, text):
         text = text.strip()
-        l = text.find('/*')
-        while l != -1:
-            r = text.find('*/')
-            if r != -1:
-                text = text[:l] + text[r + 2:]
-            l = text.find('/*')
+        left = text.find('/*')
+        while left != -1:
+            right = text.find('*/')
+            if right != -1:
+                text = text[:left] + text[right + 2:]
+            left = text.find('/*')
         lines = text.split('\n')
         for i, line in enumerate(lines):
             if '//' in line:
@@ -158,6 +158,7 @@ class Parser:
                 if c is None:
                     Error.exit(Error.UNKNOWN_BEHAVIOR, cls.name, name)
                 behaviors.append(c)
+                c.subclasses.append(cls)
             cls.behaviors = behaviors
 
         for cls in self.classes:
@@ -372,7 +373,7 @@ class Parser:
         function.parse_body(body)
         self.functions.append(function)
         return text
-    
+
     def _generate_inline_functional(self, cls):
         if len(cls.behaviors) == 0:
             return
@@ -389,6 +390,8 @@ class Parser:
             for func in parent.functions:
                 copy = deepcopy(func)
                 cls.functions.append(copy)
+
+            parent.subclasses.remove(cls)
 
         cls.behaviors = [i for i in cls.behaviors if not i.is_inline]
 
