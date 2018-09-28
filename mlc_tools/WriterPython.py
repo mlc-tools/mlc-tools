@@ -300,7 +300,7 @@ class WriterPython(Writer):
         line_visit = '''\n    def visit_{0}(self, ctx):\n        pass\n'''
         base_visitors = {}
         for cls in self.parser.classes:
-            if cls.is_visitor and (cls.behaviors and not cls.behaviors[0].is_visitor):
+            if cls.is_visitor and (not cls.behaviors[0].is_visitor if len(cls.behaviors) else True):
                 base_visitors[cls] = []
         for cls in self.parser.classes:
             parent = cls.behaviors[0] if cls.behaviors else None

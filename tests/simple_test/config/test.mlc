@@ -1,4 +1,4 @@
-class SerializedObject:serialized
+class SerializedObject:serialized:inline
 {
 	int _reference_counter:runtime = 1
 	function int retain()
@@ -36,7 +36,6 @@ class core/CommandBase<SerializedObject>
 {
 	int user_id:key = 0
 	int current_time = 0
-	function string getSerializedString():external:const;
 }
 
 class AllTypesChildren<SerializedObject>
@@ -391,9 +390,8 @@ class TestFactory<SerializedObject>
     {
         bool result = true;
         auto command = new RequestBar();
-        auto string = Factory::serialize_command(command);
-
-        auto command2 = Factory::create_command(string);
+        auto string = Factory::serialize_command<RequestBar>(command);
+        auto command2 = Factory::create_command<Request>(string);
         result = logger->push(command2 != nullptr, " - TestFactory: commnd_2 deserialized") && result;
         if(result)
         {

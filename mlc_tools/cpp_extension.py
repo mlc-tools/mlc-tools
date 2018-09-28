@@ -337,11 +337,6 @@ intrusive_hpp = '''#ifndef __intrusive_ptr__
 
 namespace @{namespace}
 {
-    class SerializedObject;
-
-    void __intrusive_ptr__retain(SerializedObject* ptr);
-    void __intrusive_ptr__release(SerializedObject* ptr);
-
     template <class TRef>
     class intrusive_ptr
     {
@@ -438,9 +433,13 @@ namespace @{namespace}
             if(ptr != _ptr)
             {
                 if(ptr)
-                    __intrusive_ptr__retain(ptr);
+                {
+                    ptr->retain();
+                }
                 if(_ptr)
-                    __intrusive_ptr__release(_ptr);
+                {
+                    _ptr->release();
+                }
 
                 _ptr = ptr;
             }
@@ -502,22 +501,6 @@ namespace @{namespace}
 
 #endif
 '''
-intrusive_cpp = '''#include "intrusive_ptr.h"
-#include "SerializedObject.h"
-
-namespace @{namespace}
-{
-    void __intrusive_ptr__retain( SerializedObject* ptr )
-    {
-        ptr->retain();
-    }
-
-    void __intrusive_ptr__release( SerializedObject* ptr )
-    {
-        ptr->release();
-    }
-}
-'''
 
 factory_hpp = '''#ifndef __@{namespace}_Factory_h__
 #define __@{namespace}_Factory_h__
@@ -526,47 +509,53 @@ factory_hpp = '''#ifndef __@{namespace}_Factory_h__
 #include <iostream>
 #include <assert.h>
 #include "intrusive_ptr.h"
-#include "SerializedObject.h"
 #include "@{namespace}_config.h"
 
 #if @{namespace_upper}_SERIALIZE_FORMAT == @{namespace_upper}_JSON
 #   include "jsoncpp/json.h"
 #else
 #   include <sstream>
+#   include "pugixml/pugixml.hpp"
 #endif
 
-#define REGISTRATION_OBJECT(TType) class registrator__##TType { \
-public: registrator__##TType() { Factory::shared().registrationCommand<TType>( TType::TYPE ); } } \
-___registrator___##TType;
+#define REGISTRATION_OBJECT(TType) class registrator__##TType { public: registrator__##TType() { Factory::shared().registrationCommand<TType>( TType::TYPE ); } } ___registrator___##TType;
 
 namespace @{namespace}
 {
-
-    template <class TRef>
-    class TFactory
+    
+    class Factory
     {
-        class IObject : public TRef
+        class IBuilder
         {
         public:
-            virtual intrusive_ptr<TRef> build() = 0;
+            virtual void* build() = 0;
         };
-
+        
         template<class TType>
-        class Object : public IObject
+        class Builder : public IBuilder
         {
         public:
-            virtual intrusive_ptr<TRef> build()
+            virtual void* build() override
             {
-                return dynamic_pointer_cast_intrusive<TRef>( make_intrusive<TType>() );
+                return new TType();
             };
         };
-    public:
-        static TFactory& shared()
+        
+        ~Factory()
         {
-            static TFactory instance;
+            for(auto& pair : _builders)
+            {
+                delete pair.second;
+            }
+            _builders.clear();
+        }
+    public:
+        static Factory& shared()
+        {
+            static Factory instance;
             return instance;
         }
-
+        
         template <class TType>
         void registrationCommand( const std::string & key )
         {
@@ -575,86 +564,79 @@ namespace @{namespace}
                 std::cout <<std::endl <<"I already have object with key [" <<key <<"]";
             }
             assert( _builders.find( key ) == _builders.end() );
-            auto ptr = make_intrusive<Object<TType>>();
-            _builders[key] = ptr;
+            _builders[key] = new Builder<TType>();
         };
-
-        intrusive_ptr<TRef> build( const std::string & key )
+        
+        template <class TType>
+        intrusive_ptr<TType> build( const std::string & key ) const
         {
             bool isreg = _builders.find( key ) != _builders.end();
             if( !isreg )
+            {
                 return nullptr;
-            return isreg ? _builders[key]->build() : nullptr;
-        }
-
-        template <class TType>
-        intrusive_ptr<TType> build( const std::string & key )
-        {
-            intrusive_ptr<TRef> ptr = build( key );
-            intrusive_ptr<TType> result = dynamic_pointer_cast_intrusive<TType>( ptr );
+            }
+            auto builder = _builders.at(key);
+            intrusive_ptr<TType> result(reinterpret_cast<TType*>(builder->build()));
+            result->release();
             return result;
-        };
-
-    #if @{namespace_upper}_SERIALIZE_FORMAT == @{namespace_upper}_JSON
-        static std::string serialize_command(intrusive_ptr<TRef> command)
+        }
+        
+        #if @{namespace_upper}_SERIALIZE_FORMAT == @{namespace_upper}_JSON
+        template <class TType>
+        static std::string serialize_command(intrusive_ptr<TType> command)
         {
             Json::Value json;
             command->serialize(json[command->get_type()]);
-
+            
             Json::StreamWriterBuilder wbuilder;
             wbuilder["indentation"] = "";
             return Json::writeString(wbuilder, json);
         }
-        static intrusive_ptr<TRef> create_command(const std::string& payload)
+        template <class TType>
+        static intrusive_ptr<TType> create_command(const std::string& payload)
         {
             Json::Value json;
             Json::Reader reader;
             reader.parse(payload, json);
-
+            
             auto type = json.getMemberNames()[0];
-            auto command = shared().build(type);
+            auto command = shared().build<TType>(type);
             if (command != nullptr)
-                command->deserialize(json[type]);
+            command->deserialize(json[type]);
             return command;
         }
-    #else
-        static std::string serialize_command(intrusive_ptr<TRef> command)
+        #else
+        template <class TType>
+        static std::string serialize_command(intrusive_ptr<TType> command)
         {
             pugi::xml_document doc;
             auto root = doc.append_child(command->get_type().c_str());
             command->serialize(root);
-
+            
             std::stringstream stream;
             pugi::xml_writer_stream writer(stream);
-        #ifdef NDEBUG
+            #ifdef NDEBUG
             doc.save(writer, "", pugi::format_no_declaration | pugi::format_raw, pugi::xml_encoding::encoding_utf8);
-        #else
+            #else
             doc.save(writer, PUGIXML_TEXT(" "), pugi::format_no_declaration | pugi::format_indent, pugi::xml_encoding::encoding_utf8);
-        #endif
+            #endif
             return stream.str();
         }
-        static intrusive_ptr<TRef> create_command(const std::string& payload)
+        template <class TType>
+        static intrusive_ptr<TType> create_command(const std::string& payload)
         {
             pugi::xml_document doc;
             doc.load(payload.c_str());
             auto root = doc.root().first_child();
-            auto command = shared().build(root.name());
+            auto command = shared().build<TType>(root.name());
             command->deserialize(root);
             return command;
         }
-    #endif
-
-        template <class TType>
-        static intrusive_ptr<TType> create_command(const std::string& payload)
-        {
-            return dynamic_pointer_cast_intrusive<TType>(create_command(payload));
-        }
-
+        #endif
+        
     private:
-        std::map<std::string, intrusive_ptr<IObject>> _builders;
+        std::map<std::string, IBuilder*> _builders;
     };
-
-    using Factory = TFactory<SerializedObject>;
 }
 
 #endif
@@ -665,6 +647,5 @@ cpp_files = [
     ['@{namespace}_extensions.h', functions_hpp],
     ['@{namespace}_extensions.cpp', functions_cpp],
     ['intrusive_ptr.h', intrusive_hpp],
-    ['intrusive_ptr.cpp', intrusive_cpp],
     ['@{namespace}_Factory.h', factory_hpp],
 ]

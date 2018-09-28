@@ -25,6 +25,7 @@ class Modifier:
     public = ":public"
     numeric = ":numeric"
     test = ":test"
+    inline = ":inline"
 
     client = ':client'
     server = ':server'

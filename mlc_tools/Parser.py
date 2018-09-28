@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from .Object import Object
 from .Class import Class
 from .Function import Function
@@ -145,10 +147,6 @@ class Parser:
             self.classes.append(generator.generate_all_tests_class())
 
         for cls in self.classes:
-            if cls.type == 'class' and cls.auto_generated:
-                cls.add_get_type_function()
-
-        for cls in self.classes:
             if cls.is_visitor and self.get_type_of_visitor(cls) != cls.name:
                 if cls.name.find('IVisitor') != 0:
                     self.create_visitor_class(cls)
@@ -176,6 +174,13 @@ class Parser:
         for cls in self.classes:
             for func in cls.functions:
                 func.link()
+
+        for cls in self.classes:
+            self._generate_inline_functional(cls)
+
+        for cls in self.classes:
+            if cls.type == 'class' and cls.auto_generated:
+                cls.add_get_type_function()
 
         for cls in self.classes:
             cls.on_linked(self)
@@ -367,6 +372,25 @@ class Parser:
         function.parse_body(body)
         self.functions.append(function)
         return text
+    
+    def _generate_inline_functional(self, cls):
+        if len(cls.behaviors) == 0:
+            return
+        for parent in cls.behaviors:
+            parent = cls.behaviors[0]
+            if not isinstance(parent, Class):
+                Error.exit(Error.INTERNAL_ERROR)
+            self._generate_inline_functional(parent)
+            if not parent.is_inline:
+                continue
+            for object in parent.members:
+                copy = deepcopy(object)
+                cls.members.append(copy)
+            for func in parent.functions:
+                copy = deepcopy(func)
+                cls.functions.append(copy)
+
+        cls.behaviors = [i for i in cls.behaviors if not i.is_inline]
 
     def parse_serialize_protocol(self, path):
         buffer_ = open(self.configs_root + path).read()
