@@ -5,6 +5,7 @@ from .DataStorageCreators import DataStoragePhpXml
 from .DataStorageCreators import DataStoragePhpJson
 from .Error import Error
 from .Object import AccessSpecifier
+from .regex import RegexPatternPhp
 import re
 
 SERIALIZATION = 0
@@ -16,6 +17,8 @@ def convertInitializeValue(value):
         value = '$' + value
     if value is None:
         value = 'null'
+    if isinstance(value, str):
+        value = RegexPatternPhp.INITIALIZE[0].sub(RegexPatternPhp.INITIALIZE[1], value)
     return value
 
 
@@ -141,6 +144,11 @@ class WriterPhp(Writer):
                 if self.parser.find_class(object.type):
                     value = 'null'
                     out_init = '$this->{} = new {}();'.format(object.name, object.type)
+        else:
+            cls = self.parser.find_class(object.type)
+            if cls and cls.type == 'enum':
+                value = None
+                out_init = '$this->{} = {};'.format(object.name, convertInitializeValue(object.initial_value))
 
         accesses = {
             AccessSpecifier.public: 'public',
@@ -193,8 +201,16 @@ class WriterPhp(Writer):
         value_type = value.name if isinstance(value, Class) else value.type
         str = self.serialize_protocol[serialization_type]['map'][0]
         _value_is_pointer = value.is_pointer
+        
+        def get_create_type_operation(type_):
+            types = {
+                'list': 'array',
+                'map': 'array',
+            }
+            return types[type_] if type_ in types else 'new ' + type_
+        
         if value_type not in self.parser.simple_types:
-            value_declararion = '$value = new {}();'.format(value_type)
+            value_declararion = '$value = {}();'.format(get_create_type_operation(value_type))
         else:
             value_declararion = ''
         a0 = obj_name
@@ -217,6 +233,7 @@ class WriterPhp(Writer):
             index = 1
         type = obj_type
         cls = self.parser.find_class(type)
+        arg_0 = obj_template_args[0].type if len(obj_template_args) > 0 else 'unknown_arg'
         if cls and cls.type == 'enum':
             type = 'enum'
         elif obj_type not in self.simple_types and type != "list" and type != "map":
@@ -247,12 +264,12 @@ class WriterPhp(Writer):
                         type = "list<pointer>"
                     elif arg.type == 'enum':
                         type = 'list<string>'
+                        arg_0 = 'string'
                     else:
                         type = "list<serialized>"
                         obj_type = arg_type
         fstr = self.serialize_protocol[serialization_type][type][index]
-        return fstr.format(obj_name, obj_type, obj_value, '{}', owner,
-                           obj_template_args[0].type if len(obj_template_args) > 0 else 'unknown_arg')
+        return fstr.format(obj_name, obj_type, obj_value, '{}', owner, arg_0)
 
     def save_config_file(self):
         content = '''<?php\n
@@ -313,7 +330,7 @@ class WriterPhp(Writer):
             $type = $command->get_type();
             $json = json_decode('{"'.$type.'": {}}');
             $command->serialize($json->$type);
-            return json_encode($json);
+            return json_encode($json, JSON_PRETTY_PRINT);
         }'''
 
         factory = pattern.format(factory_methods[self.serialize_format])
@@ -327,7 +344,7 @@ class WriterPhp(Writer):
         line_visit = '''\nfunction visit_{0}($ctx)\n@(\n@)\n'''
         base_visitors = {}
         for cls in self.parser.classes:
-            if cls.is_visitor and (cls.behaviors and not cls.behaviors[0].is_visitor):
+            if cls.is_visitor and (not cls.behaviors[0].is_visitor if len(cls.behaviors) else True):
                 base_visitors[cls] = []
         for cls in self.parser.classes:
             parent = cls.behaviors[0] if cls.behaviors else None
@@ -440,105 +457,86 @@ class WriterPhp(Writer):
         Writer.save_file(self, filename, string)
 
 
-regs = [
-    [re.compile(r'DataStorage::shared\(\).get<(\w+)>'), r'DataStorage::shared()->get\1'],
-    [re.compile(r'\.str\(\)'), r''],
-    [re.compile(r'for\s*\(auto (.+?)\s*:\s*(.+?)\s*\)'), r'foreach($\2 as $\1)'],
-    [re.compile(r'for\s*\(auto& (.+?)\s*:\s*(.+?)\s*\)'), r'foreach($\2 as $\1)'],
-    [re.compile(r'for\s*\(auto&&\s*\[(\w+),\s*(\w+)\]\s*:\s*(.+)\)'), r'foreach ($\3 as $\1 => $\2)'],
-    [re.compile(r'auto (\w+)'), r'$\1'],
-    [re.compile(r'auto& (\w+)'), r'$\1'],
-    [re.compile(r'void (\w+)'), r'$\1'],
-    [re.compile(r'int (\w+)'), r'$\1'],
-    [re.compile(r'bool (\w+)'), r'$\1'],
-    [re.compile(r'\((\w+) (\w+)\)'), r'($\2)'],
-    [re.compile(r'\(const (\w+)\& (\w+)\)'), r'($\2)'],
-    [re.compile(r'\(const (\w+)\* (\w+)\)'), r'($\2)'],
-    [re.compile(r'\((\w+)\* (\w+)\)'), r'($\2)'],
-    [re.compile(r'(\w+)\ (\w+),'), r'$\2,'],
-    [re.compile(r'(\w+)\& (\w+),'), r'$\2,'],
-    [re.compile(r'(\w+)\* (\w+),'), r'$\2,'],
-    [re.compile(r'const (\w+)\* (\w+)'), r'$\2'],
-    [re.compile(r'const (\w+)\& (\w+)'), r'$\2'],
-    [re.compile(r'float (\w+)'), r'$\1'],
-    [re.compile(r'std::string (\w+)'), r'$\1'],
-    [re.compile(r'this->'), r'$this->'],
-    [re.compile(r':const'), r''],
-    [re.compile(r'(\w+)::(\w+)'), r'\1::$\2'],
-    [re.compile(r'(\w+)::(\w+)\)'), r'\1::$\2)'],
-    [re.compile(r'(\w+)::(\w+)\.'), r'\1::$\2.'],
-    [re.compile(r'(\w+)::(\w+)->'), r'\1::$\2->'],
-    [re.compile(r'(\w+)::(\w+)\]'), r'\1::$\2]'],
-    [re.compile(r'(\w+)::\$(\w+)\((\w*)\)'), r'\1::\2(\3)'],
-    [re.compile(r'function \$(\w+)'), r'function \1'],
-    [re.compile(r'\.at\((.*?)\)'), r'[\1]'],
-    [re.compile(r'(\w+)\.'), r'\1->'],
-    [re.compile(r'(\w+)\(\)\.'), r'\1()->'],
-    [re.compile(r'(\w+)\]\.'), r'\1]->'],
-    [re.compile(r'&(\w+)'), r'\1'],
-    [re.compile(r'\$if\('), r'if('],
-    [re.compile(r'delete (\w+);'), r''],
-    [re.compile(r'([-0-9])->([-0-9])f\b'), r'\1.\2'],
-    [re.compile(r'assert\(.+\);'), r''],
-    [re.compile(r'make_intrusive<(\w+)>\(\s*\)'), r'new \1()'],
-    [re.compile(r'dynamic_pointer_cast_intrusive<\w+>\((.+?)\)'), r'\1'],
-    [re.compile(r'new\s*(\w+)\s*\(\s*\)'), r'new \1()'],
-    [re.compile(r'(.+?)\->push_back\((.+)\);'), r'array_push(\1, \2);'],
-    [re.compile(r'(".*?")\s*\+'), r'\1.'],
-    [re.compile(r'\+\s*(".*?")'), r'.\1'],
-    [re.compile(r'(\w+)\s+(\w+);'), r'$\2 = new \1();'],
-    [re.compile(r'\$(\w+) = new return\(\);'), r'return \1;'],
-    [re.compile(r'std::vector<\w+>\s+(\w+);'), r'$\1 = array();'],
-]
-
-
 def convert_function_to_php(func, parser, function_args):
-    global regs
-    variables = {
-        r'\$(\w+)'
-    }
+    if not func and not function_args:
+        return func
+    repl = (
+        ('$if(', 'if('),
+        ('function $', 'function '),
+        ('($int)', '(int)'),
+        ('time(nullptr)', 'time()'),
+        ('$$', '$'),
+        ('std::max', 'max'),
+        ('std::min', 'min'),
+        ('std::round', 'round'),
+        ('std::floor', 'floor'),
+        ('std::fabs', 'abs'),
+        ('std::ceil', 'ceil'),
+        ('std::sqrt', 'sqrt'),
+        ('in_list(', 'in_array('),
+        ('in_map', 'array_key_exists'),
+        ('list_push', 'array_push'),
+        ('list_size', 'count'),
+        ('map_size', 'count'),
+    )
 
-    regs2 = [
-        [re.compile(r'->\$(\w+)\('), r'->\1('],
-        [re.compile(r'([-0-9]*)->([-0-9]*)f\b'), r'\1.\2'],
-        [re.compile(r'([-0-9]*)->f\\b'), r'\1.0'],
-        [re.compile(r'\$return\s'), r'return'],
-    ]
+    strings = []
+    string_pattern = '@{__string_%d__}'
+    while '"' in func:
+        l = func.index('"')
+        r = l + 1
+        p = ''
+        while r < len(func):
+            if func[r] == '"' and p != '\\':
+                string = func[l:r + 1]
+                func = func[:l] + string_pattern % len(strings) + func[r + 1:]
+                strings.append(string)
+                break
+            p = func[r]
+            r += 1
 
-    repl = [
-        ['$if(', 'if('],
-        ['function $', 'function '],
-        ['($int)', '(int)'],
-        ['time(nullptr)', 'time()'],
-        ['$$', '$'],
-        ['std::$max', 'max'],
-        ['std::$min', 'min'],
-        ['std::$round', 'round'],
-        ['std::$floor', 'floor'],
-        ['in_list(', 'in_array('],
-        ['in_map', 'array_key_exists'],
-        ['list_push', 'array_push'],
-        ['list_size', 'count'],
-        ['map_size', 'count'],
-    ]
+    for reg in RegexPatternPhp.FUNCTION:
+        func = reg[0].sub(reg[1], func)
 
-    for reg in regs:
-        func = re.sub(reg[0], reg[1], func)
-
-    for key in variables:
-        arr = re.findall(key, function_args + '\n' + func)
+    for key in RegexPatternPhp.VARIABLES:
+        patterns_dict = RegexPatternPhp.VARIABLES[key]
+        arr = key.findall(function_args + '\n' + func)
+        dividers = ' +-*\\=()[]<>\t\n!,.;'
         for var in arr:
-            for ch in ' +-*\\=([<>\t\n!':
-                func = func.replace(ch + var, ch + '$' + var)
-            func = re.sub('^' + var, '$' + var, func)
+            for ch in dividers:
+                i = 0
+                while i < len(func):
+                    replace = False
+                    full = ch + var
+                    start = func.find(full, i)
+                    if start == -1:
+                        break
+                    next = start + len(full)
+                    i = next
+                    if next < len(func):
+                        replace = func[next] in dividers
+                    if not replace:
+                        continue
+                    # func = func.replace(ch + var, ch + '$' + var)
+                    func = func[:start] + (ch + '$' + var) + func[next:]
+
+            pattern = '^' + var
+            if pattern not in patterns_dict:
+                patterns_dict[pattern] = re.compile(pattern)
+            pattern = patterns_dict[pattern]
+
+            func = pattern.sub('$' + var, func)
             for ch in ['->']:
                 func = func.replace(ch + '$' + var, ch + var)
 
-    for reg in regs2:
-        func = re.sub(reg[0], reg[1], func)
+    for reg in RegexPatternPhp.FUNCTION_2:
+        func = reg[0].sub(reg[1], func)
 
     for reg in repl:
         func = func.replace(reg[0], reg[1])
+
+    for i, string in enumerate(strings):
+        func = func.replace(string_pattern % i, string)
 
     for cls in parser.classes:
         if cls.name in func:
@@ -547,7 +545,7 @@ def convert_function_to_php(func, parser, function_args):
     return func
 
 
-generated_functions = [
+generated_functions = (
     'serialize',
     'deserialize',
     'get_type',
@@ -557,7 +555,7 @@ generated_functions = [
     'int',
     'set',
     's_to_int',
-]
+)
 # format(name, initialize_list, functions, imports)
 _pattern_file = {}
 _pattern_file['xml'] = '''<?php

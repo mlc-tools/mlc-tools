@@ -10,20 +10,19 @@
 /******************************************************************************/
 #include "core/CommandBase.h"
 #include "TestEnum.h"
-#include "IntrusivePtr.h"
-#include "tests/Visitor.h"
 #include "tests/Side.h"
 #include "tests/enum.h"
 #include "tests/TestSerializeAllTypes.h"
 #include <iostream>
 #include "DataStorage.h"
 #include <fstream>
-#include "config.h"
+#include "mg_config.h"
+#include "mg_Factory.h"
 #include "AllTests.h"
 #include "tests/Logger.h"
 #include "tests/RunAllTests.h"
 
-extern intrusive_ptr<mg::CommandBase> createCommand(const std::string& payload);
+extern mg::intrusive_ptr<mg::CommandBase> createCommand(const std::string& payload);
 std::string root = "../../";
 void initialize_data_storage()
 {
@@ -68,7 +67,6 @@ int main(int argc, char ** args)
 
 	result = test_serialization() && result;
 	result = test_enum() && result;
-	result = test_visitor() && result;
 	result = test_side() && result;
 	result = test_all_types() && result;
 	result = mg::AllTests::run(&logger) && result;
@@ -76,6 +74,16 @@ int main(int argc, char ** args)
     mg::RunAllTests test;
     test.initialize(&logger);
     result = test.execute() && result;
+
+    std::cout << "====================================" << std::endl;
+    std::cout << "Sumary: " << std::endl;
+    std::cout << "  Steps: " << logger.success_count << "/" << logger.tests_count << " success" << std::endl;
+    std::cout << "  Count of classes: " << logger.class_count << std::endl;
+    std::cout << "  Count of method: " << logger.methods_count << std::endl;
+    std::cout << "  Count of all methods: " << logger.all_methods_count << std::endl;
+    std::cout << "  Count of tested methods: " << logger.implemented_methods_count << std::endl;
+    std::cout << "  Percent of cover: " << 100.f * logger.implemented_methods_count / logger.all_methods_count << "%" << std::endl;
+    std::cout << "====================================" << std::endl;
 
 
 	std::cout << "Execute results = " << (result ? "Ok" : "Fail") << std::endl;
@@ -88,10 +96,10 @@ bool test_serialization()
 	int test_user_id = 123;
 	int test_time = 1231235245;
 
-	auto command = make_intrusive<mg::CommandBase>();
+	auto command = mg::make_intrusive<mg::CommandBase>();
 	command->user_id = test_user_id;
 	command->current_time = test_time;
-	auto buffer = command->getSerializedString();
+	auto buffer = mg::Factory::shared().serialize_command(command);
 	auto deserialized = createCommand(buffer);
 
 	std::cout << "serialized string:" << std::endl;

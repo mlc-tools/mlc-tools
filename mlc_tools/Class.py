@@ -10,6 +10,7 @@ class Class(Object):
     def __init__(self):
         Object.__init__(self)
         self.behaviors = []
+        self.subclasses = []
         self.members = []
         self.functions = []
         self.is_abstract = False
@@ -18,6 +19,8 @@ class Class(Object):
         self.is_storage = False
         self.is_numeric = False
         self.is_test = False
+        self.is_inline = False
+        self.is_virtual = False
         self.generate_set_function = False
         self.type = 'class'
         self.group = ''
@@ -30,6 +33,8 @@ class Class(Object):
         line = line.strip()
         if self.type in line:
             line = line[len(self.type):]
+        elif 'interface' in line:
+            line = line[len('interface'):]
         line = self.find_modifiers(line)
         type_ = self.type
         self.type = ''
@@ -83,15 +88,38 @@ class Class(Object):
         if self.generate_set_function:
             self._generate_setters_function(parser)
             self._generate_getters_function(parser)
+
+        for func in self.functions:
+            func.is_virtual = self.is_virtual or \
+                              func.is_virtual or \
+                              func.is_abstract or \
+                              self._has_equal_function_in_subclasses(func)
+
         if not self.is_abstract:
             for function in self.functions:
                 if function.is_abstract:
                     self.is_abstract = True
+                    function.is_virtual = True
                     break
             for parent in self.behaviors:
                 parent.on_linked(parser)
 
         self._linked = True
+
+    def _has_equal_function_in_subclasses(self, function):
+        for subclass in self.subclasses:
+            for func in subclass.functions:
+                equal = True
+                equal = equal and func.name == function.name
+                # equal = equal and func.args == function.args
+                equal = equal and func.return_type.type == function.return_type.type
+                if equal:
+                    func.is_virtual = True
+                    return True
+        for subclass in self.subclasses:
+            if subclass._has_equal_function_in_subclasses(function):
+                return True
+        return False
 
     def find_modifiers(self, string):
         self.is_abstract = self.is_abstract or Modifier.abstract in string
@@ -100,21 +128,25 @@ class Class(Object):
         self.is_storage = self.is_storage or Modifier.storage in string
         self.is_numeric = self.is_numeric or Modifier.numeric in string
         self.is_test = self.is_test or Modifier.test in string
+        self.is_inline = self.is_inline or Modifier.inline in string
+        self.is_virtual = self.is_virtual or Modifier.virtual in string
         self.generate_set_function = self.generate_set_function or Modifier.set_function in string
         if Modifier.server in string:
             self.side = Modifier.side_server
         if Modifier.client in string:
             self.side = Modifier.side_client
 
-        string = re.sub(Modifier.server, '', string)
-        string = re.sub(Modifier.client, '', string)
-        string = re.sub(Modifier.abstract, '', string)
-        string = re.sub(Modifier.serialized, '', string)
-        string = re.sub(Modifier.visitor, '', string)
-        string = re.sub(Modifier.storage, '', string)
-        string = re.sub(Modifier.set_function, '', string)
-        string = re.sub(Modifier.numeric, '', string)
-        string = re.sub(Modifier.test, '', string)
+        string = string.replace(Modifier.server, '')
+        string = string.replace(Modifier.client, '')
+        string = string.replace(Modifier.abstract, '')
+        string = string.replace(Modifier.serialized, '')
+        string = string.replace(Modifier.visitor, '')
+        string = string.replace(Modifier.storage, '')
+        string = string.replace(Modifier.set_function, '')
+        string = string.replace(Modifier.numeric, '')
+        string = string.replace(Modifier.test, '')
+        string = string.replace(Modifier.inline, '')
+        string = string.replace(Modifier.virtual, '')
         return string
 
     def _generate_setters_function(self, parser):
@@ -230,20 +262,22 @@ class Class(Object):
             self.functions.append(function)
 
     def add_get_type_function(self):
-        if not self.is_abstract:
-            member = Object()
-            member.is_static = True
-            member.is_const = True
-            member.type = 'string'
-            member.name = 'TYPE'
-            member.initial_value = '"{}"'.format(self.name)
-            member.access = AccessSpecifier.public
-            self.members.append(member)
+        # if not self.is_abstract:
+        member = Object()
+        member.is_static = True
+        member.is_const = True
+        member.type = 'string'
+        member.name = 'TYPE'
+        member.initial_value = '"{}"'.format(self.name)
+        member.access = AccessSpecifier.public
+        self.members.append(member)
 
         function = Function()
         function.name = constants.CLASS_FUNCTION_GET_TYPE
         function.return_type = 'string'
         function.is_const = True
-        function.operations.append('return {}::TYPE;'.format(self.name))
+        # function.is_abstract = self.is_abstract
+        if not function.is_abstract:
+            function.operations.append('return {}::TYPE;'.format(self.name))
         function.link()
         self.functions.append(function)

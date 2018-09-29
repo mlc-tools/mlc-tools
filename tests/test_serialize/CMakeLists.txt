@@ -22,9 +22,6 @@ include_directories(
 add_executable(${PROJECT_NAME} 
 	${SRC}
 	${ROOT}/step_2.cpp
-	${EXTERNAL}/ml/converters.cpp
-	${EXTERNAL}/ml/Generics.cpp
-	${EXTERNAL}/ml/IntrusivePtr.cpp
 )
 
 target_link_libraries(${PROJECT_NAME})

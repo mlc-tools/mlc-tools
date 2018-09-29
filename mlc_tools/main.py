@@ -21,7 +21,12 @@ class Generator:
             return kwargs[arg] if arg in kwargs else default
 
         def get_bool(arg, default='yes'):
-            return get(arg) == 'yes'
+            value = get(arg)
+            if not value:
+                return False
+            if isinstance(value, str):
+                return get(arg) == 'yes'
+            return bool(value)
 
         Log.use_colors = get_bool('use_colors', 'no')
         Log.disable_logs = get_bool('disable_logs', 'no')
@@ -40,6 +45,18 @@ class Generator:
         self.test_script = get('test_script')
         self.test_script_args = get('test_script_args')
         self.generate_tests = get_bool('generate_tests', 'no')
+        self.generate_intrusive = get_bool('generate_intrusive', 'no')
+        self.generate_factory = get_bool('generate_factory', 'yes')
+        self.filter_code = None
+        self.filter_data = None
+        self.custom_generator = None
+
+    def set_filter(self, filter_code=None, filter_data=None):
+        self.filter_code = filter_code
+        self.filter_data = filter_data
+
+    def set_custom_generator(self, custom_generator):
+        self.custom_generator = custom_generator
 
     @staticmethod
     def check_version(requere):
@@ -88,8 +105,12 @@ class Generator:
                             required=False, default='')
         parser.add_argument('-disable_logs', type=str, help='Disabling logs to output',
                             required=False, default='no')
-        parser.add_argument('-generate_tests', type=str, help='Generate classes marked as :test',
+        parser.add_argument('-generate_tests', type=str, help='Generate test classes',
                             required=False, default='no')
+        parser.add_argument('-generate_intrusive', type=str, help='Generate intrusive_ptr class (only c++)',
+                            required=False, default='no')
+        parser.add_argument('-generate_factory', type=str, help='Generate Factory class (only c++)',
+                            required=False, default='yes')
         args = parser.parse_args()
 
         self.configs_directory = fileutils.normalize_path(args.i)
@@ -106,18 +127,27 @@ class Generator:
         self.test_script = args.test_script
         self.test_script_args = args.test_script_args
         self.generate_tests = args.generate_tests
+        self.generate_intrusive = args.generate_intrusive
+        self.generate_factory = args.generate_factory
         Log.use_colors = args.use_colors.lower() == 'yes'
         Log.disable_logs = args.disable_logs.lower() == 'yes'
 
     def _parse(self):
-        self.parser = Parser(self.side, self.generate_tests)
+        self.parser = Parser(self.side, self.generate_tests, self.generate_intrusive, self.generate_factory)
         self.parser.set_configs_directory(self.configs_directory)
         self.parser.generate_patterns()
         files = fileutils.get_files_list(self.configs_directory)
         for file in files:
             if file.endswith('.mlc'):
+                if self.filter_code is not None and not self.filter_code(file):
+                    continue
                 text = open(self.configs_directory + file).read()
                 self.parser.parse(text)
+
+        if self.custom_generator:
+            generator = self.custom_generator()
+            generator.generate(self.parser)
+
         self.parser.link()
         if self.php_validate:
             self.parser.validate_php_features()
@@ -132,7 +162,9 @@ class Generator:
                  validate_php=False,
                  path_to_protocols=None,
                  only_data=None,
-                 gen_data_storage=True
+                 gen_data_storage=True,
+                 generate_intrusive=None,
+                 generate_factory=None
                  ):
         if path_to_protocols is not None:
             self.path_to_protocols = path_to_protocols
@@ -150,6 +182,10 @@ class Generator:
             self.side = side
         if validate_php is not None:
             self.validate_php = validate_php
+        if generate_intrusive is not None:
+            self.generate_intrusive = generate_intrusive
+        if generate_factory is not None:
+            self.generate_factory = generate_factory
         self.configs_directory = fileutils.normalize_path(self.configs_directory)
         self.out_directory = fileutils.normalize_path(self.out_directory)
 
@@ -213,7 +249,7 @@ class Generator:
             for class_ in self.parser.classes_for_data:
                 if class_.is_storage:
                     classes.append(class_)
-            self.data_parser = DataParser(classes, self.serialize_format, self.data_directory)
+            self.data_parser = DataParser(classes, self.serialize_format, self.data_directory, self.filter_data)
             self.data_parser.flush(self.out_data_directory)
 
     def run_test(self, test_script=None, test_script_args=None):
@@ -225,7 +261,10 @@ class Generator:
             Log.message('Run test (%s):' % self.test_script)
             python = 'python3' if sys.version_info[0] == 3 else 'python'
             if os.system('{} {} {}'.format(python, self.test_script, self.test_script_args)) != 0:
+                print('TODO: exit - 1. main.py 1')
                 exit(1)
+        if not os.path.isfile(self.test_script):
+            Log.warning('Test script (%s) not founded' % self.test_script)
 
     def validate_arg_language(self):
         if self.language not in ['cpp', 'py', 'php', 'java']:

@@ -18,6 +18,8 @@ tests/test_serialize/data.php.xml
 tests/test_serialize/data.cpp.xml
 tests/test_serialize/step_2
 tests/test_serialize/step_2.exe
+tests/*/generated*
+tests/*/build*
 
 tests/java/bin
 tests/java/gen
@@ -31,6 +33,7 @@ tests/java/out
 
 .DS_Store
 *.pyc
+*.db
 *.pyproj
 *.suo
 *.sublime-project
@@ -42,3 +45,4 @@ mlc.sln
 /dist
 /build
 /mlc_tools.egg-info
+.vscode/

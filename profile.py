@@ -4,17 +4,21 @@ from mlc_tools.main import Generator
 def test_game_s():
     game_root = '/Work/survival/'
     generator = Generator(game_root + 'config', generate_tests='yes')
-    generator.generate('py', 'xml', game_root + 'tests/python/web', 'client')
+    generator.generate('py', 'json', game_root + 'tests/python/web', 'client')
+    generator.generate('cpp', 'json', game_root + 'tests/cpp/web', 'client', generate_intrusive='yes')
+    generator.generate('cpp', 'json', game_root + 'client/generated/web', 'client')
+    generator.generate_data(game_root + '/config/data', game_root + '/tests/data')
 
 
 def test_game_m():
-    game_root = '/work/marines/'
-    generator = Generator(game_root + 'config', generate_tests='no')
-    generator.generate('cpp', 'xml', game_root + 'client/generated/web', 'client')
-    generator.generate('py', 'xml', game_root + 'server/tests/lib/mg', 'client')
-
-    generator = Generator(game_root + 'config_battle', generate_tests='no', namespace='photon')
-    generator.generate('cpp', 'json', game_root + 'client/generated/photon', 'client')
+    project_root = '/Work/gushchin/marines/'
+    generator = Generator(project_root + 'config', generate_tests='yes', generate_intrusive='no', generate_factory='yes')
+    # generator.generate('cpp', 'xml', project_root + '/client/project_marines/generated/web', 'client')
+    # generator.generate('php', 'xml', project_root + '/server/mg', 'server')
+    # generator.generate('py', 'xml', project_root + '/tests/server/lib/mg', 'client')
+    # generator.generate('py', 'xml', project_root + '/tests/server/lib/mg_server', 'server')
+    # tests
+    generator.generate('cpp', 'xml', project_root + '/tests/unit_tests/cpp/generated', 'client')
 
 
 def profile():
@@ -37,7 +41,7 @@ def profile():
         s = open(id).read()
         os.remove(id)
         return s
-    print get_profile_(test_game_m)
+    print(get_profile_(test_game_m))
 
 # profile()
 test_game_m()

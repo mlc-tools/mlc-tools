@@ -8,7 +8,14 @@ class Test:
     def __init__(self, parser):
         self.tests = []
         self.parser = parser
-        self.parser.parse(base_classes)
+        self.tests_interface_methods_count = 0
+        self.tests_implemented_methods_count = 0
+
+    def generate_base_classes(self):
+        base = base_classes
+        base = base.replace('@{all_methods}', str(self.tests_interface_methods_count))
+        base = base.replace('@{implemented_methods}', str(self.tests_implemented_methods_count))
+        self.parser.parse(base)
 
     def get_member_name(self, cls_name):
         name_ = ''
@@ -19,7 +26,7 @@ class Test:
         return name_
 
     def generate_test_interface(self, cls):
-        if len(cls.functions) == 0 or cls.is_test:
+        if cls.is_test:
             return None
         test = Class()
         test.type = 'class'
@@ -28,16 +35,19 @@ class Test:
         test.behaviors.append('TestCase')
         generated_functions = []
         for func in cls.functions:
-            ignored = ['visit']
+            ignored = ['visit', 'accept']
             if func.name not in ignored and func.access == AccessSpecifier.public:
                 self.add_function(test, 'test_' + func.name)
                 generated_functions.append('test_' + func.name)
+                self.tests_interface_methods_count += 1
 
         impl = self.parser.find_class(test.name[1:])
         if impl:
             for func in impl.functions:
                 if func.name.startswith('test_') and func.name not in generated_functions:
                     self.add_function(test, func.name)
+                else:
+                    self.tests_implemented_methods_count += 1
 
         if len(test.functions) == 0:
             return None
@@ -98,8 +108,7 @@ class Test:
         for test in test_all.members:
             var_name = self.get_member_name(test.name)
             function.operations.append('this->logger->push(true, "Test case [\" + this->{0}.get_type() + \"] started");'.format(var_name))
-            function.operations.append(
-                'this->logger->push(this->{0}.execute(), "Test case [\" + this->{0}.get_type() + \"] finished\\n");'.format(var_name))
+            function.operations.append('this->logger->push(this->{0}.execute(), "Test case [\" + this->{0}.get_type() + \"] finished\\n");'.format(var_name))
             function.operations.append('this->logger->class_count += 1;')
         function.operations.append('return this->logger->result;')
 
@@ -113,6 +122,8 @@ class tests/Logger:test
     int success_count
     int class_count = 0
     int methods_count = 0
+    int all_methods_count = @{all_methods}
+    int implemented_methods_count = @{implemented_methods}
     function bool push(bool result, string message)
     {
         this->tests_count += 1;

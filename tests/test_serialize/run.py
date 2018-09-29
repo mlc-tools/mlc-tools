@@ -20,7 +20,7 @@ def execute(command):
 def generate(lang, protocol):
     global root
     test_dir = root + '/test_serialize/'
-    generator = Generator(configs_directory=test_dir, side='client', disable_logs='no', generate_tests='no')
+    generator = Generator(configs_directory=test_dir, side='client', disable_logs='no', generate_tests='no', generate_intrusive='yes', generate_factory='yes')
     generator.generate(lang, protocol, test_dir + 'generated_%s' % lang)
 
 
@@ -47,15 +47,13 @@ def run(protocol):
     generate('php', protocol)
     generate('cpp', protocol)
     python = 'python3' if sys.version_info[0] == 3 else 'python'
-    command = '''
-        cd {0}/test_serialize;
-        {2} step_0.py;
-        php step_1.php;
-        mkdir build_{1}; cd build_{1}; cmake ..; make -j8 install; cd ..; ./step_2;
-        {2} step_3.py;
-        '''.format(root, protocol, python)
-    command = command.replace('\n', '')
-    if 0 != execute(command):
+    result = True
+    result = result and 0 == execute('cd {0}/test_serialize; {1} step_0.py'.format(root, python))
+    result = result and 0 == execute('cd {0}/test_serialize; php step_1.php'.format(root))
+    result = result and 0 == execute('cd {0}/test_serialize; mkdir build_{1}; cd build_{1}; cmake ..; make -j8 install'.format(root, protocol))
+    result = result and 0 == execute('cd {0}/test_serialize; mkdir build_{1}; ./step_2'.format(root, protocol, python))
+    result = result and 0 == execute('cd {0}/test_serialize; {1} step_3.py;'.format(root, python))
+    if not result:
         clean()
         print('Error')
         exit(1)

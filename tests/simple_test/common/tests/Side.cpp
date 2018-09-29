@@ -6,8 +6,8 @@
 bool test_common()
 {
     bool result = true;
-    auto base = make_intrusive<mg::SideTestBase>();
-    auto common = make_intrusive<mg::SideTestCommon>();
+    auto base = mg::make_intrusive<mg::SideTestBase>();
+    auto common = mg::make_intrusive<mg::SideTestCommon>();
 
     result = result && base != nullptr;
     result = result && common != nullptr;
@@ -22,7 +22,7 @@ bool test_common()
 bool test_side()
 {
     bool result = true;
-    auto server = make_intrusive<mg::SideTestServer>();
+    auto server = mg::make_intrusive<mg::SideTestServer>();
 
     result = result && server != nullptr;
     result = result && test_common();
@@ -37,7 +37,7 @@ bool test_side()
 bool test_side()
 {
     bool result = true;
-    auto client = make_intrusive<mg::SideTestClient>();
+    auto client = mg::make_intrusive<mg::SideTestClient>();
 
     result = result && client != nullptr;
     result = result && test_common();

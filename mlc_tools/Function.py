@@ -7,7 +7,7 @@ class Function:
 
     def __init__(self):
         self.operations = []
-        self.return_type = ''
+        self.return_type = Object()
         self.name = ''
         self.args = []
         self.is_const = False
@@ -15,6 +15,7 @@ class Function:
         self.is_static = False
         self.is_abstract = False
         self.is_template = False
+        self.is_virtual = False
         self.side = 'both'
         self.access = AccessSpecifier.public
 
@@ -69,11 +70,20 @@ class Function:
                     return True
 
                 if not (p('*', arg) or p('&', arg) or p(' ', arg)):
+                    print('TODO: exit - 1. Function 1')
+                    print('Parsed line: [%s]' % line)
                     exit(-1)
 
-        line = self._find_modifiers(line)
-        line = line[0:line.find('(')].strip()
-        self.return_type, self.name = line.split(' ')
+        line = line[:line.find('(')] + line[line.rfind(')') + 1:]
+        line = line.replace(';', '')
+        line = re.sub(r'{.*}', '', line)
+        k = line.rfind(' ')
+        return_s = line[:k].strip()
+        name_s = line[k:].strip()
+
+        self.return_type = return_s
+        name_s = self._find_modifiers(name_s)
+        self.name = name_s
         return
 
     def get_return_type(self):
@@ -128,6 +138,7 @@ class Function:
         self.is_abstract = self.is_abstract or Modifier.abstract in string
         self.is_static = self.is_static or Modifier.static in string
         self.is_const = self.is_const or Modifier.const in string
+        self.is_virtual = self.is_virtual or Modifier.virtual in string
 
         if Modifier.private in string:
             self.access = AccessSpecifier.private
@@ -136,13 +147,14 @@ class Function:
         if Modifier.public in string:
             self.access = AccessSpecifier.public
 
-        string = re.sub(Modifier.server, '', string)
-        string = re.sub(Modifier.client, '', string)
-        string = re.sub(Modifier.external, '', string)
-        string = re.sub(Modifier.static, '', string)
-        string = re.sub(Modifier.const, '', string)
-        string = re.sub(Modifier.abstract, '', string)
-        string = re.sub(Modifier.private, '', string)
-        string = re.sub(Modifier.protected, '', string)
-        string = re.sub(Modifier.public, '', string)
+        string = string.replace(Modifier.server, '')
+        string = string.replace(Modifier.client, '')
+        string = string.replace(Modifier.external, '')
+        string = string.replace(Modifier.static, '')
+        string = string.replace(Modifier.const, '')
+        string = string.replace(Modifier.abstract, '')
+        string = string.replace(Modifier.private, '')
+        string = string.replace(Modifier.protected, '')
+        string = string.replace(Modifier.public, '')
+        string = string.replace(Modifier.virtual, '')
         return string

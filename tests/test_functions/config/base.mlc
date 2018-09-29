@@ -1,0 +1,148 @@
+class SerializedObject:serialized
+{
+	int _reference_counter:runtime = 1
+	function int retain()
+	{
+		this->_reference_counter += 1;
+		return this->_reference_counter;
+	}
+	function int release()
+	{
+		this->_reference_counter -= 1;
+		auto c = this->_reference_counter;
+		if( c == 0)
+		{
+			delete this;
+		}
+		return c;
+	}
+}
+
+class ReturnValue<SerializedObject>
+{
+    int f_value
+}
+
+class Test<SerializedObject>
+{
+    ReturnValue r0;
+
+    function void tests()
+    {
+        this->test_0();
+        this->test_1();
+        this->test_2();
+        this->test_3();
+        this->test_4();
+        this->test_5();
+        this->test_6();
+        this->test_7();
+        this->test_8(0);
+        this->test_9();
+        this->test_10();
+
+        map<std::string, int> some_map;
+        this->test_11(some_map);
+        this->test_001();
+        this->test_002();
+    }
+    function void tests_const():const
+    {
+        this->get_id();
+    }
+
+    function ReturnValue* test_0()
+    {
+        return new ReturnValue();
+    }
+
+    function ReturnValue*:link test_1()
+    {
+        return new ReturnValue();
+    }
+
+    function list<ReturnValue*> test_2()
+    {
+        list<intrusive_ptr<ReturnValue>> result;
+        return result;
+    }
+
+    function map<int, ReturnValue*> test_3()
+    {
+        map<int, intrusive_ptr<ReturnValue>> result;
+        return result;
+    }
+
+    function ReturnValue*:link test_4()
+    {
+        return nullptr;
+    }
+
+    function list<ReturnValue*:link> test_5:const()
+    {
+        list<const ReturnValue*> result;
+        return result;
+    }
+
+    function ReturnValue&:const test_6:const()
+    {
+        return this->r0;
+    }
+
+    function ReturnValue& test_7()
+    {
+        return this->r0;
+    }
+
+    function ReturnValue& test_9(int i=0)
+    {
+        return this->r0;
+    }
+
+    function list<list<string>> test_10()
+    {
+        std::vector<std::vector<std::string>> result;
+        return result;
+    }
+
+    function map<string, int> test_11(map<string, int> some_map)
+    {
+        return some_map;
+    }
+
+    //from live
+    function map<int, ReturnValue*> test_8(int some_arg)
+    {
+        map<int, intrusive_ptr<ReturnValue>> result;
+        return result;
+    }
+
+    function string get_id():const:client
+    {
+        return "";
+    }
+
+    function void test_001()
+    {
+        auto test2 = new ReturnValue();
+        test2->f_value = 0;
+
+        ReturnValue test3;
+        test3.f_value = 0;
+    }
+
+    function void test_002()
+    {
+        map<int, intrusive_ptr<ReturnValue>> value;
+        this->_002(value);
+    }
+    function void _002(map<int, ReturnValue*>:const map)
+    {
+    }
+}
+
+enum TestEnum
+{
+    field_1
+    field_2
+}

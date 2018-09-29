@@ -8,8 +8,9 @@ from .Function import Function
 from .DataStorageCreators import DataStorageCppXml
 from .DataStorageCreators import DataStorageCppJson
 from .Error import Error
-from .cpp_functions import cpp_functions, hpp_functions
+from .cpp_extension import cpp_files
 from .Object import AccessSpecifier
+from .regex import RegexPatternCpp
 
 FLAG_HPP = 2
 FLAG_CPP = 4
@@ -30,7 +31,7 @@ def convert_return_type(parser, type_object):
     result = type_object
     if isinstance(type_object, str):
         if '*' in type_object and 'const ' not in type_object:
-            t = re.sub(r'\*', '', type_object)
+            t = type_object.replace(r'\*', '')
             if parser.find_class(t):
                 result = 'intrusive_ptr<{}>'.format(t)
     else:
@@ -56,12 +57,29 @@ def convert_type(type_):
         types['Observer'] = 'Observer<std::function<void()>>'
         if type_ in types:
             return types[type_]
+        if '<' in type_ and '>' in type_ and not type_.startswith('template'):
+            object = Object()
+            object.parse(type_)
+            args = []
+            for arg in object.template_args:
+                obj = Object()
+                obj.parse(arg)
+                args.append(convert_type(obj))
+            result = '{}<{}>'.format(convert_type(object.type), ', '.join(args))
+            if object.is_const:
+                if object.is_pointer:
+                    result = 'const %s' % result
+                else:
+                    result = 'const %s&' % result
+            return result
     elif isinstance(type_, Object):
         s = convert_type(type_.type)
         if type_.template_args:
             s += '<'
             for i, arg in enumerate(type_.template_args):
-                s += convert_type(arg)
+                obj = Object()
+                obj.parse(arg)
+                s += convert_type(obj)
                 if i < len(type_.template_args) - 1:
                     s += ', '
             s += '>'
@@ -75,11 +93,13 @@ def convert_type(type_):
         return s
     else:
         # TODO: add error
+        print('TODO: add error')
+        print(type_)
         exit(-1)
     return type_
 
 
-def get_include_file(parser, class_, filename):
+def get_include_file(parser, class_, filename, namespace):
     types = dict()
     types['list'] = '<vector>'
     types['vector'] = '<vector>'
@@ -93,12 +113,18 @@ def get_include_file(parser, class_, filename):
     types['std::vector<int>'] = '<vector>'
     types['std::vector<intrusive_ptr<CommandBase>>'] = '<vector>'
     types['std::istream'] = '<istream>'
-    types['intrusive_ptr'] = '"IntrusivePtr.h"'
+    types['intrusive_ptr'] = '"intrusive_ptr.h"'
     if filename in types:
         return types[filename]
-    if 'std::map' in filename:
+    if 'map<' in filename:
         return '<map>'
-    if filename in ['DataStorage', 'mg_extensions']:
+    root_classes = ['DataStorage', 'Observable']
+    for pair in cpp_files:
+        file = pair[0].replace('@{namespace}', namespace)
+        file = file.replace('.h', '')
+        file = file.replace('.cpp', '')
+        root_classes.append(file)
+    if filename in root_classes:
         back = ''
         backs = len(class_.group.split('/')) if class_.group else 0
         for i in range(backs):
@@ -141,7 +167,10 @@ def _create_constructor_function_hpp(class_):
 def _create_destructor_function_hpp(class_):
     if class_.type == 'enum':
         return ''
-    pattern = 'virtual ~{0}()'.format(class_.name)
+    virtual = 'virtual '
+    if not class_.is_virtual and len(class_.behaviors) == 0 and len(class_.subclasses) == 0:
+        virtual = ''
+    pattern = '{0}~{1}()'.format(virtual, class_.name)
     if not is_class_has_cpp_definitions(class_):
         pattern += '{}'
     pattern += ';\n'
@@ -170,8 +199,6 @@ def _create_constructor_function_cpp(parser, class_):
 
     pattern = '{0}::{0}(){1}\n__begin__{2}\n\n__end__\n'
     string = pattern.format(class_.name, initialize, initialize2)
-    string = re.sub('__begin__', '{', string)
-    string = re.sub('__end__', '}', string)
     return string
 
 
@@ -182,8 +209,6 @@ def _create_destructor_function_cpp(class_):
         return ''
     pattern = '{0}::~{0}()\n__begin__\n__end__\n'
     string = pattern.format(class_.name)
-    string = re.sub('__begin__', '{', string)
-    string = re.sub('__end__', '}', string)
     return string
 
 
@@ -275,16 +300,11 @@ class WriterCpp(Writer):
                 if object_.initial_value is None and self._current_class.type != 'enum':
                     Error.exit(Error.STATIS_MEMBER_SHOULD_HAVE_INITIALISATION, self._current_class.name, object_.name)
                 if self._current_class.type == 'enum':
-                    pattern = '{4}{0} {2}::{1}'
+                    pattern = '{0} {2}::{1}'
                 else:
-                    pattern = '{4}{0} {2}::{1} = {3}'
+                    pattern = '{0} {2}::{1} = {3}'
                 pattern += ';\n'
-                modifier = ''
-                if object_.is_const:
-                    modifier = 'const '
-                out[flags] += pattern.format(
-                    convert_type(object_.type), object_.name,
-                    self._current_class.name, object_.initial_value, modifier)
+                out[flags] += pattern.format(convert_type(object_), object_.name, self._current_class.name, object_.initial_value)
                 pass
         return out
 
@@ -341,13 +361,11 @@ class WriterCpp(Writer):
 
         pattern = '{3}\nnamespace {0}\n__begin__{2}\n\n{1}__end__//namespace {0}'.\
             format(self.get_namespace(), pattern, forward_declarations, forward_declarations_out)
-        pattern = '#ifndef __{3}_{0}_h__\n#define __{3}_{0}_h__\n{2}\n\n{1}\n\n#endif //#ifndef __{3}_{0}_h__'.\
+        pattern = '#ifndef __{3}_{0}_h__\n#define __{3}_{0}_h__\n{2}\n{1}\n\n#endif //#ifndef __{3}_{0}_h__'.\
             format(class_.name, pattern, includes, self.get_namespace())
 
         out[FLAG_HPP] += pattern.format('class', class_.name, behaviors, objects[FLAG_HPP],
                                         functions[FLAG_HPP], constructor, destructor)
-        out[FLAG_HPP] = re.sub('__begin__', '{', out[FLAG_HPP])
-        out[FLAG_HPP] = re.sub('__end__', '}', out[FLAG_HPP])
         return out
 
     def _write_class_cpp(self, class_):
@@ -366,8 +384,7 @@ class WriterCpp(Writer):
 
         self._current_class = None
         if class_.type == 'class':
-            pattern = '''#include "{0}.h"
-                         #include "Generics.h"{4}
+            pattern = '''#include "{0}.h"{4}
 
                          namespace {3}
                          __begin__{5}{6}
@@ -375,8 +392,7 @@ class WriterCpp(Writer):
                          {7}
                          {1}__end__'''
         else:
-            pattern = '''#include "{0}.h"
-                         #include "Generics.h"{4}
+            pattern = '''#include "{0}.h"{4}
 
                          namespace {3}
                          __begin__
@@ -407,8 +423,6 @@ class WriterCpp(Writer):
 
         out[FLAG_CPP] += pattern.format(class_.name, functions[FLAG_CPP], constructor, self.get_namespace(),
                                         includes, objects[FLAG_CPP], registration, destructor)
-        out[FLAG_CPP] = re.sub('__begin__', '{', out[FLAG_CPP])
-        out[FLAG_CPP] = re.sub('__end__', '}', out[FLAG_CPP])
         return out
 
     def write_function(self, function, flags):
@@ -422,7 +436,7 @@ class WriterCpp(Writer):
             for arg in function.args:
                 args.append(_convert_argument_type(convert_type(arg[1])) + ' ' + arg[0])
             args = ', '.join(args)
-            modifier = 'virtual '
+            modifier = 'virtual ' if function.is_virtual else ''
             if function.is_static:
                 modifier = 'static '
             if function.name == self._current_class.name or \
@@ -430,7 +444,7 @@ class WriterCpp(Writer):
                function.is_template:
                 modifier = ''
             is_override = ''
-            if self.parser.is_function_override(self._current_class, function):
+            if function.is_virtual and self.parser.is_function_override(self._current_class, function):
                 is_override = ' override'
             is_const = ''
             if function.is_const:
@@ -448,13 +462,9 @@ class WriterCpp(Writer):
             body = ''
             for operation in function.operations:
                 convert_c17_toc14 = True
-                if convert_c17_toc14:
-                    reg = [re.compile(r'for\s*\(auto&&\s*\[(\w+),\s*(\w+)\]\s*:\s*(.+)\)\s*{'),
-                           r'''for (auto&& pair : \3) \n{ \nauto& \1 = pair.first; \nauto& \2 = pair.second;
-                           (void)\1; //don't generate 'Unused variable' warning
-                           (void)\2; //don't generate 'Unused variable' warning''']
-
-                    operation2 = re.sub(reg[0], reg[1], operation)
+                if operation and convert_c17_toc14:
+                    reg = RegexPatternCpp.convert_c17_to_c14
+                    operation2 = reg[0].sub(reg[1], operation)
                     if operation2 != operation:
                         operation = operation2
                 operation = operation.replace('std::round', 'round')
@@ -466,7 +476,7 @@ class WriterCpp(Writer):
 
             args = list()
             for arg in function.args:
-                args.append(_convert_argument_type(convert_type(arg[1])) + ' ' + arg[0])
+                args.append(_convert_argument_type(convert_type(arg[1])) + ' ' + RegexPatternCpp.FUNC_ARGS[0].sub(RegexPatternCpp.FUNC_ARGS[1], arg[0]))
             args = ', '.join(args)
             out[FLAG_CPP] = fstr.format(convert_return_type(self.parser, convert_type(function.get_return_type())),
                                         function.name, args, body, self._current_class.name, is_const)
@@ -527,14 +537,6 @@ class WriterCpp(Writer):
             if not have:
                 self.add_serialization(class_, SERIALIZATION)
                 self.add_serialization(class_, DESERIALIZATION)
-        if class_.is_visitor:
-            have = False
-            for function in class_.functions:
-                if function.name == 'accept':
-                    have = True
-                    break
-            if not have:
-                self.add_accept_method(class_)
         if not class_.is_abstract:
             have = False
             for function in class_.functions:
@@ -567,7 +569,8 @@ class WriterCpp(Writer):
         if serialization_type == DESERIALIZATION:
             function.name = 'deserialize'
             function.args.append(self.get_serialization_object_arg(serialization_type))
-        function.return_type = 'void'
+        function.is_virtual = len(class_.behaviors) > 0 or len(class_.subclasses) > 0
+        function.return_type = Object.VOID
         function.link()
 
         for behabior in class_.behaviors:
@@ -590,7 +593,9 @@ class WriterCpp(Writer):
 
     def _build_serialize_operation_enum(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args,
                                         serialization_type):
-        return self.serialize_protocol[serialization_type]['enum'][0].format(obj_name)
+        pattern = self.serialize_protocol[serialization_type]['enum'][0].format(obj_name)
+        pattern = pattern.replace('@__begin__namespace__end__', self.namespace)
+        return pattern
 
     def _build_serialize_operation(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args,
                                    serialization_type, is_link=False):
@@ -638,6 +643,7 @@ class WriterCpp(Writer):
             if type_ not in self.serialize_protocol[serialization_type]:
                 Error.exit(Error.UNKNOWN_SERIALISED_TYPE, type_, obj_type)
             pattern = self.serialize_protocol[serialization_type][type_][index]
+            pattern = pattern.replace('@__begin__namespace__end__', self.namespace)
             string = pattern.format(obj_name, convert_type(obj_type), obj_value, '{', '}', *template_args)
         return string
 
@@ -678,22 +684,10 @@ class WriterCpp(Writer):
             a4 = 'intrusive_ptr<{}>'.format(value_type)
         return pattern.format(a0, a1, a2, a3, a4)
 
-    def add_accept_method(self, class_):
-        visitor = self.parser.get_type_of_visitor(class_)
-        if visitor == class_.name:
-            return
-        function = Function()
-        function.name = 'accept'
-        function.return_type = 'void'
-        function.args.append(['visitor', visitor + '*'])
-        function.operations.append('visitor->visit( this );')
-        function.link()
-        class_.functions.append(function)
-
     def add_equal_methods(self, class_):
         function = Function()
         function.name = 'operator =='
-        function.return_type = 'bool'
+        function.return_type = Object.BOOL
         function.args.append(['rhs', 'const ' + class_.name + '&'])
         function.is_const = True
         function.link()
@@ -708,7 +702,7 @@ class WriterCpp(Writer):
 
         function = Function()
         function.name = 'operator !='
-        function.return_type = 'bool'
+        function.return_type = Object.BOOL
         function.args.append(['rhs', 'const ' + class_.name + '&'])
         function.is_const = True
         function.operations.append('return !(*this == rhs);')
@@ -738,9 +732,9 @@ class WriterCpp(Writer):
             include_types[t.name] = 1
         for t in class_.members:
             type_ = t.type
-            type_ = re.sub('const', '', type_).strip()
-            type_ = re.sub('\*', '', type_).strip()
-            type_ = re.sub('&', '', type_).strip()
+            type_ = type_.replace('const', '').strip()
+            type_ = type_.replace('*', '').strip()
+            type_ = type_.replace('&', '').strip()
             include_types[type_] = 1
             if t.is_pointer:
                 include_types['intrusive_ptr'] = 1
@@ -760,9 +754,9 @@ class WriterCpp(Writer):
                     is_pointer_ = '*' in type_string
                     is_ref_ = '&' in type_string
 
-                    typename = re.sub('const', '', type_string).strip()
-                    typename = re.sub('\*', '', typename).strip()
-                    typename = re.sub('&', '', typename).strip()
+                    typename = type_string.replace('const', '').strip()
+                    typename = typename.replace('*', '').strip()
+                    typename = typename.replace('&', '').strip()
                     if 'intrusive_ptr' in typename:
                         return
                     if 'CommandBase' in typename:
@@ -798,10 +792,10 @@ class WriterCpp(Writer):
 
             if not f.is_template:
                 type_ = f.get_return_type().type
-                type_ = re.sub('const', '', type_).strip()
-                type_ = re.sub('\*', '', type_).strip()
-                type_ = re.sub('&', '', type_).strip()
-                type_ = re.sub('std::', '', type_).strip()
+                type_ = type_.replace('const', '').strip()
+                type_ = type_.replace('*', '').strip()
+                type_ = type_.replace('&', '').strip()
+                type_ = type_.replace('std::', '').strip()
                 include_types[type_] = 1
 
         forward_declarations_out = ''
@@ -829,7 +823,7 @@ class WriterCpp(Writer):
             if t == self._current_class.name:
                 continue
             if need_include(t):
-                out += pattern.format(get_include_file(self.parser, self._current_class, t))
+                out += pattern.format(get_include_file(self.parser, self._current_class, t, self.get_namespace()))
 
             # else:
             #     continue
@@ -839,10 +833,10 @@ class WriterCpp(Writer):
             #     forward_declarations += str
 
         if flags == FLAG_HPP:
-            out += '\n#include "IntrusivePtr.h"'
+            out += pattern.format(get_include_file(self.parser, self._current_class, 'intrusive_ptr', self.get_namespace()))
         if flags == FLAG_CPP:
-            out += '\n#include "Factory.h"'
-            out += pattern.format(get_include_file(self.parser, self._current_class, self.get_namespace() + '_extensions'))
+            out += pattern.format(get_include_file(self.parser, self._current_class, self.get_namespace() + '_Factory', self.get_namespace()))
+            out += pattern.format(get_include_file(self.parser, self._current_class, self.get_namespace() + '_extensions', self.get_namespace()))
             out += '\n#include <algorithm>'
 
         out = out.split('\n')
@@ -865,18 +859,21 @@ class WriterCpp(Writer):
                     includes += '\n#include "Exception.h"'
                 if 'DataStorage::shared()' in operation:
                     includes += '\n#include {}'.\
-                        format(get_include_file(self.parser, self._current_class, 'DataStorage'))
+                        format(get_include_file(self.parser, self._current_class, 'DataStorage', self.get_namespace()))
                 for type_ in self.parser.classes:
                     if type_.name in operation:
                         a = '"{}.h"'.format(type_.name)
                         b = '"{}.h"'.format(type_.name)
                         if a not in includes and b not in includes:
                             includes += '\n#include {0}'.\
-                                format(get_include_file(self.parser, self._current_class, type_.name))
+                                format(get_include_file(self.parser, self._current_class, type_.name, self.get_namespace()))
         return includes
 
     def prepare_file(self, body):
         tabs = 0
+        body = body.replace('__begin__', '{')
+        body = body.replace('__end__', '}')
+
         lines = body.split('\n')
         body = list()
 
@@ -934,15 +931,18 @@ class WriterCpp(Writer):
         configs.append('#define {}_JSON 1'.format(self.get_namespace().upper()))
         configs.append('#define {}_XML 2'.format(self.get_namespace().upper()))
         configs.append('\n#define {0}_SERIALIZE_FORMAT {0}_{1}'.format(self.get_namespace().upper(), self.serialize_format.upper()))
-        filename_config = 'config.h' if self.get_namespace() == 'mg' else '{}_config.h'.format(self.get_namespace())
+        filename_config = '{}_config.h'.format(self.get_namespace())
         self.save_file(filename_config, pattern.format(self.get_namespace(), '\n'.join(configs)))
-        hpp = hpp_functions
-        cpp = cpp_functions
-        hpp = hpp.replace('@{namespace}', self.get_namespace())
-        cpp = cpp.replace('@{namespace}', self.get_namespace())
-        cpp = cpp.replace('@{header_file}', "{}_extensions.h".format(self.get_namespace()))
-        self.save_file("{}_extensions.h".format(self.get_namespace()), hpp)
-        self.save_file("{}_extensions.cpp".format(self.get_namespace()), cpp)
+
+        for pair in cpp_files:
+            filename = pair[0]
+            content = pair[1]
+            content = content.replace('@{namespace}', self.get_namespace())
+            content = content.replace('@{namespace_upper}', self.get_namespace().upper())
+            filename = filename.replace('@{namespace}', self.get_namespace())
+            if (not filename.startswith('intrusive_ptr.') or self.parser.generate_intrusive) and \
+                    (not filename.startswith(self.get_namespace() + '_Factory.') or self.parser.generate_factory):
+                self.save_file(filename, content)
 
     def convert_to_enum(self, cls):
         shift = 0
@@ -966,7 +966,8 @@ class WriterCpp(Writer):
 
         def add_function(type_, name, args, const):
             function = Function()
-            function.return_type = type_
+            function.return_type = Object()
+            function.return_type.parse(type_)
             function.name = name
             function.args = args
             function.is_const = const
@@ -1051,13 +1052,8 @@ class WriterCpp(Writer):
         cls.members.append(value)
         return values
 
-regs = [
-    [re.compile('new\s*(\w+)\s*\\(\s*\\)'), 'make_intrusive<\\1>()'],
-]
-
 
 def convert_function_to_cpp(func, parser):
-    global regs
-    for reg in regs:
-        func = re.sub(reg[0], reg[1], func)
+    for reg in RegexPatternCpp.FUNCTION:
+        func = reg[0].sub(reg[1], func)
     return func

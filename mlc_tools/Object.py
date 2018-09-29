@@ -10,8 +10,8 @@ class AccessSpecifier:
 
 class Object:
 
-    def __init__(self):
-        self.type = ''
+    def __init__(self, type_=''):
+        self.type = type_
         self.template_args = []
         self.name = ''
         self.initial_value = None
@@ -27,9 +27,9 @@ class Object:
     def parse(self, line):
         line = line.strip()
         line = self.find_modifiers(line)
-        line = re.sub(';', '', line)
-        line = re.sub(', ', ',', line)
-        line = re.sub(' ,', ',', line)
+        line = line.replace(';', '')
+        line = line.replace(', ', ',')
+        line = line.replace(' ,', ',')
         expression = ''
         if '=' in line:
             k = line.find('=')
@@ -81,7 +81,7 @@ class Object:
 
     def check_pointer(self):
         result = '*' in self.type
-        self.type = re.sub('\*', '', self.type)
+        self.type = self.type.replace('*', '')
         return result
 
     def find_modifiers(self, string):
@@ -110,18 +110,21 @@ class Object:
         if Modifier.public in string:
             self.access = AccessSpecifier.public
 
-        string = re.sub(Modifier.server, '', string)
-        string = re.sub(Modifier.client, '', string)
-        string = re.sub(Modifier.runtime, '', string)
-        string = re.sub(Modifier.const, '', string)
-        string = re.sub(Modifier.static, '', string)
-        string = re.sub(Modifier.key, '', string)
-        string = re.sub(Modifier.link, '', string)
-        string = re.sub(Modifier.private, '', string)
-        string = re.sub(Modifier.protected, '', string)
-        string = re.sub(Modifier.public, '', string)
+        string = string.replace(Modifier.server, '')
+        string = string.replace(Modifier.client, '')
+        string = string.replace(Modifier.runtime, '')
+        string = string.replace(Modifier.const, '')
+        string = string.replace(Modifier.static, '')
+        string = string.replace(Modifier.key, '')
+        string = string.replace(Modifier.link, '')
+        string = string.replace(Modifier.private, '')
+        string = string.replace(Modifier.protected, '')
+        string = string.replace(Modifier.public, '')
 
         if args:
             string = string[0:l] + args + string[l:]
 
         return string
+
+Object.VOID = Object('void')
+Object.BOOL = Object('bool')

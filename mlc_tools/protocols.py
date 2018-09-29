@@ -260,23 +260,23 @@ cpp_json = '''
 #with default value:
 if($(FIELD) != $(DEFAULT_VALUE))
 {
-    ::set(json,"$(FIELD)",$(FIELD));
+    @{namespace}::set(json,"$(FIELD)",$(FIELD));
 }
 #without default value:
-::set(json,"$(FIELD)",$(FIELD));
+@{namespace}::set(json,"$(FIELD)",$(FIELD));
 
 #deserialize:
 #with default value:
 if(json.isMember("$(FIELD)"))
 {
-    $(FIELD) = ::get<$(TYPE)>(json["$(FIELD)"]);
+    $(FIELD) = @{namespace}::get<$(TYPE)>(json["$(FIELD)"]);
 }
 else
 {
     $(FIELD) = $(DEFAULT_VALUE);
 }
 #without default value:
-$(FIELD) = ::get<$(TYPE)>(json["$(FIELD)"]);
+$(FIELD) = @{namespace}::get<$(TYPE)>(json["$(FIELD)"]);
 
 
 #serialized
@@ -314,7 +314,7 @@ auto& arr_$(FIELD) = json["$(FIELD)"];
 for(int i = 0; i < arr_$(FIELD).size(); ++i)
 {
     $(FIELD).emplace_back();
-    $(FIELD).back() = ::get<$(ARG_0)>(arr_$(FIELD)[i]);
+    $(FIELD).back() = @{namespace}::get<$(ARG_0)>(arr_$(FIELD)[i]);
 }
 
 #list<int>, list<float>, list<string>
@@ -323,14 +323,14 @@ auto& arr_$(FIELD) = json["$(FIELD)"];
 int i_$(FIELD)=0;
 for(const auto& t : $(FIELD))
 {
-    ::set(arr_$(FIELD)[i_$(FIELD)++], t);
+    @{namespace}::set(arr_$(FIELD)[i_$(FIELD)++], t);
 }
 #deserialize:
 auto& arr_$(FIELD) = json["$(FIELD)"];
 for(int i = 0; i < arr_$(FIELD).size(); ++i)
 {
     $(FIELD).emplace_back();
-    $(FIELD).back() = ::get<$(ARG_0)>(arr_$(FIELD)[i]);
+    $(FIELD).back() = @{namespace}::get<$(ARG_0)>(arr_$(FIELD)[i]);
 }
 
 
@@ -373,9 +373,9 @@ for(int i = 0; i < size_$(FIELD); ++i)
 
 #link
 #serialize:
-::set(json,"$(FIELD)",$(FIELD)->name);
+@{namespace}::set(json,"$(FIELD)",$(FIELD)->name);
 #deserialize:
-$(FIELD) = DataStorage::shared().get<$(TYPE)>(::get<std::string>(json["$(FIELD)"]));
+$(FIELD) = DataStorage::shared().get<$(TYPE)>(@{namespace}::get<std::string>(json["$(FIELD)"]));
 
 
 #list<link>
@@ -383,14 +383,13 @@ $(FIELD) = DataStorage::shared().get<$(TYPE)>(::get<std::string>(json["$(FIELD)"
 auto& arr_$(FIELD) = json["$(FIELD)"];
 for(auto& item : $(FIELD))
 {
-    auto index = arr_$(FIELD).size();
     arr_$(FIELD).append(item->name);
 }
 #deserialize:
 auto& arr_$(FIELD) = json["$(FIELD)"];
 for(auto item : arr_$(FIELD))
 {
-    auto name = ::get<std::string>(item);
+    auto name = @{namespace}::get<std::string>(item);
     auto data = DataStorage::shared().get<$(ARG_0)>(name);
     $(FIELD).push_back(data);
 }
@@ -423,9 +422,9 @@ for(unsigned int i = 0; i < size_$(FIELD); ++i)
 
 #enum
 #serialize:
-::set(json, "$(FIELD)", $(FIELD).str());
+@{namespace}::set(json, "$(FIELD)", $(FIELD).str());
 #deserialize:
-$(FIELD) = ::get<std::string>(json["$(FIELD)"]);
+$(FIELD) = @{namespace}::get<std::string>(json["$(FIELD)"]);
 
 #list<enum>
 #serialize:
@@ -433,13 +432,13 @@ auto& arr_$(FIELD) = json["$(FIELD)"];
 int i_$(FIELD)=0;
 for(const auto& t : $(FIELD))
 {
-    ::set(arr_$(FIELD)[i_$(FIELD)++], t.str());
+    @{namespace}::set(arr_$(FIELD)[i_$(FIELD)++], t.str());
 }
 #deserialize:
 auto& arr_$(FIELD) = json["$(FIELD)"];
 for(int i = 0; i < arr_$(FIELD).size(); ++i)
 {
-    $(FIELD).emplace_back(::get<std::string>(arr_$(FIELD)[i]));
+    $(FIELD).emplace_back(@{namespace}::get<std::string>(arr_$(FIELD)[i]));
 }
 '''
 
@@ -515,7 +514,7 @@ $(OWNER)$(FIELD) = str(xml.get("$(FIELD)"))
 #serialize:
 if $(OWNER)$(FIELD):
             xml_pointer = ET.SubElement(xml, '$(FIELD)')
-            xml_pointer.set('type', '$(TYPE)')
+            xml_pointer.set('type', $(OWNER)$(FIELD).get_type())
             $(OWNER)$(FIELD).serialize(xml_pointer)
 #deserialize:
 xml_pointer = xml.find('$(FIELD)')
@@ -531,7 +530,8 @@ arr = ET.SubElement(xml, '$(FIELD)')
         for obj in $(OWNER)$(FIELD):
             ET.SubElement(arr, 'item').set('value', str(obj))
 #deserialize:
-arr = xml.find('$(FIELD)')
+$(OWNER)$(FIELD) = list()
+        arr = xml.find('$(FIELD)')
         if arr is not None:
             for obj in arr:
                 $(OWNER)$(FIELD).append(int(float(obj.get('value'))))
@@ -542,7 +542,8 @@ arr = ET.SubElement(xml, '$(FIELD)')
         for obj in $(OWNER)$(FIELD):
             ET.SubElement(arr, 'item').set('value', str(obj))
 #deserialize:
-arr = xml.find('$(FIELD)')
+$(OWNER)$(FIELD) = list()
+        arr = xml.find('$(FIELD)')
         if arr is not None:
             for obj in arr:
                 value = obj.get('value')
@@ -555,7 +556,8 @@ arr = ET.SubElement(xml, '$(FIELD)')
         for obj in $(OWNER)$(FIELD):
             ET.SubElement(arr, 'item').set('value', str(obj))
 #deserialize:
-arr = xml.find('$(FIELD)')
+$(OWNER)$(FIELD) = list()
+        arr = xml.find('$(FIELD)')
         if arr is not None:
             for obj in arr:
                 $(OWNER)$(FIELD).append(float(obj.get('value')))
@@ -566,7 +568,8 @@ arr = ET.SubElement(xml, '$(FIELD)')
         for obj in $(OWNER)$(FIELD):
             ET.SubElement(arr, 'item').set('value', str(obj))
 #deserialize:
-arr = xml.find('$(FIELD)')
+$(OWNER)$(FIELD) = list()
+        arr = xml.find('$(FIELD)')
         if arr is not None:
             for obj in arr:
                 $(OWNER)$(FIELD).append(str(obj.get('value')))
@@ -579,7 +582,8 @@ arr = ET.SubElement(xml, '$(FIELD)')
             item = ET.SubElement(arr, 'item')
             obj.serialize(item)
 #deserialize:
-arr = xml.find('$(FIELD)')
+$(OWNER)$(FIELD) = list()
+        arr = xml.find('$(FIELD)')
         if arr is not None:
             from .$(TYPE) import $(TYPE)
             for xml_child in arr:
@@ -608,7 +612,8 @@ arr = ET.SubElement(xml, '$(FIELD)')
             item = ET.SubElement(arr, t.get_type())
             t.serialize(item)
 #deserialize:
-arr = xml.find('$(FIELD)')
+$(OWNER)$(FIELD) = list()
+        arr = xml.find('$(FIELD)')
         if arr is not None:
             for xml_item in arr:
                 type = xml_item.tag
@@ -635,7 +640,8 @@ arr_$(FIELD) = ET.SubElement(xml, '$(FIELD)')
             item = ET.SubElement(arr_$(FIELD), 'item')
             item.set("value", t.name)
 #deserialize:
-arr = xml.find('$(FIELD)')
+$(OWNER)$(FIELD) = list()
+        arr = xml.find('$(FIELD)')
         if arr is not None:
             for xml_item in arr:
                 name = xml_item.get('value')
@@ -673,12 +679,14 @@ py_json = '''
 #int, bool, float, string
 #serialize:
 #with default value:
-if $(OWNER)$(FIELD) != $(DEFAULT_VALUE): dictionary["$(FIELD)"] = $(OWNER)$(FIELD)
+if $(OWNER)$(FIELD) != $(DEFAULT_VALUE):
+            dictionary["$(FIELD)"] = $(OWNER)$(FIELD)
 #without default value:
 dictionary["$(FIELD)"] = $(OWNER)$(FIELD)
 #deserialize
 #with default value:
-if "$(FIELD)" in dictionary: $(OWNER)$(FIELD) = dictionary["$(FIELD)"]
+if "$(FIELD)" in dictionary:
+            $(OWNER)$(FIELD) = dictionary["$(FIELD)"]
 #without default value:
 $(OWNER)$(FIELD) = dictionary["$(FIELD)"]
 
@@ -703,7 +711,8 @@ arr_$(FIELD) = []
             arr_$(FIELD).append(obj)
         dictionary['$(FIELD)'] = arr_$(FIELD)
 #deserialize
-arr_$(FIELD) = dictionary['$(FIELD)']
+$(OWNER)$(FIELD) = list()
+        arr_$(FIELD) = dictionary['$(FIELD)']
         for obj in arr_$(FIELD):
             $(OWNER)$(FIELD).append(obj)
 
@@ -716,7 +725,9 @@ arr_$(FIELD) = []
             arr_$(FIELD).append(dict)
         dictionary['$(FIELD)'] = arr_$(FIELD)
 #deserialize
-arr_$(FIELD) = dictionary['$(FIELD)']
+$(OWNER)$(FIELD) = list()
+        from .$(TYPE) import $(TYPE)
+        arr_$(FIELD) = dictionary['$(FIELD)']
         for dict in arr_$(FIELD):
             obj = $(TYPE)()
             obj.deserialize(dict)
@@ -743,7 +754,8 @@ dictionary['$(FIELD)'] = []
             arr[-1][t.get_type()] = $({})
             t.serialize(arr[-1][t.get_type()])
 #deserialize
-arr = dictionary['$(FIELD)']
+$(OWNER)$(FIELD) = list()
+        arr = dictionary['$(FIELD)']
         size = len(arr)
         for index in range(size):
             for key, value in arr[index].iteritems():
@@ -773,7 +785,8 @@ dictionary['$(FIELD)'] = []
         for t in $(OWNER)$(FIELD):
             arr.append(t.name)
 #deserialize:
-arr = dictionary['$(FIELD)']
+$(OWNER)$(FIELD) = list()
+        arr = dictionary['$(FIELD)']
         for name in arr:
             data = DataStorage.shared().get$(ARG_0)(name)
             $(OWNER)$(FIELD).append(data)

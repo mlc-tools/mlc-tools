@@ -24,4 +24,15 @@
 			<pair key="unitname2" value="2"/>
 		</map_units>
 	</unit>
+
+	<complex_map name="test">
+		<complex_map>
+			<pair key="1">
+				<value>
+					<item value="1"/>
+					<item value="2"/>
+				</value>
+			</pair>
+		</complex_map>
+	</complex_map>
 </data>

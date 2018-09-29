@@ -1,10 +1,12 @@
 from .Writer import Writer
 from .Function import Function
 from .Class import Class
+from .Object import Object
 from .DataStorageCreators import DataStoragePythonXml
 from .DataStorageCreators import DataStoragePythonJson
+from .regex import RegexPatternPython
 import re
-import sys
+
 
 SERIALIZATION = 0
 DESERIALIZATION = 1
@@ -188,7 +190,7 @@ class WriterPython(Writer):
 
             body += self.build_serialize_operation(obj.name, obj.type, convertInitializeValue(obj.initial_value),
                                                    serialize_type, obj.template_args, obj.is_pointer, 'self.', obj.is_link)
-        use_factory = re.search(r'\bFactory\b', body) is not None
+        use_factory = RegexPatternPython.FACTORY.search(body) is not None
         use_data_storage = 'DataStorage.shared()' in body
         imports = ''
         if serialize_type == DESERIALIZATION:
@@ -266,8 +268,8 @@ class WriterPython(Writer):
         fstr = self.serialize_protocol[serialization_type][type][index]
         str = fstr.format(obj_name, obj_type, obj_value, '{}', owner,
                           obj_template_args[0].type if len(obj_template_args) > 0 else 'unknown_arg')
-        str = re.sub(r'([\w\.]+?)\s*!=\s*False', r'(\1)', str)
-        str = re.sub(r'([\w\.]+?)\s*==\s*False', r'not (\1)', str)
+        for pattern in RegexPatternPython.PEP8:
+            str = pattern[0].sub(pattern[1], str)
         return '        ' + str + '\n'
 
     def save_config_file(self):
@@ -298,7 +300,7 @@ class WriterPython(Writer):
         line_visit = '''\n    def visit_{0}(self, ctx):\n        pass\n'''
         base_visitors = {}
         for cls in self.parser.classes:
-            if cls.is_visitor and (cls.behaviors and not cls.behaviors[0].is_visitor):
+            if cls.is_visitor and (not cls.behaviors[0].is_visitor if len(cls.behaviors) else True):
                 base_visitors[cls] = []
         for cls in self.parser.classes:
             parent = cls.behaviors[0] if cls.behaviors else None
@@ -319,10 +321,11 @@ class WriterPython(Writer):
                     lines += line.format(cls.name, func_name)
                     imports += line_import.format(cls.name)
                     visits += line_visit.format(func_name)
+                    
             name = 'IVisitor{}'.format(parent.name)
             body = pattern.format(imports, lines, visits, name)
             self.save_file(name + '.py', body)
-
+                    
     def create_data_storage_class(self, name, classes):
         if self.serialize_format == 'xml':
             return DataStoragePythonXml(name, classes, self.parser)
@@ -355,7 +358,7 @@ class WriterPython(Writer):
             is_static = False
         result.append('')
         text = '\n'.join(result)
-        if re.search(r'\bET\.', text):
+        if RegexPatternPython.ET.search(text):
             text = 'import xml.etree.ElementTree as ET\n' + text
         text = '#!/usr/bin/env python\n# -*- coding: utf-8 -*-\n' + text
         return text
@@ -377,91 +380,15 @@ class WriterPython(Writer):
     def convert_to_enum(self, cls, use_type='string'):
         Writer.convert_to_enum(self, cls, use_type)
 
-regs = [
-    [re.compile(r'DataStorage::shared\(\).get<(\w+)>'), r'DataStorage::shared().get\1'],
-    [re.compile(r'for\s*\(\s*\w+[\s&\*]*(\w+)\s*:\s*(.+)\s*\)'), r'for \1 in \2:'],
-    [re.compile(r'for\s*\(\s*\w+\s*(\w+)=(\w+);\s*\w+<(\w+);\s*\+\+\w+\s*\)'), r'for \1 in range(\2, \3):'],
-    [re.compile(r'for\s*\(\s*\w+\s*(\w+)=(\w+);\s*\w+>(\w+);\s*--\w+\s*\)'), r'for \1 in range(\2, \3, -1):'],
-    [re.compile(r'for\s*\(\s*\w+\s*(\w+)=(\w+);\s*\w+<(\w+);\s*\w+\+=(\w)\s*\)'), r'for \1 in range(\2, \3, \4):'],
-    [re.compile(r'for\s*\(\s*\w+\s*(\w+)=(\w+);\s*\w+>(\w+);\s*\w+-=(\w)\s*\)'), r'for \1 in range(\2, \3, -\4):'],
-    [re.compile(r'for\s*\(auto&&\s*\[(\w+),\s*(\w+)\]\s*:\s*(.+)\)'),
-     r'for \1, \2 in \3.items():' if sys.version_info[0] == 3 else r'for \1, \2 in \3.iteritems():'],
-    [re.compile(r'else\s+if\s*\(\s*(.+)\s*\)'), r'elif \1:'],
-    [re.compile(r'if\s*\(\s*(.+)\s*\)'), r'if \1:'],
-    [re.compile(r'if\s*!(.+):'), r'if not \1:'],
-    [re.compile(r'else'), r'else:'],
-    [re.compile(r'in_map\s*\(\s*(.+),\s*(.+)\s*\)'), r'(\1 in \2)'],
-    [re.compile(r'in_list\s*\(\s*(.+),\s*(.+)\s*\)'), r'(\1 in \2)'],
-    [re.compile(r'list_push\s*\(\s*(.+),\s*(.+)\s*\)'), r'\1.append(\2)'],
-    [re.compile(r'list_remove\s*\(\s*(.+),\s*(.+)\s*\)'), r'\1.remove(\2)'],
-    [re.compile(r'list_clear\s*\(\s*(.+)\s*\)'), r'\1 = list()'],
-    [re.compile(r'list_size\s*\('), r'len('],
-    [re.compile(r'map_size\s*\('), r'len('],
-    [re.compile(r'string_empty\((.+?)\)'), r'(not (\1))'],
-    [re.compile(r'string_size\((.+?)\)'), r'len(\1)'],
-    [re.compile(r'(\w+)\s+(\w+);'), r'\2 = \1()'],
-    [re.compile(r'(\w+) = return\(\)'), r'return \1'],
-    # False = return()
-    [re.compile(r'std::vector<\w+>\s+(\w+);'), r'\1 = list()'],
-    [re.compile(r'auto (\w+)'), r'\1'],
-    [re.compile(r'string (\w+)'), r'\1'],
-    [re.compile(r'int (\w+)'), r'\1'],
-    [re.compile(r'float (\w+)'), r'\1'],
-    [re.compile(r'bool (\w+)'), r'\1'],
-    [re.compile(r'(\w)->'), r'\1.'],
-    [re.compile(r'\+\+(\w+)'), r'\1 += 1'],
-    [re.compile(r'delete (\w*);'), 'pass'],
-    [re.compile(r'&(\w+)'), r'\1'],
-    [re.compile(r'!(\w+)'), r'not \1'],
-    [re.compile(r'!\('), r'not ('],
-    [re.compile(r'make_intrusive<(\w+)>\(\)'), r'\1()'],
-    [re.compile(r'new\s*(\w+)\s*\(\s*\)'), r'\1()'],
-    [re.compile(r'assert\(.+\);'), r''],
-    [re.compile(r'([-0-9]+)\.f'), r'\1.0'],
-    [re.compile(r'([-0-9]+)\.([-0-9]*)f'), r'\1.\2'],
-    [re.compile(r';'), r''],
-    [re.compile(r'([*+-/\s])log\((.+?)\)'), r'\1math.log(\2)'],
-    [re.compile(r'random_float\(\)'), 'random.random()'],
-    [re.compile(r'random_int\(([\w\.\->]+)?,(\s*[\w\.\->]+)?\)'), r'random.randint(\1, \2-1)'],
-    [re.compile(r'\bthis\b'), r'self'],
-    [re.compile(r', std::placeholders::_\d'), r''],
-    [re.compile(r'dynamic_pointer_cast_intrusive<\w+>\((.+?)\)'), r'\1'],
-    [re.compile(r'([\w\.]+?)\s*!=\s*False'), r'(\1)'],
-    [re.compile(r'([\w\.]+?)\s*==\s*False'), r'not (\1)'],
-]
-
-regs_class_names = {}
-
 
 def convert_function_to_python(func, parser):
-    global regs
-    global regs_class_names
-    repl = [
-        ['this.', 'self.'],
-        ['->', '.'],
-        ['::', '.'],
-        ['&&', ' and '],
-        ['||', ' or '],
-        ['  and  ', ' and '],
-        ['  or  ', ' or '],
-        ['true', 'True'],
-        ['false', 'False'],
-        ['nullptr', 'None'],
-        ['std.round', 'round'],
-        ['std.fabs', 'abs'],
-        ['std.ceil', 'math.ceil'],
-        ['std.floor', 'math.floor'],
-        ['std.sqrt', 'math.sqrt'],
-        ['std.min', 'min'],
-        ['std.max', 'max'],
-        ['!= None', 'is not None'],
-        ['== None', 'is None'],
-    ]
+    if not func:
+        return func
 
-    for reg in regs:
-        func = re.sub(reg[0], reg[1], func)
+    for reg in RegexPatternPython.FUNCTION:
+        func = reg[0].sub(reg[1], func)
 
-    for reg in repl:
+    for reg in RegexPatternPython.REPLASES:
         func = func.replace(reg[0], reg[1])
 
     def get_tabs(count):
@@ -499,13 +426,13 @@ def convert_function_to_python(func, parser):
     func = func.replace('\n                        \n', '\n')
     if 'DataStorage' in func:
         func = get_tabs(2) + 'from .DataStorage import DataStorage\n' + func
-    if re.search(r'\bFactory\b', func):
+    if RegexPatternPython.FACTORY.search(func):
         func = get_tabs(2) + 'from .Factory import Factory\n' + func
     for cls in parser.classes:
-        if cls.name not in regs_class_names:
-            regs_class_names[cls.name] = re.compile(r'\b{}\b'.format(cls.name))
-        pattern = regs_class_names[cls.name]
-        need = re.search(pattern, func) is not None
+        if cls.name not in RegexPatternPython.regs_class_names:
+            RegexPatternPython.regs_class_names[cls.name] = re.compile(r'\b{}\b'.format(cls.name))
+        pattern = RegexPatternPython.regs_class_names[cls.name]
+        need = pattern.search(func) is not None
         if need:
             func = get_tabs(2) + 'from .{0} import {0}\n'.format(cls.name) + func
     if 'math.' in func:
@@ -570,7 +497,7 @@ _pattern_file['xml'] = '''
     def __init__(self):\n{4}\n{1}\n        pass
 {2}'''
 
-_pattern_file['json'] = '''import json
+_pattern_file['json'] = '''
 {3}
 class {0}:
 {5}

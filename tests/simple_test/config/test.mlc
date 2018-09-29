@@ -1,4 +1,4 @@
-class SerializedObject:serialized
+class SerializedObject:serialized:inline
 {
 	int _reference_counter:runtime = 1
 	function int retain()
@@ -36,7 +36,6 @@ class core/CommandBase<SerializedObject>
 {
 	int user_id:key = 0
 	int current_time = 0
-	function string getSerializedString():external:const;
 }
 
 class AllTypesChildren<SerializedObject>
@@ -139,6 +138,54 @@ class RequestBar<Request>
 {
 }
 
+class RequestAcceptor<IVisitorRequest>
+{
+    int base = 0
+    int foo = 0
+    int bar = 0
+    function void visit(Request* ctx)
+    {
+        this->base += 1;
+    }
+    function void visit(RequestAcceptor* ctx)
+    {
+        this->base += 1;
+    }
+    function void visit(RequestFoo* ctx)
+    {
+        this->foo += 1;
+    }
+    function void visit(RequestBar* ctx)
+    {
+        this->bar += 1;
+    }
+}
+
+class TestRequestAcceptor<ITestRequestAcceptor>
+{
+    Request* request
+    function bool test_visitor()
+    {
+        RequestAcceptor acceptor;
+
+        bool result = true;
+        this->request = new RequestFoo();
+        this->request->accept(&acceptor);
+        result = result && acceptor.foo == 1;
+        result = result && acceptor.bar == 0;
+        result = result && acceptor.base == 0;
+
+        acceptor.foo = 0;
+        this->request = new RequestBar();
+        this->request->accept(&acceptor);
+        result = result && acceptor.foo == 0;
+        result = result && acceptor.bar == 1;
+        result = result && acceptor.base == 0;
+
+        return result;
+    }
+}
+
 class Response<SerializedObject>:visitor
 {
 }
@@ -180,6 +227,7 @@ class FunctionTest<SerializedObject>
         result = FunctionTest::test_if_(logger) && result;
         result = FunctionTest::std_functions(logger) && result;
         result = FunctionTest::test_1(logger) && result;
+        result = FunctionTest::test_while(logger) && result;
         return result;
     }
 
@@ -242,6 +290,22 @@ class FunctionTest<SerializedObject>
         return result;
     }
 
+    function bool test_while(Logger* logger):static
+    {
+        auto result = true;
+        std::vector<int> test_vector;
+
+        int index = 0;
+        while(index < 10)
+        {
+            list_push(test_vector, index);
+            index++;
+        }
+        result = list_size(test_vector) == 10;
+        logger->push(result, "while index < 10");
+        return result;
+    }
+
     function bool test_if_(Logger* logger):static
     {
         bool result = true;
@@ -294,13 +358,15 @@ class FunctionTest<SerializedObject>
         return result;
     }
 
-    function bool test_1(Logger* logger):static {
+    function bool test_1(Logger* logger):static
+    {
         auto user = new TestUser1();
 		auto result = FunctionTest::test_1_1(user);
 		logger->push(result, "Functions: test 1");
 		return result;
 	}
-    function bool test_1_1(TestUser1* user):static {
+    function bool test_1_1(TestUser1* user):static
+    {
 		auto result = user->result;
 		return result;
 	}
@@ -324,9 +390,8 @@ class TestFactory<SerializedObject>
     {
         bool result = true;
         auto command = new RequestBar();
-        auto string = Factory::serialize_command(command);
-
-        auto command2 = Factory::create_command(string);
+        auto string = Factory::serialize_command<RequestBar>(command);
+        auto command2 = Factory::create_command<Request>(string);
         result = logger->push(command2 != nullptr, " - TestFactory: commnd_2 deserialized") && result;
         if(result)
         {
@@ -336,9 +401,32 @@ class TestFactory<SerializedObject>
     }
 }
 
+class DataComplexMap<SerializedObject>:storage
+{
+    string name
+    map<int, list<float>> complex_map
+    function void foo()
+    {
+    }
+}
 
-
-
+class TestDataComplexMap<ITestDataComplexMap>:tests
+{
+    function bool test_foo()
+    {
+        return true;
+    }
+    function bool test_deserialize()
+    {
+        auto data = DataStorage::shared().get<DataComplexMap>("test");
+        bool result = true;
+        result = result && map_size(data->complex_map) == 1;
+        result = result && list_size(data->complex_map.at(1)) == 2;
+        result = result && data->complex_map.at(1)[0] == 1;
+        result = result && data->complex_map.at(1)[1] == 2;
+        return result;
+    }
+}
 
 
 

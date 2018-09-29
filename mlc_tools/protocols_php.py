@@ -81,7 +81,7 @@ if($xml->$(FIELD))
 }
 
 
-#list<int>, list<bool>, list<float>, list<string>
+#list<int>, list<float>, list<string>
 #serialize:
 $xml_list = $xml->addChild("$(FIELD)");
 foreach($(OWNER)$(FIELD) as $item)
@@ -93,7 +93,23 @@ if($xml->$(FIELD))
 {
     foreach($xml->$(FIELD)->item as $item)
     {
-        array_push($(OWNER)$(FIELD), $item["value"]);
+        array_push($(OWNER)$(FIELD), ($(ARG_0))$item["value"]);
+    }
+}
+#list<bool>
+#serialize:
+$xml_list = $xml->addChild("$(FIELD)");
+foreach($(OWNER)$(FIELD) as $item)
+{
+    $xml_list->addChild("item")->addAttribute("value", $item ? 'yes' : 'no');
+}
+#deserialize:
+if($xml->$(FIELD))
+{
+    foreach($xml->$(FIELD)->item as $item)
+    {
+        $value = strtolower((string)$item["value"]);
+        array_push($(OWNER)$(FIELD), ($value == 'true' || $value == 'yes'));
     }
 }
 
@@ -217,9 +233,11 @@ $(OWNER)$(FIELD) = $json->$(FIELD);
 $json->$(FIELD) = json_decode("{}");
 $(OWNER)$(FIELD)->serialize($json->$(FIELD));
 #deserialize:
-$(OWNER)$(FIELD) = new $(TYPE);
-$(OWNER)$(FIELD)->deserialize($json->$(FIELD));
-
+if(isset($json->$(FIELD)))
+{
+    $(OWNER)$(FIELD) = new $(TYPE);
+    $(OWNER)$(FIELD)->deserialize($json->$(FIELD));
+}
 #pointer
 #serialize
 if($(OWNER)$(FIELD))
@@ -276,6 +294,7 @@ foreach($json->$(FIELD) as $item)
 $json->$(FIELD) = array();
 foreach($(OWNER)$(FIELD) as $t)
 {
+    $type       = $t->get_type();
     $obj        = json_decode("{}");
     $obj->$type = json_decode("{}");
     $t->serialize($obj->$type);
@@ -350,6 +369,8 @@ $json = $json_cache;
 #serialize:
 $json->$(FIELD) = $(OWNER)$(FIELD);
 #deserialize:
-$(OWNER)$(FIELD) = (string)($json->$(FIELD));
-
+if(isset($json->$(FIELD)))
+{
+    $(OWNER)$(FIELD) = (string)($json->$(FIELD));
+}
 '''
