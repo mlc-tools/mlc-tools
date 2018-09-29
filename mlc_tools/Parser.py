@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from .Object import Object
 from .Class import Class
 from .Function import Function
@@ -84,12 +86,12 @@ class Parser:
 
     def parse(self, text):
         text = text.strip()
-        l = text.find('/*')
-        while l != -1:
-            r = text.find('*/')
-            if r != -1:
-                text = text[:l] + text[r + 2:]
-            l = text.find('/*')
+        left = text.find('/*')
+        while left != -1:
+            right = text.find('*/')
+            if right != -1:
+                text = text[:left] + text[right + 2:]
+            left = text.find('/*')
         lines = text.split('\n')
         for i, line in enumerate(lines):
             if '//' in line:
@@ -145,10 +147,6 @@ class Parser:
             self.classes.append(generator.generate_all_tests_class())
 
         for cls in self.classes:
-            if cls.type == 'class' and cls.auto_generated:
-                cls.add_get_type_function()
-
-        for cls in self.classes:
             if cls.is_visitor and self.get_type_of_visitor(cls) != cls.name:
                 if cls.name.find('IVisitor') != 0:
                     self.create_visitor_class(cls)
@@ -160,6 +158,7 @@ class Parser:
                 if c is None:
                     Error.exit(Error.UNKNOWN_BEHAVIOR, cls.name, name)
                 behaviors.append(c)
+                c.subclasses.append(cls)
             cls.behaviors = behaviors
 
         for cls in self.classes:
@@ -176,6 +175,13 @@ class Parser:
         for cls in self.classes:
             for func in cls.functions:
                 func.link()
+
+        for cls in self.classes:
+            self._generate_inline_functional(cls)
+
+        for cls in self.classes:
+            if cls.type == 'class' and cls.auto_generated:
+                cls.add_get_type_function()
 
         for cls in self.classes:
             cls.on_linked(self)
@@ -327,6 +333,7 @@ class Parser:
             visitor.type = "class"
             visitor.is_abstract = True
             visitor.is_visitor = True
+            visitor.is_virtual = True
             visitor.side = cls.side
             self.classes.append(visitor)
 
@@ -367,6 +374,27 @@ class Parser:
         function.parse_body(body)
         self.functions.append(function)
         return text
+
+    def _generate_inline_functional(self, cls):
+        if len(cls.behaviors) == 0:
+            return
+        for parent in cls.behaviors:
+            parent = cls.behaviors[0]
+            if not isinstance(parent, Class):
+                Error.exit(Error.INTERNAL_ERROR)
+            self._generate_inline_functional(parent)
+            if not parent.is_inline:
+                continue
+            for object in parent.members:
+                copy = deepcopy(object)
+                cls.members.append(copy)
+            for func in parent.functions:
+                copy = deepcopy(func)
+                cls.functions.append(copy)
+
+            parent.subclasses.remove(cls)
+
+        cls.behaviors = [i for i in cls.behaviors if not i.is_inline]
 
     def parse_serialize_protocol(self, path):
         buffer_ = open(self.configs_root + path).read()

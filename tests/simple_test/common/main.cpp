@@ -17,6 +17,7 @@
 #include "DataStorage.h"
 #include <fstream>
 #include "mg_config.h"
+#include "mg_Factory.h"
 #include "AllTests.h"
 #include "tests/Logger.h"
 #include "tests/RunAllTests.h"
@@ -98,7 +99,7 @@ bool test_serialization()
 	auto command = mg::make_intrusive<mg::CommandBase>();
 	command->user_id = test_user_id;
 	command->current_time = test_time;
-	auto buffer = command->getSerializedString();
+	auto buffer = mg::Factory::shared().serialize_command(command);
 	auto deserialized = createCommand(buffer);
 
 	std::cout << "serialized string:" << std::endl;

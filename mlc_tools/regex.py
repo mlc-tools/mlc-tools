@@ -7,6 +7,7 @@ class RegexPatternPython:
     ET = re.compile(r'\bET\.')
     FUNCTION = (
         (re.compile(r'DataStorage::shared\(\).get<(\w+)>'), r'DataStorage::shared().get\1'),
+        (re.compile(r'Factory::(.+)<\w+>'), r'Factory.\1'),
         (re.compile(r'for\s*\(\s*\w+[\s&\*]*(\w+)\s*:\s*(.+)\s*\)'), r'for \1 in \2:'),
         (re.compile(r'for\s*\(\s*\w+\s*(\w+)=(\w+);\s*\w+<(\w+);\s*\+\+\w+\s*\)'), r'for \1 in range(\2, int(\3)):'),
         (re.compile(r'for\s*\(\s*\w+\s*(\w+)=(\w+);\s*\w+>(\w+);\s*--\w+\s*\)'), r'for \1 in range(\2, int(\3), -1):'),
@@ -98,6 +99,7 @@ class RegexPatternPhp:
 
     FUNCTION = (
         (re.compile(r'DataStorage::shared\(\).get<(\w+)>'), r'DataStorage::shared()->get\1'),
+        (re.compile(r'Factory::(.+)<\w+>'), r'Factory::\1'),
         (re.compile(r'\.str\(\)'), r''),
         (re.compile(r'for\s*\(auto (.+?)\s*:\s*(.+)\s*\)'), r'foreach($\2 as $\1)'),
         (re.compile(r'for\s*\(auto& (.+?)\s*:\s*(.+)\s*\)'), r'foreach($\2 as $\1)'),
