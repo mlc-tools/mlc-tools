@@ -1,0 +1,50 @@
+class SerializedObject:serialized
+{
+	int _reference_counter:runtime = 1
+	function int retain()
+	{
+		this->_reference_counter += 1;
+		return this->_reference_counter;
+	}
+	function int release()
+	{
+		this->_reference_counter -= 1;
+		auto c = this->_reference_counter;
+		if( c == 0)
+		{
+			delete this;
+		}
+		return c;
+	}
+}
+
+class Foo<SerializedObject>
+{
+    function void foo()
+    {
+    }
+}
+
+class TestSerializedObject<ITestSerializedObject>:test
+{
+    function bool test_retain()
+    {
+        return true;
+    }
+    function bool test_release()
+    {
+        return true;
+    }
+}
+
+class TestFoo<ITestFoo>:test
+{
+    function bool test_foo()
+    {
+        return true;
+    }
+    function bool test_bar()
+    {
+        return true;
+    }
+}

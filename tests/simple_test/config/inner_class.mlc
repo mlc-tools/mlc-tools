@@ -1,0 +1,50 @@
+class inner/OuterClass<SerializedObject>
+{
+    class InnerClass<SerializedObject>
+    {
+        function bool func()
+        {
+            return true;
+        }
+    }
+
+    function InnerClass func()
+    {
+        InnerClass inner;
+        return inner;
+    }
+
+    function void func2(InnerClass arg)
+    {
+        arg.func();
+    }
+
+    InnerClass inner
+    list<InnerClass> test_list
+    map<int, InnerClass> test_map
+}
+
+class inner/TestOuterClass<ITestOuterClass>:test
+{
+    function bool test_func()
+    {
+        OuterClass cls;
+        cls.func();
+        return true;
+    }
+    function bool test_func2()
+    {
+        OuterClassInnerClass inner;
+        OuterClass cls;
+        cls.func2(inner);
+        return true;
+    }
+}
+
+class inner/TestOuterClassInnerClass<ITestOuterClassInnerClass>:test
+{
+    function bool test_func()
+    {
+        return true;
+    }
+}

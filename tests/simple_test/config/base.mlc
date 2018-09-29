@@ -1,0 +1,14 @@
+interface model/ModelBase<SerializedObject>
+{
+}
+
+class model/ModelCity<ModelBase>
+{
+	int id
+	int owner
+
+	function int some_function(string resource)
+	{
+	    return 0;
+	}
+}

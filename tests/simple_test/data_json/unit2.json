@@ -1,0 +1,18 @@
+{
+	"unit": {
+		"name": "unitname2",
+		"unit_type": "defend",
+		"visual": {
+			"name": "some_locale_key_2",
+			"icon": "some_image_2"
+		},
+		"link_to_data" : "unitname1",
+		"all_units" : [
+			"unitname2", "unitname1"
+		],
+		"map_units" : [
+			{ "key": "unitname1", "value" : 1},
+			{ "key": "unitname2", "value" : 2}
+		]
+	}
+}

@@ -41,10 +41,10 @@ script:
   # simple test:
 
   - pushd .
-  - python src/main.py -i simple_test/config -o simple_test/generated_cpp/xml -f xml -l cpp -side server -data simple_test/data_xml -data_out simple_test/assets
-  - python src/main.py -i simple_test/config -o simple_test/generated_cpp/json -f json -l cpp -side client -data simple_test/data_json -data_out simple_test/assets
+  - python -m mlc_tools.main -i tests/simple_test/config -o tests/simple_test/generated_cpp/xml -f xml -l cpp -side server -data tests/simple_test/data_xml -data_out tests/simple_test/assets -generate_tests yes
+  - python -m mlc_tools.main -i tests/simple_test/config -o tests/simple_test/generated_cpp/json -f json -l cpp -side client -data tests/simple_test/data_json -data_out tests/simple_test/assets -generate_tests yes
   
-  - cd simple_test
+  - cd tests/simple_test
 
   - mkdir build_xml
   - cd build_xml
@@ -63,6 +63,6 @@ script:
 
   # test serialize:
   - pushd .
-  - cd test_serialize
+  - cd tests/test_serialize
   - python run.py
   - popd

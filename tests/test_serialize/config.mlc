@@ -1,0 +1,172 @@
+class SerializedObject:serialized
+{
+	int _reference_counter:runtime = 1
+	function int retain()
+	{
+		this->_reference_counter += 1;
+		return this->_reference_counter;
+	}
+	function int release()
+	{
+		this->_reference_counter -= 1;
+		auto c = this->_reference_counter;
+		if( c == 0)
+		{
+			delete this;
+		}
+		return c;
+	}
+}
+
+class TestObject<SerializedObject>
+{
+	int value = 1
+
+	function bool equal(TestObject* r)
+	{
+		return this->value == r->value;
+	}
+}
+
+enum TestEnum
+{
+	value_1
+	value_2
+	value_3
+}
+
+class TestData<SerializedObject>
+{
+	int int_value
+	float float_value
+	bool bool_value
+	string str_value
+	int i_int_value_0 = 0
+	float i_float_value_0 = 0
+	bool i_bool_value_0 = false
+	string i_str_value_0 = ""
+	int i_int_value_1 = 0
+	float i_float_value_1 = 0
+	bool i_bool_value_1 = false
+	string i_str_value_1 = ""
+	list<int> int_list
+	list<float> float_list
+	list<bool> bool_list
+	list<string> string_list
+	map<int, string> int_string_map
+	map<float, string> float_string_map
+	map<bool, string> bool_string_map
+	map<string, string> string_string_map
+	map<string, int> string_int_map
+	map<string, float> string_float_map
+	map<string, bool> string_bool_map
+	TestObject object
+	TestObject* object_ptr
+	list<TestObject*> object_ptr_list
+	map<string, TestObject*> object_ptr_map
+	TestEnum enum_value
+	list<TestEnum> enum_list
+	map<TestEnum, int> enum_map
+
+	function void initialize()
+	{
+		this->int_value = 1;
+		this->float_value = 2;
+		this->bool_value = true;
+		this->str_value = "string";
+		this->i_int_value_0 = 100;
+		this->i_float_value_0 = 200;
+		this->i_bool_value_0 = true;
+		this->i_str_value_0 = "some_value";
+		list_push(this->int_list, 1);
+		list_push(this->float_list, 2);
+		list_push(this->bool_list, true);
+		list_push(this->string_list, "string");
+		list_push(this->int_list, 2);
+		list_push(this->float_list, 3);
+		list_push(this->bool_list, false);
+		list_push(this->string_list, "string2");
+		this->int_string_map[1] = "some_value";
+		this->float_string_map[2] = "some_value";
+		this->bool_string_map[true] = "some_value";
+		this->string_string_map["string"] = "some_value";
+		this->int_string_map[3] = "some_value";
+		this->float_string_map[4] = "some_value";
+		this->bool_string_map[false] = "some_value";
+		this->string_string_map["string2"] = "some_value";
+		this->string_int_map["key"] = 1;
+		this->string_float_map["key"] = 2;
+		this->string_bool_map["key"] = true;
+		this->object.value = 2;
+		this->object_ptr = new TestObject();
+		this->object_ptr->value = 3;
+		list_push(this->object_ptr_list, new TestObject());
+		list_push(this->object_ptr_list, new TestObject());
+		this->object_ptr_list[0]->value = 5;
+		this->object_ptr_list[1]->value = 10;
+		this->object_ptr_map["key"] = new TestObject();
+		this->object_ptr_map["key"]->value = 99;
+		this->object_ptr_map["key2"] = new TestObject();
+		this->object_ptr_map["key2"]->value = 100;
+		this->enum_value = TestEnum::value_1;
+		this->enum_map[TestEnum::value_1] = 1;
+		this->enum_map[TestEnum::value_2] = 1;
+		this->enum_map[TestEnum::value_3] = 1;
+		list_push(this->enum_list, TestEnum::value_1);
+		list_push(this->enum_list, TestEnum::value_2);
+		list_push(this->enum_list, TestEnum::value_3);
+		list_push(this->enum_list, TestEnum::value_1);
+	}
+
+	function bool equal(TestData* r)
+	{
+		bool result = true;
+
+		result = result && this->int_value == r->int_value;
+		result = result && this->float_value == r->float_value;
+		result = result && this->bool_value == r->bool_value;
+		result = result && this->str_value == r->str_value;
+
+		result = result && this->i_int_value_0 == r->i_int_value_0;
+		result = result && this->i_float_value_0 == r->i_float_value_0;
+		result = result && this->i_bool_value_0 == r->i_bool_value_0;
+		result = result && this->i_str_value_0 == r->i_str_value_0;
+
+		result = result && this->i_int_value_1 == r->i_int_value_1;
+		result = result && this->i_float_value_1 == r->i_float_value_1;
+		result = result && this->i_bool_value_1 == r->i_bool_value_1;
+		result = result && this->i_str_value_1 == r->i_str_value_1;
+
+		result = result && this->int_list == r->int_list;
+		result = result && this->float_list == r->float_list;
+		result = result && this->bool_list == r->bool_list;
+		result = result && this->string_list == r->string_list;
+		result = result && this->int_string_map == r->int_string_map;
+		result = result && this->float_string_map == r->float_string_map;
+		result = result && this->bool_string_map == r->bool_string_map;
+		result = result && this->string_string_map == r->string_string_map;
+		result = result && this->string_int_map == r->string_int_map;
+		result = result && this->string_float_map == r->string_float_map;
+		result = result && this->string_bool_map == r->string_bool_map;
+		result = result && this->object.equal(&r->object);
+		result = result && this->object_ptr->equal(r->object_ptr);
+		result = result && list_size(this->object_ptr_list) == list_size(r->object_ptr_list);
+		result = result && map_size(this->object_ptr_map) == map_size(r->object_ptr_map);
+		result = result && this->enum_value == r->enum_value;
+		result = result && this->enum_map == r->enum_map;
+		auto size = list_size(this->object_ptr_list);
+		for(int i=0; i<size; ++i)
+		{
+			result = result && this->object_ptr_list[i]->equal(r->object_ptr_list[i]);
+		}
+		for(auto&& [key, obj] : this->object_ptr_map)
+		{
+			result = result && this->object_ptr_map[key]->equal(r->object_ptr_map[key]);
+		}
+		
+		result = result && this->enum_list == r->enum_list;
+		
+
+		return result;
+	}
+}

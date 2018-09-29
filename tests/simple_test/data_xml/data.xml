@@ -1,0 +1,38 @@
+<data>
+	<unit name="unitname1" link_to_data="unitname2" unit_type="attack">
+		<visual  icon="some_image" name="some_locale_key">
+		</visual>
+		<all_units>
+			<item value="unitname1"/>
+			<item value="unitname2"/>
+		</all_units>
+		<map_units>
+			<pair key="unitname1" value="1"/>
+			<pair key="unitname2" value="2"/>
+		</map_units>
+	</unit>
+
+	<unit name="unitname2" link_to_data="unitname1"  unit_type="defend">
+		<visual name="some_locale_key" icon="some_image">
+		</visual>
+		<all_units>
+			<item value="unitname2"/>
+			<item value="unitname1"/>
+		</all_units>
+		<map_units>
+			<pair key="unitname1" value="1"/>
+			<pair key="unitname2" value="2"/>
+		</map_units>
+	</unit>
+
+	<complex_map name="test">
+		<complex_map>
+			<pair key="1">
+				<value>
+					<item value="1"/>
+					<item value="2"/>
+				</value>
+			</pair>
+		</complex_map>
+	</complex_map>
+</data>
