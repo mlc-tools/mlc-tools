@@ -184,18 +184,27 @@ def _create_constructor_function_cpp(parser, class_):
         return ''
     initialize = ''
     initialize2 = ''
-    for obj in class_.members:
-        if obj.is_key:
-            str1 = '\nstatic {0} {1}_key = 0;'.format(obj.type, obj.name)
-            str2 = '\n{0} = ++{0}_key;'.format(obj.name)
-            initialize2 += str1 + str2
-        elif obj.initial_value and not obj.is_static:
-            pattern = '\n{2} {0}({1})'
-            s = ','
-            if initialize == '':
-                s = ':'
-            string = pattern.format(obj.name, obj.initial_value, s)
-            initialize += string
+
+    accesses = [
+        AccessSpecifier.public,
+        AccessSpecifier.protected,
+        AccessSpecifier.private,
+    ]
+    for access in accesses:
+        for obj in class_.members:
+            if obj.access != access:
+                continue
+            if obj.is_key:
+                str1 = '\nstatic {0} {1}_key = 0;'.format(obj.type, obj.name)
+                str2 = '\n{0} = ++{0}_key;'.format(obj.name)
+                initialize2 += str1 + str2
+            elif obj.initial_value and not obj.is_static:
+                pattern = '\n{2} {0}({1})'
+                s = ','
+                if initialize == '':
+                    s = ':'
+                string = pattern.format(obj.name, obj.initial_value, s)
+                initialize += string
 
     pattern = '{0}::{0}(){1}\n__begin__{2}\n\n__end__\n'
     string = pattern.format(class_.name, initialize, initialize2)
@@ -271,19 +280,19 @@ class WriterCpp(Writer):
 
     def write_objects(self, objects, flags):
 
-        accesses = {
-            AccessSpecifier.public: 'public: ',
-            AccessSpecifier.protected: 'protected: ',
-            AccessSpecifier.private: 'private: ',
-        }
+        accesses = [
+            (AccessSpecifier.public, 'public: '),
+            (AccessSpecifier.protected, 'protected: '),
+            (AccessSpecifier.private, 'private: '),
+        ]
 
         out = {flags: '\n'}
         for access in accesses:
             add = flags == FLAG_HPP
             for object_ in objects:
-                if object_.access == access:
+                if object_.access == access[0]:
                     if add:
-                        out[flags] += accesses[access] + '\n'
+                        out[flags] += access[1] + '\n'
                         add = False
                     out = add_dict(out, self.write_object(object_, flags))
         return out
