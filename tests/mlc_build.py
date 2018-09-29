@@ -13,7 +13,7 @@ def get_root():
     return os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + '/..')
 
 
-def run_tests(generator, root, withdata=False):
+def run_tests(generator, root, withdata=False, cpp=True, python=True, php=True):
     def run(lang, format):
         generator.generate(lang, format, root + 'generated_%s' % (lang if lang != 'cpp' else lang + '/' + format))
         if withdata:
@@ -22,13 +22,16 @@ def run_tests(generator, root, withdata=False):
         print('-----------------------------------------')
         print('|  test with params [{}, {}] finished'.format(lang, format))
         print('-----------------------------------------')
-
-    run('cpp', 'json')
-    run('cpp', 'xml')
-    run('py', 'json')
-    run('py', 'xml')
-    run('php', 'json')
-    run('php', 'xml')
+    
+    if cpp:
+        run('cpp', 'json')
+        run('cpp', 'xml')
+    if python:
+        run('py', 'json')
+        run('py', 'xml')
+    if php:
+        run('php', 'json')
+        run('php', 'xml')
 
 
 def simple_test():
@@ -51,7 +54,6 @@ def test_database():
 
 
 def test_serialize():
-
     def execute(command):
         p = os.system(command)
         return p
@@ -63,16 +65,24 @@ def test_serialize():
     if 0 != result:
         exit(1)
 
+
 def unit_tests_generator():
     root = get_root() + '/tests/unit_tests_generator/'
     generator = Generator(configs_directory=root, generate_intrusive=True, generate_factory=True, generate_tests=True)
     run_tests(generator, root)
     
+    
+def test_virtual_methods():
+    root = get_root() + '/tests/test_virtual_methods/'
+    generator = Generator(configs_directory=root, generate_intrusive=True, generate_factory=True, generate_tests=True)
+    run_tests(generator, root, python=False, php=False)
+
 
 if __name__ == '__main__':
     simple_test()
     test_serialize()
     test_functions()
     unit_tests_generator()
+    test_virtual_methods()
     # Dont run this test in CI
     # test_database()

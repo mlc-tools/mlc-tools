@@ -94,6 +94,8 @@ class Class(Object):
                               func.is_virtual or \
                               func.is_abstract or \
                               self._has_equal_function_in_subclasses(func)
+            func.is_virtual = func.is_virtual or \
+                              self._has_equal_function_in_superclasses(func)
 
         if not self.is_abstract:
             for function in self.functions:
@@ -118,6 +120,21 @@ class Class(Object):
                     return True
         for subclass in self.subclasses:
             if subclass._has_equal_function_in_subclasses(function):
+                return True
+        return False
+
+    def _has_equal_function_in_superclasses(self, function):
+        for superclass in self.behaviors:
+            for func in superclass.functions:
+                equal = True
+                equal = equal and func.name == function.name
+                # equal = equal and func.args == function.args
+                equal = equal and func.return_type.type == function.return_type.type
+                if equal:
+                    func.is_virtual = True
+                    return True
+        for superclass in self.behaviors:
+            if superclass._has_equal_function_in_superclasses(function):
                 return True
         return False
 
@@ -281,3 +298,4 @@ class Class(Object):
             function.operations.append('return {}::TYPE;'.format(self.name))
         function.link()
         self.functions.append(function)
+        function.is_virtual = self.is_virtual or len(self.behaviors) or len(self.subclasses)
