@@ -32,7 +32,7 @@ class Test:
         test.type = 'class'
         test.name = 'ITest' + cls.name
         test.group = 'tests'
-        test.behaviors.append('TestCase')
+        test.superclasses.append('TestCase')
         generated_functions = []
         for func in cls.functions:
             ignored = ['visit', 'accept']
@@ -81,7 +81,7 @@ class Test:
         test_all.type = 'class'
         test_all.name = 'RunAllTests'
         test_all.group = 'tests'
-        test_all.behaviors.append('TestCase')
+        test_all.superclasses.append('TestCase')
 
         for test in self.tests:
             if self.parser.find_class(test.name[1:]):

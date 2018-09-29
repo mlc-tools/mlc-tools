@@ -64,9 +64,9 @@ class WriterPhp(Writer):
         name = cls.name
         extend = ''
         include_patter = '\nrequire_once "{}.php";'
-        if cls.behaviors:
-            extend = ' extends ' + cls.behaviors[0].name
-            imports += include_patter.format(cls.behaviors[0].name)
+        if cls.superclasses:
+            extend = ' extends ' + cls.superclasses[0].name
+            imports += include_patter.format(cls.superclasses[0].name)
         for obj in cls.members:
             if self.parser.find_class(obj.type):
                 if obj.type != cls.name:
@@ -89,7 +89,7 @@ class WriterPhp(Writer):
         if cls.name not in self.functions_cache:
             self.functions_cache[cls.name] = []
         if function.name == 'visit' and \
-                ((cls.behaviors and cls.behaviors[0].name.startswith('IVisitor')) or cls.name.startswith('IVisitor'))\
+                ((cls.superclasses and cls.superclasses[0].name.startswith('IVisitor')) or cls.name.startswith('IVisitor'))\
                 and function.args and len(function.args[0]) > 1:
             ctx_name = function.args[0][1]
             ctx_name = ctx_name[0].lower() + ctx_name[1:]
@@ -178,7 +178,7 @@ class WriterPhp(Writer):
 
         function.args = [[self.get_serialiation_function_args(), None]]
 
-        if len(cls.behaviors):
+        if len(cls.superclasses):
             function.operations.append('parent::{}(${});'.format(function.name, self.get_serialiation_function_args()))
         for obj in cls.members:
             if obj.is_runtime:
@@ -344,20 +344,20 @@ class WriterPhp(Writer):
         line_visit = '''\nfunction visit_{0}($ctx)\n@(\n@)\n'''
         base_visitors = {}
         for cls in self.parser.classes:
-            if cls.is_visitor and (not cls.behaviors[0].is_visitor if len(cls.behaviors) else True):
+            if cls.is_visitor and (not cls.superclasses[0].is_visitor if len(cls.superclasses) else True):
                 base_visitors[cls] = []
         for cls in self.parser.classes:
-            parent = cls.behaviors[0] if cls.behaviors else None
-            while parent:
-                if parent in base_visitors:
-                    base_visitors[parent].append(cls)
+            superclass = cls.superclasses[0] if cls.superclasses else None
+            while superclass:
+                if superclass in base_visitors:
+                    base_visitors[superclass].append(cls)
                     break
-                parent = parent.behaviors[0] if parent.behaviors else None
-        for parent in base_visitors:
+                superclass = superclass.superclasses[0] if superclass.superclasses else None
+        for superclass in base_visitors:
             lines = ''
             visits = ''
             imports = ''
-            for cls in base_visitors[parent]:
+            for cls in base_visitors[superclass]:
                 if self.parser.is_visitor(cls):
                     func_name = cls.name
                     func_name = func_name[0].lower() + func_name[1:]
@@ -365,7 +365,7 @@ class WriterPhp(Writer):
                     lines += line.format(cls.name, func_name)
                     imports += line_import.format(cls.name)
                     visits += line_visit.format(func_name)
-            name = 'IVisitor{}'.format(parent.name)
+            name = 'IVisitor{}'.format(superclass.name)
             body = pattern.format(imports, lines, visits, name)
             body = body.replace('@(', '{')
             body = body.replace('@)', '}')

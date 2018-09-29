@@ -168,7 +168,7 @@ def _create_destructor_function_hpp(class_):
     if class_.type == 'enum':
         return ''
     virtual = 'virtual '
-    if not class_.is_virtual and len(class_.behaviors) == 0 and len(class_.subclasses) == 0:
+    if not class_.is_virtual and len(class_.superclasses) == 0 and len(class_.subclasses) == 0:
         virtual = ''
     pattern = '{0}~{1}()'.format(virtual, class_.name)
     if not is_class_has_cpp_definitions(class_):
@@ -321,10 +321,10 @@ class WriterCpp(Writer):
     def _write_class_hpp(self, class_):
         out = Writer.write_class(self, class_, FLAG_HPP)
         self._current_class = class_
-        behaviors = list()
-        for c in class_.behaviors:
-            behaviors.append('public ' + c.name)
-        behaviors = ', '.join(behaviors)
+        superclasses = list()
+        for c in class_.superclasses:
+            superclasses.append('public ' + c.name)
+        superclasses = ', '.join(superclasses)
         objects = self.write_objects(class_.members, FLAG_HPP)
         functions = self.write_functions(class_.functions, FLAG_HPP)
         constructor = _create_constructor_function_hpp(class_)
@@ -341,7 +341,7 @@ class WriterCpp(Writer):
         self._current_class = None
 
         pattern = ''
-        if len(class_.behaviors) > 0:
+        if len(class_.superclasses) > 0:
             pattern += '{0} {1} : {2}'
         else:
             pattern += '{0} {1}'
@@ -364,7 +364,7 @@ class WriterCpp(Writer):
         pattern = '#ifndef __{3}_{0}_h__\n#define __{3}_{0}_h__\n{2}\n{1}\n\n#endif //#ifndef __{3}_{0}_h__'.\
             format(class_.name, pattern, includes, self.get_namespace())
 
-        out[FLAG_HPP] += pattern.format('class', class_.name, behaviors, objects[FLAG_HPP],
+        out[FLAG_HPP] += pattern.format('class', class_.name, superclasses, objects[FLAG_HPP],
                                         functions[FLAG_HPP], constructor, destructor)
         return out
 
@@ -557,7 +557,7 @@ class WriterCpp(Writer):
         if self.serialize_format == 'xml' and serialization_type == DESERIALIZATION:
             return ['xml', 'const pugi::xml_node&']
 
-    def get_behavior_call_format(self):
+    def get_superclass_call_format(self):
         return '{0}::{1}(' + self.serialize_format + ');'
 
     def add_serialization(self, class_, serialization_type):
@@ -569,14 +569,14 @@ class WriterCpp(Writer):
         if serialization_type == DESERIALIZATION:
             function.name = 'deserialize'
             function.args.append(self.get_serialization_object_arg(serialization_type))
-        function.is_virtual = len(class_.behaviors) > 0 or len(class_.subclasses) > 0
+        function.is_virtual = len(class_.superclasses) > 0 or len(class_.subclasses) > 0
         function.return_type = Object.VOID
         function.link()
 
-        for behabior in class_.behaviors:
+        for behabior in class_.superclasses:
             if not behabior.is_serialized:
                 continue
-            operation = self.get_behavior_call_format().format(behabior.name, function.name)
+            operation = self.get_superclass_call_format().format(behabior.name, function.name)
             function.operations.append(operation)
 
         for obj in class_.members:
@@ -728,7 +728,7 @@ class WriterCpp(Writer):
         include_types = dict()
         forward_types = dict()
 
-        for t in class_.behaviors:
+        for t in class_.superclasses:
             include_types[t.name] = 1
         for t in class_.members:
             type_ = t.type

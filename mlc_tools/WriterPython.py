@@ -62,12 +62,12 @@ class WriterPython(Writer):
             functions += f
 
         imports = ''
-        init_behavior = ''
+        init_superclass = ''
         name = cls.name
-        if cls.behaviors:
-            name += '(' + cls.behaviors[0].name + ')'
-            imports += 'from .{0} import {0}'.format(cls.behaviors[0].name)
-            init_behavior = '        {0}.__init__(self)'.format(cls.behaviors[0].name)
+        if cls.superclasses:
+            name += '(' + cls.superclasses[0].name + ')'
+            imports += 'from .{0} import {0}'.format(cls.superclasses[0].name)
+            init_superclass = '        {0}.__init__(self)'.format(cls.superclasses[0].name)
         for obj in cls.members:
             type_class = self.parser.find_class(obj.type)
             if type_class and type_class.type == 'enum':
@@ -77,7 +77,7 @@ class WriterPython(Writer):
             functions = functions.replace(imp, '')
             initialize_list = initialize_list.replace(imp, '')
 
-        out = pattern.format(name, initialize_list, functions, imports, init_behavior, static_list)
+        out = pattern.format(name, initialize_list, functions, imports, init_superclass, static_list)
         self.current_class = None
         return {flags: out}
 
@@ -110,7 +110,7 @@ class WriterPython(Writer):
             ops = '        ' + '\n        '.join(function.operations)
 
         if name == 'visit' and \
-                ((cls.behaviors and cls.behaviors[0].name.startswith('IVisitor')) or cls.name.startswith('IVisitor'))\
+                ((cls.superclasses and cls.superclasses[0].name.startswith('IVisitor')) or cls.name.startswith('IVisitor'))\
                 and function.args and len(function.args[0]) > 1:
             ctx_name = function.args[0][1]
             ctx_name = ctx_name[0].lower() + ctx_name[1:]
@@ -177,8 +177,8 @@ class WriterPython(Writer):
                 return
 
         body = self.get_serialization_function_args() + ':\n$(import)'
-        if cls.behaviors:
-            body += ('        {0}.{1}' + self.get_serialization_function_args() + '\n').format(cls.behaviors[0].name,
+        if cls.superclasses:
+            body += ('        {0}.{1}' + self.get_serialization_function_args() + '\n').format(cls.superclasses[0].name,
                                                                                                function.name)
         for obj in cls.members:
             if obj.is_runtime:
@@ -300,20 +300,20 @@ class WriterPython(Writer):
         line_visit = '''\n    def visit_{0}(self, ctx):\n        pass\n'''
         base_visitors = {}
         for cls in self.parser.classes:
-            if cls.is_visitor and (not cls.behaviors[0].is_visitor if len(cls.behaviors) else True):
+            if cls.is_visitor and (not cls.superclasses[0].is_visitor if len(cls.superclasses) else True):
                 base_visitors[cls] = []
         for cls in self.parser.classes:
-            parent = cls.behaviors[0] if cls.behaviors else None
-            while parent:
-                if parent in base_visitors:
-                    base_visitors[parent].append(cls)
+            superclass = cls.superclasses[0] if cls.superclasses else None
+            while superclass:
+                if superclass in base_visitors:
+                    base_visitors[superclass].append(cls)
                     break
-                parent = parent.behaviors[0] if parent.behaviors else None
-        for parent in base_visitors:
+                superclass = superclass.superclasses[0] if superclass.superclasses else None
+        for superclass in base_visitors:
             lines = ''
             visits = ''
             imports = ''
-            for cls in base_visitors[parent]:
+            for cls in base_visitors[superclass]:
                 if self.parser.is_visitor(cls):
                     func_name = cls.name
                     func_name = func_name[0].lower() + func_name[1:]
@@ -322,7 +322,7 @@ class WriterPython(Writer):
                     imports += line_import.format(cls.name)
                     visits += line_visit.format(func_name)
                     
-            name = 'IVisitor{}'.format(parent.name)
+            name = 'IVisitor{}'.format(superclass.name)
             body = pattern.format(imports, lines, visits, name)
             self.save_file(name + '.py', body)
                     

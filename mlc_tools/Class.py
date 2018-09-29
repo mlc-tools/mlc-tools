@@ -9,7 +9,7 @@ class Class(Object):
 
     def __init__(self):
         Object.__init__(self)
-        self.behaviors = []
+        self.superclasses = []
         self.subclasses = []
         self.members = []
         self.functions = []
@@ -41,7 +41,7 @@ class Class(Object):
         Object.parse(self, line)
         self.name = self.type
         self.type = type_
-        self.behaviors = self.template_args
+        self.superclasses = self.template_args
         self.template_args = []
         if '/' in self.name:
             k = self.name.rindex('/')
@@ -103,8 +103,8 @@ class Class(Object):
                     self.is_abstract = True
                     function.is_virtual = True
                     break
-            for parent in self.behaviors:
-                parent.on_linked(parser)
+            for superclass in self.superclasses:
+                superclass.on_linked(parser)
 
         self._linked = True
 
@@ -124,7 +124,7 @@ class Class(Object):
         return False
 
     def _has_equal_function_in_superclasses(self, function):
-        for superclass in self.behaviors:
+        for superclass in self.superclasses:
             for func in superclass.functions:
                 equal = True
                 equal = equal and func.name == function.name
@@ -133,7 +133,7 @@ class Class(Object):
                 if equal:
                     func.is_virtual = True
                     return True
-        for superclass in self.behaviors:
+        for superclass in self.superclasses:
             if superclass._has_equal_function_in_superclasses(function):
                 return True
         return False
@@ -194,8 +194,8 @@ class Class(Object):
                 add_function = True
 
         override = False
-        if self.behaviors:
-            for class_ in self.behaviors:
+        if self.superclasses:
+            for class_ in self.superclasses:
                 if class_.is_abstract:
                     continue
                 for func in class_.functions:
@@ -253,9 +253,9 @@ class Class(Object):
                     add_function = True
                     function.operations.append(getter)
 
-        parent_class = ''
-        if self.behaviors:
-            for class_ in self.behaviors:
+        superclass = ''
+        if self.superclasses:
+            for class_ in self.superclasses:
                 if class_.is_abstract:
                     continue
                 for func in class_.functions:
@@ -263,19 +263,19 @@ class Class(Object):
                     for i, arg in enumerate(func.args):
                         equal = equal and func.args[i][1] == function.args[i][1]
                     if equal:
-                        parent_class = class_.name
+                        superclass = class_.name
                         break
 
-        if not parent_class:
+        if not superclass:
             op = 'return "";'
         elif function.operations:
             op = 'else \n{1}\n return {0}::{3}(name);\n{2}'.\
-                format(parent_class, '{', '}', constants.CLASS_FUNCTION_GET_PROPERTY)
+                format(superclass, '{', '}', constants.CLASS_FUNCTION_GET_PROPERTY)
         else:
-            op = 'return {0}::{1}(name, value);'.format(parent_class, constants.CLASS_FUNCTION_GET_PROPERTY)
+            op = 'return {0}::{1}(name, value);'.format(superclass, constants.CLASS_FUNCTION_GET_PROPERTY)
         function.operations.append(op)
 
-        if add_function or not parent_class:
+        if add_function or not superclass:
             self.functions.append(function)
 
     def add_get_type_function(self):
@@ -298,4 +298,4 @@ class Class(Object):
             function.operations.append('return {}::TYPE;'.format(self.name))
         function.link()
         self.functions.append(function)
-        function.is_virtual = self.is_virtual or len(self.behaviors) or len(self.subclasses)
+        function.is_virtual = self.is_virtual or len(self.superclasses) or len(self.subclasses)
