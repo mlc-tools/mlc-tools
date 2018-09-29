@@ -90,7 +90,10 @@ class Class(Object):
             self._generate_getters_function(parser)
 
         for func in self.functions:
-            func.is_virtual = self.is_virtual or func.is_virtual or self._has_equal_function_in_subclasses(func)
+            func.is_virtual = self.is_virtual or \
+                              func.is_virtual or \
+                              func.is_abstract or \
+                              self._has_equal_function_in_subclasses(func)
 
         if not self.is_abstract:
             for function in self.functions:

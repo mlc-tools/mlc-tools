@@ -333,6 +333,7 @@ class Parser:
             visitor.type = "class"
             visitor.is_abstract = True
             visitor.is_visitor = True
+            visitor.is_virtual = True
             visitor.side = cls.side
             self.classes.append(visitor)
 

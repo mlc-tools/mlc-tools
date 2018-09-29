@@ -569,6 +569,7 @@ class WriterCpp(Writer):
         if serialization_type == DESERIALIZATION:
             function.name = 'deserialize'
             function.args.append(self.get_serialization_object_arg(serialization_type))
+        function.is_virtual = len(class_.behaviors) > 0 or len(class_.subclasses) > 0
         function.return_type = Object.VOID
         function.link()
 
