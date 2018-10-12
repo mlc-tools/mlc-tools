@@ -168,7 +168,7 @@ def _create_destructor_function_hpp(class_):
     if class_.type == 'enum':
         return ''
     virtual = 'virtual '
-    if not class_.is_virtual and len(class_.behaviors) == 0 and len(class_.subclasses) == 0:
+    if not class_.is_virtual and len(class_.superclasses) == 0 and len(class_.subclasses) == 0:
         virtual = ''
     pattern = '{0}~{1}()'.format(virtual, class_.name)
     if not is_class_has_cpp_definitions(class_):
@@ -184,18 +184,27 @@ def _create_constructor_function_cpp(parser, class_):
         return ''
     initialize = ''
     initialize2 = ''
-    for obj in class_.members:
-        if obj.is_key:
-            str1 = '\nstatic {0} {1}_key = 0;'.format(obj.type, obj.name)
-            str2 = '\n{0} = ++{0}_key;'.format(obj.name)
-            initialize2 += str1 + str2
-        elif obj.initial_value and not obj.is_static:
-            pattern = '\n{2} {0}({1})'
-            s = ','
-            if initialize == '':
-                s = ':'
-            string = pattern.format(obj.name, obj.initial_value, s)
-            initialize += string
+
+    accesses = [
+        AccessSpecifier.public,
+        AccessSpecifier.protected,
+        AccessSpecifier.private,
+    ]
+    for access in accesses:
+        for obj in class_.members:
+            if obj.access != access:
+                continue
+            if obj.is_key:
+                str1 = '\nstatic {0} {1}_key = 0;'.format(obj.type, obj.name)
+                str2 = '\n{0} = ++{0}_key;'.format(obj.name)
+                initialize2 += str1 + str2
+            elif obj.initial_value and not obj.is_static:
+                pattern = '\n{2} {0}({1})'
+                s = ','
+                if initialize == '':
+                    s = ':'
+                string = pattern.format(obj.name, obj.initial_value, s)
+                initialize += string
 
     pattern = '{0}::{0}(){1}\n__begin__{2}\n\n__end__\n'
     string = pattern.format(class_.name, initialize, initialize2)
@@ -271,19 +280,19 @@ class WriterCpp(Writer):
 
     def write_objects(self, objects, flags):
 
-        accesses = {
-            AccessSpecifier.public: 'public: ',
-            AccessSpecifier.protected: 'protected: ',
-            AccessSpecifier.private: 'private: ',
-        }
+        accesses = [
+            (AccessSpecifier.public, 'public: '),
+            (AccessSpecifier.protected, 'protected: '),
+            (AccessSpecifier.private, 'private: '),
+        ]
 
         out = {flags: '\n'}
         for access in accesses:
             add = flags == FLAG_HPP
             for object_ in objects:
-                if object_.access == access:
+                if object_.access == access[0]:
                     if add:
-                        out[flags] += accesses[access] + '\n'
+                        out[flags] += access[1] + '\n'
                         add = False
                     out = add_dict(out, self.write_object(object_, flags))
         return out
@@ -321,10 +330,10 @@ class WriterCpp(Writer):
     def _write_class_hpp(self, class_):
         out = Writer.write_class(self, class_, FLAG_HPP)
         self._current_class = class_
-        behaviors = list()
-        for c in class_.behaviors:
-            behaviors.append('public ' + c.name)
-        behaviors = ', '.join(behaviors)
+        superclasses = list()
+        for c in class_.superclasses:
+            superclasses.append('public ' + c.name)
+        superclasses = ', '.join(superclasses)
         objects = self.write_objects(class_.members, FLAG_HPP)
         functions = self.write_functions(class_.functions, FLAG_HPP)
         constructor = _create_constructor_function_hpp(class_)
@@ -341,7 +350,7 @@ class WriterCpp(Writer):
         self._current_class = None
 
         pattern = ''
-        if len(class_.behaviors) > 0:
+        if len(class_.superclasses) > 0:
             pattern += '{0} {1} : {2}'
         else:
             pattern += '{0} {1}'
@@ -364,7 +373,7 @@ class WriterCpp(Writer):
         pattern = '#ifndef __{3}_{0}_h__\n#define __{3}_{0}_h__\n{2}\n{1}\n\n#endif //#ifndef __{3}_{0}_h__'.\
             format(class_.name, pattern, includes, self.get_namespace())
 
-        out[FLAG_HPP] += pattern.format('class', class_.name, behaviors, objects[FLAG_HPP],
+        out[FLAG_HPP] += pattern.format('class', class_.name, superclasses, objects[FLAG_HPP],
                                         functions[FLAG_HPP], constructor, destructor)
         return out
 
@@ -557,7 +566,7 @@ class WriterCpp(Writer):
         if self.serialize_format == 'xml' and serialization_type == DESERIALIZATION:
             return ['xml', 'const pugi::xml_node&']
 
-    def get_behavior_call_format(self):
+    def get_superclass_call_format(self):
         return '{0}::{1}(' + self.serialize_format + ');'
 
     def add_serialization(self, class_, serialization_type):
@@ -569,14 +578,14 @@ class WriterCpp(Writer):
         if serialization_type == DESERIALIZATION:
             function.name = 'deserialize'
             function.args.append(self.get_serialization_object_arg(serialization_type))
-        function.is_virtual = len(class_.behaviors) > 0 or len(class_.subclasses) > 0
+        function.is_virtual = len(class_.superclasses) > 0 or len(class_.subclasses) > 0
         function.return_type = Object.VOID
         function.link()
 
-        for behabior in class_.behaviors:
+        for behabior in class_.superclasses:
             if not behabior.is_serialized:
                 continue
-            operation = self.get_behavior_call_format().format(behabior.name, function.name)
+            operation = self.get_superclass_call_format().format(behabior.name, function.name)
             function.operations.append(operation)
 
         for obj in class_.members:
@@ -728,7 +737,7 @@ class WriterCpp(Writer):
         include_types = dict()
         forward_types = dict()
 
-        for t in class_.behaviors:
+        for t in class_.superclasses:
             include_types[t.name] = 1
         for t in class_.members:
             type_ = t.type

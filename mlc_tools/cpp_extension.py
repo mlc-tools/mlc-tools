@@ -528,6 +528,7 @@ namespace @{namespace}
         class IBuilder
         {
         public:
+            virtual ~IBuilder() {}
             virtual void* build() = 0;
         };
         

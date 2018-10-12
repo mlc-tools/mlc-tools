@@ -41,7 +41,7 @@ class Error:
     MAP_TWO_ARGS = inspect.currentframe().f_lineno
     DUBLICATE_METHODS = inspect.currentframe().f_lineno
     DUBLICATE_CLASS = inspect.currentframe().f_lineno
-    UNKNOWN_BEHAVIOR = inspect.currentframe().f_lineno
+    UNKNOWN_SUPERCLASS = inspect.currentframe().f_lineno
     UNKNOWN_CLASS = inspect.currentframe().f_lineno
     CANNOT_FIND_CLASS_FOR_METHOD = inspect.currentframe().f_lineno
     CANNOT_FIND_CLASS_FOR_OBJECT = inspect.currentframe().f_lineno
@@ -56,7 +56,7 @@ class Error:
         MAP_TWO_ARGS: 'Map have to have 2 arguments. [{}::{}]',
         DUBLICATE_METHODS: 'duplication function in one class [{}::{}]',
         DUBLICATE_CLASS: 'Duplication classes [{}]',
-        UNKNOWN_BEHAVIOR: 'Cannot find behavior class: {}<{}>',
+        UNKNOWN_SUPERCLASS: 'Cannot find superclass class: {}<{}>',
         UNKNOWN_CLASS: 'Unknown class: {}',
         CANNOT_FIND_CLASS_FOR_METHOD: 'Cannot find class [{}] for method [{}]',
         CANNOT_FIND_CLASS_FOR_OBJECT: 'Cannot find class [{}] for object [{}]',

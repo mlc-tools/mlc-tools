@@ -1,0 +1,58 @@
+class SerializedObject:serialized:inline
+{
+	int _reference_counter:runtime = 1
+	function int retain()
+	{
+		this->_reference_counter += 1;
+		return this->_reference_counter;
+	}
+	function int release()
+	{
+		this->_reference_counter -= 1;
+		auto c = this->_reference_counter;
+		if( c == 0)
+		{
+			delete this;
+		}
+		return c;
+	}
+}
+
+class Base<SerializedObject>
+{
+    function string virtual_method()
+    {
+        return "Base";
+    }
+}
+
+class Foo<Base>
+{
+    function string virtual_method()
+    {
+        return "Foo";
+    }
+}
+
+class Foo2<Foo>
+{
+    function string virtual_method()
+    {
+        return "Foo2";
+    }
+}
+
+class TestFoo2<ITestFoo2>
+{
+    function bool test_virtual_method()
+    {
+        bool result = true;
+        Base* a = new Base();
+        result = result && a->virtual_method() == "Base";
+        Base* b = new Foo();
+        result = result && b->virtual_method() == "Foo";
+        Base* c = new Foo2();
+        result = result && c->virtual_method() == "Foo2";
+        return result;
+    }
+}

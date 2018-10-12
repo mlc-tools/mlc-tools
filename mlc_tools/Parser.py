@@ -152,14 +152,14 @@ class Parser:
                     self.create_visitor_class(cls)
 
         for cls in self.classes:
-            behaviors = []
-            for name in cls.behaviors:
+            superclasses = []
+            for name in cls.superclasses:
                 c = self.find_class(name)
                 if c is None:
-                    Error.exit(Error.UNKNOWN_BEHAVIOR, cls.name, name)
-                behaviors.append(c)
+                    Error.exit(Error.UNKNOWN_SUPERCLASS, cls.name, name)
+                superclasses.append(c)
                 c.subclasses.append(cls)
-            cls.behaviors = behaviors
+            cls.superclasses = superclasses
 
         for cls in self.classes:
             cls.is_serialized = self.is_serialised(cls)
@@ -237,7 +237,7 @@ class Parser:
         if cls.is_serialized:
             return True
         result = False
-        for c in cls.behaviors:
+        for c in cls.superclasses:
             result = result or self.is_serialised(c)
         return result
 
@@ -245,7 +245,7 @@ class Parser:
         if cls.is_visitor:
             return True
         result = False
-        for c in cls.behaviors:
+        for c in cls.superclasses:
             result = result or self.is_visitor(c)
         return result
 
@@ -253,14 +253,14 @@ class Parser:
         if cls.type == 'enum':
             return False
         if function.name in ['serialize', 'deserialize']:
-            return len(cls.behaviors) > 0
+            return len(cls.superclasses) > 0
 
-        for c in cls.behaviors:
+        for c in cls.superclasses:
             for f in c.functions:
                 if f.name == function.name and f.get_return_type().type == function.get_return_type().type and f.args == function.args:
                     return True
         is_override = False
-        for c in cls.behaviors:
+        for c in cls.superclasses:
             is_override = is_override or self.is_function_override(c, function)
         return is_override
 
@@ -271,7 +271,7 @@ class Parser:
         if cls.name.find('IVisitor') == 0:
             return cls.name
 
-        for c in cls.behaviors:
+        for c in cls.superclasses:
             if not isinstance(c, Class):
                 return 'IVisitor' + cls.name
             if c.is_visitor:
@@ -376,25 +376,25 @@ class Parser:
         return text
 
     def _generate_inline_functional(self, cls):
-        if len(cls.behaviors) == 0:
+        if len(cls.superclasses) == 0:
             return
-        for parent in cls.behaviors:
-            parent = cls.behaviors[0]
-            if not isinstance(parent, Class):
+        for superclass in cls.superclasses:
+            superclass = cls.superclasses[0]
+            if not isinstance(superclass, Class):
                 Error.exit(Error.INTERNAL_ERROR)
-            self._generate_inline_functional(parent)
-            if not parent.is_inline:
+            self._generate_inline_functional(superclass)
+            if not superclass.is_inline:
                 continue
-            for object in parent.members:
+            for object in superclass.members:
                 copy = deepcopy(object)
                 cls.members.append(copy)
-            for func in parent.functions:
+            for func in superclass.functions:
                 copy = deepcopy(func)
                 cls.functions.append(copy)
 
-            parent.subclasses.remove(cls)
+            superclass.subclasses.remove(cls)
 
-        cls.behaviors = [i for i in cls.behaviors if not i.is_inline]
+        cls.superclasses = [i for i in cls.superclasses if not i.is_inline]
 
     def parse_serialize_protocol(self, path):
         buffer_ = open(self.configs_root + path).read()
