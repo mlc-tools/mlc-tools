@@ -123,3 +123,13 @@ class data/VisualUnit<SerializedObject>
 	string name
 	string icon
 }
+
+class TestDataAdd<ITestDataAdd>:test
+{
+    function bool test_test()
+    {
+        DataStorage::shared().get<DataAdd>("add_data");
+        bool result = in_map("add_data", DataStorage::shared().adds);
+        return result;
+    }
+}

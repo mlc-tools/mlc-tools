@@ -13,11 +13,19 @@ class DataParser:
         self.format = format
         self.classes = classes
         self.filter = filter
-
-        if self.format == 'xml':
-            self._parse_xml(data_directory)
-        elif self.format == 'json':
-            self._parse_json(data_directory)
+        self.directories = [data_directory]
+    
+    def parse(self, additional_directories):
+        directories = self.directories
+        directories.extend(additional_directories)
+        for directory in directories:
+            directory.replace('\\', '/')
+            if directory and not directory.endswith('/'):
+                directory += '/'
+            if self.format == 'xml':
+                self._parse_xml(directory)
+            elif self.format == 'json':
+                self._parse_json(directory)
         self._validate()
 
     def flush(self, out_data_directory):
@@ -34,9 +42,9 @@ class DataParser:
         for file in files:
             if not file.endswith('.xml'):
                 continue
+            file = data_directory + file
             if self.filter is not None and not self.filter(file):
                 continue
-            file = data_directory + file
             try:
                 tree = ET.parse(file)
             except ET.ParseError:
@@ -61,9 +69,9 @@ class DataParser:
         for file in files:
             if not file.endswith('.json'):
                 continue
+            file = data_directory + file
             if self.filter is not None and not self.filter(file):
                 continue
-            file = data_directory + file
             root = json.loads(open(file).read())
 
             def parse(key, dict_):

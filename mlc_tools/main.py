@@ -50,6 +50,8 @@ class Generator:
         self.filter_code = None
         self.filter_data = None
         self.custom_generator = None
+        self.additional_config_directories = []
+        self.additional_data_directories = []
 
     def set_filter(self, filter_code=None, filter_data=None):
         self.filter_code = filter_code
@@ -136,12 +138,22 @@ class Generator:
         self.parser = Parser(self.side, self.generate_tests, self.generate_intrusive, self.generate_factory)
         self.parser.set_configs_directory(self.configs_directory)
         self.parser.generate_patterns()
+        
         files = fileutils.get_files_list(self.configs_directory)
+        files = [self.configs_directory + f for f in files]
+        for directory in self.additional_config_directories:
+            directory.replace('\\', '/')
+            if directory and not directory.endswith('/'):
+                directory += '/'
+            add_files = fileutils.get_files_list(directory)
+            add_files = [directory + f for f in add_files]
+            files.extend(add_files)
+        
         for file in files:
             if file.endswith('.mlc'):
                 if self.filter_code is not None and not self.filter_code(file):
                     continue
-                text = open(self.configs_directory + file).read()
+                text = open(file).read()
                 self.parser.parse(text)
 
         if self.custom_generator:
@@ -250,6 +262,7 @@ class Generator:
                 if class_.is_storage:
                     classes.append(class_)
             self.data_parser = DataParser(classes, self.serialize_format, self.data_directory, self.filter_data)
+            self.data_parser.parse(self.additional_data_directories)
             self.data_parser.flush(self.out_data_directory)
 
     def run_test(self, test_script=None, test_script_args=None):

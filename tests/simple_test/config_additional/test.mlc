@@ -1,0 +1,7 @@
+class DataAdd<SerializedObject>:storage
+{
+    string name
+    function void test()
+    {
+    }
+}
