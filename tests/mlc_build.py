@@ -38,6 +38,8 @@ def simple_test():
     root = get_root() + '/tests/simple_test/'
     generator = Generator(configs_directory=root + 'config', side='client', disable_logs=False,
                           generate_tests=True, generate_intrusive=True, generate_factory=True)
+    generator.additional_config_directories.append(root + 'config_additional')
+    generator.additional_data_directories.append(root + 'data_additional')
     run_tests(generator, root, True)
 
 
