@@ -112,6 +112,10 @@ class Generator:
                             required=False, default='no')
         parser.add_argument('-generate_factory', type=str, help='Generate Factory class (only c++)',
                             required=False, default='yes')
+        parser.add_argument('-add_config', type=str, help='Additional directories with configs',
+                            required=False, default='')
+        parser.add_argument('-add_data', type=str, help='Additional directories with data',
+                            required=False, default='')
         args = parser.parse_args()
 
         self.configs_directory = fileutils.normalize_path(args.i)
@@ -130,9 +134,11 @@ class Generator:
         self.generate_tests = args.generate_tests
         self.generate_intrusive = args.generate_intrusive
         self.generate_factory = args.generate_factory
+        self.additional_config_directories = [x.strip() for x in args.add_config.split(',')]
+        self.additional_data_directories = [x.strip() for x in args.add_data.split(',')]
         Log.use_colors = args.use_colors.lower() == 'yes'
         Log.disable_logs = args.disable_logs.lower() == 'yes'
-
+        
     def _parse(self):
         self.parser = Parser(self.side, self.generate_tests, self.generate_intrusive, self.generate_factory)
         self.parser.set_configs_directory(self.configs_directory)
