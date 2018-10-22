@@ -3,6 +3,8 @@
 | Travis   | [![Build Status](https://travis-ci.org/mlc-tools/mlc-tools.svg?branch=master)](https://travis-ci.org/mlc-tools/mlc-tools)                   |
 | Appveyor | [![Build status](https://ci.appveyor.com/api/projects/status/h67gs6x8s4i400lw?svg=true)](https://ci.appveyor.com/project/Volodar/mlc-tools) |
 
+[Trello Board](https://trello.com/b/SOlh2xPb/mlctools)
+
 ### Simple using: ###
 
 
