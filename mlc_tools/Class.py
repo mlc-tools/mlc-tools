@@ -30,6 +30,7 @@ class Class(Object):
         self._linked = False
 
     def parse(self, line):
+        from .common import smart_split
         line = line.strip()
         if self.type in line:
             line = line[len(self.type):]
@@ -37,11 +38,11 @@ class Class(Object):
             line = line[len('interface'):]
         line = self.find_modifiers(line)
         type_ = self.type
-        self.type = ''
-        Object.parse(self, line)
-        self.name = self.type
-        self.type = type_
-        self.superclasses = self.template_args
+
+        pattern = re.compile(r' ([\w/]+)(<(\w+)>)*')
+        parts = pattern.findall(line)[0]
+        self.name = parts[0]
+        self.superclasses = smart_split(parts[2], ',')
         self.template_args = []
         if '/' in self.name:
             k = self.name.rindex('/')

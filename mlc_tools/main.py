@@ -138,12 +138,8 @@ class Generator:
         self.additional_data_directories = [x.strip() for x in args.add_data.split(',')]
         Log.use_colors = args.use_colors.lower() == 'yes'
         Log.disable_logs = args.disable_logs.lower() == 'yes'
-        
-    def _parse(self):
-        self.parser = Parser(self.side, self.generate_tests, self.generate_intrusive, self.generate_factory)
-        self.parser.set_configs_directory(self.configs_directory)
-        self.parser.generate_patterns()
-        
+
+    def _get_config_files(self):
         files = fileutils.get_files_list(self.configs_directory)
         files = [self.configs_directory + f for f in files]
         for directory in self.additional_config_directories:
@@ -153,22 +149,52 @@ class Generator:
             add_files = fileutils.get_files_list(directory)
             add_files = [directory + f for f in add_files]
             files.extend(add_files)
-        
+
+        result_files = []
         for file in files:
             if file.endswith('.mlc'):
                 if self.filter_code is not None and not self.filter_code(file):
                     continue
-                text = open(file).read()
-                self.parser.parse(text)
+                result_files.append(file)
+        return result_files
+
+    def _parse(self):
+        self.parser = Parser(self.side, self.generate_tests, self.generate_intrusive, self.generate_factory)
+        self.parser.generate_patterns()
+        self.parser.load_default_serialize_protocol(self.language, self.serialize_format)
+
+        files = self._get_config_files()
+        for file in files:
+            text = open(file).read()
+            self.parser.parse(text)
 
         if self.custom_generator:
             generator = self.custom_generator()
             generator.generate(self.parser)
 
-        self.parser.link()
-        if self.php_validate:
-            self.parser.validate_php_features()
         self.parser.copyright_text = Copyright(self.configs_directory).text
+
+    def _write(self, gen_data_storage):
+        self.writer = None
+        writers = {
+            'cpp': WriterCpp,
+            'py': WriterPython,
+            'python': WriterPython,
+            'php': WriterPhp,
+        }
+        self.writer = writers[self.language](self.parser, self.serialize_format, namespace=self.namespace)
+
+        if not self.only_data:
+            self.writer.write_classes(self.parser.classes, 0)
+        self.writer.save_generated_classes(self.out_directory)
+        if not self.only_data:
+            self.writer.save_config_files()
+
+        if gen_data_storage:
+            self.writer.create_data_storage()
+
+        self.parser.save_patterns(self.writer, self.language)
+        self.writer.remove_non_actual_files()
 
     def generate(self,
                  language=None,
@@ -211,30 +237,10 @@ class Generator:
         self.validate_arg_side()
 
         self._parse()
-
-        if self.path_to_protocols:
-            self.parser.parse_serialize_protocol(self.path_to_protocols)
-        else:
-            self.parser.load_default_serialize_protocol(self.language, self.serialize_format)
-
-        self.writer = None
-        if self.language == 'cpp':
-            self.writer = WriterCpp(self.parser, self.serialize_format, namespace=self.namespace)
-        elif self.language == 'py':
-            self.writer = WriterPython(self.parser, self.serialize_format)
-        elif self.language == 'php':
-            self.writer = WriterPhp(self.parser, self.serialize_format)
-        if not self.only_data:
-            self.writer.generate()
-        self.writer.save_generated_classes(self.out_directory)
-        if not self.only_data:
-            self.writer.save_config_file()
-
-        if gen_data_storage:
-            self.writer.create_data_storage()
-
-        self.parser.save_patterns(self.writer, self.language)
-        self.writer.remove_non_actual_files()
+        self.parser.link()
+        if self.php_validate:
+            self.parser.validate_php_features()
+        self._write(gen_data_storage)
         Log.message('mlc(lang: {}, format: {} side: {}) generate successful'.format(self.language, self.serialize_format, self.side))
 
     def generate_data(self,

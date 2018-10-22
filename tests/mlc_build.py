@@ -23,15 +23,15 @@ def run_tests(generator, root, withdata=False, cpp=True, python=True, php=True):
         print('|  test with params [{}, {}] finished'.format(lang, format))
         print('-----------------------------------------')
     
-    if cpp:
-        run('cpp', 'json')
-        run('cpp', 'xml')
+    # if cpp:
+    #     run('cpp', 'json')
+    #     run('cpp', 'xml')
     if python:
         run('py', 'json')
-        run('py', 'xml')
+        # run('py', 'xml')
     if php:
         run('php', 'json')
-        run('php', 'xml')
+    #     run('php', 'xml')
 
 
 def simple_test():
@@ -82,9 +82,9 @@ def test_virtual_methods():
 
 if __name__ == '__main__':
     simple_test()
-    test_serialize()
-    test_functions()
-    unit_tests_generator()
-    test_virtual_methods()
+    # test_serialize()
+    # test_functions()
+    # unit_tests_generator()
+    # test_virtual_methods()
     # Dont run this test in CI
     # test_database()

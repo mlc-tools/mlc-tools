@@ -396,10 +396,6 @@ class Parser:
 
         cls.superclasses = [i for i in cls.superclasses if not i.is_inline]
 
-    def parse_serialize_protocol(self, path):
-        buffer_ = open(self.configs_root + path).read()
-        self._parse_serialize_protocol(buffer_)
-
     def load_default_serialize_protocol(self, language, serialize_format):
         buffer_ = protocols[language][serialize_format]
         if sys.version_info[0] == 3 and language == 'py':

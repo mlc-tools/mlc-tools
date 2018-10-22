@@ -1,8 +1,9 @@
-import re
 from .constants import Modifier
+from .Error import Log, Error
+from enum import Enum
 
 
-class AccessSpecifier:
+class AccessSpecifier(Enum):
     public = 0
     protected = 1
     private = 2
@@ -25,36 +26,22 @@ class Object:
         self.access = AccessSpecifier.public
 
     def parse(self, line):
-        line = line.strip()
-        line = self.find_modifiers(line)
-        line = line.replace(';', '')
-        line = line.replace(', ', ',')
-        line = line.replace(' ,', ',')
+        from .common import parse_object_with_name
+        if ';' in line:
+            Error.warning(Error.SYNTAX_WARNING, line)
+            line = line.replace(';', '')
+
         expression = ''
         if '=' in line:
             k = line.find('=')
             expression = line[k + 1:].strip()
             line = line[0:k].strip()
-        args = line.split(' ')
-        for arg in args:
-            arg = arg.strip()
-            if not arg:
-                continue
-            if not self.type:
-                self.type = arg
-            elif not self.name:
-                self.name = arg
-
         if expression:
             self.initial_value = expression
 
-        if self.access == AccessSpecifier.public:
-            if self.name.startswith('__'):
-                self.access = AccessSpecifier.private
-            elif self.name.startswith('_'):
-                self.access = AccessSpecifier.protected
-
-        self.parse_type()
+        parse_object_with_name(self, line)
+        self.type = self.find_modifiers(self.type)
+        self.is_pointer = self.check_pointer()
 
         if self.initial_value is None:
             if self.type == 'int':

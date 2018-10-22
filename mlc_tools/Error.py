@@ -49,6 +49,7 @@ class Error:
     CANNOT_PARSE_XML = inspect.currentframe().f_lineno
     ENUM_CANNOT_BE_COMBINATED = inspect.currentframe().f_lineno
     INTERNAL_ERROR = inspect.currentframe().f_lineno
+    SYNTAX_WARNING = inspect.currentframe().f_lineno
 
     texts = {
         UNKNOWN_SERIALISED_TYPE: '[{}] unknown serialized serialized format. Base type - [{}]',
@@ -64,6 +65,7 @@ class Error:
         CANNOT_PARSE_XML: 'Error on parsing xml [{}]',
         ENUM_CANNOT_BE_COMBINATED: 'Enum member [{}::{}] cannot be initialed by [{}] value',
         INTERNAL_ERROR: 'Internal error',
+        SYNTAX_WARNING: 'Sytax warning: Founded symbol ";" in member declaration: [{}]',
     }
 
     @staticmethod

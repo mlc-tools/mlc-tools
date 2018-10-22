@@ -4,8 +4,8 @@ from .Class import Class
 from .DataStorageCreators import DataStoragePhpXml
 from .DataStorageCreators import DataStoragePhpJson
 from .Error import Error
-from .Object import AccessSpecifier
 from .regex import RegexPatternPhp
+from .Object import AccessSpecifier
 import re
 
 SERIALIZATION = 0
@@ -24,15 +24,9 @@ def convertInitializeValue(value):
 
 class WriterPhp(Writer):
 
-    def __init__(self, parser, serialize_format):
+    def __init__(self, parser, serialize_format, namespace):
+        Writer.__init__(self, parser, serialize_format, namespace)
         self.functions_cache = {}
-        self.save_visitors = False
-        Writer.__init__(self, parser, serialize_format)
-
-    def save_generated_classes(self, out_directory):
-        Writer.save_generated_classes(self, out_directory)
-        self.create_factory()
-        self.create_visitor_acceptors()
 
     def write_class(self, cls, flags):
         global _pattern_file
@@ -189,7 +183,7 @@ class WriterPhp(Writer):
                 continue
 
             line = self.build_serialize_operation(obj.name, obj.type, obj.initial_value, serialize_type,
-                                                  obj.template_args, obj.is_pointer, is_link=obj.is_link)
+                                                  obj.template_args, obj.is_pointer, "$this->", obj.is_link)
             function.operations.append(line)
 
         cls.functions.append(function)
@@ -226,52 +220,7 @@ class WriterPhp(Writer):
         a2 = '\n'.join(a2)
         return str.format(a0, a1, a2, '{}', '$this->', value_declararion) + '\n'
 
-    def build_serialize_operation(self, obj_name, obj_type, obj_value, serialization_type, obj_template_args,
-                                  obj_is_pointer, owner='$this->', is_link=False):
-        index = 0
-        if obj_value is None:
-            index = 1
-        type = obj_type
-        cls = self.parser.find_class(type)
-        arg_0 = obj_template_args[0].type if len(obj_template_args) > 0 else 'unknown_arg'
-        if cls and cls.type == 'enum':
-            type = 'enum'
-        elif obj_type not in self.simple_types and type != "list" and type != "map":
-            if is_link:
-                type = 'link'
-            elif obj_is_pointer:
-                type = "pointer"
-            else:
-                type = "serialized"
-        elif obj_type in self.simple_types:
-            type = obj_type
-        else:
-            if len(obj_template_args) > 0:
-                if type == "map":
-                    if len(obj_template_args) != 2:
-                        Error.exit(Error.MAP_TWO_ARGS, self._current_class.name, obj_name)
-                    return self.build_map_serialization(obj_name, obj_type, obj_value, obj_is_pointer,
-                                                        obj_template_args, serialization_type)
-                else:
-                    arg = obj_template_args[0]
-                    arg_type = arg.name if isinstance(arg, Class) else arg.type
-                    if arg.is_link:
-                        type = 'list<link>'
-                    elif arg_type in self.simple_types:
-                        type = "list<{}>".format(arg_type)
-                        obj_type = arg_type
-                    elif arg.is_pointer:
-                        type = "list<pointer>"
-                    elif arg.type == 'enum':
-                        type = 'list<string>'
-                        arg_0 = 'string'
-                    else:
-                        type = "list<serialized>"
-                        obj_type = arg_type
-        fstr = self.serialize_protocol[serialization_type][type][index]
-        return fstr.format(obj_name, obj_type, obj_value, '{}', owner, arg_0)
-
-    def save_config_file(self):
+    def save_config_files(self):
         content = '''<?php\n
         $MG_XML = 1;
         $MG_JSON = 2;
@@ -337,7 +286,6 @@ class WriterPhp(Writer):
         self.save_file('Factory.php', factory)
 
     def create_visitor_acceptors(self):
-        self.save_visitors = True
         pattern = _pattern_visitor
         line = 'else if($ctx->get_type() == {0}::$TYPE)\n@(\n$this->visit_{1}($ctx);\n@)\n'
         line_import = 'require_once "{0}.php";\n'
@@ -450,11 +398,6 @@ class WriterPhp(Writer):
         function = Function()
         function.name = 'deserialize'
         cls.functions.append(function)
-
-    def save_file(self, filename, string):
-        if not self.save_visitors and filename.startswith('IVisitor'):
-            return
-        Writer.save_file(self, filename, string)
 
 
 def convert_function_to_php(func, parser, function_args):

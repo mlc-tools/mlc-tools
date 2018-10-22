@@ -1,9 +1,9 @@
 from .Writer import Writer
 from .Function import Function
 from .Class import Class
-from .Object import Object
 from .DataStorageCreators import DataStoragePythonXml
 from .DataStorageCreators import DataStoragePythonJson
+from .Error import Error
 from .regex import RegexPatternPython
 import re
 
@@ -26,15 +26,9 @@ def convertInitializeValue(value):
 
 class WriterPython(Writer):
 
-    def __init__(self, parser, serialize_format):
-        Writer.__init__(self, parser, serialize_format)
-        self.save_visitors = False
+    def __init__(self, parser, serialize_format, namespace):
+        Writer.__init__(self, parser, serialize_format, namespace)
         self.loaded_functions = {}
-
-    def save_generated_classes(self, out_directory):
-        Writer.save_generated_classes(self, out_directory)
-        self.create_visitor_acceptors()
-        self.create_factory()
 
     def write_class(self, cls, flags):
         global _pattern_file
@@ -225,54 +219,14 @@ class WriterPython(Writer):
         return str.format(a0, a1, a2, '{}', 'self.') + '\n'
 
     def build_serialize_operation(self, obj_name, obj_type, obj_value, serialization_type, obj_template_args,
-                                  obj_is_pointer, owner='self.', is_link=False):
-        index = 0
-        if obj_value is None:
-            index = 1
-
-        type = obj_type
-        if self.parser.find_class(type) and self.parser.find_class(type).type == 'enum':
-            type = 'string'
-        elif obj_type not in self.simple_types and type != "list" and type != "map":
-            if is_link:
-                type = 'link'
-            elif obj_is_pointer:
-                type = "pointer"
-            else:
-                type = "serialized"
-        elif obj_type in self.simple_types:
-            type = obj_type
-        else:
-            if len(obj_template_args) > 0:
-                if type == "map":
-                    if len(obj_template_args) != 2:
-                        print("map should have 2 arguments")
-                        exit(-1)
-                    return self.build_map_serialization(obj_name, obj_type, obj_value, obj_is_pointer,
-                                                        obj_template_args, serialization_type)
-                else:
-                    arg = obj_template_args[0]
-                    arg_type = arg.name if isinstance(arg, Class) else arg.type
-                    if arg.is_link:
-                        type = 'list<link>'
-                    elif arg_type in self.simple_types:
-                        type = "list<{}>".format(arg_type)
-                        obj_type = arg_type
-                    elif arg.is_pointer:
-                        type = "list<pointer>"
-                    elif arg.type == 'enum':
-                        type = 'list<string>'
-                    else:
-                        type = "list<serialized>"
-                        obj_type = arg_type
-        fstr = self.serialize_protocol[serialization_type][type][index]
-        str = fstr.format(obj_name, obj_type, obj_value, '{}', owner,
-                          obj_template_args[0].type if len(obj_template_args) > 0 else 'unknown_arg')
+                                  obj_is_pointer, owner, is_link):
+        str = Writer.build_serialize_operation(self, obj_name, obj_type, obj_value, serialization_type, obj_template_args,
+                                  obj_is_pointer, owner, is_link)
         for pattern in RegexPatternPython.PEP8:
             str = pattern[0].sub(pattern[1], str)
         return '        ' + str + '\n'
 
-    def save_config_file(self):
+    def save_config_files(self):
         buffer = 'MG_XML = 2\nMG_JSON = 1\n'
         buffer += 'MG_SERIALIZE_FORMAT = MG_' + self.serialize_format.upper()
         buffer += '\n'
@@ -293,7 +247,6 @@ class WriterPython(Writer):
         self.save_file('Factory.py', factory)
 
     def create_visitor_acceptors(self):
-        self.save_visitors = True
         pattern = _pattern_visitor
         line = '        elif ctx.__class__ == {0}:\n            self.visit_{1}(ctx)\n'
         line_import = 'from .{0} import {0}\n'
@@ -371,11 +324,6 @@ class WriterPython(Writer):
 
     def create_init_file(self):
         self.save_file('__init__.py', '')
-
-    def save_file(self, filename, string):
-        if not self.save_visitors and filename.startswith('IVisitor'):
-            return
-        Writer.save_file(self, filename, string)
 
     def convert_to_enum(self, cls, use_type='string'):
         Writer.convert_to_enum(self, cls, use_type)

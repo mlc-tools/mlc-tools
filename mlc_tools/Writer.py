@@ -1,5 +1,6 @@
 from . import fileutils
 from .Object import *
+from .Class import Class
 from .Error import Log
 
 
@@ -14,12 +15,13 @@ def add_dict(inDict, toDict):
 
 class Writer:
 
-    def __init__(self, parser, serialize_format):
+    def __init__(self, parser, serialize_format, namespace):
         self.parser = parser
         self.created_files = []
         self.simple_types = parser.simple_types
         self.serialize_format = serialize_format
         self.serialize_protocol = self.parser.serialize_protocol
+        self.namespace = namespace
         self.files = {}
         self.out_directory = ''
         self.current_class = None
@@ -55,9 +57,6 @@ class Writer:
         value.access = AccessSpecifier.private
         cls.members.append(value)
         return values
-
-    def generate(self):
-        self.write_classes(self.parser.classes, 0)
 
     def write_object(self, object_, flags):
         return {flags: ""}
@@ -116,8 +115,16 @@ class Writer:
         self.out_directory = out_directory
         for file in self.files:
             self.save_file(file, self.files[file])
+        self.create_factory()
+        self.create_visitor_acceptors()
 
-    def save_config_file(self):
+    def create_factory(self):
+        pass
+
+    def create_visitor_acceptors(self):
+        pass
+
+    def save_config_files(self):
         pass
 
     def _get_filename_of_class(self, class_):
@@ -125,3 +132,50 @@ class Writer:
 
     def create_data_storage(self):
         pass
+
+    def build_serialize_operation(self, obj_name, obj_type, obj_value, serialization_type, obj_template_args,
+                                  obj_is_pointer, owner, is_link):
+        index = 0
+        if obj_value is None:
+            index = 1
+
+        type = obj_type
+        cls = self.parser.find_class(type)
+        arg_0 = obj_template_args[0].type if len(obj_template_args) > 0 else 'unknown_arg'
+        if cls and cls.type == 'enum':
+            type = 'enum'
+        elif obj_type not in self.simple_types and type != "list" and type != "map":
+            if is_link:
+                type = 'link'
+            elif obj_is_pointer:
+                type = "pointer"
+            else:
+                type = "serialized"
+        elif obj_type in self.simple_types:
+            type = obj_type
+        else:
+            if len(obj_template_args) > 0:
+                if type == "map":
+                    if len(obj_template_args) != 2:
+                        Error.exit(Error.MAP_TWO_ARGS, self._current_class.name, obj_name)
+                    return self.build_map_serialization(obj_name, obj_type, obj_value, obj_is_pointer,
+                                                        obj_template_args, serialization_type)
+                else:
+                    arg = obj_template_args[0]
+                    arg_type = arg.name if isinstance(arg, Class) else arg.type
+                    if arg.is_link:
+                        type = 'list<link>'
+                    elif arg_type in self.simple_types:
+                        type = "list<{}>".format(arg_type)
+                        obj_type = arg_type
+                    elif arg.is_pointer:
+                        type = "list<pointer>"
+                    elif arg.type == 'enum':
+                        type = 'list<string>'
+                        arg_0 = 'string'
+                    else:
+                        type = "list<serialized>"
+                        obj_type = arg_type
+        fstr = self.serialize_protocol[serialization_type][type][index]
+        str = fstr.format(obj_name, obj_type, obj_value, '{}', owner, arg_0)
+        return str

@@ -224,9 +224,7 @@ def _create_destructor_function_cpp(class_):
 class WriterCpp(Writer):
 
     def __init__(self, parser, serialize_format, namespace):
-        Writer.__init__(self, parser, serialize_format)
-        self.namespace = namespace
-        self._current_class = None
+        Writer.__init__(self, parser, serialize_format, namespace)
 
     def get_namespace(self):
         return self.namespace
@@ -264,7 +262,7 @@ class WriterCpp(Writer):
         if object_.is_static:
             modifiers += 'static '
         if object_.is_const:
-            if object_.is_static and self._current_class.type == 'enum':
+            if object_.is_static and self.current_class.type == 'enum':
                 modifiers += 'constexpr '
                 initial_value = ' = {}'.format(object_.initial_value)
             else:
@@ -306,14 +304,14 @@ class WriterCpp(Writer):
 
         if flags == FLAG_CPP:
             if object_.is_static:
-                if object_.initial_value is None and self._current_class.type != 'enum':
-                    Error.exit(Error.STATIS_MEMBER_SHOULD_HAVE_INITIALISATION, self._current_class.name, object_.name)
-                if self._current_class.type == 'enum':
+                if object_.initial_value is None and self.current_class.type != 'enum':
+                    Error.exit(Error.STATIS_MEMBER_SHOULD_HAVE_INITIALISATION, self.current_class.name, object_.name)
+                if self.current_class.type == 'enum':
                     pattern = '{0} {2}::{1}'
                 else:
                     pattern = '{0} {2}::{1} = {3}'
                 pattern += ';\n'
-                out[flags] += pattern.format(convert_type(object_), object_.name, self._current_class.name, object_.initial_value)
+                out[flags] += pattern.format(convert_type(object_), object_.name, self.current_class.name, object_.initial_value)
                 pass
         return out
 
@@ -329,7 +327,7 @@ class WriterCpp(Writer):
 
     def _write_class_hpp(self, class_):
         out = Writer.write_class(self, class_, FLAG_HPP)
-        self._current_class = class_
+        self.current_class = class_
         superclasses = list()
         for c in class_.superclasses:
             superclasses.append('public ' + c.name)
@@ -347,7 +345,7 @@ class WriterCpp(Writer):
         forward_declarations.sort()
         forward_declarations = '\n'.join(forward_declarations)
 
-        self._current_class = None
+        self.current_class = None
 
         pattern = ''
         if len(class_.superclasses) > 0:
@@ -379,7 +377,7 @@ class WriterCpp(Writer):
 
     def _write_class_cpp(self, class_):
         out = Writer.write_class(self, class_, FLAG_CPP)
-        self._current_class = class_
+        self.current_class = class_
         objects = self.write_objects(class_.members, FLAG_CPP)
         functions = self.write_functions(class_.functions, FLAG_CPP)
         constructor = _create_constructor_function_cpp(self.parser, class_)
@@ -391,7 +389,7 @@ class WriterCpp(Writer):
         includes.sort()
         includes = '\n'.join(includes)
 
-        self._current_class = None
+        self.current_class = None
         if class_.type == 'class':
             pattern = '''#include "{0}.h"{4}
 
@@ -448,12 +446,12 @@ class WriterCpp(Writer):
             modifier = 'virtual ' if function.is_virtual else ''
             if function.is_static:
                 modifier = 'static '
-            if function.name == self._current_class.name or \
+            if function.name == self.current_class.name or \
                function.name.find('operator ') == 0 or \
                function.is_template:
                 modifier = ''
             is_override = ''
-            if function.is_virtual and self.parser.is_function_override(self._current_class, function):
+            if function.is_virtual and self.parser.is_function_override(self.current_class, function):
                 is_override = ' override'
             is_const = ''
             if function.is_const:
@@ -488,7 +486,7 @@ class WriterCpp(Writer):
                 args.append(_convert_argument_type(convert_type(arg[1])) + ' ' + RegexPatternCpp.FUNC_ARGS[0].sub(RegexPatternCpp.FUNC_ARGS[1], arg[0]))
             args = ', '.join(args)
             out[FLAG_CPP] = fstr.format(convert_return_type(self.parser, convert_type(function.get_return_type())),
-                                        function.name, args, body, self._current_class.name, is_const)
+                                        function.name, args, body, self.current_class.name, is_const)
         return out
 
     def write_classes(self, classes, flags):
@@ -522,7 +520,12 @@ class WriterCpp(Writer):
             AccessSpecifier.protected: 'protected: ',
             AccessSpecifier.private: 'private: ',
         }
-        for access in accesses:
+        order = [
+            AccessSpecifier.public,
+            AccessSpecifier.protected,
+            AccessSpecifier.private,
+        ]
+        for access in order:
             add = flags == FLAG_HPP
             for function in functions:
                 if function.is_abstract and flags == FLAG_CPP:
@@ -628,7 +631,7 @@ class WriterCpp(Writer):
             if len(obj_template_args) > 0:
                 if type_ == 'map':
                     if len(obj_template_args) != 2:
-                        Error.exit(Error.MAP_TWO_ARGS, self._current_class.name, obj_name)
+                        Error.exit(Error.MAP_TWO_ARGS, self.current_class.name, obj_name)
                     if serialization_type == SERIALIZATION:
                         return self.build_map_serialization(obj_name, obj_type, obj_value,
                                                             obj_is_pointer, obj_template_args)
@@ -809,7 +812,7 @@ class WriterCpp(Writer):
 
         forward_declarations_out = ''
         for t in forward_types:
-            if t == self._current_class.name:
+            if t == self.current_class.name:
                 continue
             type_ = convert_type(t)
             if need_include(t):
@@ -829,10 +832,10 @@ class WriterCpp(Writer):
                         include_types[type_ns] = 1
 
         for t in include_types:
-            if t == self._current_class.name:
+            if t == self.current_class.name:
                 continue
             if need_include(t):
-                out += pattern.format(get_include_file(self.parser, self._current_class, t, self.get_namespace()))
+                out += pattern.format(get_include_file(self.parser, self.current_class, t, self.get_namespace()))
 
             # else:
             #     continue
@@ -842,10 +845,10 @@ class WriterCpp(Writer):
             #     forward_declarations += str
 
         if flags == FLAG_HPP:
-            out += pattern.format(get_include_file(self.parser, self._current_class, 'intrusive_ptr', self.get_namespace()))
+            out += pattern.format(get_include_file(self.parser, self.current_class, 'intrusive_ptr', self.get_namespace()))
         if flags == FLAG_CPP:
-            out += pattern.format(get_include_file(self.parser, self._current_class, self.get_namespace() + '_Factory', self.get_namespace()))
-            out += pattern.format(get_include_file(self.parser, self._current_class, self.get_namespace() + '_extensions', self.get_namespace()))
+            out += pattern.format(get_include_file(self.parser, self.current_class, self.get_namespace() + '_Factory', self.get_namespace()))
+            out += pattern.format(get_include_file(self.parser, self.current_class, self.get_namespace() + '_extensions', self.get_namespace()))
             out += '\n#include <algorithm>'
 
         out = out.split('\n')
@@ -868,14 +871,14 @@ class WriterCpp(Writer):
                     includes += '\n#include "Exception.h"'
                 if 'DataStorage::shared()' in operation:
                     includes += '\n#include {}'.\
-                        format(get_include_file(self.parser, self._current_class, 'DataStorage', self.get_namespace()))
+                        format(get_include_file(self.parser, self.current_class, 'DataStorage', self.get_namespace()))
                 for type_ in self.parser.classes:
                     if type_.name in operation:
                         a = '"{}.h"'.format(type_.name)
                         b = '"{}.h"'.format(type_.name)
                         if a not in includes and b not in includes:
                             includes += '\n#include {0}'.\
-                                format(get_include_file(self.parser, self._current_class, type_.name, self.get_namespace()))
+                                format(get_include_file(self.parser, self.current_class, type_.name, self.get_namespace()))
         return includes
 
     def prepare_file(self, body):
@@ -934,7 +937,7 @@ class WriterCpp(Writer):
         source = self.prepare_file(source)
         self.save_file(storage.name + '.cpp', source)
 
-    def save_config_file(self):
+    def save_config_files(self):
         pattern = '#ifndef __{0}_Config_h__\n#define __{0}_Config_h__\n\n{1}\n\n#endif //#ifndef __{0}_Config_h__'
         configs = list()
         configs.append('#define {}_JSON 1'.format(self.get_namespace().upper()))

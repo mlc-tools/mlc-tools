@@ -792,7 +792,7 @@ $(OWNER)$(FIELD) = list()
 
 #map
 #serialize
-        dict_cach = dictionary
+dict_cach = dictionary
         arr = []
         dictionary['$(FIELD)'] = arr
         for key, value in $(OWNER)$(FIELD).iteritems():
@@ -802,7 +802,7 @@ $(KEY_SERIALIZE)
 $(VALUE_SERIALIZE)
         dictionary = dict_cach
 #deserialize
-        dict_cach = dictionary
+dict_cach = dictionary
         arr = dictionary['$(FIELD)']
         for dict in arr:
             key = dict['key']
