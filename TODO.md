@@ -60,3 +60,42 @@
  - C#
  - Java
  - JavaScript
+
+
+Рефакторинг:
+- Парсер - занимается парсингом mlc скриптов. Шаги: 
+    Parser
+    - чтение входящих директорий. Получение списка файлов. Отфильтровка 
+        Parser.get_config_files()
+    - парсинг входящих файлов. Построение несвязных объектов классов 
+        Parser.parse()
+    - выполнение пользовательского генератора 
+        Parser.user_generator.execute(Step.PARSED)
+- Генератор:
+    Generator
+    - генерация системных, тестовых классов и интерфейсов
+        - тестовые интерфейсы
+        Generator.generate_tests_interfaces()
+        - визиторы
+        Generator.generate_acceptor_interfaces()
+- Linker:
+    - связывание объектов, линковка
+    Linker.link()
+- Валидатор:   
+    - валидация конфигов
+    Validator.validate_php_functional()
+- Language:
+    - генерация специфичных для языка классов:
+        - DataStorage ???
+        Language.Generator.generate_data_storage()
+        - Фабрика
+        Language.Generator.generate_factory()
+        - Конфиги, init файлы, прочее сопутствующее
+        Language.Generator.generate_init_files()
+    - Конвертация кода в нужный язык.
+        Language.Translator.translate()
+    - Добавление системных методов классам (сериализация, сравнение, возврат типа)
+        Language.Serializator.generate_methods()
+    - сохранение результа, запись файлов
+        Language.Writer.save()
+- generate data

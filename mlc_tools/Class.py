@@ -278,25 +278,3 @@ class Class(Object):
 
         if add_function or not superclass:
             self.functions.append(function)
-
-    def add_get_type_function(self):
-        # if not self.is_abstract:
-        member = Object()
-        member.is_static = True
-        member.is_const = True
-        member.type = 'string'
-        member.name = 'TYPE'
-        member.initial_value = '"{}"'.format(self.name)
-        member.access = AccessSpecifier.public
-        self.members.append(member)
-
-        function = Function()
-        function.name = constants.CLASS_FUNCTION_GET_TYPE
-        function.return_type = 'string'
-        function.is_const = True
-        # function.is_abstract = self.is_abstract
-        if not function.is_abstract:
-            function.operations.append('return {}::TYPE;'.format(self.name))
-        function.link()
-        self.functions.append(function)
-        function.is_virtual = self.is_virtual or len(self.superclasses) or len(self.subclasses)

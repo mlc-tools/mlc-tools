@@ -18,6 +18,8 @@ class Function:
         self.is_virtual = False
         self.side = 'both'
         self.access = AccessSpecifier.public
+        self.body = ''
+        self.translated = False
 
     def parse(self, line):
         line = line.strip()

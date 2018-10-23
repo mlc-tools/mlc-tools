@@ -160,7 +160,6 @@ class Generator:
 
     def _parse(self):
         self.parser = Parser(self.side, self.generate_tests, self.generate_intrusive, self.generate_factory)
-        self.parser.generate_patterns()
         self.parser.load_default_serialize_protocol(self.language, self.serialize_format)
 
         files = self._get_config_files()
@@ -237,6 +236,7 @@ class Generator:
         self.validate_arg_side()
 
         self._parse()
+        self.parser.generate_patterns()
         self.parser.link()
         if self.php_validate:
             self.parser.validate_php_features()

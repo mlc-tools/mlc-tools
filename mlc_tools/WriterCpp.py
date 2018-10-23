@@ -5,8 +5,8 @@ from .Writer import add_dict
 from .Class import Class
 from .Object import Object
 from .Function import Function
-from .DataStorageCreators import DataStorageCppXml
-from .DataStorageCreators import DataStorageCppJson
+from .language.Generator_ import DataStorageCppXml
+from .language.Generator_ import DataStorageCppJson
 from .Error import Error
 from .cpp_extension import cpp_files
 from .Object import AccessSpecifier

@@ -1,8 +1,7 @@
 from .Writer import Writer
 from .Function import Function
 from .Class import Class
-from .DataStorageCreators import DataStoragePythonXml
-from .DataStorageCreators import DataStoragePythonJson
+from .python.Generator_ import DataStoragePython
 from .Error import Error
 from .regex import RegexPatternPython
 import re
@@ -96,12 +95,12 @@ class WriterPython(Writer):
             else:
                 args = 'self'
 
-        convert = self.current_class.name != 'DataStorage'
-        if convert:
-            ops = '\n'.join(function.operations)
-            ops = convert_function_to_python(ops, self.parser)
-        else:
-            ops = '        ' + '\n        '.join(function.operations)
+        # convert = self.current_class.name != 'DataStorage'
+        # if convert:
+        #     ops = '\n'.join(function.operations)
+        #     ops = convert_function_to_python(ops, self.parser)
+        # else:
+        #     ops = '        ' + '\n        '.join(function.operations)
 
         if name == 'visit' and \
                 ((cls.superclasses and cls.superclasses[0].name.startswith('IVisitor')) or cls.name.startswith('IVisitor'))\
@@ -233,19 +232,6 @@ class WriterPython(Writer):
         self.save_file('config.py', buffer)
         self.create_init_file()
 
-    def create_factory(self):
-        global _factory
-        pattern = _factory[self.serialize_format]
-        line = '        if type == "{0}":\n            return {0}.{0}()\n'
-        line_import = 'from . import {0}\n'
-        creates = ''
-        imports = ''
-        for cls in self.parser.classes:
-            creates += line.format(cls.name)
-            imports += line_import.format(cls.name)
-        factory = pattern.format(imports, creates)
-        self.save_file('Factory.py', factory)
-
     def create_visitor_acceptors(self):
         pattern = _pattern_visitor
         line = '        elif ctx.__class__ == {0}:\n            self.visit_{1}(ctx)\n'
@@ -280,10 +266,7 @@ class WriterPython(Writer):
             self.save_file(name + '.py', body)
                     
     def create_data_storage_class(self, name, classes):
-        if self.serialize_format == 'xml':
-            return DataStoragePythonXml(name, classes, self.parser)
-        else:
-            return DataStoragePythonJson(name, classes, self.parser)
+        return DataStoragePython(name, classes, self.parser)
 
     def prepare_file(self, text):
         lines = text.split('\n')
@@ -329,113 +312,6 @@ class WriterPython(Writer):
         Writer.convert_to_enum(self, cls, use_type)
 
 
-def convert_function_to_python(func, parser):
-    if not func:
-        return func
-
-    for reg in RegexPatternPython.FUNCTION:
-        func = reg[0].sub(reg[1], func)
-
-    for reg in RegexPatternPython.REPLASES:
-        func = func.replace(reg[0], reg[1])
-
-    def get_tabs(count):
-        r = ''
-        for i in range(count):
-            r += '    '
-        return r
-
-    lines = func.split('\n')
-    tabs = 2
-    next_tab = False
-    for i, line in enumerate(lines):
-        if next_tab:
-            tabs += 1
-        if '{' in line:
-            tabs += 1
-            line = line.replace('{', '')
-        if '}' in line:
-            tabs -= 1
-            line = line.replace('}', '')
-        lines[i] = get_tabs(tabs) + line.strip()
-        if next_tab:
-            next_tab = False
-            tabs -= 1
-        if (line.startswith('for') or line.startswith('if') or line.startswith('else') or line.startswith('elif')) \
-                and (i < len(lines) - 1 and '{' not in line and '{' not in lines[i + 1]):
-            next_tab = True
-
-    func = '\n'.join(lines)
-    func = func.replace('\n    \n', '\n')
-    func = func.replace('\n        \n', '\n')
-    func = func.replace('\n            \n', '\n')
-    func = func.replace('\n                \n', '\n')
-    func = func.replace('\n                    \n', '\n')
-    func = func.replace('\n                        \n', '\n')
-    if 'DataStorage' in func:
-        func = get_tabs(2) + 'from .DataStorage import DataStorage\n' + func
-    if RegexPatternPython.FACTORY.search(func):
-        func = get_tabs(2) + 'from .Factory import Factory\n' + func
-    for cls in parser.classes:
-        if cls.name not in RegexPatternPython.regs_class_names:
-            RegexPatternPython.regs_class_names[cls.name] = re.compile(r'\b{}\b'.format(cls.name))
-        pattern = RegexPatternPython.regs_class_names[cls.name]
-        need = pattern.search(func) is not None
-        if need:
-            func = get_tabs(2) + 'from .{0} import {0}\n'.format(cls.name) + func
-    if 'math.' in func:
-        func = get_tabs(2) + 'import math\n' + func
-    if 'random.' in func:
-        func = get_tabs(2) + 'import random\n' + func
-
-    return func
-
-
-_factory = {}
-_factory['xml'] = '''{0}
-class Factory:
-    @staticmethod
-    def build(type):
-{1}
-        return None
-    @staticmethod
-    def create_command(string):
-        root = ET.fromstring(string)
-        type = root.tag
-        command = Factory.build(type)
-        if command is not None:
-            command.deserialize(root)
-        return command
-
-    @staticmethod
-    def serialize_command(command):
-        root = ET.Element(command.get_type())
-        command.serialize(root)
-        return ET.tostring(root)
-'''
-_factory['json'] = '''import json
-{0}
-class Factory:
-    @staticmethod
-    def build(type):
-{1}
-        return None
-    @staticmethod
-    def create_command(string):
-        dictionary = json.loads(string)
-        for key in dictionary:
-            command = Factory.build(key)
-            if command is not None:
-                command.deserialize(dictionary[key])
-            return command
-
-    @staticmethod
-    def serialize_command(command):
-        js = dict()
-        js[command.get_type()] = dict()
-        command.serialize(js[command.get_type()])
-        return json.dumps(js)
-'''
 
 _pattern_file = {}
 _pattern_file['xml'] = '''

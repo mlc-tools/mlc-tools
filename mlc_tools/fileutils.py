@@ -42,7 +42,7 @@ def remove(filename):
 
 def normalize_path(path, append_slash=True):
     path = path.replace('\\', '/')
-    if append_slash and path and path[-1] != '/':
+    if append_slash and path and not path.endswith('/'):
         path += '/'
     return path
 

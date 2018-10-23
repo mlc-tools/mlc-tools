@@ -113,5 +113,11 @@ class Object:
 
         return string
 
-Object.VOID = Object('void')
-Object.BOOL = Object('bool')
+
+class Objects(Enum):
+    VOID = Object('void')
+    BOOL = Object('bool')
+
+
+Object.VOID = Objects.VOID
+Object.BOOL = Objects.BOOL

@@ -1,8 +1,8 @@
 import inspect
+from enum import Enum
 
 
-class Color:
-
+class Color(Enum):
     red = '\033[31m'
     green = '\033[32m'
     orange = '\033[33m'
@@ -11,9 +11,11 @@ class Color:
 
 
 class Log:
-
     use_colors = True
     disable_logs = False
+    
+    def __init__(self):
+        pass
 
     @staticmethod
     def debug(msg):
@@ -36,6 +38,9 @@ class Log:
 
 
 class Error:
+    def __init__(self):
+        pass
+    
     UNKNOWN_SERIALISED_TYPE = inspect.currentframe().f_lineno
     STATIS_MEMBER_SHOULD_HAVE_INITIALISATION = inspect.currentframe().f_lineno
     MAP_TWO_ARGS = inspect.currentframe().f_lineno
@@ -65,7 +70,7 @@ class Error:
         CANNOT_PARSE_XML: 'Error on parsing xml [{}]',
         ENUM_CANNOT_BE_COMBINATED: 'Enum member [{}::{}] cannot be initialed by [{}] value',
         INTERNAL_ERROR: 'Internal error',
-        SYNTAX_WARNING: 'Sytax warning: Founded symbol ";" in member declaration: [{}]',
+        SYNTAX_WARNING: 'Syntax warning: Found symbol ";" in member declaration: [{}]',
     }
 
     @staticmethod

@@ -3,7 +3,7 @@ from .Object import Object, AccessSpecifier
 from .Function import Function
 
 
-class Test:
+class GeneratorTestInterfaces:
 
     def __init__(self, parser):
         self.tests = []

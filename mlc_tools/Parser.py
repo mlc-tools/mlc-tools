@@ -1,12 +1,9 @@
-from copy import deepcopy
-
 from .Object import Object
 from .Class import Class
 from .Function import Function
 from .protocols import protocols
 from .Error import Error
 from .ObserverCreater import ObserverPatterGenerator
-from .TestClass import Test
 import sys
 
 
@@ -18,7 +15,7 @@ def _is_interface(line):
     return line.strip().find('interface') == 0
 
 
-def _is_functon(line):
+def _is_function(line):
     return line.strip().find('function') == 0
 
 
@@ -57,7 +54,7 @@ def find_body(text):
 
 class Parser:
 
-    def __init__(self, side, generate_tests, generate_intrusive, generate_factory):
+    def __init__(self, side):
         self.classes = []
         self.classes_for_data = []
         self.objects = []
@@ -67,9 +64,6 @@ class Parser:
         self.simple_types = ["int", "float", "bool", "string"]
         self.is_validate_php_features = True
         self.configs_root = ''
-        self.generate_tests = generate_tests
-        self.generate_intrusive = generate_intrusive
-        self.generate_factory = generate_factory
         return
 
     def generate_patterns(self):
@@ -84,6 +78,11 @@ class Parser:
     def is_side(self, side):
         return self.side == 'both' or side == self.side or side == 'both'
 
+    def parse_files(self, files):
+        for path in files:
+            text = open(path).read()
+            self.parse(text)
+        
     def parse(self, text):
         text = text.strip()
         left = text.find('/*')
@@ -105,111 +104,10 @@ class Parser:
                 text = self._create_class(text, True)
             elif _is_enum(text):
                 text = self._create_enum_class(text)
-            elif _is_functon(text):
+            elif _is_function(text):
                 text = self._create_function(text)
             else:
                 text = self._create_declaration(text)
-
-    def link(self):
-        for function in self.functions:
-            parts = function.name.split('::')
-            if len(parts) == 2:
-                class_name = parts[0]
-                function_name = parts[1]
-                class_ = self.find_class(class_name)
-                if class_ is None:
-                    Error.exit(Error.CANNOT_FIND_CLASS_FOR_METHOD, class_name, function.name)
-                function.name = function_name
-                class_.functions.append(function)
-        self.functions = []
-
-        for object_ in self.objects:
-            parts = object_.name.split('::')
-            if len(parts) == 2:
-                class_name = parts[0]
-                object_name = parts[1]
-                class_ = self.find_class(class_name)
-                if class_ is None:
-                    Error.exit(Error.CANNOT_FIND_CLASS_FOR_OBJECT, class_name, object_.name)
-                object_.name = object_name
-                class_.members.append(object_)
-                self.objects.remove(object_)
-
-        if self.generate_tests:
-            generator = Test(self)
-            tests = []
-            for cls in self.classes:
-                test = generator.generate_test_interface(cls)
-                if test:
-                    tests.append(test)
-            generator.generate_base_classes()
-            self.classes.extend(tests)
-            self.classes.append(generator.generate_all_tests_class())
-
-        for cls in self.classes:
-            if cls.is_visitor and self.get_type_of_visitor(cls) != cls.name:
-                if cls.name.find('IVisitor') != 0:
-                    self.create_visitor_class(cls)
-
-        for cls in self.classes:
-            superclasses = []
-            for name in cls.superclasses:
-                c = self.find_class(name)
-                if c is None:
-                    Error.exit(Error.UNKNOWN_SUPERCLASS, cls.name, name)
-                superclasses.append(c)
-                c.subclasses.append(cls)
-            cls.superclasses = superclasses
-
-        for cls in self.classes:
-            cls.is_serialized = self.is_serialised(cls)
-            cls.is_visitor = self.is_visitor(cls)
-            if cls.is_visitor and cls.name != self.get_type_of_visitor(cls):
-                self._append_visit_function(cls)
-            self.add_accept_method(cls)
-
-        for cls in self.classes:
-            for member in cls.members:
-                self._convert_template_args(member)
-
-        for cls in self.classes:
-            for func in cls.functions:
-                func.link()
-
-        for cls in self.classes:
-            self._generate_inline_functional(cls)
-
-        for cls in self.classes:
-            if cls.type == 'class' and cls.auto_generated:
-                cls.add_get_type_function()
-
-        for cls in self.classes:
-            cls.on_linked(self)
-
-    def validate_php_features(self):
-        for cls in self.classes:
-            for member in cls.members:
-                if member.type == 'map':
-                    key_type = member.template_args[0]
-                    key_type = key_type if isinstance(key_type, str) else key_type.type
-                    cls_type = self.find_class(key_type)
-                    if cls_type is not None and cls_type.type != 'enum':
-                        value_type = member.template_args[1] if isinstance(member.template_args[1], str) else member.template_args[1].type
-                        Error.exit(Error.OBJECT_IS_KEY_OF_MAP, cls.name, key_type, value_type, member.name)
-                if cls.type == 'enum' and member.initial_value is not None:
-                    if '|' in member.initial_value or \
-                       '&' in member.initial_value or \
-                       '^' in member.initial_value or \
-                       '~' in member.initial_value:
-                        Error.exit(Error.ENUM_CANNOT_BE_COMBINATED, cls.name, member.name, member.initial_value)
-
-    def _convert_template_args(self, member):
-        args = []
-        for arg in member.template_args:
-            args.append(self._get_object_type(arg))
-            if isinstance(args[-1], Object):
-                self._convert_template_args(args[-1])
-        member.template_args = args
 
     def _create_class(self, text, is_abstract):
         body, header, text = find_body(text)
@@ -222,10 +120,8 @@ class Parser:
             if cls.is_storage:
                 self.classes_for_data.append(cls)
             return text
-        if not self.generate_tests and cls.is_test:
-            return text
 
-        cls.parse_body(Parser(self.side, False, False, False), body)
+        cls.parse_body(Parser(self.side), body)
         if self.find_class(cls.name):
             Error.exit(Error.DUBLICATE_CLASS, cls.name)
         for inner_cls in cls.inner_classes:
@@ -239,14 +135,6 @@ class Parser:
         result = False
         for c in cls.superclasses:
             result = result or self.is_serialised(c)
-        return result
-
-    def is_visitor(self, cls):
-        if cls.is_visitor:
-            return True
-        result = False
-        for c in cls.superclasses:
-            result = result or self.is_visitor(c)
         return result
 
     def is_function_override(self, cls, function):
@@ -264,38 +152,7 @@ class Parser:
             is_override = is_override or self.is_function_override(c, function)
         return is_override
 
-    def get_type_of_visitor(self, cls):
-        if not cls.is_visitor:
-            return None
-
-        if cls.name.find('IVisitor') == 0:
-            return cls.name
-
-        for c in cls.superclasses:
-            if not isinstance(c, Class):
-                return 'IVisitor' + cls.name
-            if c.is_visitor:
-                return self.get_type_of_visitor(c)
-        return 'IVisitor' + cls.name
-
-    def _append_visit_function(self, cls):
-        visitor_name = self.get_type_of_visitor(cls)
-        visitor = self.find_class(visitor_name)
-        append = cls.side == visitor.side and cls.side == self.side
-        append = append or cls.side == 'both'
-        if append:
-            function = Function()
-            function.name = 'visit'
-            function.return_type = 'void'
-            function.args.append(['ctx', cls.name + '*'])
-            function.is_abstract = True
-            visitor.functions.append(function)
-
-            def comparator(func):
-                return func.name
-            visitor.functions.sort(key=comparator)
-
-    def _get_object_type(self, type_name):
+    def get_object_type(self, type_name):
         cls = self.find_class(type_name)
         if cls:
             return cls
@@ -319,37 +176,9 @@ class Parser:
         cls.parse(header)
         if not self.is_side(cls.side):
             return text
-        cls.parse_body(Parser(self.side, False, False, False), body)
+        cls.parse_body(Parser(self.side), body)
         self.classes.append(cls)
         return text
-
-    def create_visitor_class(self, cls):
-        visitor_name = self.get_type_of_visitor(cls)
-        visitor = self.find_class(visitor_name)
-        if visitor is None:
-            visitor = Class()
-            visitor.name = visitor_name
-            visitor.group = cls.group
-            visitor.type = "class"
-            visitor.is_abstract = True
-            visitor.is_visitor = True
-            visitor.is_virtual = True
-            visitor.side = cls.side
-            self.classes.append(visitor)
-
-    def add_accept_method(self, cls):
-        if not cls.is_visitor:
-            return
-        visitor = self.get_type_of_visitor(cls)
-        if not visitor or visitor == cls.name:
-            return
-        function = Function()
-        function.name = 'accept'
-        function.return_type = Object.VOID
-        function.args.append(['visitor', visitor + '*'])
-        function.operations.append('visitor->visit(this);')
-        function.link()
-        cls.functions.append(function)
 
     def _create_declaration(self, text):
         lines = text.split("\n")
@@ -375,26 +204,6 @@ class Parser:
         self.functions.append(function)
         return text
 
-    def _generate_inline_functional(self, cls):
-        if len(cls.superclasses) == 0:
-            return
-        for superclass in cls.superclasses:
-            superclass = cls.superclasses[0]
-            if not isinstance(superclass, Class):
-                Error.exit(Error.INTERNAL_ERROR)
-            self._generate_inline_functional(superclass)
-            if not superclass.is_inline:
-                continue
-            for object in superclass.members:
-                copy = deepcopy(object)
-                cls.members.append(copy)
-            for func in superclass.functions:
-                copy = deepcopy(func)
-                cls.functions.append(copy)
-
-            superclass.subclasses.remove(cls)
-
-        cls.superclasses = [i for i in cls.superclasses if not i.is_inline]
 
     def load_default_serialize_protocol(self, language, serialize_format):
         buffer_ = protocols[language][serialize_format]
