@@ -2,7 +2,6 @@ from . import fileutils
 from .Parser import Parser
 from .DataParser import DataParser
 from .WriterCpp import WriterCpp
-from .WriterPython import WriterPython
 from .WriterPhp import WriterPhp
 from .Copyright import Copyright
 from .Error import Log
@@ -177,8 +176,6 @@ class Generator:
         self.writer = None
         writers = {
             'cpp': WriterCpp,
-            'py': WriterPython,
-            'python': WriterPython,
             'php': WriterPhp,
         }
         self.writer = writers[self.language](self.parser, self.serialize_format, namespace=self.namespace)

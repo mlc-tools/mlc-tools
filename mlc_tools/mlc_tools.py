@@ -4,16 +4,19 @@ from . import fileutils
 from .Generator_ import Generator
 from .Linker import Linker
 from .Validator import Validator
+from .DataParser import DataParser
+import os
+import sys
 
 
 class Mlc:
     def __init__(self, **kwargs):
+        self.parser = None
         self.configs_directory = ''
         self.out_directory = ''
         self.data_directory = ''
         self.out_data_directory = ''
         self.language = 'py'
-        self.serialize_format = 'xml'
         self.only_data = False
         self.namespace = 'mg'
         self.side = 'both'
@@ -40,7 +43,6 @@ class Mlc:
         self.data_directory = kwargs.get('data_directory', self.data_directory)
         self.out_data_directory = kwargs.get('out_data_directory', self.out_data_directory)
         self.language = kwargs.get('language', self.language)
-        self.serialize_format = kwargs.get('serialize_format', self.serialize_format)
         self.only_data = kwargs.get('only_data', self.only_data)
         self.namespace = kwargs.get('namespace', self.namespace)
         self.side = kwargs.get('side', self.side)
@@ -76,30 +78,59 @@ class Mlc:
             return result_files
         
         parser = Parser(self.side)
+        self.parser = parser
         all_files = get_config_files()
         parser.parse_files(all_files)
 
+        language = self.build_language()
+
         generator = Generator()
         generator.generate_tests_interfaces(parser)
-        generator.generate_acceptor_interfaces(parser)
-        
+        language.get_generator().generate_visitors_pattern(parser)
+
         linker = Linker()
         linker.link(parser)
 
         validator = Validator()
         validator.validate(parser)
 
-        language = self.build_language()
         # cpp
         # php
         language.get_generator().generate_data_storage(parser)
         language.get_generator().generate_factory(parser, language.get_writer())
         language.get_generator().generate_init_files(parser, language.get_writer())
         language.get_translator().translate(parser)
-        # python
         language.get_serializer().generate_methods(parser)
         language.get_writer().save(parser)
-        
+        # python
+
+    def generate_data(self, **kwargs):
+        self._parse_kwargs(**kwargs)
+
+        classes = []
+        for class_ in self.parser.classes:
+            if class_.is_storage:
+                classes.append(class_)
+        for class_ in self.parser.classes_for_data:
+            if class_.is_storage:
+                classes.append(class_)
+        data_parser = DataParser(classes, self.data_directory, self.filter_data)
+        data_parser.parse(self.additional_data_directories)
+        data_parser.flush(self.out_data_directory)
+
+    def run_test(self, **kwargs):
+        self._parse_kwargs(**kwargs)
+
+        if self.test_script and os.path.isfile(self.test_script):
+            python = 'python3' if sys.version_info[0] == 3 else 'python'
+            command = '{} {} {}'.format(python, self.test_script, self.test_script_args)
+            Log.message('Run test (%s):' % command)
+            if os.system(command) != 0:
+                print('TODO: exit - 1. main.py 1')
+                exit(1)
+        if not os.path.isfile(self.test_script):
+            Log.warning('Test script (%s) not founded' % self.test_script)
+
     def build_language(self):
         if self.language == 'py':
             from .python import Language
@@ -107,7 +138,6 @@ class Mlc:
             return language
         return None
             
-
     def run_user_generator(self, state):
         if self.custom_generator:
             self.custom_generator.execute(state)

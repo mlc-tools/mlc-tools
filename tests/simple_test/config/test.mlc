@@ -1,6 +1,6 @@
 class SerializedObject:serialized:inline
 {
-	int _reference_counter:runtime = 1
+	int:runtime _reference_counter = 1
 	function int retain()
 	{
 		this->_reference_counter += 1;
@@ -390,8 +390,8 @@ class TestFactory<SerializedObject>
     {
         bool result = true;
         auto command = new RequestBar();
-        auto string = Factory::serialize_command<RequestBar>(command);
-        auto command2 = Factory::create_command<Request>(string);
+        auto string = Factory::serialize_command_to_xml<RequestBar>(command);
+        auto command2 = Factory::create_command_from_xml<Request>(string);
         result = logger->push(command2 != nullptr, " - TestFactory: commnd_2 deserialized") && result;
         if(result)
         {

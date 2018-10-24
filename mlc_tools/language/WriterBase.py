@@ -3,6 +3,7 @@ from .. import fileutils
 
 class WriterBase:
     def __init__(self, out_directory):
+        self.parser = None
         self.out_directory = out_directory
         self.files = []
         
@@ -11,4 +12,10 @@ class WriterBase:
         fileutils.write(full_path, content)
         
     def save(self, parser):
-        pass
+        self.parser = parser
+        for cls in parser.classes:
+            filename, content = self.write_class(cls)
+            self.save_file(filename, content)
+
+    def write_class(self, cls):
+        return '', ''

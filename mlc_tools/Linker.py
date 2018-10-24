@@ -15,9 +15,9 @@ class Linker:
         self.add_members_to_classes(parser)
         self.convert_superclasses(parser)
         self.convert_templates(parser)
+        self.generate_inline_classes(parser)
         self.add_get_type_method(parser)
         self.link_functions(parser)
-        self.generate_inline_classes(parser)
         for cls in parser.classes:
             cls.on_linked(parser)
 

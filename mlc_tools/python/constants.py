@@ -16,13 +16,13 @@ class Factory:
         type = root.tag
         command = Factory.build(type)
         if command is not None:
-            command.deserialize(root)
+            command.deserialize_xml(root)
         return command
 
     @staticmethod
     def serialize_command_to_xml(command):
         root = ET.Element(command.get_type())
-        command.serialize(root)
+        command.serialize_xml(root)
         return ET.tostring(root)
 
     @staticmethod
@@ -31,13 +31,13 @@ class Factory:
         for key in dictionary:
             command = Factory.build(key)
             if command is not None:
-                command.deserialize(dictionary[key])
+                command.deserialize_json(dictionary[key])
             return command
 
     @staticmethod
     def serialize_command_to_json(command):
         js = dict()
         js[command.get_type()] = dict()
-        command.serialize(js[command.get_type()])
+        command.serialize_json(js[command.get_type()])
         return json.dumps(js)
 '''

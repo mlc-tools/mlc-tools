@@ -10,7 +10,6 @@ class RegexPatternPython:
     
     FACTORY = re.compile(r'\bFactory\b')
     
-    ET = re.compile(r'\bET\.')
     FUNCTION = (
         (re.compile(r'DataStorage::shared\(\).get<(\w+)>'), r'DataStorage::shared().get\1'),
         (re.compile(r'Factory::(.+)<\w+>'), r'Factory.\1'),
@@ -78,6 +77,8 @@ class RegexPatternPython:
     PEP8 = (
         (re.compile(r'([\w\.]+?)\s*!=\s*False'), r'(\1)'),
         (re.compile(r'([\w\.]+?)\s*==\s*False'), r'not (\1)'),
+        (re.compile(r'([\w\.]+?)\s*!=\s*True'), r'not (\1)'),
+        (re.compile(r'([\w\.]+?)\s*==\s*True'), r'(\1)'),
     )
     
     REPLACES = (

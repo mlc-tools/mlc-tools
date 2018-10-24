@@ -273,22 +273,23 @@ class Parser:
         def_ = pattern
         pattern = '\n'.join(pattern)
         # standard serialize
-        pattern = pattern.replace('{', '__begin__')
-        pattern = pattern.replace('}', '__end__')
-        pattern = pattern.replace('$(FIELD)', '{0}')
-        pattern = pattern.replace('$(TYPE)', '{1}')
-        pattern = pattern.replace('$(DEFAULT_VALUE)', '{2}')
-        pattern = pattern.replace('$(OWNER)', '{4}')
-        pattern = pattern.replace('$(ARG_0)', '{5}')
-        pattern = pattern.replace('$(ARG_1)', '{6}')
+        pattern = pattern.replace('{', '{{')
+        pattern = pattern.replace('}', '}}')
+        pattern = pattern.replace('$(FIELD)', '{field}')
+        pattern = pattern.replace('$(TYPE)', '{type}')
+        pattern = pattern.replace('$(DEFAULT_VALUE)', '{default_value}')
+        pattern = pattern.replace('$(OWNER)', '{owner}')
+        pattern = pattern.replace('$(ARG_0)', '{arg_0}')
+        pattern = pattern.replace('$(ARG_1)', '{arg_1}')
+        pattern = pattern.replace('$(FORMAT)', '{format}')
         # for map<key, value>
-        pattern = pattern.replace('$(KEY_SERIALIZE)', '{1}')
-        pattern = pattern.replace('$(VALUE_SERIALIZE)', '{2}')
-        pattern = pattern.replace('$(KEY)', '{3}')
-        pattern = pattern.replace('$(VALUE_TYPE)', '{4}')
-        pattern = pattern.replace('$(VALUE)', '{5}')
+        pattern = pattern.replace('$(KEY_SERIALIZE)', '{key_serialize}')
+        pattern = pattern.replace('$(VALUE_SERIALIZE)', '{value_serialize}')
+        pattern = pattern.replace('$(KEY)', '{key}')
+        pattern = pattern.replace('$(VALUE_TYPE)', '{value_type}')
+        pattern = pattern.replace('$(VALUE)', '{value}')
         # for python:
-        pattern = pattern.replace('$(__begin____end__)', '{3}')
+        pattern = pattern.replace('$({{}})', '{{}}')
 
         if not pattern and not optional:
             print('cannot find pattern for args:')

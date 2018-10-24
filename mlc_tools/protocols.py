@@ -74,7 +74,7 @@ $(FIELD) = xml.attribute("$(FIELD)").as_string();
 #serialize:
 $(FIELD).serialize(xml.append_child("$(FIELD)"));
 #deserialize:
-$(FIELD).deserialize(xml.child("$(FIELD)"));
+$(FIELD).deserialize_$(FORMAT)(xml.child("$(FIELD)"));
 
 
 #pointer
@@ -161,7 +161,7 @@ auto arr_$(FIELD) = xml.child("$(FIELD)");
 for(auto child : arr_$(FIELD))
 {
     $(FIELD).emplace_back();
-    $(FIELD).back().deserialize(child);
+    $(FIELD).back().deserialize_$(FORMAT)(child);
 }
 
 
@@ -281,7 +281,7 @@ $(FIELD) = @{namespace}::get<$(TYPE)>(json["$(FIELD)"]);
 #serialize:
 $(FIELD).serialize(json["$(FIELD)"]);
 #deserialize:
-$(FIELD).deserialize(json["$(FIELD)"]);
+$(FIELD).deserialize_$(FORMAT)(json["$(FIELD)"]);
 
 
 #pointer
@@ -345,7 +345,7 @@ auto& arr_$(FIELD) = json["$(FIELD)"];
 for(int i = 0; i < arr_$(FIELD).size(); ++i)
 {
     $(FIELD).emplace_back();
-    $(FIELD).back().deserialize(arr_$(FIELD)[i]);
+    $(FIELD).back().deserialize_$(FORMAT)(arr_$(FIELD)[i]);
 }
 
 
@@ -519,7 +519,7 @@ xml_pointer = xml.find('$(FIELD)')
         if xml_pointer is not None:
             type = xml_pointer.get('type')
             $(OWNER)$(FIELD) = Factory.build(type)
-            $(OWNER)$(FIELD).deserialize(xml_pointer)
+            $(OWNER)$(FIELD).deserialize_$(FORMAT)(xml_pointer)
 
 
 #list<int>
@@ -586,7 +586,7 @@ $(OWNER)$(FIELD) = list()
             from .$(TYPE) import $(TYPE)
             for xml_child in arr:
                 obj = $(TYPE)()
-                obj.deserialize(xml_child)
+                obj.deserialize_$(FORMAT)(xml_child)
                 $(OWNER)$(FIELD).append(obj)
 
 
@@ -600,7 +600,7 @@ xml_child = xml.find('$(FIELD)')
         from .$(TYPE) import $(TYPE)
         if xml_child is not None:
             $(OWNER)$(FIELD) = $(TYPE)()
-            $(OWNER)$(FIELD).deserialize(xml_child)
+            $(OWNER)$(FIELD).deserialize_$(FORMAT)(xml_child)
 
 
 #list<pointer>
@@ -616,7 +616,7 @@ $(OWNER)$(FIELD) = list()
             for xml_item in arr:
                 type = xml_item.tag
                 obj = Factory.build(type)
-                obj.deserialize(xml_item)
+                obj.deserialize_$(FORMAT)(xml_item)
                 $(OWNER)$(FIELD).append(obj)
 
 #link
@@ -699,7 +699,7 @@ if $(OWNER)$(FIELD):
 if '$(FIELD)' in dictionary:
             for key, value_ in dictionary['$(FIELD)'].iteritems():
                 $(OWNER)$(FIELD) = Factory.build(key)
-                $(OWNER)$(FIELD).deserialize(value_)
+                $(OWNER)$(FIELD).deserialize_$(FORMAT)(value_)
                 break
 
 #list<int>, list<float>, list<bool>, list<string>
@@ -728,7 +728,7 @@ $(OWNER)$(FIELD) = list()
         arr_$(FIELD) = dictionary['$(FIELD)']
         for dict in arr_$(FIELD):
             obj = $(TYPE)()
-            obj.deserialize(dict)
+            obj.deserialize_$(FORMAT)(dict)
             $(OWNER)$(FIELD).append(obj)
 
 #serialized
@@ -741,7 +741,7 @@ if $(OWNER)$(FIELD):
 if '$(FIELD)' in dictionary:
             from .$(TYPE) import $(TYPE)
             $(OWNER)$(FIELD) = $(TYPE)()
-            $(OWNER)$(FIELD).deserialize(dictionary['$(FIELD)'])
+            $(OWNER)$(FIELD).deserialize_$(FORMAT)(dictionary['$(FIELD)'])
 
 #list<pointer>
 #serialize
@@ -759,7 +759,7 @@ $(OWNER)$(FIELD) = list()
             for key, value in arr[index].iteritems():
                 obj = Factory.build(key)
                 $(OWNER)$(FIELD).append(obj)
-                $(OWNER)$(FIELD)[-1].deserialize(arr[index][key])
+                $(OWNER)$(FIELD)[-1].deserialize_$(FORMAT)(arr[index][key])
                 break
 
 
@@ -792,7 +792,7 @@ $(OWNER)$(FIELD) = list()
 
 #map
 #serialize
-dict_cach = dictionary
+        dict_cach = dictionary
         arr = []
         dictionary['$(FIELD)'] = arr
         for key, value in $(OWNER)$(FIELD).iteritems():
@@ -802,7 +802,7 @@ $(KEY_SERIALIZE)
 $(VALUE_SERIALIZE)
         dictionary = dict_cach
 #deserialize
-dict_cach = dictionary
+        dict_cach = dictionary
         arr = dictionary['$(FIELD)']
         for dict in arr:
             key = dict['key']

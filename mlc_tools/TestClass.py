@@ -56,13 +56,19 @@ class GeneratorTestInterfaces:
         function.name = 'execute'
         function.return_type = 'bool'
         test.functions.append(function)
+        function.operations.append('bool result = true;');
         for func in test.functions:
             name = func.name
             if name == 'initialize' or name == 'execute':
                 continue
-            function.operations.append('this->logger->push(this->{0}(), " - [{1}] tested");'.format(name, name[5:]))
-            function.operations.append('this->logger->push(true, "---------------------------------------------------------");'.format(name, name[5:]))
+            function.operations.append('result = this->{0}();'.format(name, name[5:]))
+            function.operations.append('this->logger->push(result, " - [{1}] tested");'.format(name, name[5:]))
+            function.operations.append('this->logger->push(result, "---------------------------------------------------------");'.format(name, name[5:]))
             function.operations.append('this->logger->methods_count += 1;')
+            function.operations.append('if(!result)')
+            function.operations.append('{')
+            function.operations.append('    exit(1);')
+            function.operations.append('}')
 
         function.operations.append('return this->logger->result;')
 

@@ -1,4 +1,5 @@
 from .regex import RegexPatternPython
+from ..Object import *
 import re
 
 
@@ -8,6 +9,8 @@ class Translator:
 
     def translate(self, parser):
         for cls in parser.classes:
+            if cls.type == 'enum':
+                self.convert_to_enum(cls)
             for method in cls.functions:
                 convert = not method.translated
                 if convert:
@@ -19,7 +22,7 @@ class Translator:
                         method.body = '        \n        '.join(method.operations)
                     else:
                         method.body = 'pass'
-                print('{}::{}\n{}\n\n'.format(cls.name, method.name, method.body))
+                # print('{}::{}\n{}\n\n'.format(cls.name, method.name, method.body))
 
     @staticmethod
     def translate_function_body(cls, func, parser):
@@ -110,3 +113,36 @@ class Translator:
         for i in range(count):
             r += '    '
         return r
+
+    @staticmethod
+    def convert_to_enum(cls):
+        shift = 0
+        cast = 'string'
+        values = []
+        for m in cls.members:
+            if len(m.name):
+                continue
+            m.name = m.type
+            m.type = cast
+            m.is_static = True
+            m.is_const = True
+            if m.initial_value is None:
+                if cast == 'int':
+                    m.initial_value = '(1 << {})'.format(shift)
+                    values.append(1 << shift)
+                elif cast == 'string':
+                    m.initial_value = '"{}"'.format(m.name)
+            elif cast == 'int':
+                # TODO if initialization is as enumerate of others members need throw error (example: one|two)
+                values.append(m.initial_value)
+            else:
+                m.initial_value = 'None'
+
+            shift += 1
+        value = Object()
+        value.initial_value = '{}::{}'.format(cls.name, cls.members[0].name)
+        value.name = '_value'
+        value.type = cast
+        value.access = AccessSpecifier.private
+        cls.members.append(value)
+        return values
