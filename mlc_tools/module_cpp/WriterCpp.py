@@ -1,4 +1,4 @@
-from ..core import constants
+from ..core import Modifiers
 from ..base.Writer import Writer
 from ..base.Writer import add_dict
 from ..core.Class import Class
@@ -408,7 +408,7 @@ class WriterCpp(Writer):
         if class_.is_abstract:
             registration = ''
         for func in class_.functions:
-            if func.name == constants.CLASS_FUNCTION_GET_TYPE:
+            if func.name == Modifiers.CLASS_FUNCTION_GET_TYPE:
                 has_get_type = True
         if not has_get_type:
             registration = ''
@@ -579,7 +579,7 @@ class WriterCpp(Writer):
             function.name = 'deserialize'
             function.args.append(self.get_serialization_object_arg(serialization_type))
         function.is_virtual = len(class_.superclasses) > 0 or len(class_.subclasses) > 0
-        function.return_type = Object.VOID
+        function.return_type = Objects.VOID
         function.link()
 
         for behabior in class_.superclasses:
@@ -696,7 +696,7 @@ class WriterCpp(Writer):
     def add_equal_methods(self, class_):
         function = Function()
         function.name = 'operator =='
-        function.return_type = Object.BOOL
+        function.return_type = Objects.BOOL
         function.args.append(['rhs', 'const ' + class_.name + '&'])
         function.is_const = True
         function.link()
@@ -711,7 +711,7 @@ class WriterCpp(Writer):
 
         function = Function()
         function.name = 'operator !='
-        function.return_type = Object.BOOL
+        function.return_type = Objects.BOOL
         function.args.append(['rhs', 'const ' + class_.name + '&'])
         function.is_const = True
         function.operations.append('return !(*this == rhs);')

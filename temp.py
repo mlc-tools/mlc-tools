@@ -41,5 +41,7 @@ def profile():
         os.remove(id)
         return s
     print(get_profile_(main))
-    
-profile()
+
+
+# profile()
+main()

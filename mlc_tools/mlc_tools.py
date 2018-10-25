@@ -81,18 +81,14 @@ class Mlc:
         parser.parse_files(all_files)
         self.parser = parser
 
-        language = self.build_language()
-
-        language.get_generator().generate(parser, language.get_writer())
-
-        linker = Linker()
-        linker.link(parser)
-
-        validator = Validator()
-        validator.validate(parser)
-
         # cpp
         # php
+        language = self.build_language()
+        language.get_generator().generate(parser, language.get_writer())
+
+        Linker().link(parser)
+        Validator().validate(parser)
+
         language.get_translator().translate(parser)
         language.get_serializer().generate_methods(parser)
         language.get_writer().save(parser)

@@ -1,9 +1,6 @@
 
-CLASS_FUNCTION_GET_PROPERTY = 'get_property'
-CLASS_FUNCTION_SET_PROPERTY = 'set_property'
 
-
-class Modifier:
+class Modifiers:
 
     def __init__(self):
         pass

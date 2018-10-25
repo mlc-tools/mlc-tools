@@ -1,5 +1,5 @@
 import re
-from .constants import Modifier
+from .Modifiers import Modifiers
 from .Object import Object, AccessSpecifier
 
 
@@ -52,14 +52,14 @@ class Function:
 
                 def p(char, string):
                     index = -1
-                    counter = 0
-                    for i, c in enumerate(string):
+                    counter2 = 0
+                    for j, c in enumerate(string):
                         if c == '<':
-                            counter += 1
+                            counter2 += 1
                         if c == '>':
-                            counter -= 1
-                        if counter == 0 and c == char:
-                            index = i
+                            counter2 -= 1
+                        if counter2 == 0 and c == char:
+                            index = j
                             break
                     if index == -1:
                         return False
@@ -107,11 +107,11 @@ class Function:
         operations = []
         operation = ''
 
-        def counter():
-            sum = 0
-            for div in counters:
-                sum += counters[div]
-            return sum
+        def counters_sum():
+            s = 0
+            for d in counters:
+                s += counters[d]
+            return s
 
         for ch in body:
             for div in dividers:
@@ -119,11 +119,11 @@ class Function:
                     if div not in counters:
                         counters[div] = 0
                     counters[div] += 1 if ch == div[0] else -1
-            if counter() < 0:
+            if counters_sum() < 0:
                 print('error parsing function "{}" body'.format(self.name))
                 exit(-1)
             operation += ch
-            if counter() == 0 and ch in ';}':
+            if counters_sum() == 0 and ch in ';}':
                 operations.append(operation.strip())
                 operation = ''
                 continue
@@ -132,31 +132,31 @@ class Function:
         return
 
     def _find_modifiers(self, string):
-        if Modifier.server in string:
-            self.side = Modifier.side_server
-        if Modifier.client in string:
-            self.side = Modifier.side_client
-        self.is_external = self.is_external or Modifier.external in string
-        self.is_abstract = self.is_abstract or Modifier.abstract in string
-        self.is_static = self.is_static or Modifier.static in string
-        self.is_const = self.is_const or Modifier.const in string
-        self.is_virtual = self.is_virtual or Modifier.virtual in string
+        if Modifiers.server in string:
+            self.side = Modifiers.side_server
+        if Modifiers.client in string:
+            self.side = Modifiers.side_client
+        self.is_external = self.is_external or Modifiers.external in string
+        self.is_abstract = self.is_abstract or Modifiers.abstract in string
+        self.is_static = self.is_static or Modifiers.static in string
+        self.is_const = self.is_const or Modifiers.const in string
+        self.is_virtual = self.is_virtual or Modifiers.virtual in string
 
-        if Modifier.private in string:
+        if Modifiers.private in string:
             self.access = AccessSpecifier.private
-        if Modifier.protected in string:
+        if Modifiers.protected in string:
             self.access = AccessSpecifier.protected
-        if Modifier.public in string:
+        if Modifiers.public in string:
             self.access = AccessSpecifier.public
 
-        string = string.replace(Modifier.server, '')
-        string = string.replace(Modifier.client, '')
-        string = string.replace(Modifier.external, '')
-        string = string.replace(Modifier.static, '')
-        string = string.replace(Modifier.const, '')
-        string = string.replace(Modifier.abstract, '')
-        string = string.replace(Modifier.private, '')
-        string = string.replace(Modifier.protected, '')
-        string = string.replace(Modifier.public, '')
-        string = string.replace(Modifier.virtual, '')
+        string = string.replace(Modifiers.server, '')
+        string = string.replace(Modifiers.client, '')
+        string = string.replace(Modifiers.external, '')
+        string = string.replace(Modifiers.static, '')
+        string = string.replace(Modifiers.const, '')
+        string = string.replace(Modifiers.abstract, '')
+        string = string.replace(Modifiers.private, '')
+        string = string.replace(Modifiers.protected, '')
+        string = string.replace(Modifiers.public, '')
+        string = string.replace(Modifiers.virtual, '')
         return string

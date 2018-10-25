@@ -1,5 +1,5 @@
 from ..utils.Error import Error
-from .constants import Modifier
+from .Modifiers import Modifiers
 from enum import Enum
 
 
@@ -56,11 +56,11 @@ class Object:
                 self.initial_value = "nullptr"
 
     def parse_type(self):
-        l = self.type.find('<')
-        r = self.type.rindex('>', l) if l != -1 else -1
-        if l > -1 and r > -1:
-            args = self.type[l + 1:r].split(',')
-            self.type = self.type[0:l]
+        left = self.type.find('<')
+        right = self.type.rindex('>', left) if left != -1 else -1
+        if left > -1 and right > -1:
+            args = self.type[left + 1:right].split(',')
+            self.type = self.type[0:left]
             for arg in args:
                 arg = arg.strip()
                 self.template_args.append(arg)
@@ -73,43 +73,43 @@ class Object:
 
     def find_modifiers(self, string):
         args = ''
-        l = string.find('<')
-        r = string.rfind('>')
-        if l != -1 and r != -1:
-            args = string[l:r + 1]
-            string = string[0:l] + string[r + 1:]
+        left = string.find('<')
+        right = string.rfind('>')
+        if left != -1 and right != -1:
+            args = string[left:right + 1]
+            string = string[0:left] + string[right + 1:]
 
-        if Modifier.server in string:
-            self.side = Modifier.side_server
-        if Modifier.client in string:
-            self.side = Modifier.side_client
-        self.is_runtime = self.is_runtime or Modifier.runtime in string
-        self.is_static = self.is_static or Modifier.static in string
-        self.is_key = self.is_key or Modifier.key in string
-        self.is_link = self.is_link or Modifier.link in string
-        self.is_const = self.is_const or Modifier.const in string
+        if Modifiers.server in string:
+            self.side = Modifiers.side_server
+        if Modifiers.client in string:
+            self.side = Modifiers.side_client
+        self.is_runtime = self.is_runtime or Modifiers.runtime in string
+        self.is_static = self.is_static or Modifiers.static in string
+        self.is_key = self.is_key or Modifiers.key in string
+        self.is_link = self.is_link or Modifiers.link in string
+        self.is_const = self.is_const or Modifiers.const in string
         self.is_const = self.is_const or self.is_link
 
-        if Modifier.private in string:
+        if Modifiers.private in string:
             self.access = AccessSpecifier.private
-        if Modifier.protected in string:
+        if Modifiers.protected in string:
             self.access = AccessSpecifier.protected
-        if Modifier.public in string:
+        if Modifiers.public in string:
             self.access = AccessSpecifier.public
 
-        string = string.replace(Modifier.server, '')
-        string = string.replace(Modifier.client, '')
-        string = string.replace(Modifier.runtime, '')
-        string = string.replace(Modifier.const, '')
-        string = string.replace(Modifier.static, '')
-        string = string.replace(Modifier.key, '')
-        string = string.replace(Modifier.link, '')
-        string = string.replace(Modifier.private, '')
-        string = string.replace(Modifier.protected, '')
-        string = string.replace(Modifier.public, '')
+        string = string.replace(Modifiers.server, '')
+        string = string.replace(Modifiers.client, '')
+        string = string.replace(Modifiers.runtime, '')
+        string = string.replace(Modifiers.const, '')
+        string = string.replace(Modifiers.static, '')
+        string = string.replace(Modifiers.key, '')
+        string = string.replace(Modifiers.link, '')
+        string = string.replace(Modifiers.private, '')
+        string = string.replace(Modifiers.protected, '')
+        string = string.replace(Modifiers.public, '')
 
         if args:
-            string = string[0:l] + args + string[l:]
+            string = string[0:left] + args + string[left:]
 
         return string
 
@@ -117,7 +117,6 @@ class Object:
 class Objects(Enum):
     VOID = Object('void')
     BOOL = Object('bool')
-
-
-Object.VOID = Objects.VOID
-Object.BOOL = Objects.BOOL
+    INT = Object('int')
+    STRING = Object('string')
+    FLOAT = Object('float')
