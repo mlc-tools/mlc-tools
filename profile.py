@@ -1,47 +1,46 @@
-from mlc_tools.main import Generator
-
-
-def test_game_s():
-    game_root = '/Work/survival/'
-    generator = Generator(game_root + 'config', generate_tests='yes')
-    generator.generate('py', 'json', game_root + 'tests/python/web', 'client')
-    generator.generate('cpp', 'json', game_root + 'tests/cpp/web', 'client', generate_intrusive='yes')
-    generator.generate('cpp', 'json', game_root + 'client/generated/web', 'client')
-    generator.generate_data(game_root + '/config/data', game_root + '/tests/data')
-
-
-def test_game_m():
-    project_root = '/Work/gushchin/marines/'
-    generator = Generator(project_root + 'config', generate_tests='yes', generate_intrusive='no', generate_factory='yes')
-    # generator.generate('cpp', 'xml', project_root + '/client/project_marines/generated/web', 'client')
-    # generator.generate('php', 'xml', project_root + '/server/mg', 'server')
-    # generator.generate('py', 'xml', project_root + '/tests/server/lib/mg', 'client')
-    # generator.generate('py', 'xml', project_root + '/tests/server/lib/mg_server', 'server')
-    # tests
-    generator.generate('cpp', 'xml', project_root + '/tests/unit_tests/cpp/generated', 'client')
-
-
-def profile():
-    def get_profile_(function):
-        """ Returns performance statistics (as a string) for the given function.
-        """
-        def _run():
-            function()
-        import cProfile as profile
-        import pstats
-        import os
-        import sys
-        sys.modules['__main__'].__profile_run__ = _run
-        id = function.__name__ + '()'
-        profile.run('__profile_run__()', id)
-        p = pstats.Stats(id)
-        p.stream = open(id, 'w')
-        p.sort_stats('time').print_stats(20)
-        p.stream.close()
-        s = open(id).read()
-        os.remove(id)
-        return s
-    print(get_profile_(test_game_m))
-
-# profile()
-test_game_m()
+#
+#
+# def test_game_s():
+#     game_root = '/Work/survival/'
+#     generator = Generator(game_root + 'config', generate_tests='yes')
+#     generator.generate('py', 'json', game_root + 'tests/python/web', 'client')
+#     generator.generate('cpp', 'json', game_root + 'tests/cpp/web', 'client', generate_intrusive='yes')
+#     generator.generate('cpp', 'json', game_root + 'client/generated/web', 'client')
+#     generator.generate_data(game_root + '/config/data', game_root + '/tests/data')
+#
+#
+# def test_game_m():
+#     project_root = '/Work/gushchin/marines/'
+#     generator = Generator(project_root + 'config', generate_tests='yes', generate_intrusive='no', generate_factory='yes')
+#     # generator.generate('cpp', 'xml', project_root + '/client/project_marines/generated/web', 'client')
+#     # generator.generate('php', 'xml', project_root + '/server/mg', 'server')
+#     # generator.generate('py', 'xml', project_root + '/tests/server/lib/mg', 'client')
+#     # generator.generate('py', 'xml', project_root + '/tests/server/lib/mg_server', 'server')
+#     # tests
+#     generator.generate('cpp', 'xml', project_root + '/tests/unit_tests/cpp/generated', 'client')
+#
+#
+# def profile():
+#     def get_profile_(function):
+#         """ Returns performance statistics (as a string) for the given function.
+#         """
+#         def _run():
+#             function()
+#         import cProfile as profile
+#         import pstats
+#         import os
+#         import sys
+#         sys.modules['__main__'].__profile_run__ = _run
+#         id = function.__name__ + '()'
+#         profile.run('__profile_run__()', id)
+#         p = pstats.Stats(id)
+#         p.stream = open(id, 'w')
+#         p.sort_stats('time').print_stats(20)
+#         p.stream.close()
+#         s = open(id).read()
+#         os.remove(id)
+#         return s
+#     print(get_profile_(test_game_m))
+#
+# # profile()
+# test_game_m()

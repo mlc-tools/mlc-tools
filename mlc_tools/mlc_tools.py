@@ -1,10 +1,9 @@
-from .Error import Log
-from .Parser import Parser
-from . import fileutils
-from .Generator_ import Generator
-from .Linker import Linker
-from .Validator import Validator
-from .DataParser import DataParser
+from .utils.Error import Log
+from .utils import fileutils
+from .base.Parser import Parser
+from .base.Linker import Linker
+from .base.Validator import Validator
+from .base.DataParser import DataParser
 import os
 import sys
 
@@ -42,7 +41,7 @@ class Mlc:
         self.out_directory = kwargs.get('out_directory', self.out_directory)
         self.data_directory = kwargs.get('data_directory', self.data_directory)
         self.out_data_directory = kwargs.get('out_data_directory', self.out_data_directory)
-        self.language = kwargs.get('language', self.language)
+        self.language = kwargs.get('base', self.language)
         self.only_data = kwargs.get('only_data', self.only_data)
         self.namespace = kwargs.get('namespace', self.namespace)
         self.side = kwargs.get('side', self.side)
@@ -76,17 +75,15 @@ class Mlc:
                         continue
                     result_files.append(path)
             return result_files
-        
-        parser = Parser(self.side)
-        self.parser = parser
+
         all_files = get_config_files()
+        parser = Parser(self.side)
         parser.parse_files(all_files)
+        self.parser = parser
 
         language = self.build_language()
 
-        generator = Generator()
-        generator.generate_tests_interfaces(parser)
-        language.get_generator().generate_visitors_pattern(parser)
+        language.get_generator().generate(parser, language.get_writer())
 
         linker = Linker()
         linker.link(parser)
@@ -96,13 +93,10 @@ class Mlc:
 
         # cpp
         # php
-        language.get_generator().generate_data_storage(parser)
-        language.get_generator().generate_factory(parser, language.get_writer())
-        language.get_generator().generate_init_files(parser, language.get_writer())
         language.get_translator().translate(parser)
         language.get_serializer().generate_methods(parser)
         language.get_writer().save(parser)
-        # python
+        # module_python
 
     def generate_data(self, **kwargs):
         self._parse_kwargs(**kwargs)
@@ -126,18 +120,18 @@ class Mlc:
             command = '{} {} {}'.format(python, self.test_script, self.test_script_args)
             Log.message('Run test (%s):' % command)
             if os.system(command) != 0:
-                print('TODO: exit - 1. main.py 1')
+                print('TODO: exit - 1. mlc_tools.py 1')
                 exit(1)
         if not os.path.isfile(self.test_script):
             Log.warning('Test script (%s) not founded' % self.test_script)
 
     def build_language(self):
         if self.language == 'py':
-            from .python import Language
+            from .module_python import Language
             language = Language(self.out_directory)
             return language
         return None
-            
+        
     def run_user_generator(self, state):
         if self.custom_generator:
             self.custom_generator.execute(state)

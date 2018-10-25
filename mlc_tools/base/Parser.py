@@ -1,0 +1,280 @@
+from ..core.Object import Object
+from ..core.Class import Class
+from ..core.Function import Function
+from ..utils.Error import Error
+from .ObserverCreater import ObserverPatterGenerator
+
+
+def _is_class(line):
+    return line.strip().find('class') == 0
+
+
+def _is_interface(line):
+    return line.strip().find('interface') == 0
+
+
+def _is_function(line):
+    return line.strip().find('function') == 0
+
+
+def _is_enum(line):
+    return line.strip().find('enum') == 0
+
+
+def find_body(text):
+    text = text.strip()
+    body = ""
+    if text.find("\n") != -1:
+        header = text[0:text.find("\n")]
+    else:
+        header = text
+    if header.find(':external') == -1 and header.find(':abstract') == -1:
+        text = text[text.find("{"):]
+        counter = 0
+        index = 0
+        for ch in text:
+            index += 1
+            if counter == 0 and ch == '{':
+                counter += 1
+                continue
+            if ch == '{':
+                counter += 1
+            if ch == '}':
+                counter -= 1
+            if counter == 0:
+                text = text[index:]
+                break
+            body += ch
+    else:
+        text = text[len(header):].strip()
+    return body, header, text
+
+
+class Parser:
+
+    def __init__(self, side):
+        self.classes = []
+        self.classes_for_data = []
+        self.objects = []
+        self.functions = []
+        self.side = side
+        self.simple_types = ["int", "float", "bool", "string"]
+        self.is_validate_php_features = True
+        self.configs_root = ''
+        return
+
+    def generate_patterns(self):
+        self.classes.append(ObserverPatterGenerator.get_mock())
+
+    def save_patterns(self, writer, language):
+        ObserverPatterGenerator.generate(language, writer)
+
+    def set_configs_directory(self, path):
+        self.configs_root = path
+
+    def is_side(self, side):
+        return self.side == 'both' or side == self.side or side == 'both'
+
+    def parse_files(self, files):
+        for path in files:
+            text = open(path).read()
+            self.parse(text)
+
+    def parse(self, text):
+        text = text.strip()
+        left = text.find('/*')
+        while left != -1:
+            right = text.find('*/')
+            if right != -1:
+                text = text[:left] + text[right + 2:]
+            left = text.find('/*')
+        lines = text.split('\n')
+        for i, line in enumerate(lines):
+            if '//' in line:
+                lines[i] = line[0:line.find('//')]
+        text = '\n'.join(lines)
+        while len(text) > 0:
+            text = text.strip()
+            if _is_class(text):
+                text = self._create_class(text, False)
+            elif _is_interface(text):
+                text = self._create_class(text, True)
+            elif _is_enum(text):
+                text = self._create_enum_class(text)
+            elif _is_function(text):
+                text = self._create_function(text)
+            else:
+                text = self._create_declaration(text)
+
+    def _create_class(self, text, is_abstract):
+        body, header, text = find_body(text)
+        cls = Class()
+        cls.parse(header)
+        if is_abstract:
+            cls.is_abstract = True
+
+        if not self.is_side(cls.side):
+            if cls.is_storage:
+                self.classes_for_data.append(cls)
+            return text
+
+        cls.parse_body(Parser(self.side), body)
+        if self.find_class(cls.name):
+            Error.exit(Error.DUBLICATE_CLASS, cls.name)
+        for inner_cls in cls.inner_classes:
+            self.classes.append(inner_cls)
+        self.classes.append(cls)
+        return text
+
+    def is_serialised(self, cls):
+        if cls.is_serialized:
+            return True
+        result = False
+        for c in cls.superclasses:
+            result = result or self.is_serialised(c)
+        return result
+
+    def is_function_override(self, cls, function):
+        if cls.type == 'enum':
+            return False
+        if function.name in ['serialize', 'deserialize']:
+            return len(cls.superclasses) > 0
+
+        for c in cls.superclasses:
+            for f in c.functions:
+                if f.name == function.name and f.get_return_type().type == function.get_return_type().type and f.args == function.args:
+                    return True
+        is_override = False
+        for c in cls.superclasses:
+            is_override = is_override or self.is_function_override(c, function)
+        return is_override
+
+    def find_class(self, name):
+        for cls in self.classes:
+            if cls.name == name:
+                return cls
+        return None
+
+    def _create_enum_class(self, text):
+        body, header, text = find_body(text)
+        cls = Class()
+        cls.type = 'enum'
+        cls.parse(header)
+        if not self.is_side(cls.side):
+            return text
+        cls.parse_body(Parser(self.side), body)
+        self.classes.append(cls)
+        return text
+
+    def _create_declaration(self, text):
+        lines = text.split("\n")
+        line = lines[0]
+        if len(lines) > 1:
+            text = text[text.find("\n") + 1:]
+        else:
+            text = ""
+        obj = Object()
+        obj.parse(line)
+        if not self.is_side(obj.side):
+            return text
+        self.objects.append(obj)
+        return text
+
+    def _create_function(self, text):
+        body, header, text = find_body(text)
+        function = Function()
+        function.parse(header)
+        if not self.is_side(function.side):
+            return text
+        function.parse_body(body)
+        self.functions.append(function)
+        return text
+
+    def load_default_serialize_protocol(self, buffer):
+        lines = buffer.split('\n')
+        supported_types = []
+        supported_types.extend(self.simple_types)
+        supported_types.append('serialized')
+        supported_types.append('pointer')
+        supported_types.append('list<serialized>')
+        supported_types.append('list<pointer>')
+        supported_types.append('link')
+        supported_types.append('list<link>')
+        supported_types.append('serialized')
+        supported_types.append('map')
+        supported_types.append('enum')
+        supported_types.append('list<enum>')
+        for type_ in self.simple_types:
+            list_type = "list<{0}>".format(type_)
+            supported_types.append(list_type)
+
+        serialize_protocol = list()
+        serialize_protocol.append({})
+        serialize_protocol.append({})
+        for x in range(2):
+            for type_ in supported_types:
+                simple = type_ in self.simple_types
+                p0 = self._load_protocol(lines, x, type_, True if simple else None, optional=type_ == 'list<enum>')
+                p1 = p0 if not simple else self._load_protocol(lines, x, type_, False)
+                serialize_protocol[x][type_] = []
+                serialize_protocol[x][type_].extend([p0, p1])
+        self.serialize_protocol = serialize_protocol
+
+    def _load_protocol(self, lines, serialize_type, type, initial_value=None, optional=False):
+        stypes = ['serialize', 'deserialize']
+        sinit = ['with default value', 'without default value']
+        in_type = False
+        in_serialize = False
+        in_initial_value = initial_value is None
+        pattern = []
+        for oline in lines:
+            if oline.endswith('\n'):
+                oline = oline[0:-1]
+            line = oline.strip()
+            if not line:
+                continue
+            if not in_type and line.startswith('#'):
+                types = line[1:].split(',')
+                for type_ in types:
+                    in_type = in_type or (type == type_.strip())
+                continue
+            if in_type and line.startswith('#' + stypes[serialize_type]):
+                in_serialize = True
+                continue
+            if in_type and in_serialize and not in_initial_value and line.startswith('#' + sinit[0 if initial_value else 1]):
+                in_initial_value = True
+                continue
+            if in_type and in_serialize and in_initial_value:
+                if line.startswith('#'):
+                    break
+                pattern.append(oline)
+        def_ = pattern
+        pattern = '\n'.join(pattern)
+        # standard serialize
+        pattern = pattern.replace('{', '{{')
+        pattern = pattern.replace('}', '}}')
+        pattern = pattern.replace('$(FIELD)', '{field}')
+        pattern = pattern.replace('$(TYPE)', '{type}')
+        pattern = pattern.replace('$(DEFAULT_VALUE)', '{default_value}')
+        pattern = pattern.replace('$(OWNER)', '{owner}')
+        pattern = pattern.replace('$(ARG_0)', '{arg_0}')
+        pattern = pattern.replace('$(ARG_1)', '{arg_1}')
+        pattern = pattern.replace('$(FORMAT)', '{format}')
+        # for map<key, value>
+        pattern = pattern.replace('$(KEY_SERIALIZE)', '{key_serialize}')
+        pattern = pattern.replace('$(VALUE_SERIALIZE)', '{value_serialize}')
+        pattern = pattern.replace('$(KEY)', '{key}')
+        pattern = pattern.replace('$(VALUE_TYPE)', '{value_type}')
+        pattern = pattern.replace('$(VALUE)', '{value}')
+        # for module_python:
+        pattern = pattern.replace('$({{}})', '{{}}')
+
+        if not pattern and not optional:
+            print('cannot find pattern for args:')
+            print(type, stypes[serialize_type], initial_value)
+            print('in_type', in_type)
+            print('in_serialize', in_serialize)
+            print('in_initial_value', in_initial_value)
+            print(def_)
+            exit(-1)
+        return pattern
