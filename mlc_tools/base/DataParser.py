@@ -67,20 +67,20 @@ class DataParser:
     def _parse_json(self, full_path):
         root = json.loads(open(full_path).read())
 
-        def parse(key, dict_):
-            name = key
-            self._validate_type(key, full_path)
-            if name not in self.objects:
-                self.objects[name] = []
-            self.objects[name].append(dict_)
-
         if isinstance(root, dict):
             for key in root:
-                parse(key, root)
+                self._parse_json_node(full_path, key, root)
         elif isinstance(root, list):
             for dict_ in root:
                 for key in dict_:
-                    parse(key, dict_)
+                    self._parse_json_node(full_path, key, dict_)
+
+    def _parse_json_node(self, full_path, key, dict_):
+        name = key
+        self._validate_type(key, full_path)
+        if name not in self.objects:
+            self.objects[name] = []
+        self.objects[name].append(dict_)
 
     def _validate(self):
         pass
@@ -101,10 +101,10 @@ class DataParser:
 
     def _flush_xml(self):
         root = ElementTree.Element('data')
-        for type in self.objects:
-            name = get_data_list_name(get_data_name(type))
+        for type_ in self.objects:
+            name = get_data_list_name(get_data_name(type_))
             node = ElementTree.SubElement(root, name)
-            for obj in self.objects[type]:
+            for obj in self.objects[type_]:
                 pair = ElementTree.SubElement(node, 'pair')
                 pair.attrib['key'] = obj.attrib['name']
                 obj.tag = 'value'

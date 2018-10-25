@@ -15,8 +15,9 @@ class WriterBase:
     def save(self, parser):
         self.parser = parser
         for cls in parser.classes:
-            filename, content = self.write_class(cls)
-            self.save_file(filename, content)
+            sources = self.write_class(cls)
+            for filename, content in sources:
+                self.save_file(filename, content)
 
     def write_class(self, cls):
-        return '', ''
+        return [('', '')]

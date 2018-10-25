@@ -114,7 +114,7 @@ class Object:
         return string
 
 
-class Objects(Enum):
+class Objects:
     VOID = Object('void')
     BOOL = Object('bool')
     INT = Object('int')

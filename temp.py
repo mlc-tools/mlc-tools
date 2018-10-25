@@ -6,9 +6,9 @@ def main():
     mlc = Mlc()
     
     mlc.additional_config_directories.append(root + 'tests/simple_test/config_additional')
-    mlc.generate(language='py',
+    mlc.generate(language='cpp',
                  configs_directory=root + 'tests/simple_test/config',
-                 out_directory=root + 'tests/simple_test/generated_py')
+                 out_directory=root + 'tests/simple_test/generated_cpp/xml')
     
     mlc.additional_data_directories.append(root + 'tests/simple_test/data_additional')
     mlc.generate_data(data_directory=root + 'tests/simple_test/data_xml/',
@@ -16,8 +16,8 @@ def main():
     mlc.generate_data(data_directory=root + 'tests/simple_test/data_json/',
                       out_data_directory='tests/simple_test/assets')
     
-    mlc.run_test(test_script=root + 'tests/simple_test/test_py.py', test_script_args='json')
-    mlc.run_test(test_script=root + 'tests/simple_test/test_py.py', test_script_args='xml')
+    # mlc.run_test(test_script=root + 'tests/simple_test/test_cpp.py', test_script_args='json')
+    # mlc.run_test(test_script=root + 'tests/simple_test/test_cpp.py', test_script_args='xml')
 
 
 def profile():

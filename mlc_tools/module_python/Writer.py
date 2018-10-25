@@ -50,7 +50,9 @@ class Writer(WriterBase):
                                   imports=imports,
                                   init_superclass=init_superclass,
                                   static_list=static_list)
-        return '%s.py' % cls.name, self.prepare_file(out)
+        return [
+            ('%s.py' % cls.name, self.prepare_file(out))
+            ]
 
     @staticmethod
     def set_initial_values(cls):

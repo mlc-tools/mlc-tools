@@ -94,12 +94,18 @@ class Function:
         return self.return_type
 
     def link(self):
-        if not isinstance(self.return_type, str):
-            return
+        if isinstance(self.return_type, str):
+            return_type = self.return_type
+            self.return_type = Object()
+            self.return_type.parse(return_type)
 
-        return_type = self.return_type
-        self.return_type = Object()
-        self.return_type.parse(return_type)
+        for i, arg in enumerate(self.args):
+            if isinstance(arg[1], Object):
+                continue
+            obj = Object()
+            obj.parse(arg[1])
+            obj.name = arg[0]
+            self.args[i][1] = obj
 
     def parse_body(self, body):
         counters = {}

@@ -29,7 +29,7 @@ def parse_object_with_name(obj, string):
         return obj
 
     pattern_without_name = re.compile(r'([\w:*]+)([<\.:*&\w ,>]*)')
-    pattern_with_name = re.compile(r'([\w:*]+)([<\.:*&\w ,>]*) +(\w+)')
+    pattern_with_name = re.compile(r'([\w:*]+)(<[\.:*&\w ,]*>) +(\w+)')
     with_name = True
     try:
         parts = pattern_with_name.findall(string)

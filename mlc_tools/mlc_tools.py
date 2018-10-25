@@ -6,7 +6,7 @@ from .base.Validator import Validator
 from .base.DataParser import DataParser
 import os
 import sys
-
+import importlib
 
 class Mlc:
     def __init__(self, **kwargs):
@@ -41,7 +41,7 @@ class Mlc:
         self.out_directory = kwargs.get('out_directory', self.out_directory)
         self.data_directory = kwargs.get('data_directory', self.data_directory)
         self.out_data_directory = kwargs.get('out_data_directory', self.out_data_directory)
-        self.language = kwargs.get('base', self.language)
+        self.language = kwargs.get('language', self.language)
         self.only_data = kwargs.get('only_data', self.only_data)
         self.namespace = kwargs.get('namespace', self.namespace)
         self.side = kwargs.get('side', self.side)
@@ -122,11 +122,11 @@ class Mlc:
             Log.warning('Test script (%s) not founded' % self.test_script)
 
     def build_language(self):
-        if self.language == 'py':
-            from .module_python import Language
-            language = Language(self.out_directory)
-            return language
-        return None
+        from pydoc import locate
+        module_name = 'module_%s' % (self.language if self.language != 'py' else 'python')
+        print module_name
+        module = locate('mlc_tools.%s.Language' % module_name)
+        return module(self.out_directory)
         
     def run_user_generator(self, state):
         if self.custom_generator:
