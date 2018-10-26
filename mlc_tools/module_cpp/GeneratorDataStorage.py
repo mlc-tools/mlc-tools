@@ -67,7 +67,7 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
 
     def add_initialize_function_xml(self):
         method = Function()
-        method.name = 'initialize_json'
+        method.name = 'initialize_xml'
         method.return_type = 'void'
         method.is_const = True
         method.args.append(['content', 'string'])

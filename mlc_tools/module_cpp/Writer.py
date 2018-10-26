@@ -1,5 +1,6 @@
 from ..base import WriterBase
 from ..core.Object import *
+from ..core.Class import Class
 # from ..core.Class import Class
 # from .cpp_extension import cpp_files
 
@@ -24,10 +25,11 @@ class Writer(WriterBase):
         includes, forward_declarations, forward_declarations_out = self.get_includes_for_header(cls)
         functions = ''
         for method in cls.functions:
-            functions += self.write_function_hpp(cls, method)
-        members = ''  # self.write_members(cls);
+            functions += self.write_function_hpp(method)
+        members = ''
         for member in cls.members:
-            members += self.write_member_declaration(cls, member)
+            assert(isinstance(member.type, str))
+            members += self.write_member_declaration(member)
         return HEADER.format(namespace=namespace,
                              class_name=class_name,
                              includes=includes,
@@ -41,9 +43,19 @@ class Writer(WriterBase):
         namespace = 'mg'
         class_name = cls.name
         includes = self.get_includes_for_source(cls)
-        functions = ''  # self.write_functions(cls);
+        functions = ''
+        for method in cls.functions:
+            if not method.is_abstract:
+                functions += self.write_function_cpp(cls, method)
         static_initializations = ''
         initializations = ''
+        for member in cls.members:
+            if member.is_static:
+                static_initializations += self.write_static_member_initialization(cls, member)
+            else:
+                div = ': ' if not initializations else ', '
+                initializations += div + self.write_member_initialization(cls, member)
+
         return SOURCE.format(namespace=namespace,
                              class_name=class_name,
                              includes=includes,
@@ -52,30 +64,72 @@ class Writer(WriterBase):
                              initializations=initializations
                              )
 
-    def write_function_hpp(self, cls, function):
+    def write_function_hpp(self, method):
         string = '{virtual}{static}{type} {name}({args}){const}{override}{abstract};\n'
 
         args = list()
-        for arg in function.args:
+        for arg in method.args:
             assert(isinstance(arg[1], Object))
             args.append(self.write_named_object(arg[1], arg[0], True))
         args = ', '.join(args)
 
-        assert (isinstance(function.return_type, Object))
-        return_type = self.write_named_object(function.return_type, '')
+        assert (isinstance(method.return_type, Object))
+        return_type = self.write_named_object(method.return_type, '')
 
-        return string.format(virtual='virtual ' if function.is_virtual else '',
-                             static='static ' if function.is_virtual else '',
-                             const=' const' if function.is_const else '',
+        return string.format(virtual='virtual ' if method.is_virtual else '',
+                             static='static ' if method.is_static else '',
+                             const=' const' if method.is_const else '',
                              override='',
-                             abstract=' = 0' if function.is_abstract else '',
+                             abstract=' = 0' if method.is_abstract else '',
                              type=return_type,
-                             name=function.name,
+                             name=method.name,
                              args=args
                              )
 
-    def write_member_declaration(self, cls, obj):
+    def write_function_cpp(self, cls, method):
+        text = '''{type} {class_name}::{name}({args}){const}
+        {{
+        {body}
+        }}
+        
+        '''
+        return_type = self.write_named_object(method.return_type, '')
+
+        args = list()
+        for arg in method.args:
+            assert(isinstance(arg[1], Object))
+            args.append(self.write_named_object(arg[1], arg[0], True))
+        args = ', '.join(args)
+
+        body = '\n'.join(method.operations)
+
+        return text.format(const=' const' if method.is_const else '',
+                           type=return_type,
+                           name=method.name,
+                           args=args,
+                           class_name=cls.name,
+                           body=body
+                           )
+
+    def write_member_declaration(self, obj):
         return self.write_named_object(obj, obj.name) + ';\n'
+
+    def write_static_member_initialization(self, cls, obj):
+        string = '{const}{type}{pointer} {owner}::{name}({initial_value});\n'
+        return string.format(const='const ' if obj.is_const else '',
+                             type=self.convert_type(obj.type),
+                             pointer='*' if obj.is_pointer else '',
+                             owner=cls.name,
+                             name=obj.name,
+                             initial_value=obj.initial_value
+                             )
+
+    def write_member_initialization(self, cls, obj):
+        string = '{name}({initial_value})\n'
+        initial_value = self.convert_initial_value(cls, obj)
+        return string.format(name=obj.name,
+                             initial_value=initial_value
+                             )
 
     def write_named_object(self, obj, name, try_to_use_const_ref=False):
         string = '{static}{const}{type}{templates}{pointer}{ref}{name}'
@@ -111,6 +165,18 @@ class Writer(WriterBase):
         if isinstance(type_of_object, Object):
             return Writer.convert_type(type_of_object.name)
         return type_of_object
+
+    def convert_initial_value(self, cls, obj):
+        if obj.is_pointer and obj.initial_value == '0':
+            return 'nullptr'
+        type_class = self.parser.find_class(obj.type)
+        if type_class and type_class.type == 'enum':
+            assert(len(type_class.members) > 0)
+            return '{}::{}'.format(type_class.name, type_class.members[0].name)
+
+        if obj.initial_value is None:
+            return ''
+        return obj.initial_value
     
     @staticmethod
     def can_use_const_ref(obj):
@@ -160,7 +226,9 @@ class Writer(WriterBase):
         forward_declarations = set()
         forward_declarations_out = set()
         if cls.type == 'enum':
-            return includes, forward_declarations, forward_declarations_out
+            return self.build_includes_block(cls, includes), \
+                   self.build_forward_declarions_block(forward_declarations), \
+                   self.build_forward_declarions_block(forward_declarations_out)
 
         def add(set_, obj):
             set_.add(self.convert_type(obj.type))
@@ -305,22 +373,19 @@ namespace {namespace}
 SOURCE = '''
 #include "intrusive_ptr.h"
 {includes}
+#include "{namespace}_extensions.h"
 
 namespace {namespace}
 {{
     {static_initializations}
-
     {class_name}::{class_name}()
-    {initializations}
-    {{
+    {initializations}{{
     }}
     
     {class_name}::~{class_name}()
     {{
     }}
     
-{functions}
-
-}} //namespace {namespace}
+{functions}}} //namespace {namespace}
 
 '''

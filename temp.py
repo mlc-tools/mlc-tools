@@ -9,7 +9,9 @@ def main():
     mlc.additional_config_directories.append(root + 'tests/simple_test/config_additional')
     mlc.generate(language='cpp',
                  configs_directory=root + 'tests/simple_test/config',
-                 out_directory=root + 'tests/simple_test/generated_cpp/xml')
+                 out_directory=root + 'tests/simple_test/generated_cpp/xml',
+                 side='client'
+                 )
     
     mlc.additional_data_directories.append(root + 'tests/simple_test/data_additional')
     mlc.generate_data(data_directory=root + 'tests/simple_test/data_xml/',

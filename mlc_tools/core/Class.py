@@ -71,7 +71,7 @@ class Class(Object):
         for cls in parser.classes:
             cls.name = self.name + cls.name
             cls.group = self.group
-            cls.size = self.side
+            cls.side = self.side
             cls.is_test = self.is_test
             self.inner_classes.append(cls)
 
