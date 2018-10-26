@@ -77,15 +77,14 @@ class GeneratorDataStorageBase(Class):
         self.name = 'DataStorage'
         self.is_serialized = True
 
-        string_obj = Object()
-        string_obj.type = 'string'
         for class_ in parser.classes:
             if class_.is_storage and (class_.side == parser.side or class_.side == 'both'):
                 obj = Object()
                 obj.type = 'map'
                 obj.name = get_data_list_name(get_data_name(class_.name))
-                obj.template_args.append(string_obj)
-                obj.template_args.append(class_)
+                obj.template_args.append('string')
+                obj.template_args.append(class_.name)
+                
                 obj.access = AccessSpecifier.public
                 self.members.append(obj)
 

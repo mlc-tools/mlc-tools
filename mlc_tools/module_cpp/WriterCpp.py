@@ -15,13 +15,6 @@ SERIALIZATION = 0
 DESERIALIZATION = 1
 
 
-def _convert_argument_type(type_):
-    if isinstance(type_, str):
-        if type_ == 'string' or type_ == 'std::string':
-            return 'const std::string&'
-        return type_
-    else:
-        return _convert_argument_type(type_.type)
 
 
 def convert_return_type(parser, type_object):
@@ -94,49 +87,6 @@ def convert_type(type_):
         print(type_)
         exit(-1)
     return type_
-
-
-def get_include_file(parser, class_, filename, namespace):
-    types = dict()
-    types['list'] = '<vector>'
-    types['vector'] = '<vector>'
-    types['map'] = '<map>'
-    types['set'] = '<set>'
-    types['string'] = '<string>'
-    types['pugi::xml_node'] = '"pugixml/pugixml.hpp"'
-    types['Json::Value'] = '"jsoncpp/json.h"'
-    types['pugi::xml_node'] = '"pugixml/pugixml.hpp"'
-    types['Observer'] = '"Observer.h"'
-    types['std::vector<int>'] = '<vector>'
-    types['std::vector<intrusive_ptr<CommandBase>>'] = '<vector>'
-    types['std::istream'] = '<istream>'
-    types['intrusive_ptr'] = '"intrusive_ptr.h"'
-    if filename in types:
-        return types[filename]
-    if 'map<' in filename:
-        return '<map>'
-    root_classes = ['DataStorage', 'Observable']
-    for pair in cpp_files:
-        file = pair[0].replace('@{namespace}', namespace)
-        file = file.replace('.h', '')
-        file = file.replace('.cpp', '')
-        root_classes.append(file)
-    if filename in root_classes:
-        back = ''
-        backs = len(class_.group.split('/')) if class_.group else 0
-        for i in range(backs):
-            back += '../'
-        return '"' + back + filename + '.h"'
-
-    included_class = parser.find_class(filename)
-    if included_class and included_class.name == filename and class_.group != included_class.group:
-        back = ''
-        backs = len(class_.group.split('/')) if class_.group else 0
-        for i in range(backs):
-            back += '../'
-        f = '"{2}{1}/{0}.h"' if included_class.group else '"{2}{0}.h"'
-        return f.format(included_class.name, included_class.group, back)
-    return '"{0}.h"'.format(filename)
 
 
 def is_class_has_cpp_definitions(class_):
@@ -718,145 +668,7 @@ class WriterCpp(Writer):
         function.link()
         class_.functions.append(function)
 
-    def _find_includes(self, class_, flags):
-        out = ''
-        forward_declarations = ''
-
-        pattern = '\n#include {0}'
-
-        def need_include(typename):
-            if typename == '':
-                return False
-            types = list()
-            types.append('int')
-            types.append('float')
-            types.append('bool')
-            types.append('void')
-            return typename not in types
-
-        include_types = dict()
-        forward_types = dict()
-
-        for t in class_.superclasses:
-            include_types[t.name] = 1
-        for t in class_.members:
-            type_ = t.type
-            type_ = type_.replace('const', '').strip()
-            type_ = type_.replace('*', '').strip()
-            type_ = type_.replace('&', '').strip()
-            include_types[type_] = 1
-            if t.is_pointer:
-                include_types['intrusive_ptr'] = 1
-            for arg in t.template_args:
-                type_ = arg.name if isinstance(arg, Class) else arg.type
-                if arg.is_pointer:
-                    if flags == FLAG_CPP:
-                        include_types[type_] = 1
-                    if flags == FLAG_HPP:
-                        include_types[type_] = 1
-                    type_ = 'intrusive_ptr'
-                include_types[type_] = 1
-
-        for f in class_.functions:
-            for t in f.args:
-                def checkType(type_string):
-                    is_pointer_ = '*' in type_string
-                    is_ref_ = '&' in type_string
-
-                    typename = type_string.replace('const', '').strip()
-                    typename = typename.replace('*', '').strip()
-                    typename = typename.replace('&', '').strip()
-                    if 'intrusive_ptr' in typename:
-                        return
-                    if 'CommandBase' in typename:
-                        include_types['CommandBase'] = 1
-                    else:
-                        # if flags == FLAG_CPP or type_string != typename + '*':
-                        #     include_types[typename] = 1
-                        # if flags == FLAG_HPP and type_string == typename + '*':
-                        #     forward_types[typename] = 1
-                        if flags == FLAG_CPP:
-                            include_types[typename] = 1
-                        if flags == FLAG_HPP:
-                            if is_pointer_ or is_ref_:
-                                forward_types[typename] = 1
-                            else:
-                                include_types[typename] = 1
-
-                checkType(t[1])
-                if '<' in t[1] and '>' in t[1]:
-                    type_ = t[1]
-                    k = type_.find('<') + 1
-                    l = type_.find('>')
-                    args = type_[k:l].strip().split(',')
-                    for arg in args:
-                        checkType(arg)
-
-                for cls in self.parser.classes:
-                    if cls.name in t[1]:
-                        if flags == FLAG_HPP:
-                            forward_types[cls.name] = 1
-                        else:
-                            include_types[cls.name] = 1
-
-            if not f.is_template:
-                type_ = f.get_return_type().type
-                type_ = type_.replace('const', '').strip()
-                type_ = type_.replace('*', '').strip()
-                type_ = type_.replace('&', '').strip()
-                type_ = type_.replace('std::', '').strip()
-                include_types[type_] = 1
-
-        forward_declarations_out = ''
-        for t in forward_types:
-            if t == self.current_class.name:
-                continue
-            type_ = convert_type(t)
-            if need_include(t):
-                if type_.find('::') == -1:
-                    forward_declarations += '\nclass {0};'.format(type_)
-                else:
-                    k = type_.index('::')
-                    ns = type_[0:k]
-                    type_ns = type_[k + 2:]
-                    if ns == 'mg':
-                        forward_declarations += '\nclass {0};'.format(type_ns)
-                    elif not ns == 'std':
-                        forward_declarations_out += '\nnamespace {}\n__begin__\nclass {};\n__end__'.format(ns, type_ns)
-                    elif ns == 'std':
-                        if '<' in type_ns:
-                            type_ns = type_ns[0:type_ns.index('<')]
-                        include_types[type_ns] = 1
-
-        for t in include_types:
-            if t == self.current_class.name:
-                continue
-            if need_include(t):
-                out += pattern.format(get_include_file(self.parser, self.current_class, t, self.get_namespace()))
-
-            # else:
-            #     continue
-            #     ns = type[0:type.find('::')]
-            #     type = type[type.find('::') + 2:]
-            #     str = '\nnamespace {1}\n__begin__\nclass {0};\n__end__'.format(type, ns)
-            #     forward_declarations += str
-
-        if flags == FLAG_HPP:
-            out += pattern.format(get_include_file(self.parser, self.current_class, 'intrusive_ptr', self.get_namespace()))
-        if flags == FLAG_CPP:
-            out += pattern.format(get_include_file(self.parser, self.current_class, self.get_namespace() + '_Factory', self.get_namespace()))
-            out += pattern.format(get_include_file(self.parser, self.current_class, self.get_namespace() + '_extensions', self.get_namespace()))
-            out += '\n#include <algorithm>'
-
-        out = out.split('\n')
-        out.sort()
-        out = '\n'.join(out)
-
-        forward_declarations = forward_declarations.split('\n')
-        forward_declarations.sort()
-        forward_declarations = '\n'.join(forward_declarations)
-
-        return out, forward_declarations, forward_declarations_out
+    
 
     def _find_includes_in_function_operation(self, class_, current_includes):
         includes = current_includes
@@ -878,38 +690,7 @@ class WriterCpp(Writer):
                                 format(get_include_file(self.parser, self.current_class, type_.name, self.get_namespace()))
         return includes
 
-    def prepare_file(self, body):
-        tabs = 0
-        body = body.replace('__begin__', '{')
-        body = body.replace('__end__', '}')
-
-        lines = body.split('\n')
-        body = list()
-
-        def get_tabs(count):
-            out = ''
-            for i in range(count):
-                out += '\t'
-            return out
-
-        for line in lines:
-            line = line.strip()
-
-            if line and line[0] == '}':
-                tabs -= 1
-            backward = False
-            if 'public:' in line or 'protected:' in line or 'private:' in line:
-                backward = True
-                tabs -= 1
-            line = get_tabs(tabs) + line
-            if backward:
-                tabs += 1
-            if line.strip() and line.strip()[0] == '{':
-                tabs += 1
-            body.append(line)
-        body = '\n'.join(body)
-        return body
-
+    
     def create_data_storage_class(self, name, classes):
         if self.serialize_format == 'xml':
             return DataStorageCppXml(name, classes, self.parser)
@@ -933,25 +714,6 @@ class WriterCpp(Writer):
 
         source = self.prepare_file(source)
         self.save_file(storage.name + '.cpp', source)
-
-    def save_config_files(self):
-        pattern = '#ifndef __{0}_Config_h__\n#define __{0}_Config_h__\n\n{1}\n\n#endif //#ifndef __{0}_Config_h__'
-        configs = list()
-        configs.append('#define {}_JSON 1'.format(self.get_namespace().upper()))
-        configs.append('#define {}_XML 2'.format(self.get_namespace().upper()))
-        configs.append('\n#define {0}_SERIALIZE_FORMAT {0}_{1}'.format(self.get_namespace().upper(), self.serialize_format.upper()))
-        filename_config = '{}_config.h'.format(self.get_namespace())
-        self.save_file(filename_config, pattern.format(self.get_namespace(), '\n'.join(configs)))
-
-        for pair in cpp_files:
-            filename = pair[0]
-            content = pair[1]
-            content = content.replace('@{namespace}', self.get_namespace())
-            content = content.replace('@{namespace_upper}', self.get_namespace().upper())
-            filename = filename.replace('@{namespace}', self.get_namespace())
-            if (not filename.startswith('intrusive_ptr.') or self.parser.generate_intrusive) and \
-                    (not filename.startswith(self.get_namespace() + '_Factory.') or self.parser.generate_factory):
-                self.save_file(filename, content)
 
     def convert_to_enum(self, cls):
         shift = 0

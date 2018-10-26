@@ -23,7 +23,6 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
 
         method = Function()
         method.name = 'shared'
-        method.args.append(['', ''])
         method.return_type = self.name
         method.is_static = True
         method.translated = True

@@ -17,6 +17,7 @@ class Object:
         self.name = ''
         self.initial_value = None
         self.is_pointer = False
+        self.is_ref = False
         self.is_runtime = False
         self.is_static = False
         self.is_const = False
@@ -26,7 +27,7 @@ class Object:
         self.access = AccessSpecifier.public
 
     def parse(self, line):
-        from ..utils.common import parse_object_with_name
+        from ..utils.common import parse_object
         if ';' in line:
             Error.warning(Error.SYNTAX_WARNING, line)
             line = line.replace(';', '')
@@ -39,9 +40,10 @@ class Object:
         if expression:
             self.initial_value = expression
 
-        parse_object_with_name(self, line)
+        parse_object(self, line)
         self.type = self.find_modifiers(self.type)
         self.is_pointer = self.check_pointer()
+        self.is_ref = self.check_ref()
 
         if self.initial_value is None:
             if self.type == 'int':
@@ -57,7 +59,11 @@ class Object:
 
     def parse_type(self):
         left = self.type.find('<')
-        right = self.type.rindex('>', left) if left != -1 else -1
+        try:
+            right = self.type.rindex('>', left) if left != -1 else -1
+        except ValueError as e:
+            # TODO: remove exception
+            exit(1)
         if left > -1 and right > -1:
             args = self.type[left + 1:right].split(',')
             self.type = self.type[0:left]
@@ -69,6 +75,11 @@ class Object:
     def check_pointer(self):
         result = '*' in self.type
         self.type = self.type.replace('*', '')
+        return result
+
+    def check_ref(self):
+        result = '&' in self.type
+        self.type = self.type.replace('&', '')
         return result
 
     def find_modifiers(self, string):
@@ -89,6 +100,8 @@ class Object:
         self.is_link = self.is_link or Modifiers.link in string
         self.is_const = self.is_const or Modifiers.const in string
         self.is_const = self.is_const or self.is_link
+        if self.is_link:
+            self.is_pointer = True
 
         if Modifiers.private in string:
             self.access = AccessSpecifier.private

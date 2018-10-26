@@ -24,31 +24,54 @@ def smart_split(string, divider):
     return parts
 
 
-def parse_object_with_name(obj, string):
+def parse_object(obj, string):
     if not string:
         return obj
-
-    pattern_without_name = re.compile(r'([\w:*]+)([<\.:*&\w ,>]*)')
-    pattern_with_name = re.compile(r'([\w:*]+)(<[\.:*&\w ,]*>) +(\w+)')
-    with_name = True
+    
+    # remove template
+    templates = ''
+    left = string.find('<')
+    if left != -1:
+        right = left
+        size = len(string)
+        i = left + 1
+        counter = 1
+        while i < size:
+            if string[i] == '<':
+                counter += 1
+            if string[i] == '>':
+                counter -= 1
+            if counter == 0:
+                right = i
+                break
+            i += 1
+        if counter == 0 and right != left:
+            templates = string[left+1:right]
+            string = string[:left] + string[right+1:]
+            
+    
+    pattern_with_name = re.compile(r'([\w:&*]+) (\w*)')
+    pattern_without_name = re.compile(r'([\w:&*]+)')
+    parts = []
     try:
         parts = pattern_with_name.findall(string)
         if len(parts) == 0:
-            with_name = False
             parts = pattern_without_name.findall(string)
-        parts = parts[0]
+            if len(parts) == 0:
+                # TODO: use Error.exit(...)
+                print('cannot parse string')
+                exit(-1)
+        else:
+            parts = parts[0]
     except IndexError as e:
         print(e)
         print(string)
         exit(1)
     obj.type = parts[0]
-    if with_name:
-        obj.name = parts[2]
+    if len(parts) > 1:
+        obj.name = parts[1]
 
-    args = parts[1].strip()
-    if args.startswith('<') and args.endswith('>'):
-        args = args[1:-1]
-    obj.template_args = smart_split(args, ',')
+    obj.template_args = smart_split(templates, ',')
     obj.template_args = [x.strip() for x in obj.template_args]
 
     return obj
@@ -59,7 +82,7 @@ def tests():
 
     def test_0():
         string = 'int a'
-        obj = parse_object_with_name(Object(), string)
+        obj = parse_object(Object(), string)
         # print(obj.name)
         # print(obj.type)
         # print(obj.template_args)
@@ -67,7 +90,7 @@ def tests():
 
     def test_1():
         string = 'list<list<int>> a'
-        obj = parse_object_with_name(Object(), string)
+        obj = parse_object(Object(), string)
         # print(obj.name)
         # print(obj.type)
         # print(obj.template_args)
@@ -75,7 +98,7 @@ def tests():
 
     def test_2():
         string = 'map<int, list<int>> foo'
-        obj = parse_object_with_name(Object(), string)
+        obj = parse_object(Object(), string)
         # print(obj.name)
         # print(obj.type)
         # print(obj.template_args)
@@ -83,7 +106,7 @@ def tests():
 
     def test_3():
         string = 'map<int, DataReward*:link> foo'
-        obj = parse_object_with_name(Object(), string)
+        obj = parse_object(Object(), string)
         # print(obj.name)
         # print(obj.type)
         # print(obj.template_args)
@@ -91,7 +114,7 @@ def tests():
 
     def test_4():
         string = 'list<int>'
-        obj = parse_object_with_name(Object(), string)
+        obj = parse_object(Object(), string)
         # print(obj.name)
         # print(obj.type)
         # print(obj.template_args)
@@ -99,7 +122,7 @@ def tests():
 
     def test_5():
         string = 'int'
-        obj = parse_object_with_name(Object(), string)
+        obj = parse_object(Object(), string)
         # print(obj.name)
         # print(obj.type)
         # print(obj.template_args)

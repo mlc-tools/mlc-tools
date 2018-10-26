@@ -124,7 +124,6 @@ class Mlc:
     def build_language(self):
         from pydoc import locate
         module_name = 'module_%s' % (self.language if self.language != 'py' else 'python')
-        print module_name
         module = locate('mlc_tools.%s.Language' % module_name)
         return module(self.out_directory)
         

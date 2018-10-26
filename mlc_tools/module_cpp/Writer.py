@@ -1,5 +1,8 @@
 from ..base import WriterBase
 from ..core.Object import *
+# from ..core.Class import Class
+# from .cpp_extension import cpp_files
+
 
 class Writer(WriterBase):
 
@@ -11,25 +14,25 @@ class Writer(WriterBase):
         header = self.write_hpp(cls)
         source = self.write_cpp(cls)
         return [
-            ('%s.h' % cls.name, header),
-            ('%s.cpp' % cls.name, source),
+            (self.get_filename(cls, 'h'), self.prepare_file(header)),
+            (self.get_filename(cls, 'cpp'), self.prepare_file(source)),
             ]
 
     def write_hpp(self, cls):
         namespace = 'mg'
         class_name = cls.name
-        includes = '' # TODO: find headers includes
-        forward_declarations = '' # TODO: find forward declarations
+        includes, forward_declarations, forward_declarations_out = self.get_includes_for_header(cls)
         functions = ''
         for method in cls.functions:
             functions += self.write_function_hpp(cls, method)
-        members = '' # self.write_members(cls);
+        members = ''  # self.write_members(cls);
         for member in cls.members:
             members += self.write_member_declaration(cls, member)
         return HEADER.format(namespace=namespace,
                              class_name=class_name,
                              includes=includes,
                              forward_declarations=forward_declarations,
+                             forward_declarations_out=forward_declarations_out,
                              functions=functions,
                              members=members,
                              )
@@ -37,10 +40,10 @@ class Writer(WriterBase):
     def write_cpp(self, cls):
         namespace = 'mg'
         class_name = cls.name
-        includes = '' # TODO: find source includes
-        functions = '' # self.write_functions(cls);
-        static_initializations=''
-        initializations=''
+        includes = self.get_includes_for_source(cls)
+        functions = ''  # self.write_functions(cls);
+        static_initializations = ''
+        initializations = ''
         return SOURCE.format(namespace=namespace,
                              class_name=class_name,
                              includes=includes,
@@ -50,12 +53,12 @@ class Writer(WriterBase):
                              )
 
     def write_function_hpp(self, cls, function):
-        string = '{virtual}{static}{type}{name}({args}){const}{override}{abstract};\n'
+        string = '{virtual}{static}{type} {name}({args}){const}{override}{abstract};\n'
 
         args = list()
         for arg in function.args:
             assert(isinstance(arg[1], Object))
-            args.append(self.write_named_object(arg[1], arg[0]))
+            args.append(self.write_named_object(arg[1], arg[0], True))
         args = ', '.join(args)
 
         assert (isinstance(function.return_type, Object))
@@ -74,23 +77,29 @@ class Writer(WriterBase):
     def write_member_declaration(self, cls, obj):
         return self.write_named_object(obj, obj.name) + ';\n'
 
-    def write_named_object(self, obj, name):
-        string = '{static}{const}{type}{templates}{pointer} {name}'
+    def write_named_object(self, obj, name, try_to_use_const_ref=False):
+        string = '{static}{const}{type}{templates}{pointer}{ref}{name}'
         templates = []
         for arg in obj.template_args:
             assert(isinstance(arg, Object))
-            templates.append(self.write_named_object(arg, ''))
-        if len(templates):
-            templates = '<' + ', '.join(templates) + '>'
+            templates.append(self.write_named_object(arg, '', False))
+        templates = ('<' + ', '.join(templates) + '>') if templates else ''
+        is_ref = obj.is_ref
+        is_const = obj.is_const
+        if not is_ref and not is_const and try_to_use_const_ref and Writer.can_use_const_ref(obj):
+            is_ref = True
+            is_const = True
         return string.format(static='static ' if obj.is_static else '',
-                             const='const ' if obj.is_const else '',
+                             const='const ' if is_const else '',
                              type=self.convert_type(obj.type),
-                             name=name,
+                             name=(' ' + name) if name else '',
                              pointer='*' if obj.is_pointer else '',
+                             ref='&' if is_ref else '',
                              templates=templates,
                              )
 
-    def convert_type(self, type_of_object):
+    @staticmethod
+    def convert_type(type_of_object):
         types = {
             'list': 'std::vector',
             'map': 'std::map',
@@ -99,18 +108,187 @@ class Writer(WriterBase):
         }
         if type_of_object in types:
             return types[type_of_object]
+        if isinstance(type_of_object, Object):
+            return Writer.convert_type(type_of_object.name)
         return type_of_object
+    
+    @staticmethod
+    def can_use_const_ref(obj):
+        assert(isinstance(obj, Object))
+        return obj.type in ['string', 'list', 'map']
 
+    @staticmethod
+    def prepare_file(body):
+        tabs = 0
 
+        lines = body.split('\n')
+        body = list()
+
+        def get_tabs(count):
+            out = ''
+            for i in range(count):
+                out += '\t'
+            return out
+
+        for line in lines:
+            line = line.strip()
+
+            if line and line[0] == '}':
+                tabs -= 1
+            backward = False
+            if 'public:' in line or 'protected:' in line or 'private:' in line:
+                backward = True
+                tabs -= 1
+            line = get_tabs(tabs) + line
+            if backward:
+                tabs += 1
+            if line.strip() and line.strip()[0] == '{':
+                tabs += 1
+            body.append(line)
+        body = '\n'.join(body)
+        return body
+    
+    @staticmethod
+    def get_filename(cls, ext):
+        filename = cls.name + '.' + ext
+        if cls.group:
+            filename = cls.group + '/' + filename
+        return filename
+    
+    def get_includes_for_header(self, cls):
+        includes = set()
+        forward_declarations = set()
+        forward_declarations_out = set()
+        if cls.type == 'enum':
+            return includes, forward_declarations, forward_declarations_out
+
+        def add(set_, obj):
+            set_.add(self.convert_type(obj.type))
+            for arg in obj.template_args:
+                add(forward_declarations, arg)
+        
+        # members
+        for member in cls.members:
+            if member.is_link:
+                add(forward_declarations, member)
+            else:
+                add(includes, member)
+                
+        # functions
+        for method in cls.functions:
+            for name, argtype in method.args:
+                add(forward_declarations, argtype)
+                
+        # superclasses
+        for superclass in cls.superclasses:
+            includes.add(superclass.name)
+        
+        return self.build_includes_block(cls, includes), \
+               self.build_forward_declarions_block(forward_declarations), \
+               self.build_forward_declarions_block(forward_declarations_out)
+    
+    def get_includes_for_source(self, cls):
+        includes = set()
+        includes.add(cls.name)
+
+        def add(set_, obj):
+            set_.add(self.convert_type(obj.type))
+            for arg in obj.template_args:
+                add(includes, arg)
+
+        # members
+        for member in cls.members:
+            if member.is_link:
+                add(includes, member)
+    
+        # functions
+        for method in cls.functions:
+            for name, argtype in method.args:
+                add(includes, argtype)
+
+        # method bodies
+        for method in cls.functions:
+            for operation in method.operations:
+                if operation is None:
+                    continue
+                if 'DataStorage::shared()' in operation:
+                    includes.add('DataStorage')
+                for type_ in self.parser.classes:
+                    if type_.name in operation:
+                        includes.add(type_.name)
+        return self.build_includes_block(cls, includes)
+    
+    def build_includes_block(self, cls, includes):
+        types = {
+            'std::list': '<vector>',
+            'std::vector': '<vector>',
+            'std::map': '<map>',
+            'std::set': '<set>',
+            'std::string': '<string>',
+            'Json::Value': '"jsoncpp/json.h"',
+            'pugi::xml_node': '"pugixml/pugixml.hpp"',
+            'Observer': '"Observer.h"',
+            'intrusive_ptr': '"intrusive_ptr.h"',
+        }
+        result = []
+        for typename in includes:
+            assert(isinstance(typename, str))
+            if typename in types:
+                result.append('#include %s' % types[typename])
+                continue
+
+            other_class = self.parser.find_class(typename)
+            if other_class:
+                include = '#include "'
+                if cls.group and other_class.group != cls.group:
+                    include += '../'
+                if other_class.group:
+                    include += other_class.group + '/'
+                include += other_class.name + '.h"'
+                result.append(include)
+        
+        result = sorted(result)
+        return '\n'.join(result)
+    
+    @staticmethod
+    def build_forward_declarions_block(declarations):
+        ignore = [
+            'std::list',
+            'std::vector',
+            'std::map',
+            'std::set',
+            'std::string',
+            'int',
+            'bool',
+            'float',
+        ]
+        predefined = {
+            'Json::Value': 'namespace Json\n{\nclass Value;\n}\n',
+            'pugi::xml_node': 'namespace pugi\n{\nclass xml_node;\n}\n',
+        }
+        result = []
+        for declaration in declarations:
+            if declaration in ignore:
+                continue
+            if declaration in predefined:
+                result.append(predefined[declaration])
+            else:
+                result.append('class %s;' % declaration)
+        result = sorted(result)
+        return '\n'.join(result)
+
+        
 HEADER = '''#ifndef __{namespace}_{class_name}_h__
 #define __{namespace}_{class_name}_h__
 
 #include "intrusive_ptr.h"
 {includes}
 
+{forward_declarations_out}
 namespace {namespace}
 {{
 {forward_declarations}
+
     class {class_name}
     {{
     public:

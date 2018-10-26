@@ -15,7 +15,6 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
     def create_shared_method(self):
         method = Function()
         method.name = 'shared'
-        method.args.append(['', ''])
         method.return_type = '{}&:const'.format(self.name)
         method.is_static = True
         method.operations.append('static {} instance;'.format(self.name))

@@ -79,12 +79,12 @@ class Linker:
     @staticmethod
     def get_object_type(parser, type_name):
         cls = parser.find_class(type_name)
-        if cls:
-            return cls
         obj = Object()
-        type_name = obj.find_modifiers(type_name)
-        obj.type = type_name
-        obj.parse_type()
+        if cls is None:
+            obj.type = obj.find_modifiers(type_name)
+            obj.parse_type()
+        else:
+            obj.type = cls
         obj.name = ""
         return obj
 

@@ -2,9 +2,9 @@ import os
 import inspect
 import sys
 
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0, parentdir)
+# currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+# parentdir = os.path.dirname(currentdir)
+# sys.path.insert(0, parentdir)
 
 from mlc_tools import Generator
 
@@ -22,10 +22,10 @@ def run_tests(generator, root, withdata=False, cpp=True, python=True, php=True):
         print('-----------------------------------------')
         print('|  test with params [{}, {}] finished'.format(lang, format))
         print('-----------------------------------------')
-    
-    # if cpp:
-    #     run('cpp', 'json')
-    #     run('cpp', 'xml')
+
+    if cpp:
+        run('cpp', 'json')
+        run('cpp', 'xml')
     if python:
         run('py', 'json')
         # run('py', 'xml')
@@ -72,8 +72,8 @@ def unit_tests_generator():
     root = get_root() + '/tests/unit_tests_generator/'
     generator = Generator(configs_directory=root, generate_intrusive=True, generate_factory=True, generate_tests=True)
     run_tests(generator, root)
-    
-    
+
+
 def test_virtual_methods():
     root = get_root() + '/tests/test_virtual_methods/'
     generator = Generator(configs_directory=root, generate_intrusive=True, generate_factory=True, generate_tests=True)

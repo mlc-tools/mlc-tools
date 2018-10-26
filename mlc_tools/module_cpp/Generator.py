@@ -1,6 +1,7 @@
 from ..base.Generator import *
 from .GeneratorDataStorage import GeneratorDataStorage
 from .GeneratorVisitor import GeneratorVisitor
+from .GeneratorPredefinedFiles import GeneratorPredefinedFiles
 # from .GeneratorFactory import GeneratorFactory
 
 
@@ -13,4 +14,5 @@ class Generator(GeneratorBase):
         GeneratorBase.generate(self, parser, writer)
         GeneratorDataStorage().generate(parser)
         GeneratorVisitor().generate(parser)
+        GeneratorPredefinedFiles().generate(parser, writer)
         # GeneratorFactory().generate(parser, writer)

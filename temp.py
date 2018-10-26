@@ -1,6 +1,7 @@
 from mlc_tools import Mlc
 import os
 
+
 def main():
     root = os.path.abspath(os.path.dirname(os.path.abspath(__file__))) + '/'
     mlc = Mlc()
