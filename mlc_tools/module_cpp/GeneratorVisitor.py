@@ -20,6 +20,8 @@ class GeneratorVisitor:
                 continue
             if base_class_name not in self.base_visitor_classes:
                 self.base_visitor_classes[base_class_name] = []
+                base_class = parser.find_class(base_class_name)
+                self.base_visitor_classes[base_class_name].append(base_class)
             self.base_visitor_classes[base_class_name].append(cls)
 
         # generate acceptors interface, visit methods
@@ -73,6 +75,6 @@ class GeneratorVisitor:
         method = Function()
         method.name = 'accept'
         method.return_type = Objects.VOID
-        method.args.append(['visitor', base_class_name + '*'])
+        method.args.append(['visitor', 'IVisitor' + base_class_name + '*'])
         method.operations.append('visitor->visit(this);')
         cls.functions.append(method)

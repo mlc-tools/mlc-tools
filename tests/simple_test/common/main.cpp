@@ -26,20 +26,20 @@ extern mg::intrusive_ptr<mg::CommandBase> createCommand(const std::string& paylo
 std::string root = "../../";
 void initialize_data_storage()
 {
-#if MG_SERIALIZE_FORMAT == MG_JSON
-	std::fstream stream(root + "assets/data.json", std::ios::in);
-    std::cout << "MG_SERIALIZE_FORMAT == MG_JSON\n";
-#endif
-#if MG_SERIALIZE_FORMAT == MG_XML
+//#if MG_SERIALIZE_FORMAT == MG_JSON
+//	std::fstream stream(root + "assets/data.json", std::ios::in);
+//    std::cout << "MG_SERIALIZE_FORMAT == MG_JSON\n";
+//#endif
+//#if MG_SERIALIZE_FORMAT == MG_XML
+//	std::fstream stream(root + "assets/data.xml", std::ios::in);
+//    std::cout << "MG_SERIALIZE_FORMAT == MG_XML\n";
+//#endif
+
 	std::fstream stream(root + "assets/data.xml", std::ios::in);
     std::cout << "MG_SERIALIZE_FORMAT == MG_XML\n";
-#endif
-
 	std::string str((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
-	mg::DataStorage::shared().initialize(str);
+	mg::DataStorage::shared().initialize_xml(str);
 }
-
-bool test_serialization();
 
 
 class Logger : public mg::Logger
@@ -65,10 +65,9 @@ int main(int argc, char ** args)
 
 	Logger logger;
 
-	result = test_serialization() && result;
-	result = test_enum() && result;
-	result = test_side() && result;
-	result = test_all_types() && result;
+	result = logger.push(test_enum(), "test_enum");
+    result = logger.push(test_side(), "test_side");
+    result = logger.push(test_all_types(&logger), "test_all_types");
 	result = mg::AllTests::run(&logger) && result;
 
     mg::RunAllTests test;
@@ -88,31 +87,4 @@ int main(int argc, char ** args)
 
 	std::cout << "Execute results = " << (result ? "Ok" : "Fail") << std::endl;
 	return result ? 0 : -1;
-}
-
-
-bool test_serialization()
-{
-	int test_user_id = 123;
-	int test_time = 1231235245;
-
-	auto command = mg::make_intrusive<mg::CommandBase>();
-	command->user_id = test_user_id;
-	command->current_time = test_time;
-	auto buffer = mg::Factory::shared().serialize_command(command);
-	auto deserialized = createCommand(buffer);
-
-	std::cout << "serialized string:" << std::endl;
-	std::cout << buffer << std::endl;
-
-	auto result = true;
-	result = result && deserialized->user_id == command->user_id;
-	result = result && deserialized->current_time == command->current_time;
-
-	if(!result)
-	    std::cout << "Test serialization failed." << std::endl;
-	else
-		std::cout << "Test serialization success." << std::endl;
-
-	return result;
 }

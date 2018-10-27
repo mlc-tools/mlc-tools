@@ -20,6 +20,7 @@ class Function:
         self.access = AccessSpecifier.public
         self.body = ''
         self.translated = False
+        self.specific_implementations = ''
 
     def parse(self, line):
         line = line.strip()

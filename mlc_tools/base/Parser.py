@@ -260,6 +260,7 @@ class Parser:
         pattern = pattern.replace('$(ARG_0)', '{arg_0}')
         pattern = pattern.replace('$(ARG_1)', '{arg_1}')
         pattern = pattern.replace('$(FORMAT)', '{format}')
+        pattern = pattern.replace('$(NAMESPACE)', '{namespace}')
         # for map<key, value>
         pattern = pattern.replace('$(KEY_SERIALIZE)', '{key_serialize}')
         pattern = pattern.replace('$(VALUE_SERIALIZE)', '{value_serialize}')

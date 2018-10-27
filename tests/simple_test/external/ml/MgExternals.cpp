@@ -23,7 +23,7 @@ mg::intrusive_ptr<mg::CommandBase> createCommand(const pugi::xml_node& xml)
 	auto type = xml.name();
 	auto command = mg::Factory::shared().build<mg::CommandBase>(type);
 	if (command != nullptr)
-		command->deserialize(xml);
+		command->deserialize_xml(xml);
 	return command;
 }
 
@@ -42,7 +42,7 @@ mg::intrusive_ptr<mg::CommandBase> createCommand(const Json::Value& json)
 	auto type = json.getMemberNames()[0];
 	auto command = mg::Factory::shared().build<mg::CommandBase>(type);
 	if (command != nullptr)
-		command->deserialize(json[type]);
+		command->deserialize_json(json[type]);
 	return command;
 }
 

@@ -69,7 +69,7 @@ $(FIELD) = xml.attribute("$(FIELD)").as_string();
 
 #serialized
 #serialize:
-$(FIELD).serialize(xml.append_child("$(FIELD)"));
+$(FIELD).serialize_$(FORMAT)(xml.append_child("$(FIELD)"));
 #deserialize:
 $(FIELD).deserialize_$(FORMAT)(xml.child("$(FIELD)"));
 
@@ -80,7 +80,7 @@ if($(FIELD))
 {
     auto child = xml.append_child("$(FIELD)");
     child.append_attribute("type").set_value($(FIELD)->get_type().c_str());
-    $(FIELD)->serialize(child);
+    $(FIELD)->serialize_$(FORMAT)(child);
 }
 #deserialize:
 auto xml_$(FIELD) = xml.child("$(FIELD)");
@@ -88,7 +88,7 @@ if(xml_$(FIELD))
 {
     std::string type = xml_$(FIELD).attribute("type").as_string();
     $(FIELD) = Factory::shared().build<$(TYPE)>(type);
-    $(FIELD)->deserialize(xml_$(FIELD));
+    $(FIELD)->deserialize_$(FORMAT)(xml_$(FIELD));
 }
 
 
@@ -151,7 +151,7 @@ for(const auto& child : arr_$(FIELD))
 auto arr_$(FIELD) = xml.append_child("$(FIELD)");
 for(auto& t : $(FIELD))
 {
-    t.serialize(arr_$(FIELD).append_child("item"));
+    t.serialize_$(FORMAT)(arr_$(FIELD).append_child("item"));
 }
 #deserialize:
 auto arr_$(FIELD) = xml.child("$(FIELD)");
@@ -167,7 +167,7 @@ for(auto child : arr_$(FIELD))
 auto arr_$(FIELD) = xml.append_child("$(FIELD)");
 for(auto& t : $(FIELD))
 {
-    t->serialize(arr_$(FIELD).append_child(t->get_type().c_str()));
+    t->serialize_$(FORMAT)(arr_$(FIELD).append_child(t->get_type().c_str()));
 }
 #deserialize:
 auto arr_$(FIELD) = xml.child("$(FIELD)");
@@ -175,7 +175,7 @@ for(auto child : arr_$(FIELD))
 {
     auto type = child.name();
     $(FIELD).push_back(Factory::shared().build<$(ARG_0)>(type));
-    $(FIELD).back()->deserialize(child);
+    $(FIELD).back()->deserialize_$(FORMAT)(child);
 }
 
 
@@ -236,7 +236,6 @@ $(FIELD) = std::string(xml.attribute("$(FIELD)").as_string(""));
 auto arr_$(FIELD) = xml.append_child("$(FIELD)");
 for(auto t : $(FIELD))
 {
-
     arr_$(FIELD).append_child("item").append_attribute("value").set_value(t.str().c_str());
 }
 #deserialize:
@@ -255,28 +254,28 @@ cpp_json = '''
 #with default value:
 if($(FIELD) != $(DEFAULT_VALUE))
 {
-    @{namespace}::set(json,"$(FIELD)",$(FIELD));
+    $(NAMESPACE)::set(json,"$(FIELD)",$(FIELD));
 }
 #without default value:
-@{namespace}::set(json,"$(FIELD)",$(FIELD));
+$(NAMESPACE)::set(json,"$(FIELD)",$(FIELD));
 
 #deserialize:
 #with default value:
 if(json.isMember("$(FIELD)"))
 {
-    $(FIELD) = @{namespace}::get<$(TYPE)>(json["$(FIELD)"]);
+    $(FIELD) = $(NAMESPACE)::get<$(TYPE)>(json["$(FIELD)"]);
 }
 else
 {
     $(FIELD) = $(DEFAULT_VALUE);
 }
 #without default value:
-$(FIELD) = @{namespace}::get<$(TYPE)>(json["$(FIELD)"]);
+$(FIELD) = $(NAMESPACE)::get<$(TYPE)>(json["$(FIELD)"]);
 
 
 #serialized
 #serialize:
-$(FIELD).serialize(json["$(FIELD)"]);
+$(FIELD).serialize_$(FORMAT)(json["$(FIELD)"]);
 #deserialize:
 $(FIELD).deserialize_$(FORMAT)(json["$(FIELD)"]);
 
@@ -285,14 +284,14 @@ $(FIELD).deserialize_$(FORMAT)(json["$(FIELD)"]);
 #serialize
 if($(FIELD))
 {
-    $(FIELD)->serialize(json["$(FIELD)"][$(FIELD)->get_type()]);
+    $(FIELD)->serialize_$(FORMAT)(json["$(FIELD)"][$(FIELD)->get_type()]);
 }
 #deserialize:
 if(json.isMember("$(FIELD)"))
 {
     auto type_$(FIELD) = json["$(FIELD)"].getMemberNames()[0];
     $(FIELD) = Factory::shared().build<$(TYPE)>(type_$(FIELD));
-    $(FIELD)->deserialize(json["$(FIELD)"][type_$(FIELD)]);
+    $(FIELD)->deserialize_$(FORMAT)(json["$(FIELD)"][type_$(FIELD)]);
 }
 
 
@@ -309,7 +308,7 @@ auto& arr_$(FIELD) = json["$(FIELD)"];
 for(int i = 0; i < arr_$(FIELD).size(); ++i)
 {
     $(FIELD).emplace_back();
-    $(FIELD).back() = @{namespace}::get<$(ARG_0)>(arr_$(FIELD)[i]);
+    $(FIELD).back() = $(NAMESPACE)::get<$(ARG_0)>(arr_$(FIELD)[i]);
 }
 
 #list<int>, list<float>, list<string>
@@ -318,14 +317,14 @@ auto& arr_$(FIELD) = json["$(FIELD)"];
 int i_$(FIELD)=0;
 for(const auto& t : $(FIELD))
 {
-    @{namespace}::set(arr_$(FIELD)[i_$(FIELD)++], t);
+    $(NAMESPACE)::set(arr_$(FIELD)[i_$(FIELD)++], t);
 }
 #deserialize:
 auto& arr_$(FIELD) = json["$(FIELD)"];
 for(int i = 0; i < arr_$(FIELD).size(); ++i)
 {
     $(FIELD).emplace_back();
-    $(FIELD).back() = @{namespace}::get<$(ARG_0)>(arr_$(FIELD)[i]);
+    $(FIELD).back() = $(NAMESPACE)::get<$(ARG_0)>(arr_$(FIELD)[i]);
 }
 
 
@@ -335,7 +334,7 @@ auto& arr_$(FIELD) = json["$(FIELD)"];
 int i_$(FIELD)=0;
 for(auto& t : $(FIELD))
 {
-    t.serialize(arr_$(FIELD)[i_$(FIELD)++]);
+    t.serialize_$(FORMAT)(arr_$(FIELD)[i_$(FIELD)++]);
 }
 #deserialize:
 auto& arr_$(FIELD) = json["$(FIELD)"];
@@ -352,7 +351,7 @@ auto& arr_$(FIELD) = json["$(FIELD)"];
 for(auto& t : $(FIELD))
 {
     auto index = arr_$(FIELD).size();
-    t->serialize(arr_$(FIELD)[index][t->get_type()]);
+    t->serialize_$(FORMAT)(arr_$(FIELD)[index][t->get_type()]);
 }
 #deserialize:
 auto& arr_$(FIELD) = json["$(FIELD)"];
@@ -362,15 +361,15 @@ for(int i = 0; i < size_$(FIELD); ++i)
     auto type = arr_$(FIELD)[i].getMemberNames()[0];
     auto obj = Factory::shared().build<$(ARG_0)>(type);
     $(FIELD).emplace_back(obj);
-    $(FIELD).back()->deserialize(arr_$(FIELD)[i][type]);
+    $(FIELD).back()->deserialize_$(FORMAT)(arr_$(FIELD)[i][type]);
 }
 
 
 #link
 #serialize:
-@{namespace}::set(json,"$(FIELD)",$(FIELD)->name);
+$(NAMESPACE)::set(json,"$(FIELD)",$(FIELD)->name);
 #deserialize:
-$(FIELD) = DataStorage::shared().get<$(TYPE)>(@{namespace}::get<std::string>(json["$(FIELD)"]));
+$(FIELD) = DataStorage::shared().get<$(TYPE)>($(NAMESPACE)::get<std::string>(json["$(FIELD)"]));
 
 
 #list<link>
@@ -384,7 +383,7 @@ for(auto& item : $(FIELD))
 auto& arr_$(FIELD) = json["$(FIELD)"];
 for(auto item : arr_$(FIELD))
 {
-    auto name = @{namespace}::get<std::string>(item);
+    auto name = $(NAMESPACE)::get<std::string>(item);
     auto data = DataStorage::shared().get<$(ARG_0)>(name);
     $(FIELD).push_back(data);
 }
@@ -417,9 +416,9 @@ for(unsigned int i = 0; i < size_$(FIELD); ++i)
 
 #enum
 #serialize:
-@{namespace}::set(json, "$(FIELD)", $(FIELD).str());
+$(NAMESPACE)::set(json, "$(FIELD)", $(FIELD).str());
 #deserialize:
-$(FIELD) = @{namespace}::get<std::string>(json["$(FIELD)"]);
+$(FIELD) = $(NAMESPACE)::get<std::string>(json["$(FIELD)"]);
 
 #list<enum>
 #serialize:
@@ -427,12 +426,12 @@ auto& arr_$(FIELD) = json["$(FIELD)"];
 int i_$(FIELD)=0;
 for(const auto& t : $(FIELD))
 {
-    @{namespace}::set(arr_$(FIELD)[i_$(FIELD)++], t.str());
+    $(NAMESPACE)::set(arr_$(FIELD)[i_$(FIELD)++], t.str());
 }
 #deserialize:
 auto& arr_$(FIELD) = json["$(FIELD)"];
 for(int i = 0; i < arr_$(FIELD).size(); ++i)
 {
-    $(FIELD).emplace_back(@{namespace}::get<std::string>(arr_$(FIELD)[i]));
+    $(FIELD).emplace_back($(NAMESPACE)::get<std::string>(arr_$(FIELD)[i]));
 }
 '''

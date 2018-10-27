@@ -1,138 +1,168 @@
 import sys
 from ..core.Function import Function
 from ..core.Class import Class
+from ..core.Object import Object
 from ..utils.Error import Error
 from .protocols import cpp_xml
 from .protocols import cpp_json
+from ..base.SerializerBase import SerializerBase
+from .Writer import Writer
 
 SERIALIZATION = 0
 DESERIALIZATION = 1
 
 
-class Serializer:
-    serialize_protocol = {}
+class Serializer(SerializerBase):
 
     def __init__(self):
-        pass
+        SerializerBase.__init__(self)
+        self.namespace = 'mg'
 
-    @staticmethod
-    def get_protocol(serialize_format):
+    def get_protocol(self, serialize_format):
         protocol = cpp_xml if serialize_format == 'xml' else cpp_json
-        if sys.version_info[0] == 3:
-            protocol = protocol.replace('.iteritems()', '.items()')
         return protocol
 
-    def generate_methods(self, parser):
-        parser.load_default_serialize_protocol(self.get_protocol('xml'))
-        Serializer.serialize_protocol = parser.serialize_protocol
-        for cls in parser.classes:
-            self.create_serialization_function(parser, cls, SERIALIZATION, 'xml')
-            self.create_serialization_function(parser, cls, DESERIALIZATION, 'xml')
+    def get_parent_serialize_format(self):
+        return '{}::{}({});\n'
 
-        parser.load_default_serialize_protocol(self.get_protocol('json'))
-        Serializer.serialize_protocol = parser.serialize_protocol
-        for cls in parser.classes:
-            self.create_serialization_function(parser, cls, SERIALIZATION, 'json')
-            self.create_serialization_function(parser, cls, DESERIALIZATION, 'json')
+    def get_serialization_function_args(self, serialize_type, format_serialization):
+        def get_json(const):
+            obj = Object()
+            obj.type = 'Json::Value'
+            obj.is_ref = True
+            obj.is_const = const
+            return obj
 
-    @staticmethod
-    def create_serialization_function(parser, cls, serialize_type, serialize_format):
-        pass
+        def get_xml(const):
+            obj = Object()
+            obj.type = 'pugi::xml_node'
+            obj.is_ref = const
+            obj.is_const = const
+            return obj
 
-        # print '{}::{}:\n{}\n\n'.format(cls.name, method.name, body)
+        if format_serialization == 'json' and serialize_type == SERIALIZATION:
+            return ['json', get_json(False)]
+        if format_serialization == 'json' and serialize_type == DESERIALIZATION:
+            return ['json', get_json(True)]
+        if format_serialization == 'xml' and serialize_type == SERIALIZATION:
+            return ['xml', get_xml(False)]
+        if format_serialization == 'xml' and serialize_type == DESERIALIZATION:
+            return ['xml', get_xml(True)]
 
-    @staticmethod
-    def build_map_serialization(parser, obj_name, obj_template_args, serialization_type, serialize_format):
+    def build_serialize_operation(self, obj, serialization_type, serialize_format):
+        return self.build_serialize_operation_(obj.name, obj.type, obj.initial_value,
+                                               serialization_type, obj.template_args, obj.is_pointer,
+                                               obj.is_link, serialize_format)
+    
+    def build_serialize_operation_(self, obj_name, obj_type, obj_value, serialization_type, obj_template_args,
+                                   obj_is_pointer, is_link, serialize_format):
+        index = 0
+        if obj_value is None:
+            index = 1
+    
+        type_ = obj_type
+        if self.parser.find_class(type_) and self.parser.find_class(type_).type == 'enum':
+            string = self._build_serialize_operation_enum(obj_name, obj_type, obj_value,
+                                                          obj_is_pointer, obj_template_args, serialization_type)
+            return string
+        else:
+            if obj_type not in self.parser.simple_types and type_ != 'list' and type_ != 'map':
+                if is_link:
+                    type_ = 'link'
+                elif obj_is_pointer:
+                    type_ = 'pointer'
+                else:
+                    type_ = 'serialized'
+            template_args = list()
+            if len(obj_template_args) > 0:
+                if type_ == 'map':
+                    if len(obj_template_args) != 2:
+                        Error.exit(Error.MAP_TWO_ARGS, self.current_class.name, obj_name)
+                    if serialization_type == SERIALIZATION:
+                        return self.build_map_serialization(obj_name, obj_template_args, serialize_format)
+                    if serialization_type == DESERIALIZATION:
+                        return self.build_map_deserialization(obj_name, obj_template_args, serialize_format)
+                else:
+                    arg = obj_template_args[0]
+                    arg_type = arg.name if isinstance(arg, Class) else arg.type
+                    template_args.append(self.convert_type(arg_type))
+                    if arg.is_link:
+                        type_ = 'list<link>'
+                    elif arg_type in self.parser.simple_types:
+                        type_ = '{0}<{1}>'.format(type_, arg_type)
+                    elif arg.is_pointer:
+                        type_ = 'list<pointer>'
+                    elif arg.type == 'enum':
+                        type_ = 'list<enum>'
+                    else:
+                        type_ = '{0}<serialized>'.format(type_)
+            if type_ not in self.serialize_protocol[serialization_type]:
+                Error.exit(Error.UNKNOWN_SERIALISED_TYPE, type_, obj_type)
+            pattern = self.serialize_protocol[serialization_type][type_][index]
+            string = pattern.format(field=obj_name,
+                                    type=self.convert_type(obj_type),
+                                    default_value=obj_value,
+                                    arg_0=template_args[0] if len(template_args) > 0 else '',
+                                    arg_1=template_args[1] if len(template_args) > 1 else '',
+                                    format=serialize_format,
+                                    namespace=self.namespace)
+        return string + '\n\n'
+    
+    def build_map_serialization(self, obj_name, obj_template_args, serialize_format):
         key = obj_template_args[0]
         value = obj_template_args[1]
         key_type = key.name if isinstance(key, Class) else key.type
         value_type = value.name if isinstance(value, Class) else value.type
-        string = parser.serialize_protocol[serialization_type]['map'][0]
+        pattern = self.serialize_protocol[SERIALIZATION]['map'][0]
         a0 = obj_name
-        a1 = Serializer.build_serialize_operation(parser, 'key', key_type, None, serialization_type,
-                                                  key.template_args, False, '', key.is_link, serialize_format)
-        a2 = Serializer.build_serialize_operation(parser, 'value', value_type, None, serialization_type,
-                                                  value.template_args, value.is_pointer, '', value.is_link,
-                                                  serialize_format)
-        a1 = a1.split('\n')
-        for index, a in enumerate(a1):
-            a1[index] = '    ' + a
-        a1 = '\n'.join(a1)
-        a2 = a2.split('\n')
-        for index, a in enumerate(a2):
-            a2[index] = '    ' + a
-        a2 = '\n'.join(a2)
-        return string.format(field=a0,
-                             key_serialize=a1,
-                             value_serialize=a2,
-                             owner='self.') + '\n'
-
-    @staticmethod
-    def convert_initialize_value(value):
-        if value == 'true':
-            return 'True'
-        if value == 'false':
-            return 'False'
-        if value == 'nullptr':
-            return 'None'
-        if isinstance(value, str) and '::' in value:
-            value = value.replace('::', '.')
-        return value
-
-    @staticmethod
-    def get_serialization_function_args(format_serialization):
-        return ['xml', ''] if format_serialization == 'xml' else ['dictionary', '']
-
-    @staticmethod
-    def build_serialize_operation(parser, obj_name, obj_type, obj_value, serialization_type, obj_template_args,
-                                  obj_is_pointer, owner, is_link, serialize_format):
-        index = 0
-        if obj_value is None:
-            index = 1
-
-        type_ = obj_type
-        cls = parser.find_class(type_)
-        arg_0 = obj_template_args[0].type if len(obj_template_args) > 0 else 'unknown_arg'
-        if cls and cls.type == 'enum':
-            type_ = 'enum'
-        elif obj_type not in parser.simple_types and type_ != "list" and type_ != "map":
-            if is_link:
-                type_ = 'link'
-            elif obj_is_pointer:
-                type_ = "pointer"
-            else:
-                type_ = "serialized"
-        elif obj_type in parser.simple_types:
-            type_ = obj_type
+        a1 = self.build_serialize_operation_('key', key_type, None, SERIALIZATION, [],
+                                             key.is_pointer, key.is_link, serialize_format)
+        a2 = self.build_serialize_operation_('value', value_type, None, SERIALIZATION, value.template_args,
+                                             value.is_pointer, value.is_link, serialize_format)
+        return pattern.format(field=a0,
+                              key_serialize=a1,
+                              value_serialize=a2)
+    
+    def build_map_deserialization(self, obj_name, obj_template_args, serialize_format):
+        key = obj_template_args[0]
+        value = obj_template_args[1]
+        key_type = key.name if isinstance(key, Class) else key.type
+        value_type = value.name if isinstance(value, Class) else value.type
+        pattern = self.serialize_protocol[DESERIALIZATION]['map'][0]
+        if key.is_link:
+            key_str = 'const {}* key(nullptr);'.format(key_type)
+        elif key.is_pointer:
+            key_str = 'auto key = make_intrusive<{}>();'.format(key_type)
         else:
-            if len(obj_template_args) > 0:
-                if type_ == "map":
-                    if len(obj_template_args) != 2:
-                        Error.exit(Error.MAP_TWO_ARGS, cls.name, obj_name)
-                    return Serializer.build_map_serialization(parser, obj_name,
-                                                              obj_template_args, serialization_type, serialize_format)
-                else:
-                    arg = obj_template_args[0]
-                    arg_type = arg.name if isinstance(arg, Class) else arg.type
-                    if arg.is_link:
-                        type_ = 'list<link>'
-                    elif arg_type in parser.simple_types:
-                        type_ = "list<{}>".format(arg_type)
-                        obj_type = arg_type
-                    elif arg.is_pointer:
-                        type_ = "list<pointer>"
-                    elif arg.type == 'enum':
-                        type_ = 'list<string>'
-                        arg_0 = 'string'
-                    else:
-                        type_ = "list<serialized>"
-                        obj_type = arg_type
-        string = Serializer.serialize_protocol[serialization_type][type_][index]
-        string = string.format(field=obj_name,
-                               type=obj_type,
-                               default_value=obj_value,
-                               owner=owner,
-                               arg_0=arg_0,
-                               format=serialize_format)
+            key_str = '{} key;'.format(self.convert_type(key_type))
+    
+        value_is_pointer = value.is_pointer if isinstance(value, Object) else False
+        a0 = obj_name
+        a1 = self.build_serialize_operation_('key', key_type, None, DESERIALIZATION, [],
+                                             key.is_pointer, key.is_link, serialize_format)
+        a2 = self.build_serialize_operation_('value', value_type, None, DESERIALIZATION, value.template_args,
+                                             value_is_pointer, value.is_link, serialize_format)
+        a3 = key_str
+        a4 = Writer.write_named_object(value, '', False, False)
+        if value.is_pointer:
+            a4 = 'intrusive_ptr<{}>'.format(value_type)
+        return pattern.format(field=a0,
+                              key_serialize=a1,
+                              value_serialize=a2,
+                              key=a3,
+                              value_type=a4)
 
-        return '        ' + string + '\n'
+    def convert_type(self, t):
+        types = {
+            'list': 'std::vector',
+            'map': 'std::map',
+            'string': 'std::string',
+        }
+        if t in types:
+            return types[t]
+        return t
+
+    def _build_serialize_operation_enum(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args,
+                                        serialization_type):
+        pattern = self.serialize_protocol[serialization_type]['enum'][0].format(field=obj_name, namespace=self.namespace)
+        return pattern + '\n\n'

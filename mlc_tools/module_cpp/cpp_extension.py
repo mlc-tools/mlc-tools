@@ -9,11 +9,8 @@ functions_hpp = '''
 #include <algorithm>
 #include "@{namespace}_config.h"
 
-#if @{namespace_upper}_SERIALIZE_FORMAT == @{namespace_upper}_XML
-#   include "pugixml/pugixml.hpp"
-#elif @{namespace_upper}_SERIALIZE_FORMAT == @{namespace_upper}_JSON
-#   include "jsoncpp/json.h"
-#endif
+#include "pugixml/pugixml.hpp"
+#include "jsoncpp/json.h"
 
 namespace @{namespace}
 {
@@ -72,8 +69,6 @@ namespace @{namespace}
     template <typename T> T strTo(const std::string &value);
     template <typename T> std::string toStr(T value);
 
-#if @{namespace_upper}_SERIALIZE_FORMAT == @{namespace_upper}_XML
-
     //XML
     template <class T> void set(pugi::xml_attribute& xml, T value);
     template <class T> T get(const pugi::xml_attribute& xml);
@@ -91,8 +86,6 @@ namespace @{namespace}
         return 0;
     }
 
-#elif @{namespace_upper}_SERIALIZE_FORMAT == @{namespace_upper}_JSON
-
     //JSON
     template <class T> void set(Json::Value& json, T value);
     template <class T> T get(const Json::Value& json);
@@ -105,8 +98,6 @@ namespace @{namespace}
     {
         get<T>(json[key]);
     }
-
-#endif
 
 }
 
@@ -270,8 +261,6 @@ namespace @{namespace}
         return floatToStr( value );
     }
 
-#if @{namespace_upper}_SERIALIZE_FORMAT == @{namespace_upper}_XML
-
     //XML
     template <> void set(pugi::xml_attribute& xml, int8_t value) { xml.set_value(value); }
     template <> void set(pugi::xml_attribute& xml, int16_t value) { xml.set_value(value); }
@@ -296,8 +285,6 @@ namespace @{namespace}
     template <> bool get(const pugi::xml_attribute& xml) { return xml.as_bool(); }
     template <> float get(const pugi::xml_attribute& xml) { return xml.as_float(); }
     template <> std::string get(const pugi::xml_attribute& xml) { return xml.as_string(); }
-
-#elif @{namespace_upper}_SERIALIZE_FORMAT == @{namespace_upper}_JSON
 
     //JSON
     template <> void set( Json::Value& json, int8_t value ) { json = value; }
@@ -324,7 +311,6 @@ namespace @{namespace}
     template <> float get( const Json::Value& json ) { return json.asFloat(); }
     template <> std::string get( const Json::Value& json ) { return json.asString(); }
 
-#endif
 }
 
 '''
@@ -509,16 +495,19 @@ factory_hpp = '''#ifndef __@{namespace}_Factory_h__
 #include <iostream>
 #include <assert.h>
 #include "intrusive_ptr.h"
-#include "@{namespace}_config.h"
+#include "jsoncpp/json.h"
+#include <sstream>
+#include "pugixml/pugixml.hpp"
 
-#if @{namespace_upper}_SERIALIZE_FORMAT == @{namespace_upper}_JSON
-#   include "jsoncpp/json.h"
-#else
-#   include <sstream>
-#   include "pugixml/pugixml.hpp"
-#endif
-
-#define REGISTRATION_OBJECT(TType) class registrator__##TType { public: registrator__##TType() { Factory::shared().registrationCommand<TType>( TType::TYPE ); } } ___registrator___##TType;
+#define REGISTRATION_OBJECT(TType)                                      \\
+class registration__##TType                                             \\
+{                                                                       \\
+public:                                                                 \\
+    registration__##TType()                                             \\
+    {                                                                   \\
+        Factory::shared().registrationCommand<TType>( TType::TYPE );    \\
+    }                                                                   \\
+} ___registration___##TType;
 
 namespace @{namespace}
 {
@@ -582,19 +571,19 @@ namespace @{namespace}
             return result;
         }
         
-        #if @{namespace_upper}_SERIALIZE_FORMAT == @{namespace_upper}_JSON
         template <class TType>
-        static std::string serialize_command(intrusive_ptr<TType> command)
+        static std::string serialize_command_to_json(intrusive_ptr<TType> command)
         {
             Json::Value json;
-            command->serialize(json[command->get_type()]);
+            command->serialize_json(json[command->get_type()]);
             
             Json::StreamWriterBuilder wbuilder;
             wbuilder["indentation"] = "";
             return Json::writeString(wbuilder, json);
         }
+        
         template <class TType>
-        static intrusive_ptr<TType> create_command(const std::string& payload)
+        static intrusive_ptr<TType> create_command_from_json(const std::string& payload)
         {
             Json::Value json;
             Json::Reader reader;
@@ -603,44 +592,50 @@ namespace @{namespace}
             auto type = json.getMemberNames()[0];
             auto command = shared().build<TType>(type);
             if (command != nullptr)
-            command->deserialize(json[type]);
+            command->deserialize_json(json[type]);
             return command;
         }
-        #else
+
         template <class TType>
-        static std::string serialize_command(intrusive_ptr<TType> command)
+        static std::string serialize_command_to_xml(intrusive_ptr<TType> command)
         {
             pugi::xml_document doc;
             auto root = doc.append_child(command->get_type().c_str());
-            command->serialize(root);
+            command->serialize_xml(root);
             
             std::stringstream stream;
             pugi::xml_writer_stream writer(stream);
             #ifdef NDEBUG
-            doc.save(writer, "", pugi::format_no_declaration | pugi::format_raw, pugi::xml_encoding::encoding_utf8);
+            doc.save(writer,
+                     "",
+                     pugi::format_no_declaration | pugi::format_raw,
+                     pugi::xml_encoding::encoding_utf8);
             #else
-            doc.save(writer, PUGIXML_TEXT(" "), pugi::format_no_declaration | pugi::format_indent, pugi::xml_encoding::encoding_utf8);
+            doc.save(writer,
+                     PUGIXML_TEXT(" "),
+                     pugi::format_no_declaration | pugi::format_indent,
+                     pugi::xml_encoding::encoding_utf8);
             #endif
             return stream.str();
         }
+        
         template <class TType>
-        static intrusive_ptr<TType> create_command(const std::string& payload)
+        static intrusive_ptr<TType> create_command_from_xml(const std::string& payload)
         {
             pugi::xml_document doc;
             doc.load(payload.c_str());
             auto root = doc.root().first_child();
             auto command = shared().build<TType>(root.name());
-            command->deserialize(root);
+            command->deserialize_xml(root);
             return command;
         }
-        #endif
         
     private:
         std::map<std::string, IBuilder*> _builders;
     };
 }
 
-#endif
+#endif // __@{namespace}_Factory_h__
 '''
 
 

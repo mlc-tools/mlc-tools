@@ -196,12 +196,12 @@ enum TestEnum:numeric
     value2
 }
 
-enum TestEnumValue1<TestEnum>
+class TestEnumValue1<TestEnum>
 {
 	int parameter
 }
 
-enum TestEnumValue2<TestEnum>
+class TestEnumValue2<TestEnum>
 {
 	int parameter
 }

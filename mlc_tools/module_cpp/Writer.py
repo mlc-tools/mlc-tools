@@ -29,14 +29,27 @@ class Writer(WriterBase):
         members = ''
         for member in cls.members:
             assert(isinstance(member.type, str))
-            members += self.write_member_declaration(member)
+            if cls.type == 'class':
+                members += self.write_member_declaration(member)
+            elif cls.type == 'enum':
+                members += self.write_enum_declaration(member)
+
+        virtual = 'virtual '
+        if not cls.is_virtual and len(cls.superclasses) == 0 and len(cls.subclasses) == 0:
+            virtual = ''
+        destructor = '{virtual}~{name}();'.format(virtual=virtual, name=cls.name)
+
+        superclass = '' if not cls.superclasses else ' : public %s' % cls.superclasses[0].name
+        
         return HEADER.format(namespace=namespace,
                              class_name=class_name,
+                             destructor=destructor,
                              includes=includes,
                              forward_declarations=forward_declarations,
                              forward_declarations_out=forward_declarations_out,
                              functions=functions,
                              members=members,
+                             superclass=superclass,
                              )
 
     def write_cpp(self, cls):
@@ -50,18 +63,37 @@ class Writer(WriterBase):
         static_initializations = ''
         initializations = ''
         for member in cls.members:
+            if cls.type == 'enum' and member.name != 'value':
+                continue
             if member.is_static:
                 static_initializations += self.write_static_member_initialization(cls, member)
             else:
                 div = ': ' if not initializations else ', '
                 initializations += div + self.write_member_initialization(cls, member)
-
+        
+        destructor = '''{name}::~{name}()
+        {{
+        }}
+        '''.format(name=cls.name)
+        
+        registration = 'REGISTRATION_OBJECT({0});\n'.format(cls.name)
+        has_get_type = False
+        if cls.is_abstract:
+            registration = ''
+        for method in cls.functions:
+            if method.name == 'get_type':
+                has_get_type = True
+        if not has_get_type:
+            registration = ''
+        
         return SOURCE.format(namespace=namespace,
                              class_name=class_name,
+                             destructor=destructor,
                              includes=includes,
                              functions=functions,
                              static_initializations=static_initializations,
-                             initializations=initializations
+                             initializations=initializations,
+                             registration=registration,
                              )
 
     def write_function_hpp(self, method):
@@ -70,12 +102,12 @@ class Writer(WriterBase):
         args = list()
         for arg in method.args:
             assert(isinstance(arg[1], Object))
-            args.append(self.write_named_object(arg[1], arg[0], True))
+            args.append(self.write_named_object(arg[1], arg[0], True, False))
         args = ', '.join(args)
 
         assert (isinstance(method.return_type, Object))
-        return_type = self.write_named_object(method.return_type, '')
-
+        return_type = self.write_named_object(method.return_type, '', False, False)
+        
         return string.format(virtual='virtual ' if method.is_virtual else '',
                              static='static ' if method.is_static else '',
                              const=' const' if method.is_const else '',
@@ -87,21 +119,24 @@ class Writer(WriterBase):
                              )
 
     def write_function_cpp(self, cls, method):
+        if method.specific_implementations:
+            return method.specific_implementations
+        
         text = '''{type} {class_name}::{name}({args}){const}
         {{
         {body}
         }}
         
         '''
-        return_type = self.write_named_object(method.return_type, '')
+        return_type = self.write_named_object(method.return_type, '', False, False)
 
         args = list()
         for arg in method.args:
             assert(isinstance(arg[1], Object))
-            args.append(self.write_named_object(arg[1], arg[0], True))
+            args.append(self.write_named_object(arg[1], arg[0], True, False))
         args = ', '.join(args)
 
-        body = '\n'.join(method.operations)
+        body = method.body
 
         return text.format(const=' const' if method.is_const else '',
                            type=return_type,
@@ -112,7 +147,14 @@ class Writer(WriterBase):
                            )
 
     def write_member_declaration(self, obj):
-        return self.write_named_object(obj, obj.name) + ';\n'
+        return self.write_named_object(obj, obj.name, False, True) + ';\n'
+    
+    def write_enum_declaration(self, obj):
+        if obj.name == 'value':
+            return self.write_member_declaration(obj)
+        return 'static constexpr {type} {name} = {value};\n'.format(type=obj.type,
+                                                                    name=obj.name,
+                                                                    value=obj.initial_value)
 
     def write_static_member_initialization(self, cls, obj):
         string = '{const}{type}{pointer} {owner}::{name}({initial_value});\n'
@@ -130,22 +172,29 @@ class Writer(WriterBase):
         return string.format(name=obj.name,
                              initial_value=initial_value
                              )
-
-    def write_named_object(self, obj, name, try_to_use_const_ref=False):
-        string = '{static}{const}{type}{templates}{pointer}{ref}{name}'
+    
+    @staticmethod
+    def write_named_object(obj, name, try_to_use_const_ref, use_intrusive):
+        string_non_pointer = '{static}{const}{type}{templates}{pointer}{ref}{name}'
+        string_pointer = '{static}{const}intrusive_ptr<{type}{templates}>{ref}{name}'
         templates = []
         for arg in obj.template_args:
             assert(isinstance(arg, Object))
-            templates.append(self.write_named_object(arg, '', False))
+            templates.append(Writer.write_named_object(arg, '', False, use_intrusive))
         templates = ('<' + ', '.join(templates) + '>') if templates else ''
         is_ref = obj.is_ref
         is_const = obj.is_const
         if not is_ref and not is_const and try_to_use_const_ref and Writer.can_use_const_ref(obj):
             is_ref = True
             is_const = True
+            
+        if use_intrusive and obj.is_pointer and not obj.is_const and not obj.is_link:
+            string = string_pointer
+        else:
+            string = string_non_pointer
         return string.format(static='static ' if obj.is_static else '',
                              const='const ' if is_const else '',
-                             type=self.convert_type(obj.type),
+                             type=Writer.convert_type(obj.type),
                              name=(' ' + name) if name else '',
                              pointer='*' if obj.is_pointer else '',
                              ref='&' if is_ref else '',
@@ -225,10 +274,10 @@ class Writer(WriterBase):
         includes = set()
         forward_declarations = set()
         forward_declarations_out = set()
-        if cls.type == 'enum':
-            return self.build_includes_block(cls, includes), \
-                   self.build_forward_declarions_block(forward_declarations), \
-                   self.build_forward_declarions_block(forward_declarations_out)
+        # if cls.type == 'enum':
+        #     return self.build_includes_block(cls, includes), \
+        #            self.build_forward_declarions_block(forward_declarations), \
+        #            self.build_forward_declarions_block(forward_declarations_out)
 
         def add(set_, obj):
             set_.add(self.convert_type(obj.type))
@@ -237,19 +286,34 @@ class Writer(WriterBase):
         
         # members
         for member in cls.members:
-            if member.is_link:
-                add(forward_declarations, member)
-            else:
-                add(includes, member)
-                
+            def parse_object(obj):
+                if obj.is_link:
+                    add(forward_declarations, obj)
+                else:
+                    add(includes, obj)
+                for arg in obj.template_args:
+                    parse_object(arg)
+                    
+            parse_object(member)
+            
         # functions
         for method in cls.functions:
             for name, argtype in method.args:
-                add(forward_declarations, argtype)
+                if 'pugi::' in argtype.type or 'Json::' in argtype.type:
+                    add(forward_declarations_out, argtype)
+                else:
+                    add(forward_declarations, argtype)
                 
         # superclasses
         for superclass in cls.superclasses:
             includes.add(superclass.name)
+
+        if cls.name in includes:
+            includes.remove(cls.name)
+        if cls.name in forward_declarations:
+            forward_declarations.remove(cls.name)
+        if cls.name in forward_declarations_out:
+            forward_declarations_out.remove(cls.name)
         
         return self.build_includes_block(cls, includes), \
                self.build_forward_declarions_block(forward_declarations), \
@@ -350,6 +414,7 @@ HEADER = '''#ifndef __{namespace}_{class_name}_h__
 #define __{namespace}_{class_name}_h__
 
 #include "intrusive_ptr.h"
+#include "pugixml/pugixml.hpp"
 {includes}
 
 {forward_declarations_out}
@@ -357,11 +422,11 @@ namespace {namespace}
 {{
 {forward_declarations}
 
-    class {class_name}
+    class {class_name}{superclass}
     {{
     public:
         {class_name}();
-        virtual ~{class_name}();
+        {destructor}
 {functions}
 {members}
     }};
@@ -372,19 +437,19 @@ namespace {namespace}
 
 SOURCE = '''
 #include "intrusive_ptr.h"
+#include "{namespace}_Factory.h"
 {includes}
 #include "{namespace}_extensions.h"
 
 namespace {namespace}
 {{
     {static_initializations}
+    {registration}
     {class_name}::{class_name}()
     {initializations}{{
     }}
     
-    {class_name}::~{class_name}()
-    {{
-    }}
+    {destructor}
     
 {functions}}} //namespace {namespace}
 

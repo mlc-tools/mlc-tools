@@ -9,6 +9,7 @@ class GeneratorVisitor:
     def __init__(self):
         self.parser = None
         self.base_visitor_classes = {}
+        self.acceptors_interfaces = []
 
     def generate(self, parser):
         self.parser = parser
@@ -20,6 +21,8 @@ class GeneratorVisitor:
                 continue
             if base_class_name not in self.base_visitor_classes:
                 self.base_visitor_classes[base_class_name] = []
+                base_class = parser.find_class(base_class_name)
+                self.base_visitor_classes[base_class_name].append(base_class)
             self.base_visitor_classes[base_class_name].append(cls)
 
         # generate acceptors interface, visit methods
@@ -28,6 +31,16 @@ class GeneratorVisitor:
             self.generate_acceptor_interface(base_class_name, visitors)
             for visitor in visitors:
                 self.add_accept_method(visitor, base_class_name)
+                
+        # change name of methods to classes extends IVisitor interfaces
+        for cls in parser.classes:
+            superclass_name = cls.superclasses[0] if cls.superclasses else None
+            while superclass_name is not None:
+                if superclass_name in self.acceptors_interfaces:
+                    self.override_methods(cls, superclass_name)
+                    break
+                superclass = parser.find_class(superclass_name)
+                superclass_name = superclass.superclasses[0] if superclass.superclasses else None
 
     def get_base_visitor_name(self, cls):
         for superclass_name in cls.superclasses:
@@ -55,6 +68,7 @@ class GeneratorVisitor:
         acceptor.is_virtual = True
         acceptor.side = visitors[0].side
         self.parser.classes.append(acceptor)
+        self.acceptors_interfaces.append(acceptor.name)
 
         for visitor in visitors:
             method = Function()
@@ -93,3 +107,11 @@ class GeneratorVisitor:
         method.args.append(['visitor', base_class_name + '*'])
         method.operations.append('visitor->visit(this);')
         cls.functions.append(method)
+        
+    @staticmethod
+    def override_methods(cls, superclass):
+        for method in cls.functions:
+            if method.name == 'visit' and len(method.args) == 1:
+                arg_type = method.args[0][1].replace('*', '')
+                method.name = 'visit_%s' % (arg_type[0].lower()) + arg_type[1:]
+                pass

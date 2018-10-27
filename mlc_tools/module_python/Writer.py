@@ -68,16 +68,6 @@ class Writer(WriterBase):
             args.insert(0, 'self')
         args = ', '.join(args)
 
-        if method.name == 'visit' \
-                and method.args \
-                and len(method.args[0]) > 1 \
-                and cls.superclasses \
-                and cls.superclasses[0].name.startswith('IVisitor'):
-            ctx_name = method.args[0][1]
-            ctx_name = ctx_name[0].lower() + ctx_name[1:]
-            ctx_name = ctx_name.replace('*', '')
-            method.name = 'visit_' + ctx_name
-
         text = PATTERN_METHOD.format(name=method.name,
                                      args=args,
                                      body=method.body)

@@ -2,7 +2,28 @@ from mlc_tools import Mlc
 import os
 
 
-def main():
+def python():
+    root = os.path.abspath(os.path.dirname(os.path.abspath(__file__))) + '/'
+    mlc = Mlc()
+    
+    mlc.additional_config_directories.append(root + 'tests/simple_test/config_additional')
+    mlc.generate(language='py',
+                 configs_directory=root + 'tests/simple_test/config',
+                 out_directory=root + 'tests/simple_test/generated_py',
+                 side='client'
+                 )
+    
+    mlc.additional_data_directories.append(root + 'tests/simple_test/data_additional')
+    mlc.generate_data(data_directory=root + 'tests/simple_test/data_xml/',
+                      out_data_directory='tests/simple_test/assets')
+    mlc.generate_data(data_directory=root + 'tests/simple_test/data_json/',
+                      out_data_directory='tests/simple_test/assets')
+    
+    mlc.run_test(test_script=root + 'tests/simple_test/test_py.py', test_script_args='json')
+    mlc.run_test(test_script=root + 'tests/simple_test/test_py.py', test_script_args='xml')
+
+
+def cpp():
     root = os.path.abspath(os.path.dirname(os.path.abspath(__file__))) + '/'
     mlc = Mlc()
     
@@ -20,10 +41,10 @@ def main():
                       out_data_directory='tests/simple_test/assets')
     
     # mlc.run_test(test_script=root + 'tests/simple_test/test_cpp.py', test_script_args='json')
-    # mlc.run_test(test_script=root + 'tests/simple_test/test_cpp.py', test_script_args='xml')
+    mlc.run_test(test_script=root + 'tests/simple_test/test_cpp.py', test_script_args='xml')
 
 
-def profile():
+def profile(func_to_profile):
     def get_profile_(func):
         """ Returns performance statistics (as a string) for the given function.
         """
@@ -43,8 +64,8 @@ def profile():
         s = open(id).read()
         os.remove(id)
         return s
-    print(get_profile_(main))
+    print(get_profile_(func_to_profile))
 
 
-# profile()
-main()
+# profile(cpp)
+cpp()

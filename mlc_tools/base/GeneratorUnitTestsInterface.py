@@ -138,7 +138,7 @@ class GeneratorUnitTestsInterface:
 
 
 base_classes = '''
-class tests/Logger:test
+class tests/Logger<SerializedObject>:test
 {
     bool result = true
     int tests_count

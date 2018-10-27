@@ -45,6 +45,11 @@ class Linker:
                 copy = deepcopy(obj)
                 cls.members.append(copy)
             for func in superclass.functions:
+                disallow = False
+                disallow = disallow or func.name == 'operator =='
+                disallow = disallow or func.name == 'operator !='
+                if disallow:
+                    continue
                 copy = deepcopy(func)
                 cls.functions.append(copy)
 
