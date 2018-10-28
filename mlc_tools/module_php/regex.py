@@ -80,3 +80,27 @@ class RegexPatternPhp:
 
     INITIALIZE = (re.compile(r'(\w+)::(\w+)'), r'\1::$\2')
 
+    REPLACES = (
+        ('$if(', 'if('),
+        ('function $', 'function '),
+        ('($int)', '(int)'),
+        ('time(nullptr)', 'time()'),
+        ('$$', '$'),
+        ('std::max', 'max'),
+        ('std::$max<int>', 'max'),
+        ('std::$max<float>', 'max'),
+        ('std::min', 'min'),
+        ('std::$min<int>', 'min'),
+        ('std::$min<float>', 'min'),
+        ('std::round', 'round'),
+        ('std::floor', 'floor'),
+        ('std::fabs', 'abs'),
+        ('std::ceil', 'ceil'),
+        ('std::sqrt', 'sqrt'),
+        ('in_list(', 'in_array('),
+        ('in_map', 'array_key_exists'),
+        ('list_push', 'array_push'),
+        ('list_size', 'count'),
+        ('map_size', 'count'),
+    )
+

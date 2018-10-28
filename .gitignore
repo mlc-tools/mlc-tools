@@ -23,8 +23,8 @@ tests/*/generated*
 tests/*/build*
 
 
-/.idea/
-/.sublime/
+.idea/
+.sublime/
 
 .DS_Store
 *.pyc

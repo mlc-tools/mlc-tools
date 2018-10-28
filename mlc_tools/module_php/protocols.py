@@ -59,10 +59,10 @@ $(OWNER)$(FIELD) = ($value == 'true' || $value == 'yes');
 
 #serialized
 #serialize:
-$(OWNER)$(FIELD)->serialize($xml->addChild("$(FIELD)"));
+$(OWNER)$(FIELD)->serialize_$(FORMAT)($xml->addChild("$(FIELD)"));
 #deserialize:
 $(OWNER)$(FIELD) = new $(TYPE);
-$(OWNER)$(FIELD)->deserialize($xml->$(FIELD));
+$(OWNER)$(FIELD)->deserialize_$(FORMAT)($xml->$(FIELD));
 
 #pointer
 #serialize
@@ -70,14 +70,14 @@ if($(OWNER)$(FIELD))
 {
     $child = $xml->addChild("$(FIELD)");
     $child->addAttribute("type", $(OWNER)$(FIELD)->get_type());
-    $(OWNER)$(FIELD)->serialize($child);
+    $(OWNER)$(FIELD)->serialize_$(FORMAT)($child);
 }
 #deserialize:
 if($xml->$(FIELD))
 {
     $type = (string)$xml->$(FIELD)["type"];
     $(OWNER)$(FIELD) = Factory::build($type);
-    $(OWNER)$(FIELD)->deserialize($xml->$(FIELD));
+    $(OWNER)$(FIELD)->deserialize_$(FORMAT)($xml->$(FIELD));
 }
 
 
@@ -118,7 +118,7 @@ if($xml->$(FIELD))
 $xml_list = $xml->addChild("$(FIELD)");
 foreach($(OWNER)$(FIELD) as $item)
 {
-    $item->serialize($xml_list->addChild("item"));
+    $item->serialize_$(FORMAT)($xml_list->addChild("item"));
 }
 #deserialize:
 if($xml->$(FIELD))
@@ -126,7 +126,7 @@ if($xml->$(FIELD))
     foreach($xml->$(FIELD)->children() as $item)
     {
         $obj = new $(TYPE)();
-        $obj->deserialize($item);
+        $obj->deserialize_$(FORMAT)($item);
         array_push($(OWNER)$(FIELD), $obj);
     }
 }
@@ -137,7 +137,7 @@ if($xml->$(FIELD))
 $xml_list = $xml->addChild("$(FIELD)");
 foreach($(OWNER)$(FIELD) as $item)
 {
-    $item->serialize($xml_list->addChild($item->get_type()));
+    $item->serialize_$(FORMAT)($xml_list->addChild($item->get_type()));
 }
 #deserialize:
 if($xml->$(FIELD))
@@ -146,7 +146,7 @@ if($xml->$(FIELD))
     {
         $type = $item->getName();
         $obj = Factory::build($type);
-        $obj->deserialize($item);
+        $obj->deserialize_$(FORMAT)($item);
         array_push($(OWNER)$(FIELD), $obj);
     }
 }
@@ -231,12 +231,12 @@ $(OWNER)$(FIELD) = $json->$(FIELD);
 #serialized
 #serialize:
 $json->$(FIELD) = json_decode("{}");
-$(OWNER)$(FIELD)->serialize($json->$(FIELD));
+$(OWNER)$(FIELD)->serialize_$(FORMAT)($json->$(FIELD));
 #deserialize:
 if(isset($json->$(FIELD)))
 {
     $(OWNER)$(FIELD) = new $(TYPE);
-    $(OWNER)$(FIELD)->deserialize($json->$(FIELD));
+    $(OWNER)$(FIELD)->deserialize_$(FORMAT)($json->$(FIELD));
 }
 #pointer
 #serialize
@@ -245,14 +245,14 @@ if($(OWNER)$(FIELD))
     $type = $(OWNER)$(FIELD)->get_type();
     $json->$(FIELD)        = json_decode("{}");
     $json->$(FIELD)->$type = json_decode("{}");
-    $(OWNER)$(FIELD)->serialize($json->$(FIELD)->$type);
+    $(OWNER)$(FIELD)->serialize_$(FORMAT)($json->$(FIELD)->$type);
 }
 #deserialize:
 if(isset($json->$(FIELD)))
 {
     $type = (string) key($json->$(FIELD));
     $(OWNER)$(FIELD) = Factory::build($type);
-    $(OWNER)$(FIELD)->deserialize($json->$(FIELD)->$type);
+    $(OWNER)$(FIELD)->deserialize_$(FORMAT)($json->$(FIELD)->$type);
 }
 
 
@@ -279,13 +279,13 @@ $json->$(FIELD) = array();
 foreach($(OWNER)$(FIELD) as $item)
 {
     array_push($json->$(FIELD), "");
-    $item->serialize($json->$(FIELD)[count($json->$(FIELD))]);
+    $item->serialize_$(FORMAT)($json->$(FIELD)[count($json->$(FIELD))]);
 }
 #deserialize:
 foreach($json->$(FIELD) as $item)
 {
     $obj = new $(TYPE)();
-    $obj->deserialize($item);
+    $obj->deserialize_$(FORMAT)($item);
     array_push($(OWNER)$(FIELD), $obj);
 }
 
@@ -297,7 +297,7 @@ foreach($(OWNER)$(FIELD) as $t)
     $type       = $t->get_type();
     $obj        = json_decode("{}");
     $obj->$type = json_decode("{}");
-    $t->serialize($obj->$type);
+    $t->serialize_$(FORMAT)($obj->$type);
     array_push($json->$(FIELD), $obj);
 }
 #deserialize:
@@ -306,7 +306,7 @@ foreach($arr_$(FIELD) as $item)
 {
     $type = key($item);
     $obj = Factory::build($type);
-    $obj->deserialize($item->$type);
+    $obj->deserialize_$(FORMAT)($item->$type);
     array_push($(OWNER)$(FIELD), $obj);
 }
 

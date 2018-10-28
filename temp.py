@@ -44,8 +44,8 @@ def php():
                       out_data_directory='tests/simple_test/assets')
     mlc.generate_data(data_directory=root + 'tests/simple_test/data_json/',
                       out_data_directory='tests/simple_test/assets')
-    mlc.run_test(test_script=root + 'tests/simple_test/test_php.py', test_script_args='json')
-    # mlc.run_test(test_script=root + 'tests/simple_test/test_php.py', test_script_args='xml')
+    # mlc.run_test(test_script=root + 'tests/simple_test/test_php.py', test_script_args='json')
+    mlc.run_test(test_script=root + 'tests/simple_test/test_php.py', test_script_args='xml')
 
     
 def cpp():
@@ -97,3 +97,4 @@ def profile(func_to_profile):
 # profile(python_test)
 python()
 cpp()
+php()

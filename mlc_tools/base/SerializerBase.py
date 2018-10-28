@@ -35,7 +35,7 @@ class SerializerBase:
         method.return_type = Objects.VOID
         for func in cls.functions:
             if func.name == method.name:
-                return
+                return method
     
         method.args.append(self.get_serialization_function_args(serialize_type, serialize_format))
         body = ''
