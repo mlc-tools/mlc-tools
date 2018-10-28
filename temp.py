@@ -19,6 +19,10 @@ def python():
     mlc.generate_data(data_directory=root + 'tests/simple_test/data_json/',
                       out_data_directory='tests/simple_test/assets')
     
+
+def python_test():
+    root = os.path.abspath(os.path.dirname(os.path.abspath(__file__))) + '/'
+    mlc = Mlc()
     mlc.run_test(test_script=root + 'tests/simple_test/test_py.py', test_script_args='json')
     mlc.run_test(test_script=root + 'tests/simple_test/test_py.py', test_script_args='xml')
 
@@ -68,4 +72,6 @@ def profile(func_to_profile):
 
 
 # profile(cpp)
+# profile(python)
+# profile(python_test)
 cpp()

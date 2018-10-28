@@ -14,24 +14,32 @@ class Writer(WriterBase):
 
         initialize_list = ''
         static_list = ''
+        slots = []
         for obj in cls.members:
             if not obj.is_static:
                 initialize_list += '        ' + self.write_object(obj) + '\n'
+                slots.append('"%s"' % obj.name)
             else:
                 static_list += '    ' + self.write_object(obj) + '\n'
-
+        slots = '__slots__ = [' + ', '.join(slots) + ']'
+        
         functions = ''
         for method in cls.functions:
             f = self.write_function(cls, method)
             functions += f
-
+        
         imports = ''
         init_superclass = ''
         name = cls.name
+        superclass_name = ''
         if cls.superclasses:
-            name += '(' + cls.superclasses[0].name + ')'
+            superclass_name = cls.superclasses[0].name
             imports += 'from .{0} import {0}'.format(cls.superclasses[0].name)
             init_superclass = '        {0}.__init__(self)'.format(cls.superclasses[0].name)
+        else:
+            superclass_name = 'object'
+        name += '(' + superclass_name + ')'
+        
         for obj in cls.members:
             type_class = self.parser.find_class(obj.type)
             if type_class and type_class.type == 'enum':
@@ -49,7 +57,8 @@ class Writer(WriterBase):
                                   functions=functions,
                                   imports=imports,
                                   init_superclass=init_superclass,
-                                  static_list=static_list)
+                                  static_list=static_list,
+                                  slots=slots)
         return [
             ('%s.py' % cls.name, self.prepare_file(out))
             ]
@@ -147,7 +156,7 @@ import json
 {imports}
 class {name}:
 {static_list}
-
+    {slots}
     def __init__(self):
 {init_superclass}
 {initialize_list}
