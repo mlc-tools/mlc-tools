@@ -1,8 +1,5 @@
 from ..base import WriterBase
 from ..core.Object import *
-from ..core.Class import Class
-# from ..core.Class import Class
-# from .cpp_extension import cpp_files
 
 
 class Writer(WriterBase):
@@ -32,7 +29,7 @@ class Writer(WriterBase):
             if cls.type == 'class':
                 members += self.write_member_declaration(member)
             elif cls.type == 'enum':
-                members += self.write_enum_declaration(member)
+                members += self.write_member_enum_declaration(member)
 
         virtual = 'virtual '
         if not cls.is_virtual and len(cls.superclasses) == 0 and len(cls.subclasses) == 0:
@@ -66,10 +63,10 @@ class Writer(WriterBase):
             if cls.type == 'enum' and member.name != 'value':
                 continue
             if member.is_static:
-                static_initializations += self.write_static_member_initialization(cls, member)
+                static_initializations += self.write_member_static_initialization(cls, member)
             else:
                 div = ': ' if not initializations else ', '
-                initializations += div + self.write_member_initialization(cls, member)
+                initializations += div + self.write_member_initialization(member)
         
         destructor = '''{name}::~{name}()
         {{
@@ -149,14 +146,14 @@ class Writer(WriterBase):
     def write_member_declaration(self, obj):
         return self.write_named_object(obj, obj.name, False, True) + ';\n'
     
-    def write_enum_declaration(self, obj):
+    def write_member_enum_declaration(self, obj):
         if obj.name == 'value':
             return self.write_member_declaration(obj)
         return 'static constexpr {type} {name} = {value};\n'.format(type=obj.type,
                                                                     name=obj.name,
                                                                     value=obj.initial_value)
 
-    def write_static_member_initialization(self, cls, obj):
+    def write_member_static_initialization(self, cls, obj):
         string = '{const}{type}{pointer} {owner}::{name}({initial_value});\n'
         return string.format(const='const ' if obj.is_const else '',
                              type=self.convert_type(obj.type),
@@ -166,15 +163,33 @@ class Writer(WriterBase):
                              initial_value=obj.initial_value
                              )
 
-    def write_member_initialization(self, cls, obj):
+    def write_member_initialization(self, obj):
+        
+        def convert_initial_value(object_):
+            if object_.is_pointer and obj.initial_value == '0':
+                return 'nullptr'
+            type_class = self.parser.find_class(object_.type)
+            if type_class and type_class.type == 'enum':
+                assert (len(type_class.members) > 0)
+                return '{}::{}'.format(type_class.name, type_class.members[0].name)
+        
+            if object_.initial_value is None:
+                return ''
+            return object_.initial_value
+    
         string = '{name}({initial_value})\n'
-        initial_value = self.convert_initial_value(cls, obj)
+        initial_value = convert_initial_value(obj)
         return string.format(name=obj.name,
                              initial_value=initial_value
                              )
     
     @staticmethod
     def write_named_object(obj, name, try_to_use_const_ref, use_intrusive):
+    
+        def can_use_const_ref(object_):
+            assert (isinstance(object_, Object))
+            return object_.type in ['string', 'list', 'map']
+        
         string_non_pointer = '{static}{const}{type}{templates}{pointer}{ref}{name}'
         string_pointer = '{static}{const}intrusive_ptr<{type}{templates}>{ref}{name}'
         templates = []
@@ -184,7 +199,7 @@ class Writer(WriterBase):
         templates = ('<' + ', '.join(templates) + '>') if templates else ''
         is_ref = obj.is_ref
         is_const = obj.is_const
-        if not is_ref and not is_const and try_to_use_const_ref and Writer.can_use_const_ref(obj):
+        if not is_ref and not is_const and try_to_use_const_ref and can_use_const_ref(obj):
             is_ref = True
             is_const = True
             
@@ -214,23 +229,6 @@ class Writer(WriterBase):
         if isinstance(type_of_object, Object):
             return Writer.convert_type(type_of_object.name)
         return type_of_object
-
-    def convert_initial_value(self, cls, obj):
-        if obj.is_pointer and obj.initial_value == '0':
-            return 'nullptr'
-        type_class = self.parser.find_class(obj.type)
-        if type_class and type_class.type == 'enum':
-            assert(len(type_class.members) > 0)
-            return '{}::{}'.format(type_class.name, type_class.members[0].name)
-
-        if obj.initial_value is None:
-            return ''
-        return obj.initial_value
-    
-    @staticmethod
-    def can_use_const_ref(obj):
-        assert(isinstance(obj, Object))
-        return obj.type in ['string', 'list', 'map']
 
     @staticmethod
     def prepare_file(body):
@@ -274,10 +272,6 @@ class Writer(WriterBase):
         includes = set()
         forward_declarations = set()
         forward_declarations_out = set()
-        # if cls.type == 'enum':
-        #     return self.build_includes_block(cls, includes), \
-        #            self.build_forward_declarions_block(forward_declarations), \
-        #            self.build_forward_declarions_block(forward_declarations_out)
 
         def add(set_, obj):
             set_.add(self.convert_type(obj.type))
@@ -314,10 +308,11 @@ class Writer(WriterBase):
             forward_declarations.remove(cls.name)
         if cls.name in forward_declarations_out:
             forward_declarations_out.remove(cls.name)
-        
-        return self.build_includes_block(cls, includes), \
-               self.build_forward_declarions_block(forward_declarations), \
-               self.build_forward_declarions_block(forward_declarations_out)
+
+        includes = self.build_includes_block(cls, includes)
+        forward_declarations = self.build_forward_declarations_block(forward_declarations)
+        forward_declarations_out = self.build_forward_declarations_block(forward_declarations_out)
+        return includes, forward_declarations, forward_declarations_out
     
     def get_includes_for_source(self, cls):
         includes = set()
@@ -383,7 +378,7 @@ class Writer(WriterBase):
         return '\n'.join(result)
     
     @staticmethod
-    def build_forward_declarions_block(declarations):
+    def build_forward_declarations_block(declarations):
         ignore = [
             'std::list',
             'std::vector',
