@@ -37,7 +37,7 @@ class GeneratorVisitor:
             superclass_name = cls.superclasses[0] if cls.superclasses else None
             while superclass_name is not None:
                 if superclass_name in self.acceptors_interfaces:
-                    self.override_methods(cls, superclass_name)
+                    self.override_methods(cls)
                     break
                 superclass = parser.find_class(superclass_name)
                 superclass_name = superclass.superclasses[0] if superclass.superclasses else None
@@ -49,7 +49,6 @@ class GeneratorVisitor:
 
             superclass = self.parser.find_class(superclass_name)
             if not superclass:
-                # TODO: remove print
                 if superclass_name.startswith('IVisitor'):
                     # Correct situation. The class can be inherited from the IVisitor interface
                     continue
@@ -109,7 +108,7 @@ class GeneratorVisitor:
         cls.functions.append(method)
         
     @staticmethod
-    def override_methods(cls, superclass):
+    def override_methods(cls):
         for method in cls.functions:
             if method.name == 'visit' and len(method.args) == 1:
                 arg_type = method.args[0][1].replace('*', '')

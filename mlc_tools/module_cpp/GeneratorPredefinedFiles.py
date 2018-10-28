@@ -6,10 +6,11 @@ class GeneratorPredefinedFiles:
     def __init__(self):
         pass
     
-    def get_namespace(self):
+    @staticmethod
+    def get_namespace():
         return 'mg'
     
-    def generate(self, parser, writer):
+    def generate(self, writer):
         self.generate_config_files(writer)
         for pair in cpp_files:
             filename = pair[0]

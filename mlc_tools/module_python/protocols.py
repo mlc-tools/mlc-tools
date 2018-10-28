@@ -1,10 +1,4 @@
 py_xml = '''
-# $(0) = obj_name
-# $(1) = obj_type
-# $(2) = obj_value
-# ??? {3} = '{}'
-# $(4) = owner
-# $(5) = obj_template_args[0].type if len(obj_template_args) > 0 else 'unknown_arg'
 
 #int
 #serialize:

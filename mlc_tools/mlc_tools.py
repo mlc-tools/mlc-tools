@@ -1,12 +1,13 @@
 from .utils.Error import Log
 from .utils import fileutils
-from .base.Parser import Parser
-from .base.Linker import Linker
-from .base.Validator import Validator
-from .base.DataParser import DataParser
+from .base import Parser
+from .base import Linker
+from .base import Validator
+from .base import DataParser
+from .base import Language
 import os
 import sys
-import importlib
+
 
 class Mlc:
     def __init__(self, **kwargs):
@@ -83,7 +84,7 @@ class Mlc:
 
         # cpp
         # php
-        language = self.build_language()
+        language = Language(self.language, self.out_directory)
         language.get_generator().generate(parser, language.get_writer())
 
         Linker().link(parser)
@@ -121,12 +122,6 @@ class Mlc:
         if not os.path.isfile(self.test_script):
             Log.warning('Test script (%s) not founded' % self.test_script)
 
-    def build_language(self):
-        from pydoc import locate
-        module_name = 'module_%s' % (self.language if self.language != 'py' else 'python')
-        module = locate('mlc_tools.%s.Language' % module_name)
-        return module(self.out_directory)
-        
     def run_user_generator(self, state):
         if self.custom_generator:
             self.custom_generator.execute(state)

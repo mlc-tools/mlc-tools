@@ -25,13 +25,12 @@ class Writer(WriterBase):
         
         functions = ''
         for method in cls.functions:
-            f = self.write_function(cls, method)
+            f = self.write_function(method)
             functions += f
         
         imports = ''
         init_superclass = ''
         name = cls.name
-        superclass_name = ''
         if cls.superclasses:
             superclass_name = cls.superclasses[0].name
             imports += 'from .{0} import {0}'.format(cls.superclasses[0].name)
@@ -71,7 +70,7 @@ class Writer(WriterBase):
                     member.initial_value = cls.members[0].initial_value
 
     @staticmethod
-    def write_function(cls, method):
+    def write_function(method):
         args = [x[0] for x in method.args]
         if not method.is_static:
             args.insert(0, 'self')

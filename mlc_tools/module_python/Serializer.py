@@ -1,6 +1,5 @@
 import sys
 from ..base.SerializerBase import SerializerBase
-from ..core.Function import Function
 from ..core.Class import Class
 from ..core.Object import Object
 from ..utils.Error import Error

@@ -14,5 +14,5 @@ class Generator(GeneratorBase):
         GeneratorBase.generate(self, parser, writer)
         GeneratorDataStorage().generate(parser)
         GeneratorVisitor().generate(parser)
-        GeneratorPredefinedFiles().generate(parser, writer)
+        GeneratorPredefinedFiles().generate(writer)
         GeneratorOperatorEquals().generate(parser)

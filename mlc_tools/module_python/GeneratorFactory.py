@@ -6,7 +6,8 @@ class GeneratorFactory:
     def __init__(self):
         pass
 
-    def generate(self, parser, writer):
+    @staticmethod
+    def generate(parser, writer):
         line = '''
         if type == "{0}":
             from . import {0}

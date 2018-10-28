@@ -12,7 +12,7 @@ class Translator(TranslatorBase):
     def translate_function(self, cls, method, parser):
         if not method.translated:
             body = '\n'.join(method.operations)
-            body = self.translate_function_body(cls, body, parser)
+            body = self.translate_function_body(body)
             method.body = body
         else:
             if len(method.operations) > 0:
@@ -21,7 +21,7 @@ class Translator(TranslatorBase):
                 method.body = ''
 
     @staticmethod
-    def translate_function_body(cls, func, parser):
+    def translate_function_body(func):
         if not func:
             func = ''
         func = Translator.replace_by_regex(func)
@@ -182,4 +182,6 @@ class Translator(TranslatorBase):
     def replace_by_regex(body):
         for reg in RegexPatternCpp.FUNCTION:
             body = reg[0].sub(reg[1], body)
+        for reg in RegexPatternCpp.REPLACES:
+            body = body.replace(reg[0], reg[1])
         return body

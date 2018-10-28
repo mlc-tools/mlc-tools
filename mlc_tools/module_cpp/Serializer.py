@@ -1,5 +1,3 @@
-import sys
-from ..core.Function import Function
 from ..core.Class import Class
 from ..core.Object import Object
 from ..utils.Error import Error
@@ -62,8 +60,7 @@ class Serializer(SerializerBase):
     
         type_ = obj_type
         if self.parser.find_class(type_) and self.parser.find_class(type_).type == 'enum':
-            string = self._build_serialize_operation_enum(obj_name, obj_type, obj_value,
-                                                          obj_is_pointer, obj_template_args, serialization_type)
+            string = self._build_serialize_operation_enum(obj_name, serialization_type)
             return string
         else:
             if obj_type not in self.parser.simple_types and type_ != 'list' and type_ != 'map':
@@ -152,7 +149,8 @@ class Serializer(SerializerBase):
                               key=a3,
                               value_type=a4)
 
-    def convert_type(self, t):
+    @staticmethod
+    def convert_type(t):
         types = {
             'list': 'std::vector',
             'map': 'std::map',
@@ -162,7 +160,6 @@ class Serializer(SerializerBase):
             return types[t]
         return t
 
-    def _build_serialize_operation_enum(self, obj_name, obj_type, obj_value, obj_is_pointer, obj_template_args,
-                                        serialization_type):
-        pattern = self.serialize_protocol[serialization_type]['enum'][0].format(field=obj_name, namespace=self.namespace)
-        return pattern + '\n\n'
+    def _build_serialize_operation_enum(self, obj_name, serialization_type):
+        pattern = self.serialize_protocol[serialization_type]['enum'][0]
+        return pattern.format(field=obj_name, namespace=self.namespace) + '\n\n'
