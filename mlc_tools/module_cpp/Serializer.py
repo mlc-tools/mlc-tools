@@ -89,7 +89,7 @@ class Serializer(SerializerBase):
                         type_ = '{0}<{1}>'.format(type_, arg_type)
                     elif arg.is_pointer:
                         type_ = 'list<pointer>'
-                    elif arg.type == 'enum':
+                    elif isinstance(arg.type, Class) and arg.type.type == 'enum':
                         type_ = 'list<enum>'
                     else:
                         type_ = '{0}<serialized>'.format(type_)
@@ -109,7 +109,9 @@ class Serializer(SerializerBase):
         key = obj_template_args[0]
         value = obj_template_args[1]
         key_type = key.name if isinstance(key, Class) else key.type
+        key_type = key_type.name if isinstance(key_type, Class) else key_type
         value_type = value.name if isinstance(value, Class) else value.type
+        value_type = value_type.name if isinstance(value_type, Class) else value_type
         pattern = self.serialize_protocol[SERIALIZATION]['map'][0]
         a0 = obj_name
         a1 = self.build_serialize_operation_('key', key_type, None, SERIALIZATION, [],
@@ -124,7 +126,9 @@ class Serializer(SerializerBase):
         key = obj_template_args[0]
         value = obj_template_args[1]
         key_type = key.name if isinstance(key, Class) else key.type
+        key_type = key_type.name if isinstance(key_type, Class) else key_type
         value_type = value.name if isinstance(value, Class) else value.type
+        value_type = value_type.name if isinstance(value_type, Class) else value_type
         pattern = self.serialize_protocol[DESERIALIZATION]['map'][0]
         if key.is_link:
             key_str = 'const {}* key(nullptr);'.format(key_type)

@@ -139,7 +139,7 @@ if(DataStorage::$__instance == NULL)
     }
     else if(endsWith(DataStorage::$PATH_TO_DATA, '.json'))
     {
-        $string = file_get_contents(GeneratorDataStorageBase::$PATH_TO_DATA);
+        $string = file_get_contents(DataStorage::$PATH_TO_DATA);
         DataStorage::$__json = json_decode($string);
     }
 

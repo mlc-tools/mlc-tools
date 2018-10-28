@@ -65,7 +65,7 @@ $(OWNER)$(FIELD) = str(xml.get("$(FIELD)"))
 if $(OWNER)$(FIELD):
             xml_pointer = ET.SubElement(xml, '$(FIELD)')
             xml_pointer.set('type', $(OWNER)$(FIELD).get_type())
-            $(OWNER)$(FIELD).serialize(xml_pointer)
+            $(OWNER)$(FIELD).serialize_$(FORMAT)(xml_pointer)
 #deserialize:
 xml_pointer = xml.find('$(FIELD)')
         if xml_pointer is not None:
@@ -130,7 +130,7 @@ $(OWNER)$(FIELD) = list()
 arr = ET.SubElement(xml, '$(FIELD)')
         for obj in $(OWNER)$(FIELD):
             item = ET.SubElement(arr, 'item')
-            obj.serialize(item)
+            obj.serialize_$(FORMAT)(item)
 #deserialize:
 $(OWNER)$(FIELD) = list()
         arr = xml.find('$(FIELD)')
@@ -146,7 +146,7 @@ $(OWNER)$(FIELD) = list()
 #serialize:
 if $(OWNER)$(FIELD):
             xml_child = ET.SubElement(xml, '$(FIELD)')
-            $(OWNER)$(FIELD).serialize(xml_child)
+            $(OWNER)$(FIELD).serialize_$(FORMAT)(xml_child)
 #deserialize:
 xml_child = xml.find('$(FIELD)')
         from .$(TYPE) import $(TYPE)
@@ -160,7 +160,7 @@ xml_child = xml.find('$(FIELD)')
 arr = ET.SubElement(xml, '$(FIELD)')
         for t in $(OWNER)$(FIELD):
             item = ET.SubElement(arr, t.get_type())
-            t.serialize(item)
+            t.serialize_$(FORMAT)(item)
 #deserialize:
 $(OWNER)$(FIELD) = list()
         arr = xml.find('$(FIELD)')
@@ -246,7 +246,7 @@ $(OWNER)$(FIELD) = dictionary["$(FIELD)"]
 if $(OWNER)$(FIELD):
             dictionary['$(FIELD)'] = $({})
             dictionary['$(FIELD)'][$(OWNER)$(FIELD).get_type()] = $({})
-            $(OWNER)$(FIELD).serialize(dictionary['$(FIELD)'][$(OWNER)$(FIELD).get_type()])
+            $(OWNER)$(FIELD).serialize_$(FORMAT)(dictionary['$(FIELD)'][$(OWNER)$(FIELD).get_type()])
 #deserialize
 if '$(FIELD)' in dictionary:
             for key, value_ in dictionary['$(FIELD)'].iteritems():
@@ -271,7 +271,7 @@ $(OWNER)$(FIELD) = list()
 arr_$(FIELD) = []
         for obj in $(OWNER)$(FIELD):
             dict = $({})
-            obj.serialize(dict)
+            obj.serialize_$(FORMAT)(dict)
             arr_$(FIELD).append(dict)
         dictionary['$(FIELD)'] = arr_$(FIELD)
 #deserialize
@@ -287,7 +287,7 @@ $(OWNER)$(FIELD) = list()
 #serialize
 if $(OWNER)$(FIELD):
             dict = $({})
-            $(OWNER)$(FIELD).serialize(dict)
+            $(OWNER)$(FIELD).serialize_$(FORMAT)(dict)
             dictionary["$(FIELD)"] = dict
 #deserialize
 if '$(FIELD)' in dictionary:
@@ -302,7 +302,7 @@ dictionary['$(FIELD)'] = []
         for t in $(OWNER)$(FIELD):
             arr.append($({}))
             arr[-1][t.get_type()] = $({})
-            t.serialize(arr[-1][t.get_type()])
+            t.serialize_$(FORMAT)(arr[-1][t.get_type()])
 #deserialize
 $(OWNER)$(FIELD) = list()
         arr = dictionary['$(FIELD)']

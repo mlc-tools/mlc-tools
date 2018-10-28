@@ -69,6 +69,17 @@ def cpp():
     mlc.run_test(test_script=root + 'tests/simple_test/test_cpp.py', test_script_args='xml')
 
 
+def test_serialize():
+    root = os.path.abspath(os.path.dirname(os.path.abspath(__file__))) + '/'
+    mlc = Mlc()
+    
+    mlc.generate(language='php',
+                 configs_directory=root + 'tests/test_serialize',
+                 out_directory=root + 'tests/test_serialize/generated_php',
+                 side='server'
+                 )
+
+
 def profile(func_to_profile):
     def get_profile_(func):
         """ Returns performance statistics (as a string) for the given function.
@@ -95,6 +106,8 @@ def profile(func_to_profile):
 # profile(cpp)
 # profile(python)
 # profile(python_test)
-python()
-cpp()
-php()
+# python()
+# cpp()
+# php()
+
+test_serialize()

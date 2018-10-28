@@ -44,6 +44,7 @@ class Serializer(SerializerBase):
         key = obj_template_args[0]
         value = obj_template_args[1]
         key_type = key.name if isinstance(key, Class) else key.type
+        key_type = key_type.name if isinstance(key_type, Class) else key_type
         value_type = value.name if isinstance(value, Class) else value.type
         value_type = value_type.name if isinstance(value_type, Class) else value_type
         str = self.serialize_protocol[serialization_type]['map'][0]
@@ -83,10 +84,14 @@ class Serializer(SerializerBase):
 
     @staticmethod
     def convert_initialize_value(value):
+        if value is None:
+            value = ''
         if value == 'nullptr':
             return 'null'
         if value == 'None':
             return 'null'
+        if '::' in value:
+            value = value.replace('::', '::$')
         return value
 
     def get_serialization_function_args(self, serialize_type, serialize_format):
@@ -136,12 +141,13 @@ class Serializer(SerializerBase):
                         obj_type = arg_type
                     elif arg.is_pointer:
                         type_ = "list<pointer>"
-                    elif arg.type == 'enum':
+                    elif isinstance(arg.type, Class) and arg.type.type == 'enum':
                         type_ = 'list<string>'
                         arg_0 = 'string'
                     else:
                         type_ = "list<serialized>"
                         obj_type = arg_type
+        obj_value = Serializer.convert_initialize_value(obj_value)
         string = self.serialize_protocol[serialization_type][type_][index]
         string = string.format(field=obj_name,
                                type=obj_type,

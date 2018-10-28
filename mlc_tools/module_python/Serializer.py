@@ -125,12 +125,13 @@ class Serializer(SerializerBase):
                         obj_type = arg_type
                     elif arg.is_pointer:
                         type_ = "list<pointer>"
-                    elif arg.type == 'enum':
+                    elif isinstance(arg.type, Class) and arg.type.type == 'enum':
                         type_ = 'list<string>'
                         arg_0 = 'string'
                     else:
                         type_ = "list<serialized>"
                         obj_type = arg_type
+        obj_value = Serializer.convert_initialize_value(obj_value)
         string = self.serialize_protocol[serialization_type][type_][index]
         string = string.format(field=obj_name,
                                type=obj_type,

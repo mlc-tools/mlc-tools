@@ -61,8 +61,8 @@ class Writer(WriterBase):
         initializations = ''
         for member in cls.members:
             if cls.type == 'enum' and member.name != 'value':
-                continue
-            if member.is_static:
+                static_initializations += self.write_member_static_enum(cls, member)
+            elif member.is_static:
                 static_initializations += self.write_member_static_initialization(cls, member)
             else:
                 div = ': ' if not initializations else ', '
@@ -162,6 +162,10 @@ class Writer(WriterBase):
                              name=obj.name,
                              initial_value=obj.initial_value
                              )
+    
+    def write_member_static_enum(self, cls, obj):
+        string = 'const int {owner}::{name};\n'
+        return string.format(owner=cls.name, name=obj.name)
 
     def write_member_initialization(self, obj):
         
@@ -274,9 +278,12 @@ class Writer(WriterBase):
         forward_declarations_out = set()
 
         def add(set_, obj):
-            set_.add(self.convert_type(obj.type))
-            for arg in obj.template_args:
-                add(forward_declarations, arg)
+            if isinstance(obj, str):
+                set_.add(obj)
+            else:
+                set_.add(self.convert_type(obj.type))
+                for arg in obj.template_args:
+                    add(forward_declarations, arg)
         
         # members
         for member in cls.members:

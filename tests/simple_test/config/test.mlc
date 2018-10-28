@@ -51,7 +51,7 @@ class AllTypes<SerializedObject>
 	float float_value0 = 0
 	float float_value1
 	bool bool_value0 = true
-	bool bool_value1
+	bool bool_value1 = false
 	string str_value0 = ""
 	string str_value1
 	list<int> int_list
@@ -72,6 +72,9 @@ class AllTypes<SerializedObject>
 	list<AllTypesChildren*> object_ptr_list
 	map<string, AllTypesChildren> object_map
 	map<string, AllTypesChildren*> object_ptr_map
+
+	list<TestEnum> enum_list
+	map<TestEnum, int> enum_map
 
     function void initialize()
     {
@@ -115,6 +118,11 @@ class AllTypes<SerializedObject>
         this->object_ptr = new AllTypesChildren();
         this->object_ptr->value = 0;
 
+        list_push(this->enum_list, TestEnum::value1);
+        list_push(this->enum_list, TestEnum::value2);
+
+        this->enum_map[TestEnum::value1] = 1;
+        this->enum_map[TestEnum::value2] = 2;
     }
 
     function bool tests(Logger* logger):static
@@ -208,8 +216,8 @@ class TestEnumValue2<TestEnum>
 
 class FunctionTest<SerializedObject>
 {
-    bool initialized = false;
-    DataUnit*:link data_unit;
+    bool initialized = false
+    DataUnit*:link data_unit
     list<int> list
     map<int, int> map
 
