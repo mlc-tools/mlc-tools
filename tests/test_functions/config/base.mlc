@@ -93,7 +93,7 @@ class Test<SerializedObject>
     {
         return this->r0;
     }
-
+    /*
     function ReturnValue& test_9(int i=0)
     {
         return this->r0;
@@ -104,6 +104,7 @@ class Test<SerializedObject>
         std::vector<std::vector<std::string>> result;
         return result;
     }
+    */
 
     function map<string, int> test_11(map<string, int> some_map)
     {
@@ -111,11 +112,13 @@ class Test<SerializedObject>
     }
 
     //from live
+    /*
     function map<int, ReturnValue*> test_8(int some_arg)
     {
         map<int, intrusive_ptr<ReturnValue>> result;
         return result;
     }
+    */
 
     function string get_id():const:client
     {

@@ -3,6 +3,7 @@ from .GeneratorDataStorage import GeneratorDataStorage
 from .GeneratorVisitor import GeneratorVisitor
 from .GeneratorPredefinedFiles import GeneratorPredefinedFiles
 from .GeneratorOperatorEquals import GeneratorOperatorEquals
+from .GeneratorObserver import GeneratorObserver
 
 
 class Generator(GeneratorBase):
@@ -16,3 +17,4 @@ class Generator(GeneratorBase):
         GeneratorVisitor().generate(parser)
         GeneratorPredefinedFiles().generate(writer)
         GeneratorOperatorEquals().generate(parser)
+        GeneratorObserver().generate(writer)

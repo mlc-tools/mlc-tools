@@ -2,6 +2,7 @@ from ..base.Generator import *
 from .GeneratorDataStorage import GeneratorDataStorage
 from .GeneratorVisitor import GeneratorVisitor
 from .GeneratorFactory import GeneratorFactory
+from .GeneratorObserver import GeneratorObserver
 
 
 class Generator(GeneratorBase):
@@ -14,3 +15,4 @@ class Generator(GeneratorBase):
         GeneratorDataStorage().generate(parser)
         GeneratorVisitor().generate(parser)
         GeneratorFactory().generate(parser, writer)
+        GeneratorObserver().generate(writer)

@@ -26,7 +26,7 @@ class GeneratorUnitTestsInterface:
         base = base_classes
         base = base.replace('@{all_methods}', str(self.tests_interface_methods_count))
         base = base.replace('@{implemented_methods}', str(self.tests_implemented_methods_count))
-        self.parser.parse(base)
+        self.parser.parse_text(base)
 
     @staticmethod
     def get_member_name(cls_name):

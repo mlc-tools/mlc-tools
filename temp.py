@@ -108,6 +108,4 @@ def profile(func_to_profile):
 # profile(python_test)
 # python()
 # cpp()
-# php()
-
-test_serialize()
+php()

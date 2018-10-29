@@ -47,7 +47,7 @@ class Class(Object):
             self.name = self.name[k + 1:]
 
     def parse_body(self, parser, body):
-        parser.parse(body)
+        parser.parse_text(body)
 
         for member in parser.objects:
             if parser.find_class(member.type):

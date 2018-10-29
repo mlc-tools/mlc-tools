@@ -26,37 +26,6 @@ class Object:
         self.side = 'both'
         self.access = AccessSpecifier.public
 
-    def parse(self, line):
-        from ..utils.common import parse_object
-        if ';' in line:
-            Error.warning(Error.SYNTAX_WARNING, line)
-            line = line.replace(';', '')
-
-        expression = ''
-        if '=' in line:
-            k = line.find('=')
-            expression = line[k + 1:].strip()
-            line = line[0:k].strip()
-        if expression:
-            self.initial_value = expression
-
-        parse_object(self, line)
-        self.type = self.find_modifiers(self.type)
-        self.is_pointer = self.check_pointer()
-        self.is_ref = self.check_ref()
-
-        if self.initial_value is None:
-            if self.type == 'int':
-                self.initial_value = "0"
-            elif self.type == 'float':
-                self.initial_value = "0.0"
-            elif self.type == 'bool':
-                self.initial_value = "false"
-            elif self.type == 'string':
-                self.initial_value = '""'
-            elif self.is_pointer:
-                self.initial_value = "nullptr"
-
     def parse_type(self):
         left = self.type.find('<')
         try:

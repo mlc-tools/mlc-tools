@@ -1,54 +1,9 @@
+from mlc_tools.core.Object import Object
 from ..core.Object import Object
 from ..core.Class import Class
 from ..core.Function import Function
 from ..utils.Error import Error
-from .ObserverCreater import ObserverPatterGenerator
-
-
-def _is_class(line):
-    return line.strip().find('class') == 0
-
-
-def _is_interface(line):
-    return line.strip().find('interface') == 0
-
-
-def _is_function(line):
-    return line.strip().find('function') == 0
-
-
-def _is_enum(line):
-    return line.strip().find('enum') == 0
-
-
-def find_body(text):
-    text = text.strip()
-    body = ""
-    if text.find("\n") != -1:
-        header = text[0:text.find("\n")]
-    else:
-        header = text
-    if header.find(':external') == -1 and header.find(':abstract') == -1:
-        text = text[text.find("{"):]
-        counter = 0
-        index = 0
-        for ch in text:
-            index += 1
-            if counter == 0 and ch == '{':
-                counter += 1
-                continue
-            if ch == '{':
-                counter += 1
-            if ch == '}':
-                counter -= 1
-            if counter == 0:
-                text = text[index:]
-                break
-            body += ch
-    else:
-        text = text[len(header):].strip()
-    return body, header, text
-
+from ..utils.common import parse_object
 
 class Parser:
 
@@ -59,18 +14,8 @@ class Parser:
         self.functions = []
         self.side = side
         self.simple_types = ["int", "float", "bool", "string"]
-        self.is_validate_php_features = True
-        self.configs_root = ''
+        self.serialize_protocol = []
         return
-
-    def generate_patterns(self):
-        self.classes.append(ObserverPatterGenerator.get_mock())
-
-    def save_patterns(self, writer, language):
-        ObserverPatterGenerator.generate(language, writer)
-
-    def set_configs_directory(self, path):
-        self.configs_root = path
 
     def is_side(self, side):
         return self.side == 'both' or side == self.side or side == 'both'
@@ -78,10 +23,32 @@ class Parser:
     def parse_files(self, files):
         for path in files:
             text = open(path).read()
-            self.parse(text)
+            self.parse_text(text)
 
-    def parse(self, text):
+    def find_class(self, name):
+        for cls in self.classes:
+            if cls.name == name:
+                return cls
+        return None
+
+    def parse_text(self, text):
+        text = self.remove_comments(text)
         text = text.strip()
+        while len(text) > 0:
+            if Parser._is_class(text):
+                text = self._create_class(text, False)
+            elif Parser._is_interface(text):
+                text = self._create_class(text, True)
+            elif Parser._is_enum(text):
+                text = self._create_enum_class(text)
+            elif Parser._is_function(text):
+                text = self._create_function(text)
+            else:
+                text = self._create_member(text)
+            text = text.strip()
+
+    @staticmethod
+    def remove_comments(text):
         left = text.find('/*')
         while left != -1:
             right = text.find('*/')
@@ -93,21 +60,10 @@ class Parser:
             if '//' in line:
                 lines[i] = line[0:line.find('//')]
         text = '\n'.join(lines)
-        while len(text) > 0:
-            text = text.strip()
-            if _is_class(text):
-                text = self._create_class(text, False)
-            elif _is_interface(text):
-                text = self._create_class(text, True)
-            elif _is_enum(text):
-                text = self._create_enum_class(text)
-            elif _is_function(text):
-                text = self._create_function(text)
-            else:
-                text = self._create_declaration(text)
+        return text
 
     def _create_class(self, text, is_abstract):
-        body, header, text = find_body(text)
+        body, header, text = Parser.parse_body(text)
         cls = Class()
         cls.parse(header)
         if is_abstract:
@@ -126,37 +82,8 @@ class Parser:
         self.classes.append(cls)
         return text
 
-    def is_serialised(self, cls):
-        if cls.is_serialized:
-            return True
-        result = False
-        for c in cls.superclasses:
-            result = result or self.is_serialised(c)
-        return result
-
-    def is_function_override(self, cls, function):
-        if cls.type == 'enum':
-            return False
-        if function.name in ['serialize', 'deserialize']:
-            return len(cls.superclasses) > 0
-
-        for c in cls.superclasses:
-            for f in c.functions:
-                if f.name == function.name and f.get_return_type().type == function.get_return_type().type and f.args == function.args:
-                    return True
-        is_override = False
-        for c in cls.superclasses:
-            is_override = is_override or self.is_function_override(c, function)
-        return is_override
-
-    def find_class(self, name):
-        for cls in self.classes:
-            if cls.name == name:
-                return cls
-        return None
-
     def _create_enum_class(self, text):
-        body, header, text = find_body(text)
+        body, header, text = Parser.parse_body(text)
         cls = Class()
         cls.type = 'enum'
         cls.parse(header)
@@ -166,7 +93,7 @@ class Parser:
         self.classes.append(cls)
         return text
 
-    def _create_declaration(self, text):
+    def _create_member(self, text):
         lines = text.split("\n")
         line = lines[0]
         if len(lines) > 1:
@@ -174,24 +101,113 @@ class Parser:
         else:
             text = ""
         obj = Object()
-        obj.parse(line)
-        if not self.is_side(obj.side):
-            return text
         self.objects.append(obj)
+        self.parse_object(obj, line)
         return text
 
     def _create_function(self, text):
-        body, header, text = find_body(text)
-        function = Function()
-        function.parse(header)
-        if not self.is_side(function.side):
+        body, header, text = Parser.parse_body(text)
+        method = Function()
+        method.parse(header)
+        if not self.is_side(method.side):
             return text
-        function.parse_body(body)
-        self.functions.append(function)
+        method.parse_body(body)
+        self.functions.append(method)
         return text
+    
+    def parse_object(self, obj, line):
+        if ';' in line:
+            Error.warning(Error.SYNTAX_WARNING, line)
+            line = line.replace(';', '')
+        
+        # parse initialize value
+        expression = ''
+        if '=' in line:
+            k = line.find('=')
+            expression = line[k + 1:].strip()
+            line = line[0:k].strip()
+        if expression:
+            obj.initial_value = expression
+        
+        # parse type, name, tempalte arguments
+        parse_object(obj, line)
+        
+        # parse specific modifiers
+        obj.type = obj.find_modifiers(obj.type)
+        obj.is_pointer = obj.check_pointer()
+        obj.is_ref = obj.check_ref()
+        if not self.is_side(obj.side):
+            return
+        
+        # recursive parsing template arguments
+        args = []
+        for arg_desc in obj.template_args:  # type: str
+            arg = Object()
+            self.parse_object(arg, arg_desc)
+            args.append(arg)
+        obj.template_args = args
+        
+        # TODO: move to Translator
+        # convert initial value
+        if obj.initial_value is None:
+            if obj.type == 'int':
+                obj.initial_value = "0"
+            elif obj.type == 'float':
+                obj.initial_value = "0.0"
+            elif obj.type == 'bool':
+                obj.initial_value = "false"
+            elif obj.type == 'string':
+                obj.initial_value = '""'
+            elif obj.is_pointer:
+                obj.initial_value = "nullptr"
+        
+    @staticmethod
+    def _is_class(line):
+        return line.find('class') == 0
 
-    def load_default_serialize_protocol(self, buffer):
-        lines = buffer.split('\n')
+    @staticmethod
+    def _is_interface(line):
+        return line.find('interface') == 0
+
+    @staticmethod
+    def _is_function(line):
+        return line.find('function') == 0
+
+    @staticmethod
+    def _is_enum(line):
+        return line.find('enum') == 0
+
+    @staticmethod
+    def parse_body(text):
+        text = text.strip()
+        body = ""
+        if text.find("\n") != -1:
+            header = text[0:text.find("\n")]
+        else:
+            header = text
+        if header.find(':external') == -1 and header.find(':abstract') == -1:
+            text = text[text.find("{"):]
+            counter = 0
+            index = 0
+            for ch in text:
+                index += 1
+                if counter == 0 and ch == '{':
+                    counter += 1
+                    continue
+                if ch == '{':
+                    counter += 1
+                if ch == '}':
+                    counter -= 1
+                if counter == 0:
+                    text = text[index:]
+                    break
+                body += ch
+        else:
+            text = text[len(header):].strip()
+        return body, header, text
+
+    def load_default_serialize_protocol(self, text):
+        lines = text.split('\n')
         supported_types = []
         supported_types.extend(self.simple_types)
         supported_types.append('serialized')
@@ -220,7 +236,8 @@ class Parser:
                 serialize_protocol[x][type_].extend([p0, p1])
         self.serialize_protocol = serialize_protocol
 
-    def _load_protocol(self, lines, serialize_type, type, initial_value=None, optional=False):
+    @staticmethod
+    def _load_protocol(lines, serialize_type, type_object, initial_value=None, optional=False):
         stypes = ['serialize', 'deserialize']
         sinit = ['with default value', 'without default value']
         in_type = False
@@ -236,12 +253,13 @@ class Parser:
             if not in_type and line.startswith('#'):
                 types = line[1:].split(',')
                 for type_ in types:
-                    in_type = in_type or (type == type_.strip())
+                    in_type = in_type or (type_object == type_.strip())
                 continue
             if in_type and line.startswith('#' + stypes[serialize_type]):
                 in_serialize = True
                 continue
-            if in_type and in_serialize and not in_initial_value and line.startswith('#' + sinit[0 if initial_value else 1]):
+            if in_type and in_serialize and not in_initial_value and \
+                    line.startswith('#' + sinit[0 if initial_value else 1]):
                 in_initial_value = True
                 continue
             if in_type and in_serialize and in_initial_value:
@@ -272,10 +290,11 @@ class Parser:
 
         if not pattern and not optional:
             print('cannot find pattern for args:')
-            print(type, stypes[serialize_type], initial_value)
+            print(type_object, stypes[serialize_type], initial_value)
             print('in_type', in_type)
             print('in_serialize', in_serialize)
             print('in_initial_value', in_initial_value)
             print(def_)
             exit(-1)
         return pattern
+
