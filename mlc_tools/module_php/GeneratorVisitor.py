@@ -111,6 +111,5 @@ class GeneratorVisitor:
     def override_methods(cls):
         for method in cls.functions:
             if method.name == 'visit' and len(method.args) == 1:
-                arg_type = method.args[0][1].replace('*', '')
+                arg_type = method.args[0][1].type
                 method.name = 'visit_%s' % (arg_type[0].lower()) + arg_type[1:]
-                pass

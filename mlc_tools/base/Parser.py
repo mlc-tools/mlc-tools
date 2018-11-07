@@ -3,7 +3,8 @@ from ..core.Object import Object
 from ..core.Class import Class
 from ..core.Function import Function
 from ..utils.Error import Error
-from ..utils.common import parse_object
+from ..utils.common import parse_object, smart_split
+import re
 
 class Parser:
 
@@ -108,11 +109,10 @@ class Parser:
     def _create_function(self, text):
         body, header, text = Parser.parse_body(text)
         method = Function()
-        method.parse(header)
-        if not self.is_side(method.side):
-            return text
-        method.parse_body(body)
-        self.functions.append(method)
+        self.parse_function_header(method, header)
+        if self.is_side(method.side):
+            method.parse_body(body)
+            self.functions.append(method)
         return text
     
     def parse_object(self, obj, line):
@@ -160,7 +160,42 @@ class Parser:
                 obj.initial_value = '""'
             elif obj.is_pointer:
                 obj.initial_value = "nullptr"
-        
+
+    def parse_function_header(self, method, line):
+        line = line.strip()
+        k = line.find('function')
+        if k == 0:
+            line = line[len('function'):].strip()
+        args_s = line[line.find('(') + 1:line.rfind(')')]
+        args = smart_split(args_s, ',')
+
+        for arg in args:
+            arg = arg.strip()
+            is_const = False
+            # TODO: deprecated
+            if arg.startswith('const '):
+                is_const = True
+                arg = arg[len('const '):]
+
+            obj = Object()
+            self.parse_object(obj, arg)
+            method.args.append([obj.name, obj])
+
+        line = line[:line.find('(')] + line[line.rfind(')') + 1:]
+        line = line.replace(';', '')
+        line = re.sub(r'{.*}', '', line)
+        k = line.rfind(' ')
+
+        name_s = line[k:].strip()
+        name_s = method._find_modifiers(name_s)
+        method.name = name_s
+
+        return_s = line[:k].strip()
+        method.return_type = Object()
+        self.parse_object(method.return_type, return_s)
+
+        return method
+
     @staticmethod
     def _is_class(line):
         return line.find('class') == 0

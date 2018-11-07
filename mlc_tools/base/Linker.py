@@ -16,7 +16,6 @@ class Linker:
         self.convert_templates(parser)
         self.generate_inline_classes(parser)
         self.add_get_type_method(parser)
-        self.link_functions(parser)
         for cls in parser.classes:
             cls.on_linked(parser)
 
@@ -56,12 +55,6 @@ class Linker:
             superclass.subclasses.remove(cls)
 
         cls.superclasses = [i for i in cls.superclasses if not i.is_inline]
-
-    @staticmethod
-    def link_functions(parser):
-        for cls in parser.classes:
-            for func in cls.functions:
-                func.link()
 
     @staticmethod
     def convert_templates(parser):

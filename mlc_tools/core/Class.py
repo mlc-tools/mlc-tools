@@ -124,6 +124,7 @@ class Class(Object):
                 equal = True
                 equal = equal and func.name == method.name
                 # equal = equal and func.args == function.args
+                print func.return_type, method.return_type
                 equal = equal and func.return_type.type == method.return_type.type
                 if equal:
                     func.is_virtual = True

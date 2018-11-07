@@ -33,31 +33,74 @@ class TestParseObject(unittest.TestCase):
         self.assertEqual(obj.template_args[1].template_args[0].name, '')
 
 
-# class TestParseFunction(unittest.TestCase):
+class TestParseFunction(unittest.TestCase):
     
-    # def test_1(self):
-    #     parser = Parser('client')
-    #     text = 'function map<int, list<Foo>> some_function(map<float, list<Bar>> arg0, list<int> arg1){}'
-    #     parser.parse_text(text)
-    #     func = parser.functions[0]
-    #     self.assertTrue(isinstance(func, Function))
-    #     self.assertEqual(func.name, 'some_function')
-    #     self.assertEqual(len(func.args), 2)
-    #
-    #     self.assertTrue(isinstance(func.return_type, Object))
-    #     self.assertEqual(func.return_type.type, 'map')
-    #     self.assertEqual(func.return_type.name, '')
-    #     self.assertEqual(len(func.return_type.template_args), 2)
-    #     self.assertTrue(isinstance(func.return_type.template_args[0], Object))
-    #     self.assertTrue(isinstance(func.return_type.template_args[1], Object))
-    #     self.assertEqual(func.return_type.template_args[0].name, '')
-    #     self.assertEqual(func.return_type.template_args[0].type, 'int')
-    #     self.assertEqual(func.return_type.template_args[1].name, '')
-    #     self.assertEqual(func.return_type.template_args[1].type, 'list')
-    #     self.assertEqual(len(func.return_type.template_args[1].template_args), 1)
-    #     self.assertTrue(isinstance(func.return_type.template_args[1].template_args[0], Object))
-    #     self.assertEqual(func.return_type.template_args[1].template_args[0].name, '')
-    #     self.assertEqual(func.return_type.template_args[1].template_args[0].type, 'Foo')
+    def test_1(self):
+        parser = Parser('client')
+        text = 'function map<int, list<Foo>> some_function(map<float, list<Bar>> arg0, list<int> arg1){}'
+        parser.parse_text(text)
+        func = parser.functions[0]
+        self.assertTrue(isinstance(func, Function))
+        self.assertEqual(func.name, 'some_function')
+        self.assertEqual(len(func.args), 2)
+        self.assertEqual(len(func.operations), 0)
+
+        self.assertTrue(isinstance(func.return_type, Object))
+        self.assertEqual(func.return_type.type, 'map')
+        self.assertEqual(func.return_type.name, '')
+        self.assertEqual(len(func.return_type.template_args), 2)
+        self.assertTrue(isinstance(func.return_type.template_args[0], Object))
+        self.assertTrue(isinstance(func.return_type.template_args[1], Object))
+        self.assertEqual(func.return_type.template_args[0].name, '')
+        self.assertEqual(func.return_type.template_args[0].type, 'int')
+        self.assertEqual(func.return_type.template_args[1].name, '')
+        self.assertEqual(func.return_type.template_args[1].type, 'list')
+        self.assertEqual(len(func.return_type.template_args[1].template_args), 1)
+        self.assertTrue(isinstance(func.return_type.template_args[1].template_args[0], Object))
+        self.assertEqual(func.return_type.template_args[1].template_args[0].name, '')
+        self.assertEqual(func.return_type.template_args[1].template_args[0].type, 'Foo')
+
+        self.assertEquals(func.args[0][0], 'arg0')
+        self.assertEquals(func.args[1][0], 'arg1')
+        self.assertTrue(isinstance(func.args[0][1], Object))
+        self.assertTrue(isinstance(func.args[1][1], Object))
+        self.assertEquals(func.args[0][1].name, 'arg0')
+        self.assertEquals(func.args[0][1].type, 'map')
+        self.assertTrue(isinstance(func.args[0][1].template_args[0], Object))
+        self.assertTrue(isinstance(func.args[0][1].template_args[1], Object))
+        self.assertEquals(func.args[1][1].name, 'arg1')
+        self.assertEquals(func.args[1][1].type, 'list')
+        self.assertTrue(isinstance(func.args[0][1].template_args[0], Object))
+
+    def test_2(self):
+        text = 'function void visit(Request* ctx)'
+        parser = Parser('client')
+        parser.parse_text(text)
+        func = parser.functions[0]
+        self.assertTrue(isinstance(func.return_type, Object))
+        self.assertEqual(func.return_type.type, 'void')
+        self.assertEqual(func.return_type.name, '')
+
+
+class TestParseClass(unittest.TestCase):
+
+    def test_1(self):
+        text = '''
+        class Foo
+        {
+            int int_name
+            float float_name
+            Bar bar_name
+            
+            function void function_1(int a){}
+            function map<int, int> function_2(list<int> a){}
+        }
+        '''
+        parser = Parser('client')
+        parser.parse_text(text)
+        foo = parser.classes[0]
+        self.assertEquals(foo.name, 'Foo')
+        self.assertEquals(foo.type, 'class')
 
 
 
