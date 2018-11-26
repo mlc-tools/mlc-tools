@@ -91,8 +91,8 @@ def test_virtual_methods():
 if __name__ == '__main__':
     simple_test()
     test_serialize()
-    # test_functions()
-    # unit_tests_generator()
-    # test_virtual_methods()
+    test_functions()
+    unit_tests_generator()
+    test_virtual_methods()
     # Dont run this test in CI
     # test_database()

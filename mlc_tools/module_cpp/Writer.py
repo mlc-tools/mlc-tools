@@ -100,10 +100,12 @@ class Writer(WriterBase):
         for arg in method.args:
             assert(isinstance(arg[1], Object))
             args.append(self.write_named_object(arg[1], arg[0], True, False))
+            if arg[1].initial_value is not None:
+                args[-1] += '=' + self.convert_initial_value(arg[1])
         args = ', '.join(args)
-
+        
         assert (isinstance(method.return_type, Object))
-        return_type = self.write_named_object(method.return_type, '', False, False)
+        return_type = self.write_named_object(method.return_type, '', False, True)
         
         return string.format(virtual='virtual ' if method.is_virtual else '',
                              static='static ' if method.is_static else '',
@@ -125,7 +127,7 @@ class Writer(WriterBase):
         }}
         
         '''
-        return_type = self.write_named_object(method.return_type, '', False, False)
+        return_type = self.write_named_object(method.return_type, '', False, True)
 
         args = list()
         for arg in method.args:
@@ -166,23 +168,22 @@ class Writer(WriterBase):
     def write_member_static_enum(self, cls, obj):
         string = 'const int {owner}::{name};\n'
         return string.format(owner=cls.name, name=obj.name)
+    
+    def convert_initial_value(self, object_):
+        if object_.is_pointer and object_.initial_value == '0':
+            return 'nullptr'
+        type_class = self.parser.find_class(object_.type)
+        if type_class and type_class.type == 'enum':
+            assert (len(type_class.members) > 0)
+            return '{}::{}'.format(type_class.name, type_class.members[0].name)
+    
+        if object_.initial_value is None:
+            return ''
+        return object_.initial_value
 
     def write_member_initialization(self, obj):
-        
-        def convert_initial_value(object_):
-            if object_.is_pointer and obj.initial_value == '0':
-                return 'nullptr'
-            type_class = self.parser.find_class(object_.type)
-            if type_class and type_class.type == 'enum':
-                assert (len(type_class.members) > 0)
-                return '{}::{}'.format(type_class.name, type_class.members[0].name)
-        
-            if object_.initial_value is None:
-                return ''
-            return object_.initial_value
-    
         string = '{name}({initial_value})\n'
-        initial_value = convert_initial_value(obj)
+        initial_value = self.convert_initial_value(obj)
         return string.format(name=obj.name,
                              initial_value=initial_value
                              )
@@ -199,7 +200,7 @@ class Writer(WriterBase):
         templates = []
         for arg in obj.template_args:
             assert(isinstance(arg, Object))
-            templates.append(Writer.write_named_object(arg, '', False, use_intrusive))
+            templates.append(Writer.write_named_object(arg, '', False, True))
         templates = ('<' + ', '.join(templates) + '>') if templates else ''
         is_ref = obj.is_ref
         is_const = obj.is_const
@@ -207,7 +208,7 @@ class Writer(WriterBase):
             is_ref = True
             is_const = True
             
-        if use_intrusive and obj.is_pointer and not obj.is_const and not obj.is_link:
+        if use_intrusive and obj.is_pointer and not obj.is_const and not obj.is_link and not obj.denied_intrusive:
             string = string_pointer
         else:
             string = string_non_pointer
@@ -304,7 +305,8 @@ class Writer(WriterBase):
                     add(forward_declarations_out, argtype)
                 else:
                     add(forward_declarations, argtype)
-                
+            add(includes, method.return_type)
+            
         # superclasses
         for superclass in cls.superclasses:
             includes.add(superclass.name)

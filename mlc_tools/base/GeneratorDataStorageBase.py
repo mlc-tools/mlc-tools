@@ -1,5 +1,5 @@
 from ..core.Class import Class
-from ..core.Object import Object
+from ..core.Object import Object, Objects
 from ..core.Object import AccessSpecifier
 
 
@@ -81,7 +81,7 @@ class GeneratorDataStorageBase(Class):
                 obj = Object()
                 obj.type = 'map'
                 obj.name = get_data_list_name(get_data_name(class_.name))
-                obj.template_args.append('string')
+                obj.template_args.append(Objects.STRING)
                 obj.template_args.append(class_.name)
                 
                 obj.access = AccessSpecifier.public

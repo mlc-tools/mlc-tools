@@ -81,15 +81,18 @@ class Serializer(SerializerBase):
                         return self.build_map_deserialization(obj_name, obj_template_args, serialize_format)
                 else:
                     arg = obj_template_args[0]
-                    arg_type = arg.name if isinstance(arg, Class) else arg.type
+                    assert (isinstance(arg, Object))
+                    assert (isinstance(arg.type, str))
+                    arg_type = arg.type
                     template_args.append(self.convert_type(arg_type))
+                    type_cls = self.parser.find_class(arg.type)
                     if arg.is_link:
                         type_ = 'list<link>'
                     elif arg_type in self.parser.simple_types:
                         type_ = '{0}<{1}>'.format(type_, arg_type)
                     elif arg.is_pointer:
                         type_ = 'list<pointer>'
-                    elif isinstance(arg.type, Class) and arg.type.type == 'enum':
+                    elif type_cls.type == 'enum':
                         type_ = 'list<enum>'
                     else:
                         type_ = '{0}<serialized>'.format(type_)
@@ -108,10 +111,12 @@ class Serializer(SerializerBase):
     def build_map_serialization(self, obj_name, obj_template_args, serialize_format):
         key = obj_template_args[0]
         value = obj_template_args[1]
-        key_type = key.name if isinstance(key, Class) else key.type
-        key_type = key_type.name if isinstance(key_type, Class) else key_type
-        value_type = value.name if isinstance(value, Class) else value.type
-        value_type = value_type.name if isinstance(value_type, Class) else value_type
+        assert (isinstance(key, Object))
+        assert (isinstance(value, Object))
+        assert (isinstance(key.type, str))
+        assert (isinstance(value.type, str))
+        key_type = key.type
+        value_type = value.type
         pattern = self.serialize_protocol[SERIALIZATION]['map'][0]
         a0 = obj_name
         a1 = self.build_serialize_operation_('key', key_type, None, SERIALIZATION, [],

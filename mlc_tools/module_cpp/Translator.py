@@ -53,11 +53,7 @@ class Translator(TranslatorBase):
     
         def add_method(type_, name, const):
             method = Function()
-            if isinstance(type_, str):
-                method.return_type = Object()
-                method.return_type.parse(type_)
-            else:
-                method.return_type = type_
+            method.return_type = type_
             method.name = name
             method.is_const = const
             cls.functions.append(method)
@@ -71,17 +67,17 @@ class Translator(TranslatorBase):
             return const_ref
         
         def add_constructor_with_parameter():
-            method = add_method('', cls.name, False)
+            method = add_method(Object(), cls.name, False)
             method.args.append(['_value', Objects.INT])
             method.operations.append('value = _value;')
             
         def add_constructor_copy():
-            method = add_method('', cls.name, False)
+            method = add_method(Object(), cls.name, False)
             method.args.append(['rhs', create_const_ref()])
             method.operations.append('value = rhs.value;')
 
         def add_constructor_with_string():
-            method = add_method('', cls.name, False)
+            method = add_method(Object(), cls.name, False)
             method.args.append(['_value', Objects.STRING])
             for index, obj in enumerate(cls.members):
                 if obj.name != 'value' and index <= len(values):
@@ -115,26 +111,26 @@ class Translator(TranslatorBase):
             method.operations.append('return *this;')
             
         def add_operator_equals():
-            method = add_method('bool', 'operator ==', True)
+            method = add_method(Objects.BOOL, 'operator ==', True)
             method.args.append(['rhs', create_const_ref()])
             method.operations.append('return value == rhs.value;')
 
         def add_operator_equals_with_int():
-            method = add_method('bool', 'operator ==', True)
+            method = add_method(Objects.BOOL, 'operator ==', True)
             method.args.append(['rhs', Objects.INT])
             method.operations.append('return value == rhs;')
 
         def add_operator_less():
-            method = add_method('bool', 'operator <', True)
+            method = add_method(Objects.BOOL, 'operator <', True)
             method.args.append(['rhs', create_const_ref()])
             method.operations.append('return value < rhs.value;')
 
         def add_cast_to_int():
-            method = add_method('', 'operator int', True)
+            method = add_method(Object(), 'operator int', True)
             method.operations.append('return value;')
 
         def add_operator_cast_string():
-            method = add_method('', 'operator std::string', True)
+            method = add_method(Object(), 'operator std::string', True)
             for index, obj in enumerate(cls.members):
                 if obj.name != 'value' and index <= len(values):
                     method.operations.append('''if(value == {0})
@@ -144,7 +140,7 @@ class Translator(TranslatorBase):
             method.operations.append('return std::string();')
 
         def add_method_str():
-            method = add_method('string', 'str', True)
+            method = add_method(Objects.STRING, 'str', True)
             for index, obj in enumerate(cls.members):
                 if obj.name != 'value' and index <= len(values):
                     method.operations.append('''if(value == {0})

@@ -79,6 +79,6 @@ class GeneratorObserver:
     def generate(self, writer):
         text = PREDEFINED
         filename = GeneratorObserver.get_observable_name() + '.py'
-        text = text.replace('@{namespace}', writer.namespace)
+        text = text.replace('@{namespace}', 'mg')
         text = text.replace('@{name}', GeneratorObserver.get_observable_name())
         writer.save_file(filename, text)

@@ -69,14 +69,32 @@ class Class(Object):
                 for i, op in enumerate(func.operations):
                     func.operations[i] = re.sub(pattern, repl, op)
         for cls in parser.classes:
+            inner_class_name = cls.name
             cls.name = self.name + cls.name
             cls.group = self.group
             cls.side = self.side
             cls.is_test = self.is_test
             self.inner_classes.append(cls)
+            
+            for obj in parser.objects:
+                if obj.type == inner_class_name:
+                    obj.type = cls.name
+                for arg in obj.template_args:
+                    if arg.type == inner_class_name:
+                        arg.type = cls.name
+
+            for method in parser.functions:
+                for name, arg in method.args:
+                    if arg.type == inner_class_name:
+                        arg.type = cls.name
+                if method.return_type.type == inner_class_name:
+                    method.return_type.type = cls.name
 
         self.members = parser.objects
         self.functions = parser.functions
+        
+        for member in self.members:
+            member.set_default_initial_value()
         return
 
     def on_linked(self, parser):
@@ -124,7 +142,6 @@ class Class(Object):
                 equal = True
                 equal = equal and func.name == method.name
                 # equal = equal and func.args == function.args
-                print func.return_type, method.return_type
                 equal = equal and func.return_type.type == method.return_type.type
                 if equal:
                     func.is_virtual = True

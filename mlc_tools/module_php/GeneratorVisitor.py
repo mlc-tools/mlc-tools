@@ -1,3 +1,4 @@
+from ..base.Parser import Parser
 from ..core.Object import *
 from ..core.Class import Class
 from ..core.Function import Function
@@ -72,16 +73,16 @@ class GeneratorVisitor:
         for visitor in visitors:
             method = Function()
             method.name = 'visit_' + visitor.name[0].lower() + visitor.name[1:]
-            method.return_type = 'void'
-            method.args.append(['ctx', visitor.name + '*'])
+            method.return_type = Objects.VOID
+            method.args.append(['ctx', Parser.create_object(visitor.name + '*')])
             method.is_abstract = True
             acceptor.functions.append(method)
 
         method = Function()
         acceptor.functions.append(method)
         method.name = 'visit'
-        method.return_type = 'void'
-        method.args.append(['ctx', base_class_name + '*'])
+        method.return_type = Objects.VOID
+        method.args.append(['ctx', Parser.create_object(base_class_name + '*')])
         method.operations.append('''
             if(!ctx)
             {
@@ -103,7 +104,7 @@ class GeneratorVisitor:
         method = Function()
         method.name = 'accept'
         method.return_type = Objects.VOID
-        method.args.append(['visitor', base_class_name + '*'])
+        method.args.append(['visitor', Parser.create_object(base_class_name + '*')])
         method.operations.append('$visitor->visit($this);')
         cls.functions.append(method)
         

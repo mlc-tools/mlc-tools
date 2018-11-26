@@ -23,6 +23,8 @@ class Modifiers:
     test = ":test"
     inline = ":inline"
     virtual = ":virtual"
+    pointer = ":pointer"
+    ref = ":ref"
 
     client = ':client'
     server = ':server'

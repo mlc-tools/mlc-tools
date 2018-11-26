@@ -1,4 +1,3 @@
-from mlc_tools.core.Object import Object
 from ..core.Object import Object
 from ..core.Class import Class
 from ..core.Function import Function
@@ -115,6 +114,13 @@ class Parser:
             self.functions.append(method)
         return text
     
+    @staticmethod
+    def create_object(description):
+        parser = Parser('both')
+        parser.parse_text(description)
+        return parser.objects[0]
+
+    
     def parse_object(self, obj, line):
         if ';' in line:
             Error.warning(Error.SYNTAX_WARNING, line)
@@ -146,20 +152,6 @@ class Parser:
             self.parse_object(arg, arg_desc)
             args.append(arg)
         obj.template_args = args
-        
-        # TODO: move to Translator
-        # convert initial value
-        if obj.initial_value is None:
-            if obj.type == 'int':
-                obj.initial_value = "0"
-            elif obj.type == 'float':
-                obj.initial_value = "0.0"
-            elif obj.type == 'bool':
-                obj.initial_value = "false"
-            elif obj.type == 'string':
-                obj.initial_value = '""'
-            elif obj.is_pointer:
-                obj.initial_value = "nullptr"
 
     def parse_function_header(self, method, line):
         line = line.strip()

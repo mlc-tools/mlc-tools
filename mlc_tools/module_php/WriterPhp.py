@@ -3,7 +3,7 @@ from ..core.Function import Function
 from ..core.Class import Class
 from ..utils.Error import Error
 from ..module_php.regex import RegexPatternPhp
-from ..core.Object import AccessSpecifier
+from ..core.Object import AccessSpecifier, Objects
 import re
 
 
@@ -386,7 +386,7 @@ class WriterPhp(Writer):
 
         function = Function()
         function.name = 'set'
-        function.args.append(['value', ''])
+        function.args.append(['value', Objects.VOID])
         function.operations.append('$this->_value = $value;')
         cls.functions.append(function)
 

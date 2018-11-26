@@ -1,7 +1,7 @@
 import sys
 from ..base.SerializerBase import SerializerBase
 from ..core.Class import Class
-from ..core.Object import Object
+from ..core.Object import Object, Objects
 from ..utils.Error import Error
 from .regex import RegexPatternPython
 from .protocols import py_xml
@@ -44,8 +44,12 @@ class Serializer(SerializerBase):
     def build_map_serialization(self, obj_name, obj_template_args, serialization_type, serialize_format):
         key = obj_template_args[0]
         value = obj_template_args[1]
-        key_type = key.type.name if isinstance(key.type, Object) else key.type
-        value_type = value.type.name if isinstance(value.type, Object) else value.type
+        assert (isinstance(key, Object))
+        assert (isinstance(value, Object))
+        assert (isinstance(key.type, str))
+        assert (isinstance(value.type, str))
+        key_type = key.type
+        value_type = value.type
         string = self.parser.serialize_protocol[serialization_type]['map'][0]
         a0 = obj_name
         a1 = self.build_serialize_operation_('key', key_type, None, serialization_type,
@@ -79,7 +83,7 @@ class Serializer(SerializerBase):
         return value
 
     def get_serialization_function_args(self, serialize_type, serialize_format):
-        return ['xml', ''] if serialize_format == 'xml' else ['dictionary', '']
+        return ['xml', Objects.VOID] if serialize_format == 'xml' else ['dictionary', Objects.VOID]
     
     def build_serialize_operation(self, obj, serialization_type, serialize_format):
         return self.build_serialize_operation_(obj.name, obj.type, obj.initial_value,
@@ -117,7 +121,10 @@ class Serializer(SerializerBase):
                                                         serialization_type, serialize_format)
                 else:
                     arg = obj_template_args[0]
-                    arg_type = arg.type.name if isinstance(arg.type, Class) else arg.type
+                    assert (isinstance(arg, Object))
+                    assert (isinstance(arg.type, str))
+                    arg_type = arg.type
+                    type_cls = self.parser.find_class(arg.type)
                     if arg.is_link:
                         type_ = 'list<link>'
                     elif arg_type in self.parser.simple_types:
@@ -125,7 +132,7 @@ class Serializer(SerializerBase):
                         obj_type = arg_type
                     elif arg.is_pointer:
                         type_ = "list<pointer>"
-                    elif isinstance(arg.type, Class) and arg.type.type == 'enum':
+                    elif type_cls and type_cls.type == 'enum':
                         type_ = 'list<string>'
                         arg_0 = 'string'
                     else:

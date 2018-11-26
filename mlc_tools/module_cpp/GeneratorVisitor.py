@@ -1,6 +1,7 @@
 from ..core.Object import *
 from ..core.Class import Class
 from ..core.Function import Function
+from ..base.Parser import Parser
 from ..utils.Error import Error
 
 
@@ -56,13 +57,15 @@ class GeneratorVisitor:
         acceptor.is_abstract = True
         acceptor.is_virtual = True
         acceptor.side = visitors[0].side
+        acceptor.superclasses.append('SerializedObject')
         self.parser.classes.append(acceptor)
 
         for visitor in visitors:
             method = Function()
             method.name = 'visit'
-            method.return_type = 'void'
-            method.args.append(['ctx', visitor.name + '*'])
+            method.return_type = Objects.VOID
+            method.args.append(['ctx', Parser.create_object(visitor.name + '*')])
+            method.args[0][1].denied_intrusive = True
             method.is_abstract = True
             acceptor.functions.append(method)
 
@@ -75,6 +78,6 @@ class GeneratorVisitor:
         method = Function()
         method.name = 'accept'
         method.return_type = Objects.VOID
-        method.args.append(['visitor', 'IVisitor' + base_class_name + '*'])
+        method.args.append(['visitor', Parser.create_object('IVisitor' + base_class_name + '*')])
         method.operations.append('visitor->visit(this);')
         cls.functions.append(method)

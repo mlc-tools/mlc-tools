@@ -25,6 +25,7 @@ class Object:
         self.is_link = ''
         self.side = 'both'
         self.access = AccessSpecifier.public
+        self.denied_intrusive = False
 
     def parse_type(self):
         left = self.type.find('<')
@@ -44,12 +45,12 @@ class Object:
     def check_pointer(self):
         result = '*' in self.type
         self.type = self.type.replace('*', '')
-        return result
+        return result or self.is_pointer
 
     def check_ref(self):
         result = '&' in self.type
         self.type = self.type.replace('&', '')
-        return result
+        return result or self.is_ref
 
     def find_modifiers(self, string):
         args = ''
@@ -69,6 +70,8 @@ class Object:
         self.is_link = self.is_link or Modifiers.link in string
         self.is_const = self.is_const or Modifiers.const in string
         self.is_const = self.is_const or self.is_link
+        self.is_pointer = self.is_pointer or Modifiers.pointer in string
+        self.is_ref = self.is_ref or Modifiers.ref in string
         if self.is_link:
             self.is_pointer = True
 
@@ -89,11 +92,28 @@ class Object:
         string = string.replace(Modifiers.private, '')
         string = string.replace(Modifiers.protected, '')
         string = string.replace(Modifiers.public, '')
+        string = string.replace(Modifiers.ref, '')
+        string = string.replace(Modifiers.pointer, '')
 
         if args:
             string = string[0:left] + args + string[left:]
 
         return string
+
+    def set_default_initial_value(self):
+        # TODO: move to Translator
+        # convert initial value
+        if self.initial_value is None:
+            if self.type == 'int':
+                self.initial_value = "0"
+            elif self.type == 'float':
+                self.initial_value = "0.0"
+            elif self.type == 'bool':
+                self.initial_value = "false"
+            elif self.type == 'string':
+                self.initial_value = '""'
+            elif self.is_pointer:
+                self.initial_value = "nullptr"
 
 
 class Objects:

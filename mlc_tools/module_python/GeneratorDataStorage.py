@@ -1,4 +1,5 @@
 from ..base.GeneratorDataStorageBase import *
+from ..base.Parser import Parser
 from ..core.Object import *
 from ..core.Function import Function
 
@@ -23,7 +24,7 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
 
         method = Function()
         method.name = 'shared'
-        method.return_type = self.name
+        method.return_type = Parser.create_object(self.name)
         method.is_static = True
         method.translated = True
         method.operations.append('        if not {}.__instance:'.format(self.name))
@@ -37,7 +38,7 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
                 map_name = get_data_list_name(get_data_name(class_.name))
                 method = Function()
                 method.name = 'get' + class_.name
-                method.args.append(['name', ''])
+                method.args.append(['name', Objects.VOID])
                 method.operations.append('        if not self._loaded and name not in self.{}:'.format(map_name))
                 method.operations.append('    from .{0} import {0}'.format(class_.name))
                 method.operations.append('    self.{}[name] = {}()'.format(map_name, class_.name))
@@ -49,9 +50,9 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
     def add_initialize_function_json(self):
         method = Function()
         method.name = 'initialize_json'
-        method.return_type = 'void'
+        method.return_type = Objects.VOID
         method.is_const = True
-        method.args.append(['content', 'string'])
+        method.args.append(['content', Objects.STRING])
         method.translated = True
 
         method.operations.append('        js = json.loads(content)')
@@ -62,9 +63,9 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
     def add_initialize_function_xml(self):
         method = Function()
         method.name = 'initialize_xml'
-        method.return_type = 'void'
+        method.return_type = Objects.VOID
         method.is_const = True
-        method.args.append(['content', 'string'])
+        method.args.append(['content', Objects.STRING])
         method.translated = True
 
         method.operations.append('        root = ET.fromstring(content)')

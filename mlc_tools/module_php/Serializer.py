@@ -1,7 +1,7 @@
 import sys
 from ..base.SerializerBase import SerializerBase
 from ..core.Class import Class
-from ..core.Object import Object
+from ..core.Object import Object, Objects
 from ..utils.Error import Error
 from .regex import RegexPatternPhp
 from .protocols import php_xml
@@ -43,11 +43,13 @@ class Serializer(SerializerBase):
     def build_map_serialization(self, obj_name, obj_template_args, serialization_type, serialize_format):
         key = obj_template_args[0]
         value = obj_template_args[1]
-        key_type = key.name if isinstance(key, Class) else key.type
-        key_type = key_type.name if isinstance(key_type, Class) else key_type
-        value_type = value.name if isinstance(value, Class) else value.type
-        value_type = value_type.name if isinstance(value_type, Class) else value_type
-        str = self.serialize_protocol[serialization_type]['map'][0]
+        assert (isinstance(key, Object))
+        assert (isinstance(value, Object))
+        assert (isinstance(key.type, str))
+        assert (isinstance(value.type, str))
+        key_type = key.type
+        value_type = value.type
+        pattern = self.serialize_protocol[serialization_type]['map'][0]
         value_is_pointer = value.is_pointer
     
         def get_create_type_operation(type_):
@@ -75,12 +77,12 @@ class Serializer(SerializerBase):
         for index, a in enumerate(a2):
             a2[index] = a
         a2 = '\n'.join(a2)
-        return str.format(field=a0,
-                          key_serialize=a1,
-                          value_serialize=a2,
-                          key='{}',
-                          owner='$this->',
-                          value=value_declaration) + '\n'
+        return pattern.format(field=a0,
+                              key_serialize=a1,
+                              value_serialize=a2,
+                              key='{}',
+                              owner='$this->',
+                              value=value_declaration) + '\n'
 
     @staticmethod
     def convert_initialize_value(value):
@@ -95,7 +97,7 @@ class Serializer(SerializerBase):
         return value
 
     def get_serialization_function_args(self, serialize_type, serialize_format):
-        return ['xml', ''] if serialize_format == 'xml' else ['json', '']
+        return ['xml', Objects.VOID] if serialize_format == 'xml' else ['json', Objects.VOID]
     
     def build_serialize_operation(self, obj, serialization_type, serialize_format):
         return self.build_serialize_operation_(obj.name, obj.type, obj.initial_value,
@@ -133,7 +135,10 @@ class Serializer(SerializerBase):
                                                         serialization_type, serialize_format)
                 else:
                     arg = obj_template_args[0]
-                    arg_type = arg.type.name if isinstance(arg.type, Class) else arg.type
+                    assert (isinstance(arg, Object))
+                    assert (isinstance(arg.type, str))
+                    arg_type = arg.type
+                    type_cls = self.parser.find_class(arg.type)
                     if arg.is_link:
                         type_ = 'list<link>'
                     elif arg_type in self.parser.simple_types:
@@ -141,7 +146,7 @@ class Serializer(SerializerBase):
                         obj_type = arg_type
                     elif arg.is_pointer:
                         type_ = "list<pointer>"
-                    elif isinstance(arg.type, Class) and arg.type.type == 'enum':
+                    elif type_cls.type == 'enum':
                         type_ = 'list<string>'
                         arg_0 = 'string'
                     else:

@@ -103,6 +103,23 @@ class TestParseClass(unittest.TestCase):
         self.assertEquals(foo.type, 'class')
 
 
+class TestParseFunctionArgs(unittest.TestCase):
+    
+    def test_arg_default_params(self):
+        parser = Parser('client')
+        text = 'function ReturnValue& test_9(int i=0)'
+        parser.parse_text(text)
+        func = parser.functions[0]
+        self.assertTrue(isinstance(func, Function))
+        self.assertEqual(func.name, 'test_9')
+        self.assertEqual(len(func.args), 1)
+        self.assertEqual(len(func.operations), 0)
+        
+        arg = func.args[0][1]
+        self.assertTrue(isinstance(arg, Object))
+        self.assertEqual(arg.type, 'int')
+        self.assertEqual(arg.initial_value, '0')
+
 
 if __name__ == '__main__':
     unittest.main()

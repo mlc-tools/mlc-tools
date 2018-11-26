@@ -1,5 +1,6 @@
+from ..base.Parser import Parser
 from ..core.Class import Class
-from ..core.Object import Object, AccessSpecifier
+from ..core.Object import Object, Objects, AccessSpecifier
 from ..core.Function import Function
 
 
@@ -66,7 +67,7 @@ class GeneratorUnitTestsInterface:
 
         method = Function()
         method.name = 'execute'
-        method.return_type = 'bool'
+        method.return_type = Objects.BOOL
         test.functions.append(method)
         method.operations.append('bool result = true;')
         for func in test.functions:
@@ -92,7 +93,7 @@ class GeneratorUnitTestsInterface:
     def add_method(cls, name):
         method = Function()
         method.name = name
-        method.return_type = 'bool'
+        method.return_type = Objects.BOOL
         method.is_abstract = True
         cls.functions.append(method)
 
@@ -113,8 +114,8 @@ class GeneratorUnitTestsInterface:
 
         method = Function()
         method.name = 'initialize'
-        method.args.append(['logger', 'Logger*'])
-        method.return_type = 'void'
+        method.args.append(['logger', Parser.create_object('Logger*')])
+        method.return_type = Objects.VOID
         test_all.functions.append(method)
         method.operations.append('this->logger = logger;')
         for test in test_all.members:
@@ -123,7 +124,7 @@ class GeneratorUnitTestsInterface:
 
         method = Function()
         method.name = 'execute'
-        method.return_type = 'bool'
+        method.return_type = Objects.BOOL
         test_all.functions.append(method)
         for test in test_all.members:
             var_name = self.get_member_name(test.name)
@@ -138,7 +139,7 @@ class GeneratorUnitTestsInterface:
 
 
 base_classes = '''
-class tests/Logger<SerializedObject>:test
+class tests/Logger<SerializedObject>:test:virtual
 {
     bool result = true
     int tests_count

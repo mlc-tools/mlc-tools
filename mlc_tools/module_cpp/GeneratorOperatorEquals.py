@@ -29,7 +29,6 @@ class GeneratorOperatorEquals:
         operator.return_type = Objects.BOOL
         operator.args.append(['rhs', get_const_ref()])
         operator.is_const = True
-        operator.link()
         body_line = 'result = result && {0} == rhs.{0};'
         operator.operations.append('bool result = true;')
         for m in cls.members:
@@ -45,5 +44,4 @@ class GeneratorOperatorEquals:
         operator.args.append(['rhs', get_const_ref()])
         operator.is_const = True
         operator.operations.append('return !(*this == rhs);')
-        operator.link()
         cls.functions.append(operator)

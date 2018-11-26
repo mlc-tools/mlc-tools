@@ -1,4 +1,5 @@
 from ..base.GeneratorDataStorageBase import *
+from ..base.Parser import Parser
 from ..core.Object import *
 from ..core.Function import Function
 
@@ -30,7 +31,7 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
         self.members.append(obj)
 
         obj = Object()
-        obj.type = 'string'
+        obj.type = Objects.STRING
         obj.name = 'PATH_TO_DATA'
         obj.initial_value = '"assets/data/data.xml"'
         obj.is_static = True
@@ -47,7 +48,7 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
 
         method = Function()
         method.name = 'shared'
-        method.return_type = self.name
+        method.return_type = Parser.create_object(self.name)
         method.is_static = True
         method.translated = True
         method.operations.extend(SHARED_METHOD.split('\n'))
@@ -55,20 +56,20 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
         
         method = Function()
         method.name = 'deserialize_xml'
-        method.args.append(['xml', ''])
+        method.args.append(['xml', Objects.VOID])
         self.functions.append(method)
         method = Function()
         method.name = 'deserialize_json'
-        method.args.append(['xml', ''])
+        method.args.append(['xml', Objects.VOID])
         self.functions.append(method)
 
         method = Function()
         method.name = 'serialize_xml'
-        method.args.append(['xml', ''])
+        method.args.append(['xml', Objects.VOID])
         self.functions.append(method)
         method = Function()
         method.name = 'serialize_json'
-        method.args.append(['xml', ''])
+        method.args.append(['xml', Objects.VOID])
         self.functions.append(method)
 
     def create_getters(self, classes):
@@ -77,7 +78,7 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
                 map_name = get_data_list_name(get_data_name(class_.name))
                 method = Function()
                 method.name = 'get' + class_.name
-                method.args.append(['name', ''])
+                method.args.append(['name', Objects.VOID])
                 method.operations.append(PATTERN_GETTER)
                 method.operations[0] = method.operations[0].replace('@{array}', map_name)
                 method.operations[0] = method.operations[0].replace('@{type}', class_.name)
@@ -93,9 +94,9 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
     def add_initialize_function_json(self):
         method = Function()
         method.name = 'initialize_json'
-        method.return_type = 'void'
+        method.return_type = Objects.VOID
         method.is_const = True
-        method.args.append(['content', 'string'])
+        method.args.append(['content', Objects.STRING])
         method.translated = True
 
         method.operations.append('$json = json_decode(content);')
@@ -106,9 +107,9 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
     def add_initialize_function_xml(self):
         method = Function()
         method.name = 'initialize_xml'
-        method.return_type = 'void'
+        method.return_type = Objects.VOID
         method.is_const = True
-        method.args.append(['content', 'string'])
+        method.args.append(['content', Objects.STRING])
         method.translated = True
 
         method.operations.append('$root = simplexml_load_string(content);')

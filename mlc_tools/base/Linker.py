@@ -82,7 +82,7 @@ class Linker:
             obj.type = obj.find_modifiers(type_name)
             obj.parse_type()
         else:
-            obj.type = cls
+            obj.type = cls.name
         obj.name = ""
         return obj
 
@@ -139,7 +139,7 @@ class Linker:
 
         method = Function()
         method.name = 'get_type'
-        method.return_type = 'string'
+        method.return_type = Objects.STRING
         method.is_const = True
         method.operations.append('return {}::TYPE;'.format(cls.name))
         cls.functions.append(method)

@@ -71,9 +71,15 @@ class Writer(WriterBase):
 
     @staticmethod
     def write_function(method):
-        args = [x[0] for x in method.args]
+        # args = [x[0] for x in method.args]
+        args = []
         if not method.is_static:
-            args.insert(0, 'self')
+            args.append('self')
+        for name, arg in method.args:
+            if arg.initial_value is not None:
+                args.append(name + '=' + Serializer.convert_initialize_value(arg.initial_value))
+            else:
+                args.append(name)
         args = ', '.join(args)
 
         text = PATTERN_METHOD.format(name=method.name,

@@ -1,3 +1,4 @@
+from ..base import Parser
 from ..base.GeneratorDataStorageBase import *
 from ..core.Object import *
 from ..core.Function import Function
@@ -15,7 +16,7 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
     def create_shared_method(self):
         method = Function()
         method.name = 'shared'
-        method.return_type = '{}&:const'.format(self.name)
+        method.return_type = Parser.create_object('{}&:const'.format(self.name))
         method.is_static = True
         method.operations.append('static {} instance;'.format(self.name))
         method.operations.append('return instance;')
@@ -24,7 +25,7 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
     def create_getters(self, classes):
         method = Function()
         method.name = 'get'
-        method.args.append(['name', 'string'])
+        method.args.append(['name', Objects.STRING])
         method.return_type = Object()
         method.return_type.type = 'template <class T> const T*'
         method.is_const = True
@@ -50,9 +51,9 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
     def add_initialize_function_json(self):
         method = Function()
         method.name = 'initialize_json'
-        method.return_type = 'void'
+        method.return_type = Objects.VOID
         method.is_const = True
-        method.args.append(['content', 'string'])
+        method.args.append(['content', Objects.STRING])
         method.translated = True
 
         method.operations.append('Json::Value json;')
@@ -65,9 +66,9 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
     def add_initialize_function_xml(self):
         method = Function()
         method.name = 'initialize_xml'
-        method.return_type = 'void'
+        method.return_type = Objects.VOID
         method.is_const = True
-        method.args.append(['content', 'string'])
+        method.args.append(['content', Objects.STRING])
         method.translated = True
 
         method.operations.append('pugi::xml_document doc;')
