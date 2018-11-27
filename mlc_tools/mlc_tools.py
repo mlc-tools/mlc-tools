@@ -10,6 +10,7 @@ import sys
 
 
 class Mlc:
+
     def __init__(self, **kwargs):
         self.parser = None
         self.configs_directory = ''
@@ -26,7 +27,7 @@ class Mlc:
         self.generate_tests = False
         self.generate_intrusive = False
         self.generate_factory = True
-        
+
         self.filter_code = None
         self.filter_data = None
         self.custom_generator = None
@@ -36,7 +37,7 @@ class Mlc:
         Log.use_colors = kwargs.get('use_colors', False)
         Log.disable_logs = kwargs.get('disable_logs', False)
         self._parse_kwargs(**kwargs)
-        
+
     def _parse_kwargs(self, **kwargs):
         self.configs_directory = kwargs.get('configs_directory', self.configs_directory)
         self.out_directory = kwargs.get('out_directory', self.out_directory)
@@ -52,13 +53,16 @@ class Mlc:
         self.generate_tests = kwargs.get('generate_tests', self.generate_tests)
         self.generate_intrusive = kwargs.get('generate_intrusive', self.generate_intrusive)
         self.generate_factory = kwargs.get('generate_factory', self.generate_factory)
-        
+        if 'add_config' in kwargs:
+            self.additional_config_directories.append(fileutils.normalize_path(kwargs.get('add_config')))
+        if 'add_data' in kwargs:
+            self.additional_data_directories.append(fileutils.normalize_path(kwargs.get('add_data')))
         self.out_directory = fileutils.normalize_path(self.out_directory)
         self.out_data_directory = fileutils.normalize_path(self.out_data_directory)
-        
+
     def generate(self, **kwargs):
         self._parse_kwargs(**kwargs)
-        
+
         def get_config_files():
             all_directories = [self.configs_directory]
             all_directories.extend(self.additional_config_directories)
@@ -68,7 +72,7 @@ class Mlc:
                 add_files = fileutils.get_files_list(directory)
                 add_files = [directory + f for f in add_files]
                 files.extend(add_files)
-    
+
             result_files = []
             for path in files:
                 if path.endswith('.mlc'):

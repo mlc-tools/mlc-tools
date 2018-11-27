@@ -49,7 +49,7 @@ script:
   - mkdir build_xml
   - cd build_xml
   - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DBUILD_XML=ON -DBUILD_JSON=OFF -DBUILD_SIDE=SERVER
-  - make
+  - cmake --build .
   - ./test_mlc_xml ../
   - cd ..
 
