@@ -180,4 +180,6 @@ class Translator(TranslatorBase):
             body = reg[0].sub(reg[1], body)
         for reg in RegexPatternCpp.REPLACES:
             body = body.replace(reg[0], reg[1])
+        for reg in RegexPatternCpp.convert_c17_to_c14:
+            body = reg[0].sub(reg[1], body)
         return body
