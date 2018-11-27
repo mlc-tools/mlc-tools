@@ -7,6 +7,7 @@ setup(
     packages=find_packages(),
     long_description="mlc-tools",
     install_requires=[
+        'enum'
     ]
     # entry_points={
     #     'console_scripts':
