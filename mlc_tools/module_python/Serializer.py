@@ -72,13 +72,17 @@ class Serializer(SerializerBase):
 
     @staticmethod
     def convert_initialize_value(value):
+        assert (value is None or isinstance(value, str))
+        if value is None:
+            return None
+        
         if value == 'true':
             return 'True'
         if value == 'false':
             return 'False'
         if value == 'nullptr':
             return 'None'
-        if isinstance(value, str) and '::' in value:
+        if '::' in value:
             value = value.replace('::', '.')
         return value
 
@@ -99,8 +103,6 @@ class Serializer(SerializerBase):
         type_ = obj_type
         cls = self.parser.find_class(type_)
         arg_0 = obj_template_args[0].type if len(obj_template_args) > 0 else 'unknown_arg'
-        if isinstance(arg_0, Class):
-            arg_0 = arg_0.name
         if cls and cls.type == 'enum':
             type_ = 'enum'
         elif obj_type not in self.parser.simple_types and type_ != "list" and type_ != "map":

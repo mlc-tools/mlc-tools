@@ -23,8 +23,6 @@ class Function:
         self.specific_implementations = ''
 
     def get_return_type(self):
-        if isinstance(self.return_type, str):
-            self.link()
         return self.return_type
 
     def parse_body(self, body):

@@ -39,9 +39,7 @@ class Writer(WriterBase):
                     imports += include_patter.format(obj.type)
             elif obj.type == 'list' or obj.type == 'map':
                 for arg in obj.template_args:
-                    if isinstance(arg, Class) and arg.name != cls.name:
-                        imports += include_patter.format(arg.name)
-                    elif self.parser.find_class(arg.type) and arg.type != cls.name:
+                    if self.parser.find_class(arg.type) and arg.type != cls.name:
                         imports += include_patter.format(arg.type)
         imports += include_patter.format('Factory')
         if 'DataStorage' in functions:
@@ -165,12 +163,12 @@ class Writer(WriterBase):
 
     @staticmethod
     def convert_initialize_value(value):
-        if value and value.startswith('this'):
-            value = '$' + value
+        assert (value is None or isinstance(value, str))
         if value is None:
             value = 'null'
-        if isinstance(value, str):
-            value = RegexPatternPhp.INITIALIZE[0].sub(RegexPatternPhp.INITIALIZE[1], value)
+        if value and value.startswith('this'):
+            value = '$' + value
+        value = RegexPatternPhp.INITIALIZE[0].sub(RegexPatternPhp.INITIALIZE[1], value)
         return value
 
 

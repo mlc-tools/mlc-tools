@@ -3,7 +3,6 @@ from ..base.SerializerBase import SerializerBase
 from ..core.Class import Class
 from ..core.Object import Object, Objects
 from ..utils.Error import Error
-from .regex import RegexPatternPhp
 from .protocols import php_xml
 from .protocols import php_json
 
@@ -57,8 +56,7 @@ class Serializer(SerializerBase):
                 'list': 'array',
                 'map': 'array',
             }
-            value_type = type_.type if isinstance(type_, Object) else type_
-            return types[value_type] if value_type in types else 'new ' + value_type
+            return types[type_] if type_ in types else 'new ' + type_
     
         if value_type not in self.parser.simple_types:
             value_declaration = '$value = {}();'.format(get_create_type_operation(value_type))
@@ -113,8 +111,6 @@ class Serializer(SerializerBase):
         type_ = obj_type
         cls = self.parser.find_class(type_)
         arg_0 = obj_template_args[0].type if len(obj_template_args) > 0 else 'unknown_arg'
-        if isinstance(arg_0, Class):
-            arg_0 = arg_0.name
         if cls and cls.type == 'enum':
             type_ = 'enum'
         elif obj_type not in self.parser.simple_types and type_ != "list" and type_ != "map":

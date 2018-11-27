@@ -130,10 +130,12 @@ class Serializer(SerializerBase):
     def build_map_deserialization(self, obj_name, obj_template_args, serialize_format):
         key = obj_template_args[0]
         value = obj_template_args[1]
-        key_type = key.name if isinstance(key, Class) else key.type
-        key_type = key_type.name if isinstance(key_type, Class) else key_type
-        value_type = value.name if isinstance(value, Class) else value.type
-        value_type = value_type.name if isinstance(value_type, Class) else value_type
+        assert (isinstance(key, Object))
+        assert (isinstance(value, Object))
+        assert (isinstance(key.type, str))
+        assert (isinstance(value.type, str))
+        key_type = key.type
+        value_type = value.type
         pattern = self.serialize_protocol[DESERIALIZATION]['map'][0]
         if key.is_link:
             key_str = 'const {}* key(nullptr);'.format(key_type)
@@ -142,7 +144,7 @@ class Serializer(SerializerBase):
         else:
             key_str = '{} key;'.format(self.convert_type(key_type))
     
-        value_is_pointer = value.is_pointer if isinstance(value, Object) else False
+        value_is_pointer = value.is_pointer
         a0 = obj_name
         a1 = self.build_serialize_operation_('key', key_type, None, DESERIALIZATION, [],
                                              key.is_pointer, key.is_link, serialize_format)

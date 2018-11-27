@@ -223,6 +223,7 @@ class Writer(WriterBase):
 
     @staticmethod
     def convert_type(type_of_object):
+        assert (isinstance(type_of_object, str))
         types = {
             'list': 'std::vector',
             'map': 'std::map',
@@ -231,8 +232,6 @@ class Writer(WriterBase):
         }
         if type_of_object in types:
             return types[type_of_object]
-        if isinstance(type_of_object, Object):
-            return Writer.convert_type(type_of_object.name)
         return type_of_object
 
     @staticmethod
@@ -279,12 +278,9 @@ class Writer(WriterBase):
         forward_declarations_out = set()
 
         def add(set_, obj):
-            if isinstance(obj, str):
-                set_.add(obj)
-            else:
-                set_.add(self.convert_type(obj.type))
-                for arg in obj.template_args:
-                    add(forward_declarations, arg)
+            set_.add(self.convert_type(obj.type))
+            for arg in obj.template_args:
+                add(forward_declarations, arg)
         
         # members
         for member in cls.members:

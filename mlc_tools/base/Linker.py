@@ -35,9 +35,10 @@ class Linker:
         if len(cls.superclasses) == 0:
             return
         for superclass in cls.superclasses:
-            if not isinstance(superclass, Class):
+            assert (isinstance(superclass, Class))
+            if superclass.__class__ != Class:
                 Error.exit(Error.INTERNAL_ERROR)
-                Linker._generate_inline_classes(parser, superclass)
+
             if not superclass.is_inline:
                 continue
             for obj in superclass.members:
@@ -66,11 +67,11 @@ class Linker:
     def _convert_templates(parser, member):
         args = []
         for arg in member.template_args:
-            if isinstance(arg, Object):
+            if arg.__class__ == Object:
                 args.append(arg)
             else:
                 args.append(Linker.get_object_type(parser, arg))
-                if isinstance(args[-1], Object):
+                if args[-1].__class__ == Object:
                     Linker._convert_templates(parser, args[-1])
         member.template_args = args
 

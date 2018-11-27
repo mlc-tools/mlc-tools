@@ -14,12 +14,10 @@ class Validator:
         for cls in parser.classes:
             for member in cls.members:
                 if member.type == 'map':
-                    key_type = member.template_args[0]
-                    key_type = key_type if isinstance(key_type, str) else key_type.type
+                    key_type = member.template_args[0].type
                     cls_type = parser.find_class(key_type)
                     if cls_type is not None and cls_type.type != 'enum':
-                        value_type = member.template_args[1] if isinstance(member.template_args[1], str) else \
-                            member.template_args[1].type
+                        value_type = member.template_args[1].type
                         Error.exit(Error.OBJECT_IS_KEY_OF_MAP, cls.name, key_type, value_type, member.name)
                 if cls.type == 'enum' and member.initial_value is not None:
                     if '|' in member.initial_value or \

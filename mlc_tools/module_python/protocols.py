@@ -174,10 +174,7 @@ $(OWNER)$(FIELD) = list()
 #link
 #serialize:
 from .$(TYPE) import $(TYPE)
-        if isinstance($(OWNER)$(FIELD), $(TYPE)):
-            xml.set("$(FIELD)", $(OWNER)$(FIELD).name)
-        else:
-            xml.set("$(FIELD)", $(OWNER)$(FIELD))
+        xml.set("$(FIELD)", $(OWNER)$(FIELD).name)
 #deserialize:
 name_$(FIELD) = xml.get("$(FIELD)")
         from .$(TYPE) import $(TYPE)
@@ -318,11 +315,8 @@ $(OWNER)$(FIELD) = list()
 #link
 #serialize:
 from .$(TYPE) import $(TYPE)
-        if isinstance($(OWNER)$(FIELD), $(TYPE)):
-            from .$(TYPE) import $(TYPE)
-            dictionary['$(FIELD)'] = $(OWNER)$(FIELD).name
-        else:
-            dictionary['$(FIELD)'] = $(OWNER)$(FIELD)
+        from .$(TYPE) import $(TYPE)
+        dictionary['$(FIELD)'] = $(OWNER)$(FIELD).name
 #deserialize:
 name = dictionary["$(FIELD)"]
         $(OWNER)$(FIELD) = DataStorage.shared().get$(TYPE)(name)
