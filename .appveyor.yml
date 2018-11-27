@@ -25,6 +25,7 @@ environment:
         - TOOLCHAIN: msvc17
 
 install:
+    - pip install enum --user
 
 build_script:
     # скрипт сборки проекта:
