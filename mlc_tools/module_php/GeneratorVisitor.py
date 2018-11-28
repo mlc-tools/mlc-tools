@@ -8,21 +8,21 @@ from ..utils.Error import Error
 class GeneratorVisitor:
 
     def __init__(self):
-        self.parser = None
+        self.model = None
         self.base_visitor_classes = {}
         self.acceptors_interfaces = []
 
-    def generate(self, parser):
-        self.parser = parser
+    def generate(self, model):
+        self.model = model
 
         # find visitor and bases classes
-        for cls in parser.classes:
+        for cls in model.classes:
             base_class_name = self.get_base_visitor_name(cls)
             if base_class_name is None:
                 continue
             if base_class_name not in self.base_visitor_classes:
                 self.base_visitor_classes[base_class_name] = []
-                base_class = parser.find_class(base_class_name)
+                base_class = model.get_class(base_class_name)
                 self.base_visitor_classes[base_class_name].append(base_class)
             self.base_visitor_classes[base_class_name].append(cls)
 
@@ -34,13 +34,13 @@ class GeneratorVisitor:
                 self.add_accept_method(visitor, base_class_name)
                 
         # change name of methods to classes extends IVisitor interfaces
-        for cls in parser.classes:
+        for cls in model.classes:
             superclass_name = cls.superclasses[0] if cls.superclasses else None
             while superclass_name is not None:
                 if superclass_name in self.acceptors_interfaces:
                     self.override_methods(cls)
                     break
-                superclass = parser.find_class(superclass_name)
+                superclass = model.get_class(superclass_name)
                 superclass_name = superclass.superclasses[0] if superclass.superclasses else None
 
     def get_base_visitor_name(self, cls):
@@ -48,7 +48,7 @@ class GeneratorVisitor:
             if superclass_name in self.base_visitor_classes:
                 return superclass_name
 
-            superclass = self.parser.find_class(superclass_name)
+            superclass = self.model.get_class(superclass_name)
             if not superclass:
                 if superclass_name.startswith('IVisitor'):
                     # Correct situation. The class can be inherited from the IVisitor interface
@@ -67,7 +67,7 @@ class GeneratorVisitor:
         acceptor.is_abstract = True
         acceptor.is_virtual = True
         acceptor.side = visitors[0].side
-        self.parser.classes.append(acceptor)
+        self.model.classes.append(acceptor)
         self.acceptors_interfaces.append(acceptor.name)
 
         for visitor in visitors:

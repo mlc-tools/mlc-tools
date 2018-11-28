@@ -8,26 +8,26 @@ class GeneratorUnitTestsInterface:
 
     def __init__(self):
         self.tests = []
-        self.parser = None
+        self.model = None
         self.tests_interface_methods_count = 0
         self.tests_implemented_methods_count = 0
 
-    def generate(self, parser):
-        self.parser = parser
+    def generate(self, model):
+        self.model = model
         tests = []
-        for cls in parser.classes:
+        for cls in model.classes:
             test = self.generate_test_interface(cls)
             if test:
                 tests.append(test)
         self.generate_base_classes()
-        parser.classes.extend(tests)
-        parser.classes.append(self.generate_all_tests_class())
+        model.classes.extend(tests)
+        model.classes.append(self.generate_all_tests_class())
 
     def generate_base_classes(self):
         base = base_classes
         base = base.replace('@{all_methods}', str(self.tests_interface_methods_count))
         base = base.replace('@{implemented_methods}', str(self.tests_implemented_methods_count))
-        self.parser.parse_text(base)
+        self.model.parser.parse_text(base)
 
     @staticmethod
     def get_member_name(cls_name):
@@ -54,7 +54,7 @@ class GeneratorUnitTestsInterface:
                 generated_functions.append('test_' + func.name)
                 self.tests_interface_methods_count += 1
 
-        impl = self.parser.find_class(test.name[1:])
+        impl = self.model.get_class(test.name[1:])
         if impl:
             for func in impl.functions:
                 if func.name.startswith('test_') and func.name not in generated_functions:
@@ -105,7 +105,7 @@ class GeneratorUnitTestsInterface:
         test_all.superclasses.append('TestCase')
 
         for test in self.tests:
-            if self.parser.find_class(test.name[1:]):
+            if self.model.get_class(test.name[1:]):
                 var_name = self.get_member_name(test.name[1:])
                 member = Object()
                 member.type = test.name[1:]

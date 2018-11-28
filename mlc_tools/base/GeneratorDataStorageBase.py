@@ -68,16 +68,16 @@ class GeneratorDataStorageBase(Class):
 
     def __init__(self):
         Class.__init__(self)
-        self.parser = None
+        self.model = None
 
-    def generate(self, parser):
-        self.parser = parser
+    def generate(self, model):
+        self.model = model
 
         self.name = 'DataStorage'
         self.is_serialized = True
 
-        for class_ in parser.classes:
-            if class_.is_storage and (class_.side == parser.side or class_.side == 'both'):
+        for class_ in model.classes:
+            if class_.is_storage and (class_.side == model.side or class_.side == 'both'):
                 obj = Object()
                 obj.type = 'map'
                 obj.name = get_data_list_name(get_data_name(class_.name))
@@ -98,7 +98,7 @@ class GeneratorDataStorageBase(Class):
         self.create_shared_method()
         self.add_initialize_function_xml()
         self.add_initialize_function_json()
-        self.create_getters(parser.classes)
+        self.create_getters(model.classes)
 
     def add_initialize_function_xml(self):
         pass

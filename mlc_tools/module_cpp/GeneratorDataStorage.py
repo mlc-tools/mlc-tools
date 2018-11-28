@@ -9,9 +9,9 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
     def __init__(self):
         GeneratorDataStorageBase.__init__(self)
 
-    def generate(self, parser):
-        GeneratorDataStorageBase.generate(self, parser)
-        parser.classes.append(self)
+    def generate(self, model):
+        GeneratorDataStorageBase.generate(self, model)
+        model.classes.append(self)
 
     def create_shared_method(self):
         method = Function()
@@ -37,7 +37,7 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
     def generate_implementations(self, classes, getter):
         implementations = ''
         for class_ in classes:
-            if class_.is_storage and (class_.side == self.parser.side or class_.side == 'both'):
+            if class_.is_storage and (class_.side == self.model.side or class_.side == 'both'):
                 impl = '''
                 template<>const {type}* DataStorage::get(const std::string& name) const
                 {{

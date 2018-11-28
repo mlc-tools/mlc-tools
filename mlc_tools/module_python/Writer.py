@@ -40,7 +40,7 @@ class Writer(WriterBase):
         name += '(' + superclass_name + ')'
         
         for obj in cls.members:
-            type_class = self.parser.find_class(obj.type)
+            type_class = self.model.get_class(obj.type)
             if type_class and type_class.type == 'enum':
                 imports += '\nfrom .{0} import {0}'.format(type_class.name)
 
@@ -111,7 +111,7 @@ class Writer(WriterBase):
             if type_ == "map":
                 value = "{}"
             else:
-                if self.parser.find_class(obj.type):
+                if self.model.get_class(obj.type):
                     value = obj.type + '()'
                     imports += 'from .{0} import {0}\n        '.format(obj.type)
         if value and value.endswith('f'):

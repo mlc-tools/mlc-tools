@@ -6,5 +6,5 @@ class GeneratorPackage:
         pass
 
     @staticmethod
-    def generate(parser, writer):
+    def generate(model, writer):
         writer.save_file('__init__.py', '')

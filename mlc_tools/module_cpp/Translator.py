@@ -9,7 +9,7 @@ class Translator(TranslatorBase):
     def __init__(self):
         TranslatorBase.__init__(self)
 
-    def translate_function(self, cls, method, parser):
+    def translate_function(self, cls, method, model):
         if not method.translated:
             body = '\n'.join(method.operations)
             body = self.translate_function_body(body)
@@ -27,7 +27,7 @@ class Translator(TranslatorBase):
         func = Translator.replace_by_regex(func)
         # func = Translator.convert_braces_to_tabs(func)
         # func = Translator.remove_double_eol(func)
-        # func = Translator.add_imports(cls, func, parser)
+        # func = Translator.add_imports(cls, func, model)
         return func
 
     def convert_to_enum(self, cls):

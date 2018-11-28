@@ -10,9 +10,9 @@ class Generator(GeneratorBase):
     def __init__(self):
         GeneratorBase.__init__(self)
 
-    def generate(self, parser, writer):
-        GeneratorBase.generate(self, parser, writer)
-        GeneratorDataStorage().generate(parser)
-        GeneratorVisitor().generate(parser)
-        GeneratorFactory().generate(parser, writer)
+    def generate(self, model, writer):
+        GeneratorBase.generate(self, model, writer)
+        GeneratorDataStorage().generate(model)
+        GeneratorVisitor().generate(model)
+        GeneratorFactory().generate(model, writer)
         GeneratorObserver().generate(writer)

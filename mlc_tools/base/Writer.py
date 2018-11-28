@@ -14,12 +14,12 @@ def add_dict(inDict, toDict):
 
 class Writer:
 
-    def __init__(self, parser, serialize_format, namespace):
-        self.parser = parser
+    def __init__(self, model, serialize_format, namespace):
+        self.model = model
         self.created_files = []
-        self.simple_types = parser.simple_types
+        self.simple_types = model.simple_types
         self.serialize_format = serialize_format
-        self.serialize_protocol = self.parser.serialize_protocol
+        self.serialize_protocol = self.model.serialize_protocol
         self.namespace = namespace
         self.files = {}
         self.out_directory = ''

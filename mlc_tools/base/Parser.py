@@ -1,3 +1,4 @@
+from ..base.Model import Model
 from ..core.Object import Object
 from ..core.Class import Class
 from ..core.Function import Function
@@ -5,31 +6,17 @@ from ..utils.Error import Error
 from ..utils.common import parse_object, smart_split
 import re
 
+
 class Parser:
 
-    def __init__(self, side):
-        self.classes = []
-        self.classes_for_data = []
-        self.objects = []
-        self.functions = []
-        self.side = side
-        self.simple_types = ["int", "float", "bool", "string"]
-        self.serialize_protocol = []
+    def __init__(self, model):
+        self.model = model
         return
-
-    def is_side(self, side):
-        return self.side == 'both' or side == self.side or side == 'both'
 
     def parse_files(self, files):
         for path in files:
             text = open(path).read()
             self.parse_text(text)
-
-    def find_class(self, name):
-        for cls in self.classes:
-            if cls.name == name:
-                return cls
-        return None
 
     def parse_text(self, text):
         text = self.remove_comments(text)
@@ -69,17 +56,19 @@ class Parser:
         if is_abstract:
             cls.is_abstract = True
 
-        if not self.is_side(cls.side):
+        if not self.model.is_side(cls.side):
             if cls.is_storage:
-                self.classes_for_data.append(cls)
+                self.model.classes_for_data.append(cls)
             return text
-
-        cls.parse_body(Parser(self.side), body)
-        if self.find_class(cls.name):
+        
+        parser = Parser(Model())
+        parser.model.side = self.model.side
+        cls.parse_body(parser, body)
+        if self.model.get_class(cls.name):
             Error.exit(Error.DUBLICATE_CLASS, cls.name)
         for inner_cls in cls.inner_classes:
-            self.classes.append(inner_cls)
-        self.classes.append(cls)
+            self.model.classes.append(inner_cls)
+        self.model.classes.append(cls)
         return text
 
     def _create_enum_class(self, text):
@@ -87,10 +76,12 @@ class Parser:
         cls = Class()
         cls.type = 'enum'
         cls.parse(header)
-        if not self.is_side(cls.side):
+        if not self.model.is_side(cls.side):
             return text
-        cls.parse_body(Parser(self.side), body)
-        self.classes.append(cls)
+        parser = Parser(Model())
+        parser.model.side = self.model.side
+        cls.parse_body(parser, body)
+        self.model.classes.append(cls)
         return text
 
     def _create_member(self, text):
@@ -101,7 +92,7 @@ class Parser:
         else:
             text = ""
         obj = Object()
-        self.objects.append(obj)
+        self.model.objects.append(obj)
         self.parse_object(obj, line)
         return text
 
@@ -109,18 +100,17 @@ class Parser:
         body, header, text = Parser.parse_body(text)
         method = Function()
         self.parse_function_header(method, header)
-        if self.is_side(method.side):
+        if self.model.is_side(method.side):
             method.parse_body(body)
-            self.functions.append(method)
+            self.model.functions.append(method)
         return text
     
     @staticmethod
     def create_object(description):
-        parser = Parser('both')
+        parser = Parser(Model())
         parser.parse_text(description)
-        return parser.objects[0]
+        return parser.model.objects[0]
 
-    
     def parse_object(self, obj, line):
         if ';' in line:
             Error.warning(Error.SYNTAX_WARNING, line)
@@ -142,7 +132,7 @@ class Parser:
         obj.type = obj.find_modifiers(obj.type)
         obj.is_pointer = obj.check_pointer()
         obj.is_ref = obj.check_ref()
-        if not self.is_side(obj.side):
+        if not self.model.is_side(obj.side):
             return
         
         # recursive parsing template arguments
@@ -163,10 +153,9 @@ class Parser:
 
         for arg in args:
             arg = arg.strip()
-            is_const = False
-            # TODO: deprecated
+
+            # TODO: deprecated. replace to assert
             if arg.startswith('const '):
-                is_const = True
                 arg = arg[len('const '):]
 
             obj = Object()
@@ -179,7 +168,7 @@ class Parser:
         k = line.rfind(' ')
 
         name_s = line[k:].strip()
-        name_s = method._find_modifiers(name_s)
+        name_s = method.find_modifiers(name_s)
         method.name = name_s
 
         return_s = line[:k].strip()
@@ -236,7 +225,7 @@ class Parser:
     def load_default_serialize_protocol(self, text):
         lines = text.split('\n')
         supported_types = []
-        supported_types.extend(self.simple_types)
+        supported_types.extend(self.model.simple_types)
         supported_types.append('serialized')
         supported_types.append('pointer')
         supported_types.append('list<serialized>')
@@ -247,7 +236,7 @@ class Parser:
         supported_types.append('map')
         supported_types.append('enum')
         supported_types.append('list<enum>')
-        for type_ in self.simple_types:
+        for type_ in self.model.simple_types:
             list_type = "list<{0}>".format(type_)
             supported_types.append(list_type)
 
@@ -256,25 +245,25 @@ class Parser:
         serialize_protocol.append({})
         for x in range(2):
             for type_ in supported_types:
-                simple = type_ in self.simple_types
+                simple = type_ in self.model.simple_types
                 p0 = self._load_protocol(lines, x, type_, True if simple else None, optional=type_ == 'list<enum>')
                 p1 = p0 if not simple else self._load_protocol(lines, x, type_, False)
                 serialize_protocol[x][type_] = []
                 serialize_protocol[x][type_].extend([p0, p1])
-        self.serialize_protocol = serialize_protocol
+        self.model.serialize_protocol = serialize_protocol
 
     @staticmethod
     def _load_protocol(lines, serialize_type, type_object, initial_value=None, optional=False):
-        stypes = ['serialize', 'deserialize']
-        sinit = ['with default value', 'without default value']
+        serialize_types = ['serialize', 'deserialize']
+        serialize_init = ['with default value', 'without default value']
         in_type = False
         in_serialize = False
         in_initial_value = initial_value is None
         pattern = []
-        for oline in lines:
-            if oline.endswith('\n'):
-                oline = oline[0:-1]
-            line = oline.strip()
+        for original_line in lines:
+            if original_line.endswith('\n'):
+                original_line = original_line[0:-1]
+            line = original_line.strip()
             if not line:
                 continue
             if not in_type and line.startswith('#'):
@@ -282,17 +271,17 @@ class Parser:
                 for type_ in types:
                     in_type = in_type or (type_object == type_.strip())
                 continue
-            if in_type and line.startswith('#' + stypes[serialize_type]):
+            if in_type and line.startswith('#' + serialize_types[serialize_type]):
                 in_serialize = True
                 continue
             if in_type and in_serialize and not in_initial_value and \
-                    line.startswith('#' + sinit[0 if initial_value else 1]):
+                    line.startswith('#' + serialize_init[0 if initial_value else 1]):
                 in_initial_value = True
                 continue
             if in_type and in_serialize and in_initial_value:
                 if line.startswith('#'):
                     break
-                pattern.append(oline)
+                pattern.append(original_line)
         def_ = pattern
         pattern = '\n'.join(pattern)
         # standard serialize
@@ -317,11 +306,10 @@ class Parser:
 
         if not pattern and not optional:
             print('cannot find pattern for args:')
-            print(type_object, stypes[serialize_type], initial_value)
+            print(type_object, serialize_types[serialize_type], initial_value)
             print('in_type', in_type)
             print('in_serialize', in_serialize)
             print('in_initial_value', in_initial_value)
             print(def_)
             exit(-1)
         return pattern
-

@@ -10,10 +10,10 @@ class Translator(TranslatorBase):
         TranslatorBase.__init__(self)
         pass
 
-    def translate_function(self, cls, method, parser):
+    def translate_function(self, cls, method, model):
         if not method.translated:
             body = '\n'.join(method.operations)
-            body = self.translate_function_body(cls, body, parser)
+            body = self.translate_function_body(cls, body, model)
             method.body = body
         else:
             if len(method.operations) > 0:
@@ -22,13 +22,13 @@ class Translator(TranslatorBase):
                 method.body = 'pass'
 
     @staticmethod
-    def translate_function_body(cls, func, parser):
+    def translate_function_body(cls, func, model):
         if not func:
             func = 'pass'
         func = Translator.replace_by_regex(func)
         func = Translator.convert_braces_to_tabs(func)
         func = Translator.remove_double_eol(func)
-        func = Translator.add_imports(cls, func, parser)
+        func = Translator.add_imports(cls, func, model)
         return func
     
     def convert_to_enum(self, cls):
@@ -64,14 +64,14 @@ class Translator(TranslatorBase):
         return values
 
     @staticmethod
-    def add_imports(cls_owner, func, parser):
+    def add_imports(cls_owner, func, model):
         if not func:
             return func
         if 'DataStorage' in func:
             func = Translator.get_tabs(2) + 'from .DataStorage import DataStorage\n' + func
         if RegexPatternPython.FACTORY.search(func):
             func = Translator.get_tabs(2) + 'from .Factory import Factory\n' + func
-        for cls in parser.classes:
+        for cls in model.classes:
             if cls.name not in RegexPatternPython.regs_class_names:
                 RegexPatternPython.regs_class_names[cls.name] = re.compile(r'\b{}\b'.format(cls.name))
             pattern = RegexPatternPython.regs_class_names[cls.name]

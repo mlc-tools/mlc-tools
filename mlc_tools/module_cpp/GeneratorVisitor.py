@@ -8,20 +8,20 @@ from ..utils.Error import Error
 class GeneratorVisitor:
 
     def __init__(self):
-        self.parser = None
+        self.model = None
         self.base_visitor_classes = {}
 
-    def generate(self, parser):
-        self.parser = parser
+    def generate(self, model):
+        self.model = model
 
         # find visitor and bases classes
-        for cls in parser.classes:
+        for cls in model.classes:
             base_class_name = self.get_base_visitor_name(cls)
             if base_class_name is None:
                 continue
             if base_class_name not in self.base_visitor_classes:
                 self.base_visitor_classes[base_class_name] = []
-                base_class = parser.find_class(base_class_name)
+                base_class = model.get_class(base_class_name)
                 self.base_visitor_classes[base_class_name].append(base_class)
             self.base_visitor_classes[base_class_name].append(cls)
 
@@ -37,7 +37,7 @@ class GeneratorVisitor:
             if superclass_name in self.base_visitor_classes:
                 return superclass_name
 
-            superclass = self.parser.find_class(superclass_name)
+            superclass = self.model.get_class(superclass_name)
             if not superclass:
                 # TODO: remove print
                 if superclass_name.startswith('IVisitor'):
@@ -58,7 +58,7 @@ class GeneratorVisitor:
         acceptor.is_virtual = True
         acceptor.side = visitors[0].side
         acceptor.superclasses.append('SerializedObject')
-        self.parser.classes.append(acceptor)
+        self.model.classes.append(acceptor)
 
         for visitor in visitors:
             method = Function()

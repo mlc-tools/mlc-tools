@@ -46,8 +46,8 @@ def simple_test():
                     generate_tests=True,
                     generate_intrusive=True,
                     generate_factory=True)
-    generator.additional_config_directories.append(root + 'config_additional')
-    generator.additional_data_directories.append(root + 'data_additional')
+    generator.add_config_directories(root + 'config_additional')
+    generator.add_data_directories(root + 'data_additional')
     run_tests(generator, root, True)
 
 
@@ -94,5 +94,6 @@ if __name__ == '__main__':
     test_functions()
     unit_tests_generator()
     test_virtual_methods()
+    
     # Dont run this test in CI
     # test_database()

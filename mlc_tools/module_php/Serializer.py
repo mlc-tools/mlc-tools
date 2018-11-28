@@ -58,7 +58,7 @@ class Serializer(SerializerBase):
             }
             return types[type_] if type_ in types else 'new ' + type_
     
-        if value_type not in self.parser.simple_types:
+        if value_type not in self.model.simple_types:
             value_declaration = '$value = {}();'.format(get_create_type_operation(value_type))
         else:
             value_declaration = ''
@@ -109,18 +109,18 @@ class Serializer(SerializerBase):
             index = 1
 
         type_ = obj_type
-        cls = self.parser.find_class(type_)
+        cls = self.model.get_class(type_)
         arg_0 = obj_template_args[0].type if len(obj_template_args) > 0 else 'unknown_arg'
         if cls and cls.type == 'enum':
             type_ = 'enum'
-        elif obj_type not in self.parser.simple_types and type_ != "list" and type_ != "map":
+        elif obj_type not in self.model.simple_types and type_ != "list" and type_ != "map":
             if is_link:
                 type_ = 'link'
             elif obj_is_pointer:
                 type_ = "pointer"
             else:
                 type_ = "serialized"
-        elif obj_type in self.parser.simple_types:
+        elif obj_type in self.model.simple_types:
             type_ = obj_type
         else:
             if len(obj_template_args) > 0:
@@ -134,10 +134,10 @@ class Serializer(SerializerBase):
                     assert (isinstance(arg, Object))
                     assert (isinstance(arg.type, str))
                     arg_type = arg.type
-                    type_cls = self.parser.find_class(arg.type)
+                    type_cls = self.model.get_class(arg.type)
                     if arg.is_link:
                         type_ = 'list<link>'
-                    elif arg_type in self.parser.simple_types:
+                    elif arg_type in self.model.simple_types:
                         type_ = "list<{}>".format(arg_type)
                         obj_type = arg_type
                     elif arg.is_pointer:

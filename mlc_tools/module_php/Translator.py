@@ -9,19 +9,19 @@ class Translator(TranslatorBase):
     def __init__(self):
         TranslatorBase.__init__(self)
     
-    def translate_function(self, cls, method, parser):
+    def translate_function(self, cls, method, model):
         if not method.translated:
             body = '\n'.join(method.operations)
-            body = self.translate_function_body(cls, body, parser, method.args)
+            body = self.translate_function_body(cls, body, model, method.args)
             method.body = body
         else:
             if len(method.operations) > 0:
                 method.body = '\n        '.join(method.operations)
     
     @staticmethod
-    def translate_function_body(cls, func, parser, args):
-        func = Translator.replace_by_regex(func, parser, args)
-        func = Translator.add_imports(cls, func, parser)
+    def translate_function_body(cls, func, model, args):
+        func = Translator.replace_by_regex(func, model, args)
+        func = Translator.add_imports(cls, func, model)
         return func
     
     def convert_to_enum(self, cls):
@@ -57,14 +57,14 @@ class Translator(TranslatorBase):
         return values
     
     @staticmethod
-    def add_imports(cls_owner, func, parser):
+    def add_imports(cls_owner, func, model):
         # if not func:
         #     return func
         # if 'DataStorage' in func:
         #     func = 'from .DataStorage import DataStorage\n' + func
         # if RegexPatternPython.FACTORY.search(func):
         #     func = 'from .Factory import Factory\n' + func
-        # for cls in parser.classes:
+        # for cls in model.classes:
         #     if cls.name not in RegexPatternPython.regs_class_names:
         #         RegexPatternPython.regs_class_names[cls.name] = re.compile(r'\b{}\b'.format(cls.name))
         #     pattern = RegexPatternPython.regs_class_names[cls.name]
@@ -79,7 +79,7 @@ class Translator(TranslatorBase):
         return func
     
     @staticmethod
-    def replace_by_regex(func, parser, function_args):
+    def replace_by_regex(func, model, function_args):
         function_args = ', '.join(['$' + x[0] for x in function_args])
         
         if not func and not function_args:
@@ -143,7 +143,7 @@ class Translator(TranslatorBase):
         for i, string in enumerate(strings):
             func = func.replace(string_pattern % i, string)
     
-        for cls in parser.classes:
+        for cls in model.classes:
             if cls.name in func:
                 func = 'require_once "{}.php";\n'.format(cls.name) + func
     

@@ -55,7 +55,7 @@ class Function:
         self.operations = [o for o in operations if o]
         return
 
-    def _find_modifiers(self, string):
+    def find_modifiers(self, string):
         if Modifiers.server in string:
             self.side = Modifiers.side_server
         if Modifiers.client in string:

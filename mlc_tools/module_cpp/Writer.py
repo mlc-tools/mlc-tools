@@ -172,7 +172,7 @@ class Writer(WriterBase):
     def convert_initial_value(self, object_):
         if object_.is_pointer and object_.initial_value == '0':
             return 'nullptr'
-        type_class = self.parser.find_class(object_.type)
+        type_class = self.model.get_class(object_.type)
         if type_class and type_class.type == 'enum':
             assert (len(type_class.members) > 0)
             return '{}::{}'.format(type_class.name, type_class.members[0].name)
@@ -345,7 +345,7 @@ class Writer(WriterBase):
                     continue
                 if 'DataStorage::shared()' in operation:
                     includes.add('DataStorage')
-                for type_ in self.parser.classes:
+                for type_ in self.model.classes:
                     if type_.name in operation:
                         includes.add(type_.name)
         return self.build_includes_block(cls, includes)
@@ -369,7 +369,7 @@ class Writer(WriterBase):
                 result.append('#include %s' % types[typename])
                 continue
 
-            other_class = self.parser.find_class(typename)
+            other_class = self.model.get_class(typename)
             if other_class:
                 include = '#include "'
                 if cls.group and other_class.group != cls.group:

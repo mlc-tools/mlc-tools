@@ -9,21 +9,21 @@ class SerializerBase:
 
     def __init__(self):
         self.serialize_protocol = {}
-        self.parser = None
+        self.model = None
         self.current_class = None
 
-    def generate_methods(self, parser):
-        self.parser = parser
-        parser.load_default_serialize_protocol(self.get_protocol('xml'))
-        self.serialize_protocol = parser.serialize_protocol
-        for cls in parser.classes:
+    def generate_methods(self, model):
+        self.model = model
+        model.parser.load_default_serialize_protocol(self.get_protocol('xml'))
+        self.serialize_protocol = model.serialize_protocol
+        for cls in model.classes:
             self.current_class = cls
             self.create_serialization_function(cls, SERIALIZATION, 'xml')
             self.create_serialization_function(cls, DESERIALIZATION, 'xml')
 
-        parser.load_default_serialize_protocol(self.get_protocol('json'))
-        self.serialize_protocol = parser.serialize_protocol
-        for cls in parser.classes:
+        model.parser.load_default_serialize_protocol(self.get_protocol('json'))
+        self.serialize_protocol = model.serialize_protocol
+        for cls in model.classes:
             self.current_class = cls
             self.create_serialization_function(cls, SERIALIZATION, 'json')
             self.create_serialization_function(cls, DESERIALIZATION, 'json')

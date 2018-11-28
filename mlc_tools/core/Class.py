@@ -49,26 +49,26 @@ class Class(Object):
     def parse_body(self, parser, body):
         parser.parse_text(body)
 
-        for member in parser.objects:
-            if parser.find_class(member.type):
+        for member in parser.model.objects:
+            if parser.model.get_class(member.type):
                 member.type = self.name + member.type
             for i, arg in enumerate(member.template_args):
-                if parser.find_class(arg):
+                if parser.model.get_class(arg):
                     member.template_args[i] = self.name + member.template_args[i]
 
-        for func in parser.functions:
-            if parser.find_class(func.return_type):
+        for func in parser.model.functions:
+            if parser.model.get_class(func.return_type):
                 func.return_type = self.name + func.return_type
             for arg in func.args:
-                if parser.find_class(arg[1]):
+                if parser.model.get_class(arg[1]):
                     arg[1] = self.name + arg[1]
 
-            for cls in parser.classes:
+            for cls in parser.model.classes:
                 pattern = re.compile(r'\b{}\b'.format(cls.name))
                 repl = self.name + cls.name
                 for i, op in enumerate(func.operations):
                     func.operations[i] = re.sub(pattern, repl, op)
-        for cls in parser.classes:
+        for cls in parser.model.classes:
             inner_class_name = cls.name
             cls.name = self.name + cls.name
             cls.group = self.group
@@ -76,28 +76,28 @@ class Class(Object):
             cls.is_test = self.is_test
             self.inner_classes.append(cls)
             
-            for obj in parser.objects:
+            for obj in parser.model.objects:
                 if obj.type == inner_class_name:
                     obj.type = cls.name
                 for arg in obj.template_args:
                     if arg.type == inner_class_name:
                         arg.type = cls.name
 
-            for method in parser.functions:
+            for method in parser.model.functions:
                 for name, arg in method.args:
                     if arg.type == inner_class_name:
                         arg.type = cls.name
                 if method.return_type.type == inner_class_name:
                     method.return_type.type = cls.name
 
-        self.members = parser.objects
-        self.functions = parser.functions
+        self.members = parser.model.objects
+        self.functions = parser.model.functions
         
         for member in self.members:
             member.set_default_initial_value()
         return
 
-    def on_linked(self, parser):
+    def on_linked(self, model):
         if self._linked:
             return
 
@@ -116,7 +116,7 @@ class Class(Object):
                     method.is_virtual = True
                     break
             for superclass in self.superclasses:
-                superclass.on_linked(parser)
+                superclass.on_linked(model)
 
         self._linked = True
 

@@ -7,8 +7,8 @@ class GeneratorOperatorEquals:
     def __init__(self):
         pass
     
-    def generate(self, parser):
-        for cls in parser.classes:
+    def generate(self, model):
+        for cls in model.classes:
             if cls.type == 'enum':
                 continue
             if cls.name in ['DataStorage']:

@@ -59,11 +59,11 @@ class Serializer(SerializerBase):
             index = 1
     
         type_ = obj_type
-        if self.parser.find_class(type_) and self.parser.find_class(type_).type == 'enum':
+        if self.model.get_class(type_) and self.model.get_class(type_).type == 'enum':
             string = self._build_serialize_operation_enum(obj_name, serialization_type)
             return string
         else:
-            if obj_type not in self.parser.simple_types and type_ != 'list' and type_ != 'map':
+            if obj_type not in self.model.simple_types and type_ != 'list' and type_ != 'map':
                 if is_link:
                     type_ = 'link'
                 elif obj_is_pointer:
@@ -85,10 +85,10 @@ class Serializer(SerializerBase):
                     assert (isinstance(arg.type, str))
                     arg_type = arg.type
                     template_args.append(self.convert_type(arg_type))
-                    type_cls = self.parser.find_class(arg.type)
+                    type_cls = self.model.get_class(arg.type)
                     if arg.is_link:
                         type_ = 'list<link>'
-                    elif arg_type in self.parser.simple_types:
+                    elif arg_type in self.model.simple_types:
                         type_ = '{0}<{1}>'.format(type_, arg_type)
                     elif arg.is_pointer:
                         type_ = 'list<pointer>'

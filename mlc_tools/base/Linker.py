@@ -9,29 +9,29 @@ class Linker:
     def __init__(self):
         pass
 
-    def link(self, parser):
-        self.add_functions_to_classes(parser)
-        self.add_members_to_classes(parser)
-        self.convert_superclasses(parser)
-        self.convert_templates(parser)
-        self.generate_inline_classes(parser)
-        self.add_get_type_method(parser)
-        for cls in parser.classes:
-            cls.on_linked(parser)
+    def link(self, model):
+        self.add_functions_to_classes(model)
+        self.add_members_to_classes(model)
+        self.convert_superclasses(model)
+        self.convert_templates(model)
+        self.generate_inline_classes(model)
+        self.add_get_type_method(model)
+        for cls in model.classes:
+            cls.on_linked(model)
 
     @staticmethod
-    def add_get_type_method(parser):
-        for cls in parser.classes:
+    def add_get_type_method(model):
+        for cls in model.classes:
             if cls.type == 'class' and cls.auto_generated:
                 Linker.add_get_type_function(cls)
 
     @staticmethod
-    def generate_inline_classes(parser):
-        for cls in parser.classes:
-            Linker._generate_inline_classes(parser, cls)
+    def generate_inline_classes(model):
+        for cls in model.classes:
+            Linker._generate_inline_classes(model, cls)
 
     @staticmethod
-    def _generate_inline_classes(parser, cls):
+    def _generate_inline_classes(model, cls):
         if len(cls.superclasses) == 0:
             return
         for superclass in cls.superclasses:
@@ -58,26 +58,26 @@ class Linker:
         cls.superclasses = [i for i in cls.superclasses if not i.is_inline]
 
     @staticmethod
-    def convert_templates(parser):
-        for cls in parser.classes:
+    def convert_templates(model):
+        for cls in model.classes:
             for member in cls.members:
-                Linker._convert_templates(parser, member)
+                Linker._convert_templates(model, member)
 
     @staticmethod
-    def _convert_templates(parser, member):
+    def _convert_templates(model, member):
         args = []
         for arg in member.template_args:
             if arg.__class__ == Object:
                 args.append(arg)
             else:
-                args.append(Linker.get_object_type(parser, arg))
+                args.append(Linker.get_object_type(model, arg))
                 if args[-1].__class__ == Object:
-                    Linker._convert_templates(parser, args[-1])
+                    Linker._convert_templates(model, args[-1])
         member.template_args = args
 
     @staticmethod
-    def get_object_type(parser, type_name):
-        cls = parser.find_class(type_name)
+    def get_object_type(model, type_name):
+        cls = model.get_class(type_name)
         obj = Object()
         if cls is None:
             obj.type = obj.find_modifiers(type_name)
@@ -88,11 +88,11 @@ class Linker:
         return obj
 
     @staticmethod
-    def convert_superclasses(parser):
-        for cls in parser.classes:
+    def convert_superclasses(model):
+        for cls in model.classes:
             superclasses = []
             for name in cls.superclasses:
-                c = parser.find_class(name)
+                c = model.get_class(name)
                 if c is None:
                     Error.exit(Error.UNKNOWN_SUPERCLASS, cls.name, name)
                 superclasses.append(c)
@@ -100,32 +100,32 @@ class Linker:
             cls.superclasses = superclasses
 
     @staticmethod
-    def add_members_to_classes(parser):
-        for object_ in parser.objects:
+    def add_members_to_classes(model):
+        for object_ in model.objects:
             parts = object_.name.split('::')
             if len(parts) == 2:
                 class_name = parts[0]
                 object_name = parts[1]
-                class_ = parser.find_class(class_name)
+                class_ = model.get_class(class_name)
                 if class_ is None:
                     Error.exit(Error.CANNOT_FIND_CLASS_FOR_OBJECT, class_name, object_.name)
                 object_.name = object_name
                 class_.members.append(object_)
-                parser.objects.remove(object_)
+                model.objects.remove(object_)
 
     @staticmethod
-    def add_functions_to_classes(parser):
-        for method in parser.functions:
+    def add_functions_to_classes(model):
+        for method in model.functions:
             parts = method.name.split('::')
             if len(parts) == 2:
                 class_name = parts[0]
                 function_name = parts[1]
-                class_ = parser.find_class(class_name)
+                class_ = model.get_class(class_name)
                 if class_ is None:
                     Error.exit(Error.CANNOT_FIND_CLASS_FOR_METHOD, class_name, method.name)
                 method.name = function_name
                 class_.functions.append(method)
-        parser.functions = []
+        model.functions = []
 
     @staticmethod
     def add_get_type_function(cls):
