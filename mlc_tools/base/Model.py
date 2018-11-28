@@ -24,7 +24,7 @@ class Model(object):
         self.test_script = ''
         self.test_script_args = ''
         self.generate_tests = False
-        self.generate_intrusive = False
+        self.generate_intrusive = True
         self.generate_factory = True
         self.filter_code = None
         self.filter_data = None
