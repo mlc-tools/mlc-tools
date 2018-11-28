@@ -119,6 +119,25 @@ class TestParseFunctionArgs(unittest.TestCase):
         self.assertTrue(isinstance(arg, Object))
         self.assertEqual(arg.type, 'int')
         self.assertEqual(arg.initial_value, '0')
+    
+    def test_arg_count_3(self):
+        parser = Parser('client')
+        text = 'function ReturnValue& test_9(int a, int b, int c)'
+        parser.parse_text(text)
+        func = parser.functions[0]
+        self.assertEqual(len(func.args), 3)
+
+        self.assertTrue(isinstance(func.args[0][1], Object))
+        self.assertEqual(func.args[0][0], 'a')
+        self.assertEqual(func.args[0][1].type, 'int')
+
+        self.assertTrue(isinstance(func.args[1][1], Object))
+        self.assertEqual(func.args[1][0], 'b')
+        self.assertEqual(func.args[1][1].type, 'int')
+
+        self.assertTrue(isinstance(func.args[2][1], Object))
+        self.assertEqual(func.args[2][0], 'c')
+        self.assertEqual(func.args[2][1].type, 'int')
 
 
 if __name__ == '__main__':

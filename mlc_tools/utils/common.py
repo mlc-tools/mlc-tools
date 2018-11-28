@@ -14,7 +14,7 @@ def smart_split(string, divider):
             continue
 
         if s == divider and depth == 0:
-            parts.append(string[start:curr - start])
+            parts.append(string[start:curr])
             start = curr + 1
         elif s == '<':
             depth += 1
