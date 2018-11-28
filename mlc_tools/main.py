@@ -26,7 +26,9 @@ def main():
     def add(name, name2=None):
         if name2 is None:
             name2 = name[1:]
-        args[name2] = get_named_arg(name)
+        value = get_named_arg(name)
+        if value is not None:
+            args[name2] = value
 
     add('-i', 'configs_directory')
     add('-o', 'out_directory')
