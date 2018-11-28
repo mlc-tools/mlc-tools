@@ -16,12 +16,20 @@ class data/DataUnit<SerializedObject>:storage
 
 	function bool tests(Logger* logger):static
 	{
+	    auto data = DataStorage::shared().get<DataUnit>("unitname1");
+
 	    auto result = true;
+	    result = logger->push(DataUnit::test_0(data), " - DataUnit: links") && result;
 	    result = logger->push(DataUnit::test_links(logger), " - DataUnit: links") && result;
 	    result = logger->push(DataUnit::test_enums(logger), " - DataUnit: enums") && result;
 	    result = logger->push(DataUnit::test_list_links(logger), " - DataUnit: list_links") && result;
 	    result = logger->push(DataUnit::test_map_links(logger), " - DataUnit: map_links") && result;
 	    return result;
+	}
+
+	function bool test_0(DataUnit:link data):static
+	{
+	    return true;
 	}
 
 	function bool test_1(Logger* logger):static

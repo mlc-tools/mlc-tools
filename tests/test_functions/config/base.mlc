@@ -139,6 +139,9 @@ class Test<SerializedObject>
     function void _002(map<int, ReturnValue*>:const:ref map)
     {
     }
+    function void _003(ReturnValue* v, int a, int b)
+    {
+    }
 }
 
 enum TestEnum
