@@ -57,7 +57,6 @@ class GeneratorVisitor:
         acceptor.is_abstract = True
         acceptor.is_virtual = True
         acceptor.side = visitors[0].side
-        acceptor.superclasses.append('SerializedObject')
         self.model.classes.append(acceptor)
 
         for visitor in visitors:

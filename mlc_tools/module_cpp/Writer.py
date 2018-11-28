@@ -9,8 +9,8 @@ class Writer(WriterBase):
         pass
 
     def write_class(self, cls):
-        header = self.write_hpp(cls)
-        source = self.write_cpp(cls)
+        header, includes, forw_declarations, forw_declarations_out = self.write_hpp(cls)
+        source = self.write_cpp(cls, includes, forw_declarations, forw_declarations_out)
         return [
             (self.get_filename(cls, 'h'), self.prepare_file(header)),
             (self.get_filename(cls, 'cpp'), self.prepare_file(source)),
@@ -38,21 +38,24 @@ class Writer(WriterBase):
 
         superclass = '' if not cls.superclasses else ' : public %s' % cls.superclasses[0].name
         
-        return HEADER.format(namespace=namespace,
-                             class_name=class_name,
-                             destructor=destructor,
-                             includes=includes,
-                             forward_declarations=forward_declarations,
-                             forward_declarations_out=forward_declarations_out,
-                             functions=functions,
-                             members=members,
-                             superclass=superclass,
-                             )
+        includes_s = self.build_includes_block(cls, includes)
+        forward_declarations_s = self.build_forward_declarations_block(forward_declarations)
+        forward_declarations_out_s = self.build_forward_declarations_block(forward_declarations_out)
+        header = HEADER.format(namespace=namespace,
+                               class_name=class_name,
+                               destructor=destructor,
+                               includes=includes_s,
+                               forward_declarations=forward_declarations_s,
+                               forward_declarations_out=forward_declarations_out_s,
+                               functions=functions,
+                               members=members,
+                               superclass=superclass,
+                               )
+        return header, includes, forward_declarations, forward_declarations_out
 
-    def write_cpp(self, cls):
+    def write_cpp(self, cls, includes, forw_declarations, forw_declarations_out):
         namespace = 'mg'
         class_name = cls.name
-        includes = self.get_includes_for_source(cls)
         functions = ''
         for method in cls.functions:
             if not method.is_abstract:
@@ -83,6 +86,8 @@ class Writer(WriterBase):
         if not has_get_type:
             registration = ''
         
+        includes = self.get_includes_for_source(cls, functions, includes, forw_declarations, forw_declarations_out)
+
         return SOURCE.format(namespace=namespace,
                              class_name=class_name,
                              destructor=destructor,
@@ -118,6 +123,8 @@ class Writer(WriterBase):
                              )
 
     def write_function_cpp(self, cls, method):
+        if method.is_external:
+            return ''
         if method.specific_implementations:
             return method.specific_implementations
         
@@ -285,10 +292,7 @@ class Writer(WriterBase):
         # members
         for member in cls.members:
             def parse_object(obj):
-                if obj.is_link:
-                    add(forward_declarations, obj)
-                else:
-                    add(includes, obj)
+                add(includes, obj)
                 for arg in obj.template_args:
                     parse_object(arg)
                     
@@ -314,40 +318,25 @@ class Writer(WriterBase):
         if cls.name in forward_declarations_out:
             forward_declarations_out.remove(cls.name)
 
-        includes = self.build_includes_block(cls, includes)
-        forward_declarations = self.build_forward_declarations_block(forward_declarations)
-        forward_declarations_out = self.build_forward_declarations_block(forward_declarations_out)
         return includes, forward_declarations, forward_declarations_out
     
-    def get_includes_for_source(self, cls):
+    def get_includes_for_source(self, cls, functions_text, hpp_includes, forw_declarations, forw_declarations_out):
         includes = set()
         includes.add(cls.name)
+        includes.update(forw_declarations)
+        includes.update(forw_declarations_out)
 
         def add(set_, obj):
             set_.add(self.convert_type(obj.type))
             for arg in obj.template_args:
                 add(includes, arg)
 
-        # members
-        for member in cls.members:
-            if member.is_link:
-                add(includes, member)
-    
-        # functions
-        for method in cls.functions:
-            for name, argtype in method.args:
-                add(includes, argtype)
-
-        # method bodies
-        for method in cls.functions:
-            for operation in method.operations:
-                if operation is None:
-                    continue
-                if 'DataStorage::shared()' in operation:
-                    includes.add('DataStorage')
-                for type_ in self.model.classes:
-                    if type_.name in operation:
-                        includes.add(type_.name)
+        if 'DataStorage::shared()' in functions_text:
+            includes.add('DataStorage')
+        for type_ in self.model.classes:
+            name = type_.name
+            if name not in hpp_includes and name in functions_text:
+                includes.add(name)
         return self.build_includes_block(cls, includes)
     
     def build_includes_block(self, cls, includes):

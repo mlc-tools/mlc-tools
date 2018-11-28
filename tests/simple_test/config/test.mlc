@@ -34,7 +34,7 @@ class AllTests<SerializedObject>
 
 class core/CommandBase<SerializedObject>
 {
-	int user_id:key = 0
+	int:key user_id = 0
 	int current_time = 0
 }
 

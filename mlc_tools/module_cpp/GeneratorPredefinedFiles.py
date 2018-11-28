@@ -10,10 +10,14 @@ class GeneratorPredefinedFiles:
     def get_namespace():
         return 'mg'
     
-    def generate(self, writer):
+    def generate(self, model, writer):
         self.generate_config_files(writer)
         for pair in cpp_files:
             filename = pair[0]
+            if 'intrusive_ptr' in filename and not model.generate_intrusive:
+                continue
+            if 'Factory' in filename and not model.generate_factory:
+                continue
             content = pair[1]
             content = content.replace('@{namespace}', self.get_namespace())
             content = content.replace('@{namespace_upper}', self.get_namespace().upper())

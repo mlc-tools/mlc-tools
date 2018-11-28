@@ -1,6 +1,6 @@
 class SerializedObject:serialized
 {
-    int _reference_counter:runtime = 1
+    int:runtime _reference_counter = 1
     function int retain()
     {
         this->_reference_counter += 1;

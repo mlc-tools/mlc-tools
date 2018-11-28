@@ -92,8 +92,9 @@ class Parser:
         else:
             text = ""
         obj = Object()
-        self.model.objects.append(obj)
         self.parse_object(obj, line)
+        if self.model.is_side(obj.side):
+            self.model.objects.append(obj)
         return text
 
     def _create_function(self, text):

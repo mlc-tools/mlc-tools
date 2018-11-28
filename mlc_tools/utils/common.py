@@ -49,27 +49,20 @@ def parse_object(obj, string):
             templates = string[left+1:right]
             string = string[:left] + string[right+1:]
             
+    type_s = re.search(r'\w+[&\*]*', string).group(0)
+    string = string[len(type_s):]
+    while True:
+        match = re.search(r':\w+', string)
+        if not match:
+            break
+        modifier = match.group(0)
+        string = string[len(modifier):]
+        type_s += modifier
+        
+    name_s = string.strip()
     
-    pattern_with_name = re.compile(r'([\w:&*]+) (\w*)')
-    pattern_without_name = re.compile(r'([\w:&*]+)')
-    parts = []
-    try:
-        parts = pattern_with_name.findall(string)
-        if len(parts) == 0:
-            parts = pattern_without_name.findall(string)
-            if len(parts) == 0:
-                # TODO: use Error.exit(...)
-                print('cannot parse string')
-                exit(-1)
-        else:
-            parts = parts[0]
-    except IndexError as e:
-        print(e)
-        print(string)
-        exit(1)
-    obj.type = parts[0]
-    if len(parts) > 1:
-        obj.name = parts[1]
+    obj.type = type_s
+    obj.name = name_s
 
     obj.template_args = smart_split(templates, ',')
     obj.template_args = [x.strip() for x in obj.template_args]

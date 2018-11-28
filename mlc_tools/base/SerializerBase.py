@@ -33,6 +33,8 @@ class SerializerBase:
         method.name = ('serialize_' if serialize_type == SERIALIZATION else 'deserialize_') + serialize_format
         method.translated = True
         method.return_type = Objects.VOID
+        method.is_virtual = len(cls.superclasses) > 0 or len(cls.subclasses) > 0
+        method.is_const = serialize_type == SERIALIZATION
         for func in cls.functions:
             if func.name == method.name:
                 return method

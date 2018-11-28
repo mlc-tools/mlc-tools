@@ -16,6 +16,7 @@ def test_game_m():
     generator.generate(language='cpp',
                        configs_directory=project_root + 'config',
                        out_directory=project_root + 'client/project_marines/generated/web',
+                       # out_directory=project_root + 'tests/unit_tests/cpp/generated',
                        side='client'
                        )
     # generator.generate('php', 'xml', project_root + '/server/mg', 'server')

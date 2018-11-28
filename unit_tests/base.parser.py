@@ -8,15 +8,16 @@ sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.abspath(inspect.getfi
 from mlc_tools.core.Object import *
 from mlc_tools.core.Function import *
 from mlc_tools.base.Parser import Parser
+from mlc_tools.base.Model import Model
 
 
 class TestParseObject(unittest.TestCase):
     
     def test_1(self):
-        parser = Parser('client')
+        parser = Parser(Model())
         text = 'map<int, list<Foo>> some_map'
         parser.parse_text(text)
-        obj = parser.objects[0]
+        obj = parser.model.objects[0]
         self.assertTrue(isinstance(obj, Object))
         self.assertEqual(obj.type, 'map')
         self.assertEqual(obj.name, 'some_map')
@@ -31,15 +32,15 @@ class TestParseObject(unittest.TestCase):
         self.assertTrue(isinstance(obj.template_args[1].template_args[0], Object))
         self.assertEqual(obj.template_args[1].template_args[0].type, 'Foo')
         self.assertEqual(obj.template_args[1].template_args[0].name, '')
-
+        
 
 class TestParseFunction(unittest.TestCase):
     
     def test_1(self):
-        parser = Parser('client')
+        parser = Parser(Model())
         text = 'function map<int, list<Foo>> some_function(map<float, list<Bar>> arg0, list<int> arg1){}'
         parser.parse_text(text)
-        func = parser.functions[0]
+        func = parser.model.functions[0]
         self.assertTrue(isinstance(func, Function))
         self.assertEqual(func.name, 'some_function')
         self.assertEqual(len(func.args), 2)
@@ -74,12 +75,26 @@ class TestParseFunction(unittest.TestCase):
 
     def test_2(self):
         text = 'function void visit(Request* ctx)'
-        parser = Parser('client')
+        parser = Parser(Model())
         parser.parse_text(text)
-        func = parser.functions[0]
+        func = parser.model.functions[0]
         self.assertTrue(isinstance(func.return_type, Object))
         self.assertEqual(func.return_type.type, 'void')
         self.assertEqual(func.return_type.name, '')
+
+    def test_3(self):
+        parser = Parser(Model())
+        parser.parse_text('function void initialize(ModelUser*user){}')
+        func = parser.model.functions[0]
+        self.assertEqual(func.args[0][0], 'user')
+        self.assertEqual(func.args[0][1].type, 'ModelUser')
+        
+    def test_4(self):
+        parser = Parser(Model())
+        parser.parse_text('function DataAbility*:link get_non_random_ability():const:client')
+        func = parser.model.functions[0]
+        self.assertEqual(func.return_type.type, 'DataAbility')
+        self.assertEqual(func.return_type.is_link, True)
 
 
 class TestParseClass(unittest.TestCase):
@@ -92,24 +107,47 @@ class TestParseClass(unittest.TestCase):
             float float_name
             Bar bar_name
             
+            string:const:static INAPP = "inapp"
+            
             function void function_1(int a){}
             function map<int, int> function_2(list<int> a){}
         }
         '''
-        parser = Parser('client')
+        parser = Parser(Model())
         parser.parse_text(text)
-        foo = parser.classes[0]
+        foo = parser.model.classes[0]
         self.assertEquals(foo.name, 'Foo')
         self.assertEquals(foo.type, 'class')
+        self.assertEqual(len(foo.members), 4)
+        
+        self.assertEqual(foo.members[0].type, 'int')
+        self.assertEqual(foo.members[0].name, 'int_name')
+
+        self.assertEqual(foo.members[3].type, 'string')
+        self.assertEqual(foo.members[3].name, 'INAPP')
+        
+    def test_2(self):
+        text = '''
+        class RewardsListHelper<SerializedObject>
+        {
+            list<DataReward*> rewards
+        }
+        '''
+        parser = Parser(Model())
+        parser.parse_text(text)
+        foo = parser.model.classes[0]
+        self.assertEquals(foo.name, 'RewardsListHelper')
+        self.assertEquals(foo.type, 'class')
+        self.assertEqual(len(foo.members), 1)
 
 
 class TestParseFunctionArgs(unittest.TestCase):
     
     def test_arg_default_params(self):
-        parser = Parser('client')
+        parser = Parser(Model())
         text = 'function ReturnValue& test_9(int i=0)'
         parser.parse_text(text)
-        func = parser.functions[0]
+        func = parser.model.functions[0]
         self.assertTrue(isinstance(func, Function))
         self.assertEqual(func.name, 'test_9')
         self.assertEqual(len(func.args), 1)
@@ -121,10 +159,10 @@ class TestParseFunctionArgs(unittest.TestCase):
         self.assertEqual(arg.initial_value, '0')
     
     def test_arg_count_3(self):
-        parser = Parser('client')
+        parser = Parser(Model())
         text = 'function ReturnValue& test_9(int a, int b, int c)'
         parser.parse_text(text)
-        func = parser.functions[0]
+        func = parser.model.functions[0]
         self.assertEqual(len(func.args), 3)
 
         self.assertTrue(isinstance(func.args[0][1], Object))
