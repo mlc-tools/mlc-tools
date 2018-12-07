@@ -6,15 +6,42 @@ class Writer(WriterBase):
 
     def __init__(self, out_directory):
         WriterBase.__init__(self, out_directory)
-        pass
+        self.current_cls = None
+        self.objects_cache = {}
 
     def write_class(self, cls):
-        header, includes, forw_declarations, forw_declarations_out = self.write_hpp(cls)
-        source = self.write_cpp(cls, includes, forw_declarations, forw_declarations_out)
+        self.current_cls = cls
+        self.objects_cache = {}
+
+        for member in cls.members:
+            declaration, initialisation, static_initialization = self.write_object(member)
+            self.objects_cache[member.name] = [declaration, initialisation, static_initialization]
+
+        header, includes, forward_declarations, forward_declarations_out = self.write_hpp(cls)
+        source = self.write_cpp(cls, includes, forward_declarations, forward_declarations_out)
         return [
             (self.get_filename(cls, 'h'), self.prepare_file(header)),
             (self.get_filename(cls, 'cpp'), self.prepare_file(source)),
             ]
+
+    def write_object(self, member):
+        declaration = ''
+        initialization = ''
+        static_initialization = ''
+
+        assert (isinstance(member.type, str))
+        if self.current_cls.type == 'class':
+            declaration = self.write_member_declaration(member)
+        elif self.current_cls.type == 'enum':
+            declaration = self.write_member_enum_declaration(member)
+
+        if self.current_cls.type == 'enum' and member.name != 'value':
+            static_initialization = self.write_member_static_enum(self.current_cls, member)
+        elif member.is_static:
+            static_initialization = self.write_member_static_initialization(self.current_cls, member)
+        else:
+            initialization += self.write_member_initialization(member)
+        return declaration, initialization, static_initialization
 
     def write_hpp(self, cls):
         namespace = 'mg'
@@ -25,11 +52,8 @@ class Writer(WriterBase):
             functions += self.write_function_hpp(method)
         members = ''
         for member in cls.members:
-            assert(isinstance(member.type, str))
-            if cls.type == 'class':
-                members += self.write_member_declaration(member) + '\n'
-            elif cls.type == 'enum':
-                members += self.write_member_enum_declaration(member) + '\n'
+            declaration, initialisation, static_initialization = self.objects_cache[member.name]
+            members += declaration + '\n'
 
         virtual = 'virtual '
         if not cls.is_virtual and len(cls.superclasses) == 0 and len(cls.subclasses) == 0:
@@ -63,14 +87,13 @@ class Writer(WriterBase):
         static_initializations = ''
         initializations = ''
         for member in cls.members:
-            if cls.type == 'enum' and member.name != 'value':
-                static_initializations += self.write_member_static_enum(cls, member) + '\n'
-            elif member.is_static:
-                static_initializations += self.write_member_static_initialization(cls, member) + '\n'
-            else:
+            declaration, initialisation, static_initialization = self.objects_cache[member.name]
+            if initialisation:
                 div = ': ' if not initializations else ', '
-                initializations += div + self.write_member_initialization(member) + '\n'
-        
+                initializations += div + initialisation + '\n'
+            if static_initialization:
+                static_initializations += static_initialization + '\n'
+
         destructor = '''{name}::~{name}()
         {{
         }}

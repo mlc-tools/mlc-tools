@@ -65,14 +65,9 @@ def save(lang, model):
 
 def save_object(lang, model):
     cls = model.get_class('Test')
-    if lang == 'cpp':
-        writer = create_lang(lang, model).get_writer()
-        return (
-            writer.write_member_declaration(cls.members[0]),
-            writer.write_member_initialization(cls.members[0])
-        )
-    else:
-        return create_lang(lang, model).get_writer().write_object(cls.members[0])
+    writer = create_lang(lang, model).get_writer()
+    writer.current_cls = cls
+    return writer.write_object(cls.members[0])
 
 
 def save_function(lang, model):
@@ -107,7 +102,7 @@ class TestWriteObject(unittest.TestCase):
     def test_cpp(self):
         model = create_test_model()
         result = save_object('cpp', model)
-        self.assertEquals(result, ('int int_value;', 'int_value(42)'))
+        self.assertEquals(result, ('int int_value;', 'int_value(42)', ''))
 
     def test_python(self):
         model = create_test_model()
@@ -125,7 +120,17 @@ class TestWriteFunction(unittest.TestCase):
     def test_cpp(self):
         model = create_test_model()
         result = save_function('cpp', model)
-        self.assertEquals(result, ('int foo(int a0, const std::string& a1);\n', 'int Test::foo(int a0, const std::string& a1)\n        {\n        auto result = this->int_value;\nresult += a0;\nreturn result;\n\n        }\n        \n        '))
+        hpp = 'int foo(int a0, const std::string& a1);\n'
+        cpp = '''int Test::foo(int a0, const std::string& a1)
+        {
+        auto result = this->int_value;
+result += a0;
+return result;
+
+        }
+        \n        '''
+        self.assertEquals(result[0], hpp)
+        self.assertEquals(result[1], cpp)
 
     def test_python(self):
         model = create_test_model()
