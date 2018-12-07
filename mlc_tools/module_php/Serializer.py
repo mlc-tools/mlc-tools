@@ -5,6 +5,7 @@ from ..core.Object import Object, Objects
 from ..utils.Error import Error
 from .protocols import php_xml
 from .protocols import php_json
+from .regex import RegexPatternPhp
 
 SERIALIZATION = 0
 DESERIALIZATION = 1
@@ -84,14 +85,13 @@ class Serializer(SerializerBase):
 
     @staticmethod
     def convert_initialize_value(value):
-        if value is None:
-            value = ''
-        if value == 'nullptr':
-            return 'null'
-        if value == 'None':
-            return 'null'
-        if '::' in value:
-            value = value.replace('::', '::$')
+        assert (value is None or isinstance(value, str))
+
+        if value is None or value == 'nullptr' or value == 'None':
+            value = 'null'
+        if value and value.startswith('this'):
+            value = '$' + value
+        value = RegexPatternPhp.INITIALIZE[0].sub(RegexPatternPhp.INITIALIZE[1], value)
         return value
 
     def get_serialization_function_args(self, serialize_type, serialize_format):

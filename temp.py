@@ -106,6 +106,6 @@ def profile(func_to_profile):
 # profile(cpp)
 # profile(python)
 # profile(python_test)
-# python()
-# cpp()
+python()
+cpp()
 php()

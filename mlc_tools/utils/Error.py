@@ -2,7 +2,8 @@ import inspect
 from enum import Enum
 
 
-class Color(Enum):
+class Color(object):
+
     red = '\033[31m'
     green = '\033[32m'
     orange = '\033[33m'

@@ -34,6 +34,8 @@ class Model(object):
         self.serialize_protocol = []
 
         self.simple_types = ["int", "float", "bool", "string"]
+
+        self.out_dict = None
         
     def clear_data(self):
         self.parser = None

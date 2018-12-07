@@ -27,9 +27,9 @@ class Writer(WriterBase):
         for member in cls.members:
             assert(isinstance(member.type, str))
             if cls.type == 'class':
-                members += self.write_member_declaration(member)
+                members += self.write_member_declaration(member) + '\n'
             elif cls.type == 'enum':
-                members += self.write_member_enum_declaration(member)
+                members += self.write_member_enum_declaration(member) + '\n'
 
         virtual = 'virtual '
         if not cls.is_virtual and len(cls.superclasses) == 0 and len(cls.subclasses) == 0:
@@ -64,12 +64,12 @@ class Writer(WriterBase):
         initializations = ''
         for member in cls.members:
             if cls.type == 'enum' and member.name != 'value':
-                static_initializations += self.write_member_static_enum(cls, member)
+                static_initializations += self.write_member_static_enum(cls, member) + '\n'
             elif member.is_static:
-                static_initializations += self.write_member_static_initialization(cls, member)
+                static_initializations += self.write_member_static_initialization(cls, member) + '\n'
             else:
                 div = ': ' if not initializations else ', '
-                initializations += div + self.write_member_initialization(member)
+                initializations += div + self.write_member_initialization(member) + '\n'
         
         destructor = '''{name}::~{name}()
         {{
@@ -153,17 +153,17 @@ class Writer(WriterBase):
                            )
 
     def write_member_declaration(self, obj):
-        return self.write_named_object(obj, obj.name, False, True) + ';\n'
+        return self.write_named_object(obj, obj.name, False, True) + ';'
     
     def write_member_enum_declaration(self, obj):
         if obj.name == 'value':
             return self.write_member_declaration(obj)
-        return 'static constexpr {type} {name} = {value};\n'.format(type=obj.type,
-                                                                    name=obj.name,
-                                                                    value=obj.initial_value)
+        return 'static constexpr {type} {name} = {value};'.format(type=obj.type,
+                                                                  name=obj.name,
+                                                                  value=obj.initial_value)
 
     def write_member_static_initialization(self, cls, obj):
-        string = '{const}{type}{pointer} {owner}::{name}({initial_value});\n'
+        string = '{const}{type}{pointer} {owner}::{name}({initial_value});'
         return string.format(const='const ' if obj.is_const else '',
                              type=self.convert_type(obj.type),
                              pointer='*' if obj.is_pointer else '',
@@ -173,7 +173,8 @@ class Writer(WriterBase):
                              )
     
     def write_member_static_enum(self, cls, obj):
-        string = 'const int {owner}::{name};\n'
+        assert (self is not None)
+        string = 'const int {owner}::{name};'
         return string.format(owner=cls.name, name=obj.name)
     
     def convert_initial_value(self, object_):
@@ -189,7 +190,7 @@ class Writer(WriterBase):
         return object_.initial_value
 
     def write_member_initialization(self, obj):
-        string = '{name}({initial_value})\n'
+        string = '{name}({initial_value})'
         initial_value = self.convert_initial_value(obj)
         return string.format(name=obj.name,
                              initial_value=initial_value
@@ -241,8 +242,7 @@ class Writer(WriterBase):
             return types[type_of_object]
         return type_of_object
 
-    @staticmethod
-    def prepare_file(body):
+    def prepare_file(self, body):
         tabs = 0
 
         lines = body.split('\n')
@@ -251,7 +251,7 @@ class Writer(WriterBase):
         def get_tabs(count):
             out = ''
             for i in range(count):
-                out += '\t'
+                out += '    '
             return out
 
         for line in lines:
@@ -263,13 +263,15 @@ class Writer(WriterBase):
             if 'public:' in line or 'protected:' in line or 'private:' in line:
                 backward = True
                 tabs -= 1
-            line = get_tabs(tabs) + line
+            if len(line) > 0:
+                line = get_tabs(tabs) + line
             if backward:
                 tabs += 1
             if line.strip() and line.strip()[0] == '{':
                 tabs += 1
             body.append(line)
         body = '\n'.join(body)
+        body = body.strip().replace('\n\n\n', '\n\n') + '\n'
         return body
     
     @staticmethod

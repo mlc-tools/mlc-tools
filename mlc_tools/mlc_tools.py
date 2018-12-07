@@ -77,7 +77,7 @@ class Mlc:
 
         # cpp
         # php
-        language = Language(self.model.language, self.model.out_directory)
+        language = Language(self.model.language, self.model)
         language.get_generator().generate(self.model, language.get_writer())
 
         Linker().link(self.model)

@@ -11,6 +11,10 @@ class WriterBase:
         self.created_files = []
 
     def save_file(self, filename, content):
+        if self.model is not None and self.model.out_dict is not None:
+            self.model.out_dict[filename] = content
+            return
+
         full_path = fileutils.normalize_path(self.out_directory) + filename
         self.created_files.append(filename)
         exist = fileutils.isfile(full_path)
@@ -27,3 +31,15 @@ class WriterBase:
 
     def write_class(self, cls):
         return [('', '')]
+
+    def set_initial_values(self, cls):
+        return ''
+
+    def write_function(self, method):
+        return ''
+
+    def write_object(self, obj):
+        return ''
+
+    def prepare_file(self, text):
+        return text

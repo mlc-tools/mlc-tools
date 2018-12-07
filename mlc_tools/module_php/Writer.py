@@ -1,8 +1,7 @@
 from ..base import WriterBase
 from ..core.Object import *
-from ..core.Class import Class
 from .Serializer import Serializer
-from .regex import RegexPatternPhp
+
 
 class Writer(WriterBase):
 
@@ -15,8 +14,8 @@ class Writer(WriterBase):
 
         declaration_list = ''
         initialization_list = ''
-        for object in cls.members:
-            declare, init = self.write_object(object)
+        for member in cls.members:
+            declare, init = self.write_object(member)
             declaration_list += declare + '\n'
             if init:
                 initialization_list += init + '\n'
@@ -57,15 +56,13 @@ class Writer(WriterBase):
             ('%s.php' % cls.name, self.prepare_file(out))
             ]
 
-    @staticmethod
-    def set_initial_values(cls):
+    def set_initial_values(self, cls):
         if cls.type == 'enum':
             for member in cls.members:
                 if member.name == '_value' and member.initial_value is not None:
                     member.initial_value = cls.members[0].initial_value
 
-    @staticmethod
-    def write_function(method):
+    def write_function(self, method):
         args = []
         for name, arg in method.args:
             if arg.initial_value is not None:
@@ -82,7 +79,6 @@ class Writer(WriterBase):
         return text
     
     def write_object(self, obj):
-        out_declaration = ''
         out_init = ''
         value = obj.initial_value
         if value is None and not obj.is_pointer:
@@ -108,7 +104,7 @@ class Writer(WriterBase):
             cls = self.model.get_class(obj.type)
             if cls and cls.type == 'enum':
                 value = None
-                out_init = '$this->{} = {};'.format(obj.name, Writer.convert_initialize_value(obj.initial_value))
+                out_init = '$this->{} = {};'.format(obj.name, Serializer.convert_initialize_value(obj.initial_value))
     
         accesses = {
             AccessSpecifier.public: 'public',
@@ -120,11 +116,10 @@ class Writer(WriterBase):
             out_declaration = accesses[obj.access] + ' static ${0} = {1};'
         else:
             out_declaration = accesses[obj.access] + ' ${0} = {1};'
-        out_declaration = out_declaration.format(obj.name, Writer.convert_initialize_value(value))
+        out_declaration = out_declaration.format(obj.name, Serializer.convert_initialize_value(value))
         return out_declaration, out_init
     
-    @staticmethod
-    def prepare_file(text):
+    def prepare_file(self, text):
         text = text.replace('::TYPE', '::$TYPE')
         text = text.replace('nullptr', 'null')
 
@@ -160,16 +155,6 @@ class Writer(WriterBase):
         text = text.replace('  extends', ' extends')
         text = text.strip()
         return text
-
-    @staticmethod
-    def convert_initialize_value(value):
-        assert (value is None or isinstance(value, str))
-        if value is None:
-            value = 'null'
-        if value and value.startswith('this'):
-            value = '$' + value
-        value = RegexPatternPhp.INITIALIZE[0].sub(RegexPatternPhp.INITIALIZE[1], value)
-        return value
 
 
 PATTERN_FILE = '''<?php

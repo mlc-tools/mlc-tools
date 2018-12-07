@@ -62,15 +62,13 @@ class Writer(WriterBase):
             ('%s.py' % cls.name, self.prepare_file(out))
             ]
 
-    @staticmethod
-    def set_initial_values(cls):
+    def set_initial_values(self, cls):
         if cls.type == 'enum':
             for member in cls.members:
                 if member.name == '_value' and member.initial_value is not None:
                     member.initial_value = cls.members[0].initial_value
 
-    @staticmethod
-    def write_function(method):
+    def write_function(self, method):
         # args = [x[0] for x in method.args]
         args = []
         if not method.is_static:
@@ -124,8 +122,7 @@ class Writer(WriterBase):
         out = imports + out.format(obj.name, Serializer.convert_initialize_value(value))
         return out if out.strip() else 'pass'
 
-    @staticmethod
-    def prepare_file(text):
+    def prepare_file(self, text):
         lines = text.split('\n')
         result = []
         tabs = False

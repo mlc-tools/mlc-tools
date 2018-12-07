@@ -7,4 +7,5 @@ class GeneratorBase:
         pass
 
     def generate(self, model, writer):
-        GeneratorUnitTestsInterface().generate(model)
+        if model.generate_tests:
+            GeneratorUnitTestsInterface().generate(model)
