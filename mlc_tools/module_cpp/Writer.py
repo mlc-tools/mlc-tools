@@ -8,14 +8,20 @@ class Writer(WriterBase):
         WriterBase.__init__(self, out_directory)
         self.current_cls = None
         self.objects_cache = {}
+        self.methods_cache = []
 
     def write_class(self, cls):
         self.current_cls = cls
         self.objects_cache = {}
+        self.methods_cache = []
 
         for member in cls.members:
             declaration, initialisation, static_initialization = self.write_object(member)
             self.objects_cache[member.name] = [declaration, initialisation, static_initialization]
+
+        for method in cls.functions:
+            hpp, cpp = self.write_function(method)
+            self.methods_cache.append([hpp, cpp])
 
         header, includes, forward_declarations, forward_declarations_out = self.write_hpp(cls)
         source = self.write_cpp(cls, includes, forward_declarations, forward_declarations_out)
@@ -43,13 +49,16 @@ class Writer(WriterBase):
             initialization += self.write_member_initialization(member)
         return declaration, initialization, static_initialization
 
+    def write_function(self, method):
+        return [self.write_function_hpp(method), self.write_function_cpp(method)]
+
     def write_hpp(self, cls):
         namespace = 'mg'
         class_name = cls.name
         includes, forward_declarations, forward_declarations_out = self.get_includes_for_header(cls)
         functions = ''
-        for method in cls.functions:
-            functions += self.write_function_hpp(method)
+        for method in self.methods_cache:
+            functions += method[0]
         members = ''
         for member in cls.members:
             declaration, initialisation, static_initialization = self.objects_cache[member.name]
@@ -81,9 +90,8 @@ class Writer(WriterBase):
         namespace = 'mg'
         class_name = cls.name
         functions = ''
-        for method in cls.functions:
-            if not method.is_abstract:
-                functions += self.write_function_cpp(cls, method)
+        for method in self.methods_cache:
+            functions += method[1]
         static_initializations = ''
         initializations = ''
         for member in cls.members:
@@ -145,8 +153,8 @@ class Writer(WriterBase):
                              args=args
                              )
 
-    def write_function_cpp(self, cls, method):
-        if method.is_external:
+    def write_function_cpp(self, method):
+        if method.is_external or method.is_abstract:
             return ''
         if method.specific_implementations:
             return method.specific_implementations
@@ -171,7 +179,7 @@ class Writer(WriterBase):
                            type=return_type,
                            name=method.name,
                            args=args,
-                           class_name=cls.name,
+                           class_name=self.current_cls.name,
                            body=body
                            )
 

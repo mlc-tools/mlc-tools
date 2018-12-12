@@ -72,14 +72,9 @@ def save_object(lang, model):
 
 def save_function(lang, model):
     cls = model.get_class('Test')
-    if lang == 'cpp':
-        writer = create_lang(lang, model).get_writer()
-        return (
-            writer.write_function_hpp(cls.functions[0]),
-            writer.write_function_cpp(cls, cls.functions[0])
-        )
-    else:
-        return create_lang(lang, model).get_writer().write_function(cls.functions[0])
+    writer = create_lang(lang, model).get_writer()
+    writer.current_cls = cls
+    return writer.write_function(cls.functions[0])
 
 
 class TestWriteClass(unittest.TestCase):
