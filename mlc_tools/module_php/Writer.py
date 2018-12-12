@@ -56,28 +56,6 @@ class Writer(WriterBase):
             ('%s.php' % cls.name, self.prepare_file(out))
             ]
 
-    def set_initial_values(self, cls):
-        if cls.type == 'enum':
-            for member in cls.members:
-                if member.name == '_value' and member.initial_value is not None:
-                    member.initial_value = cls.members[0].initial_value
-
-    def write_function(self, method):
-        args = []
-        for name, arg in method.args:
-            if arg.initial_value is not None:
-                args.append('$' + name + '=' + Serializer.convert_initialize_value(arg.initial_value))
-            else:
-                args.append('$' + name)
-        args = ', '.join(args)
-
-        text = PATTERN_METHOD.format(name=method.name,
-                                     args=args,
-                                     body=method.body)
-        if method.is_static:
-            text = 'static ' + text
-        return text
-    
     def write_object(self, obj):
         out_init = ''
         value = obj.initial_value
@@ -155,6 +133,18 @@ class Writer(WriterBase):
         text = text.replace('  extends', ' extends')
         text = text.strip()
         return text
+
+    def get_method_arg_pattern(self, obj):
+        return '${}={}' if obj.initial_value is not None else '${}'
+
+    def get_method_pattern(self):
+        return PATTERN_METHOD
+
+    def get_required_args_to_function(self, method):
+        return None
+
+    def add_static_modifier_to_method(self, text):
+        return 'static ' + text
 
 
 PATTERN_FILE = '''<?php

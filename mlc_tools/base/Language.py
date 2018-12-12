@@ -11,6 +11,7 @@ class Language:
         self.serializer = locate('mlc_tools.%s.Serializer' % module_name)()
         self.writer = locate('mlc_tools.%s.Writer' % module_name)(model.out_directory)
         self.writer.model = model
+        self.writer.serializer = self.serializer
 
     def get_generator(self):
         return self.generator

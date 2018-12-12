@@ -6,7 +6,6 @@ class Writer(WriterBase):
 
     def __init__(self, out_directory):
         WriterBase.__init__(self, out_directory)
-        pass
 
     def write_class(self, cls):
 
@@ -61,31 +60,6 @@ class Writer(WriterBase):
         return [
             ('%s.py' % cls.name, self.prepare_file(out))
             ]
-
-    def set_initial_values(self, cls):
-        if cls.type == 'enum':
-            for member in cls.members:
-                if member.name == '_value' and member.initial_value is not None:
-                    member.initial_value = cls.members[0].initial_value
-
-    def write_function(self, method):
-        # args = [x[0] for x in method.args]
-        args = []
-        if not method.is_static:
-            args.append('self')
-        for name, arg in method.args:
-            if arg.initial_value is not None:
-                args.append(name + '=' + Serializer.convert_initialize_value(arg.initial_value))
-            else:
-                args.append(name)
-        args = ', '.join(args)
-
-        text = PATTERN_METHOD.format(name=method.name,
-                                     args=args,
-                                     body=method.body)
-        if method.is_static:
-            text = '    @staticmethod' + text
-        return text
 
     def write_object(self, obj):
         imports = ''
@@ -150,6 +124,20 @@ class Writer(WriterBase):
         text = '\n'.join(result)
         text = '# -*- coding: utf-8 -*-\n' + text
         return text
+
+    def get_method_arg_pattern(self, obj):
+        return '{}={}' if obj.initial_value is not None else '{}'
+
+    def get_method_pattern(self):
+        return PATTERN_METHOD
+
+    def get_required_args_to_function(self, method):
+        if not method.is_static:
+            return 'self'
+        return None
+
+    def add_static_modifier_to_method(self, text):
+        return '    @staticmethod' + text
 
 
 PATTERN_FILE = '''

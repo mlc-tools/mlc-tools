@@ -6,6 +6,7 @@ class WriterBase:
 
     def __init__(self, out_directory):
         self.model = None
+        self.serializer = None
         self.out_directory = out_directory
         self.files = []
         self.created_files = []
@@ -33,10 +34,40 @@ class WriterBase:
         return [('', '')]
 
     def set_initial_values(self, cls):
-        return ''
+        if cls.type == 'enum':
+            for member in cls.members:
+                if member.name == '_value' and member.initial_value is not None:
+                    member.initial_value = cls.members[0].initial_value
 
+    # Function methods
     def write_function(self, method):
-        return ''
+        args = []
+        if self.get_required_args_to_function(method) is not None:
+            args.append(self.get_required_args_to_function(method))
+        for name, arg in method.args:
+            pattern = self.get_method_arg_pattern(arg)
+            args.append(pattern.format(name, self.serializer.convert_initialize_value(arg.initial_value)))
+        args = ', '.join(args)
+
+        text = self.get_method_pattern().format(name=method.name,
+                                                args=args,
+                                                body=method.body)
+        if method.is_static:
+            text = self.add_static_modifier_to_method(text)
+        return text
+
+    def get_method_arg_pattern(self, obj):
+        return '${}={}' if obj.initial_value is not None else '${}'
+
+    def get_method_pattern(self):
+        return '{name}({args})\n{body}'
+
+    def get_required_args_to_function(self, method):
+        return None
+
+    def add_static_modifier_to_method(self, text):
+        return 'static ' + text
+    # End Function methods
 
     def write_object(self, obj):
         return ''
