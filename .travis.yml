@@ -39,6 +39,13 @@ matrix:
 
 
 script:
+
+  # unit tests
+  - pushd .
+  - cd unit_tests
+  - python -m unittest discover
+  - popd
+
   # simple test:
 
   - pushd .
