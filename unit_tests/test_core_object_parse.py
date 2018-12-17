@@ -6,76 +6,64 @@ import inspect
 
 sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) + '/..'))
 from mlc_tools.core.Object import *
+from mlc_tools.base.Parser import Parser
 
 
 class TestParseModifiersTypes(unittest.TestCase):
 
     def test_1(self):
-        obj = Object()
-        obj.parse('int:client')
+        obj = Parser.create_object('int:client')
         self.assertEqual(obj.side, 'client')
 
     def test_2(self):
-        obj = Object()
-        obj.parse('int:server')
+        obj = Parser.create_object('int:server')
         self.assertEqual(obj.side, 'server')
 
     def test_3(self):
-        obj = Object()
-        obj.parse('int*')
+        obj = Parser.create_object('int*')
         self.assertTrue(obj.is_pointer)
 
     def test_4(self):
-        obj = Object()
-        obj.parse('int&')
+        obj = Parser.create_object('int&')
         self.assertTrue(obj.is_ref)
 
     def test_5(self):
-        obj = Object()
-        obj.parse('int:runtime')
+        obj = Parser.create_object('int:runtime')
         self.assertTrue(obj.is_runtime)
 
     def test_6(self):
-        obj = Object()
-        obj.parse('int:static')
+        obj = Parser.create_object('int:static')
         self.assertTrue(obj.is_static)
 
     def test_7(self):
-        obj = Object()
-        obj.parse('int:const')
+        obj = Parser.create_object('int:const')
         self.assertTrue(obj.is_const)
 
     def test_8(self):
-        obj = Object()
-        obj.parse('int:key')
+        obj = Parser.create_object('int:key')
         self.assertTrue(obj.is_key)
 
     def test_9(self):
-        obj = Object()
-        obj.parse('int:link')
+        obj = Parser.create_object('int:link')
         self.assertTrue(obj.is_link)
 
     def test_10(self):
-        obj = Object()
-        obj.parse('int:private')
+        obj = Parser.create_object('int:private')
         self.assertTrue(obj.access == AccessSpecifier.private)
 
     def test_11(self):
-        obj = Object()
-        obj.parse('int:protected')
+        obj = Parser.create_object('int:protected')
         self.assertTrue(obj.access == AccessSpecifier.protected)
 
     def test_12(self):
-        obj = Object()
-        obj.parse('int:public')
+        obj = Parser.create_object('int:public')
         self.assertTrue(obj.access == AccessSpecifier.public)
 
 
 class TestParseComplexTypes(unittest.TestCase):
     
     def test_1(self):
-        obj = Object()
-        obj.parse('int key')
+        obj = Parser.create_object('int key')
         self.assertEqual(obj.type, 'int')
         self.assertEqual(obj.name, 'key')
         self.assertEqual(obj.template_args, [])
@@ -90,8 +78,7 @@ class TestParseComplexTypes(unittest.TestCase):
         self.assertEqual(obj.access, AccessSpecifier.public)
 
     def test_2(self):
-        obj = Object()
-        obj.parse('DataStorage&:static')
+        obj = Parser.create_object('DataStorage&:static')
         self.assertEqual(obj.type, 'DataStorage')
         self.assertEqual(obj.name, '')
         self.assertEqual(obj.template_args, [])
@@ -106,11 +93,10 @@ class TestParseComplexTypes(unittest.TestCase):
         self.assertEqual(obj.access, AccessSpecifier.public)
 
     def test_3(self):
-        obj = Object()
-        obj.parse('list<int>:static name')
+        obj = Parser.create_object('list<int>:static name')
         self.assertEqual(obj.type, 'list')
         self.assertEqual(obj.name, 'name')
-        self.assertEqual(obj.template_args, ['int'])
+        self.assertEqual(obj.template_args[0].type, 'int')
         self.assertFalse(obj.is_pointer)
         self.assertFalse(obj.is_ref)
         self.assertFalse(obj.is_runtime)
@@ -122,11 +108,12 @@ class TestParseComplexTypes(unittest.TestCase):
         self.assertEqual(obj.access, AccessSpecifier.public)
     
     def test_4(self):
-        obj = Object()
-        obj.parse('map<string, list<int>:static>:const name')
+        obj = Parser.create_object('map<string, list<int>:static>:const name')
         self.assertEqual(obj.type, 'map')
         self.assertEqual(obj.name, 'name')
-        self.assertEqual(obj.template_args, ['string', 'list<int>:static'])
+        self.assertEqual(obj.template_args[0].type, 'string')
+        self.assertEqual(obj.template_args[1].type, 'list')
+        self.assertTrue(obj.template_args[1].is_static)
         self.assertFalse(obj.is_pointer)
         self.assertFalse(obj.is_ref)
         self.assertFalse(obj.is_runtime)

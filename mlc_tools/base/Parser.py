@@ -111,6 +111,12 @@ class Parser:
         parser = Parser(Model())
         parser.parse_text(description)
         return parser.model.objects[0]
+    
+    @staticmethod
+    def create_function(description):
+        parser = Parser(Model())
+        parser.parse_text(description)
+        return parser.model.functions[0]
 
     def parse_object(self, obj, line):
         if ';' in line:
