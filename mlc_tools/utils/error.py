@@ -10,10 +10,10 @@ class Color(object):
     endc = '\033[0m'
 
 
-class Log:
+class Log(object):
     use_colors = True
     disable_logs = False
-    
+
     def __init__(self):
         pass
 
@@ -37,10 +37,11 @@ class Log:
             print(Color.green + msg + Color.endc) if Log.use_colors else msg
 
 
-class Error:
+class Error(object):
+
     def __init__(self):
         pass
-    
+
     UNKNOWN_SERIALISED_TYPE = inspect.currentframe().f_lineno
     STATIS_MEMBER_SHOULD_HAVE_INITIALISATION = inspect.currentframe().f_lineno
     MAP_TWO_ARGS = inspect.currentframe().f_lineno

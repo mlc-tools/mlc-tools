@@ -53,7 +53,7 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
         method.translated = True
         method.operations.extend(SHARED_METHOD.split('\n'))
         self.functions.append(method)
-        
+
         method = Function()
         method.name = 'deserialize_xml'
         method.args.append(['xml', Objects.VOID])

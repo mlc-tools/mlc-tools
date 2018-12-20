@@ -1,6 +1,6 @@
 import re
 from .regex import RegexPatternPython
-from ..core.object import *
+from ..core.object import Object, AccessSpecifier
 from ..base.translator_base import TranslatorBase
 
 
@@ -8,7 +8,6 @@ class Translator(TranslatorBase):
 
     def __init__(self):
         TranslatorBase.__init__(self)
-        pass
 
     def translate_function(self, cls, method, model):
         if not method.translated:
@@ -16,43 +15,43 @@ class Translator(TranslatorBase):
             body = self.translate_function_body(cls, body, model)
             method.body = body
         else:
-            if len(method.operations) > 0:
+            if method.operations:
                 method.body = '\n        '.join(method.operations)
             else:
                 method.body = 'pass'
 
     @staticmethod
-    def translate_function_body(cls, func, model):
+    def translate_function_body(class_, func, model):
         if not func:
             func = 'pass'
         func = Translator.replace_by_regex(func)
         func = Translator.convert_braces_to_tabs(func)
         func = Translator.remove_double_eol(func)
-        func = Translator.add_imports(cls, func, model)
+        func = Translator.add_imports(class_, func, model)
         return func
-    
+
     def convert_to_enum(self, cls):
         shift = 0
         cast = 'string'
         values = []
-        for m in cls.members:
-            if len(m.name):
+        for member in cls.members:
+            if member.name:
                 continue
-            m.name = m.type
-            m.type = cast
-            m.is_static = True
-            m.is_const = True
-            if m.initial_value is None:
+            member.name = member.type
+            member.type = cast
+            member.is_static = True
+            member.is_const = True
+            if member.initial_value is None:
                 if cast == 'int':
-                    m.initial_value = '(1 << {})'.format(shift)
+                    member.initial_value = '(1 << {})'.format(shift)
                     values.append(1 << shift)
                 elif cast == 'string':
-                    m.initial_value = '"{}"'.format(m.name)
+                    member.initial_value = '"{}"'.format(member.name)
             elif cast == 'int':
                 # TODO if initialization is as enumerate of others members need throw error (example: one|two)
-                values.append(m.initial_value)
+                values.append(member.initial_value)
             else:
-                m.initial_value = 'None'
+                member.initial_value = 'None'
 
             shift += 1
         value = Object()
@@ -117,11 +116,10 @@ class Translator(TranslatorBase):
             if next_tab:
                 next_tab = False
                 tabs -= 1
-            if (line.startswith('for') or line.startswith('if') or line.startswith('else') or line.startswith(
-                    'elif')) \
+            if (line.startswith('for') or line.startswith('if') or line.startswith('else') or line.startswith('elif')) \
                     and (i < len(lines) - 1 and '{' not in line and '{' not in lines[i + 1]):
                 next_tab = True
-    
+
         func = '\n'.join(lines)
         return func
 
@@ -133,12 +131,9 @@ class Translator(TranslatorBase):
             func = reg[0].sub(reg[1], func)
         for reg in RegexPatternPython.REPLACES:
             func = func.replace(reg[0], reg[1])
-    
+
         return func
 
     @staticmethod
     def get_tabs(count):
-        r = ''
-        for i in range(count):
-            r += '    '
-        return r
+        return '    ' * count

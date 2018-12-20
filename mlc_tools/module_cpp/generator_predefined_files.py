@@ -1,15 +1,15 @@
 from .cpp_extension import cpp_files
 
 
-class GeneratorPredefinedFiles:
-    
+class GeneratorPredefinedFiles(object):
+
     def __init__(self):
         pass
-    
+
     @staticmethod
     def get_namespace():
         return 'mg'
-    
+
     def generate(self, model, writer):
         self.generate_config_files(writer)
         for pair in cpp_files:
@@ -23,7 +23,7 @@ class GeneratorPredefinedFiles:
             content = content.replace('@{namespace_upper}', self.get_namespace().upper())
             filename = filename.replace('@{namespace}', self.get_namespace())
             writer.save_file(filename, content)
-            
+
     def generate_config_files(self, writer):
         pattern = '#ifndef __{0}_Config_h__\n#define __{0}_Config_h__\n\n{1}\n\n#endif //#ifndef __{0}_Config_h__'
         configs = list()

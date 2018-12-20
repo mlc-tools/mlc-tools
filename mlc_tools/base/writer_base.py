@@ -2,7 +2,7 @@ from ..utils import fileutils
 from ..utils.error import Log
 
 
-class WriterBase:
+class WriterBase(object):
 
     def __init__(self, out_directory):
         self.model = None

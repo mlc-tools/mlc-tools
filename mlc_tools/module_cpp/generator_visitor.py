@@ -5,7 +5,7 @@ from ..base.parser import Parser
 from ..utils.error import Error
 
 
-class GeneratorVisitor:
+class GeneratorVisitor(object):
 
     def __init__(self):
         self.model = None

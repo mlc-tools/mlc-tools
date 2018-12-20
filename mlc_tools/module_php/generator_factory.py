@@ -1,6 +1,6 @@
 
 
-class GeneratorFactory:
+class GeneratorFactory(object):
 
     def __init__(self):
         pass
@@ -8,8 +8,8 @@ class GeneratorFactory:
     @staticmethod
     def generate(model, writer):
         writer.save_file('Factory.php', FACTORY)
-      
-        
+
+
 FACTORY = '''<?php
 
 class Factory

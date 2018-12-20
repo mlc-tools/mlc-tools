@@ -83,7 +83,7 @@ class GeneratorDataStorageBase(Class):
                 obj.name = get_data_list_name(get_data_name(class_.name))
                 obj.template_args.append(Objects.STRING)
                 obj.template_args.append(class_.name)
-                
+
                 obj.access = AccessSpecifier.public
                 self.members.append(obj)
 

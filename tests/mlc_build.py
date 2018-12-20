@@ -94,6 +94,6 @@ if __name__ == '__main__':
     test_functions()
     unit_tests_generator()
     test_virtual_methods()
-    
+
     # Dont run this test in CI
     # test_database()

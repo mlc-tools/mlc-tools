@@ -1,6 +1,6 @@
 
 
-class Modifiers:
+class Modifiers(object):
 
     def __init__(self):
         pass

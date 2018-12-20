@@ -50,13 +50,13 @@ class Serializer(SerializerBase):
         return self.build_serialize_operation_(obj.name, obj.type, obj.initial_value,
                                                serialization_type, obj.template_args, obj.is_pointer,
                                                obj.is_link, serialize_format)
-    
+
     def build_serialize_operation_(self, obj_name, obj_type, obj_value, serialization_type, obj_template_args,
                                    obj_is_pointer, is_link, serialize_format):
         index = 0
         if obj_value is None:
             index = 1
-    
+
         type_ = obj_type
         if self.model.get_class(type_) and self.model.get_class(type_).type == 'enum':
             string = self._build_serialize_operation_enum(obj_name, serialization_type)
@@ -106,7 +106,7 @@ class Serializer(SerializerBase):
                                     format=serialize_format,
                                     namespace=self.namespace)
         return string + '\n\n'
-    
+
     def build_map_serialization(self, obj_name, obj_template_args, serialize_format):
         key = obj_template_args[0]
         value = obj_template_args[1]
@@ -125,7 +125,7 @@ class Serializer(SerializerBase):
         return pattern.format(field=a0,
                               key_serialize=a1,
                               value_serialize=a2)
-    
+
     def build_map_deserialization(self, obj_name, obj_template_args, serialize_format):
         key = obj_template_args[0]
         value = obj_template_args[1]
@@ -142,7 +142,7 @@ class Serializer(SerializerBase):
             key_str = 'auto key = make_intrusive<{}>();'.format(key_type)
         else:
             key_str = '{} key;'.format(self.convert_type(key_type))
-    
+
         value_is_pointer = value.is_pointer
         a0 = obj_name
         a1 = self.build_serialize_operation_('key', key_type, None, DESERIALIZATION, [],

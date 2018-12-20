@@ -1,7 +1,7 @@
 import re
 
 
-class RegexPatternCpp:
+class RegexPatternCpp(object):
     convert_c17_to_c14 = [
         (re.compile(r'for\s*\(auto&&\s*\[(\w+),\s*(\w+)\]\s*:\s*(.+)\)\s*{'), r'''for (auto&& pair : \3) \n{ \nauto& \1 = pair.first; \nauto& \2 = pair.second;
                            (void)\1; //don't generate 'Unused variable' warning

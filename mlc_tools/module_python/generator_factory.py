@@ -1,7 +1,7 @@
 from .constants import FACTORY
 
 
-class GeneratorFactory:
+class GeneratorFactory(object):
 
     def __init__(self):
         pass

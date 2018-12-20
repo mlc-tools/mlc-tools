@@ -1,4 +1,4 @@
-py_xml = '''
+PY_XML = '''
 
 #int
 #serialize:
@@ -222,7 +222,7 @@ xml.set("$(FIELD)", str($(OWNER)$(FIELD)))
 $(OWNER)$(FIELD) = xml.get("$(FIELD)")
 '''
 
-py_json = '''
+PY_JSON = '''
 #int, bool, float, string
 #serialize:
 #with default value:

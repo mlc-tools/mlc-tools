@@ -7,7 +7,7 @@ from ..utils.error import Error
 from ..utils.common import parse_object, smart_split
 
 
-class Parser:
+class Parser(object):
 
     def __init__(self, model):
         self.model = model
@@ -60,7 +60,7 @@ class Parser:
             if cls.is_storage:
                 self.model.classes_for_data.append(cls)
             return text
-        
+
         parser = Parser(Model())
         parser.model.side = self.model.side
         cls.parse_body(parser, body)
@@ -105,13 +105,13 @@ class Parser:
             method.parse_body(body)
             self.model.functions.append(method)
         return text
-    
+
     @staticmethod
     def create_object(description):
         parser = Parser(Model())
         parser.parse_text(description)
         return parser.model.objects[0]
-    
+
     @staticmethod
     def create_function(description):
         parser = Parser(Model())
@@ -122,7 +122,7 @@ class Parser:
         if ';' in line:
             Error.warning(Error.SYNTAX_WARNING, line)
             line = line.replace(';', '')
-        
+
         # parse initialize value
         expression = ''
         if '=' in line:
@@ -131,17 +131,17 @@ class Parser:
             line = line[0:k].strip()
         if expression:
             obj.initial_value = expression
-        
+
         # parse type, name, tempalte arguments
         parse_object(obj, line)
-        
+
         # parse specific modifiers
         obj.type = obj.find_modifiers(obj.type)
         obj.is_pointer = obj.check_pointer()
         obj.is_ref = obj.check_ref()
         if not self.model.is_side(obj.side):
             return
-        
+
         # recursive parsing template arguments
         args = []
         for arg_desc in obj.template_args:  # type: str

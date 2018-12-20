@@ -2,23 +2,23 @@ import re
 
 
 def smart_split(string, divider):
-    assert(len(divider) == 1)
+    assert len(divider) == 1
     if not string:
         return []
 
     parts = []
     depth = 0
     start = 0
-    for curr, s in enumerate(string):
+    for curr, char in enumerate(string):
         if start >= curr:
             continue
 
-        if s == divider and depth == 0:
+        if char == divider and depth == 0:
             parts.append(string[start:curr])
             start = curr + 1
-        elif s == '<':
+        elif char == '<':
             depth += 1
-        elif s == '>':
+        elif char == '>':
             depth -= 1
     parts.append(string[start:])
     return parts
@@ -27,7 +27,7 @@ def smart_split(string, divider):
 def parse_object(obj, string):
     if not string:
         return obj
-    
+
     # remove template
     templates = ''
     left = string.find('<')
@@ -48,7 +48,7 @@ def parse_object(obj, string):
         if counter == 0 and right != left:
             templates = string[left+1:right]
             string = string[:left] + string[right+1:]
-            
+
     type_s = re.search(r'\w+[&\*]*', string).group(0)
     string = string[len(type_s):]
     while True:
@@ -58,9 +58,9 @@ def parse_object(obj, string):
         modifier = match.group(0)
         string = string[len(modifier):]
         type_s += modifier
-        
+
     name_s = string.strip()
-    
+
     obj.type = type_s
     obj.name = name_s
 

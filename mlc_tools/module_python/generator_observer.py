@@ -59,11 +59,11 @@ class @{name}:
 '''
 
 
-class GeneratorObserver:
-    
+class GeneratorObserver(object):
+
     def __init__(self):
         pass
-    
+
     @staticmethod
     def get_mock():
         cls = Class()
@@ -71,12 +71,13 @@ class GeneratorObserver:
         cls.type = 'class'
         cls.auto_generated = False
         return cls
-    
+
     @staticmethod
     def get_observable_name():
         return 'Observable'
-    
-    def generate(self, writer):
+
+    @staticmethod
+    def generate(writer):
         text = PREDEFINED
         filename = GeneratorObserver.get_observable_name() + '.py'
         text = text.replace('@{namespace}', 'mg')

@@ -23,7 +23,7 @@ class Serializer(SerializerBase):
 
     def create_serialization_function(self, cls, serialize_type, serialize_format):
         method = SerializerBase.create_serialization_function(self, cls, serialize_type, serialize_format)
-        
+
         use_data_storage = 'DataStorage::shared()' in method.body
         use_factory = 'Factory::shared()' in method.body
         imports = ''
@@ -50,14 +50,14 @@ class Serializer(SerializerBase):
         value_type = value.type
         pattern = self.serialize_protocol[serialization_type]['map'][0]
         value_is_pointer = value.is_pointer
-    
+
         def get_create_type_operation(type_):
             types = {
                 'list': 'array',
                 'map': 'array',
             }
             return types[type_] if type_ in types else 'new ' + type_
-    
+
         if value_type not in self.model.simple_types:
             value_declaration = '$value = {}();'.format(get_create_type_operation(value_type))
         else:
@@ -95,12 +95,12 @@ class Serializer(SerializerBase):
 
     def get_serialization_function_args(self, serialize_type, serialize_format):
         return ['xml', Objects.VOID] if serialize_format == 'xml' else ['json', Objects.VOID]
-    
+
     def build_serialize_operation(self, obj, serialization_type, serialize_format):
         return self.build_serialize_operation_(obj.name, obj.type, obj.initial_value,
                                                serialization_type, obj.template_args, obj.is_pointer, '$this->',
                                                obj.is_link, serialize_format)
-        
+
     def build_serialize_operation_(self, obj_name, obj_type, obj_value, serialization_type, obj_template_args,
                                    obj_is_pointer, owner, is_link, serialize_format):
         index = 0

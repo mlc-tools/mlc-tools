@@ -5,7 +5,7 @@ SERIALIZATION = 0
 DESERIALIZATION = 1
 
 
-class SerializerBase:
+class SerializerBase(object):
 
     def __init__(self):
         self.serialize_protocol = {}
@@ -38,7 +38,7 @@ class SerializerBase:
         for func in cls.functions:
             if func.name == method.name:
                 return method
-    
+
         method.args.append(self.get_serialization_function_args(serialize_type, serialize_format))
         body = ''
         if cls.superclasses:
@@ -55,7 +55,7 @@ class SerializerBase:
         method.body = body
         cls.functions.append(method)
         return method
-        
+
     def get_protocol(self, serialize_format):
         assert(False and "override me")
 

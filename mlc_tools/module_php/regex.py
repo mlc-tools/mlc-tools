@@ -1,7 +1,7 @@
 import re
 
 
-class RegexPatternPhp:
+class RegexPatternPhp(object):
 
     FUNCTION = (
         (re.compile(r'DataStorage::shared\(\).get<(\w+)>'), r'DataStorage::shared()->get\1'),
@@ -104,4 +104,3 @@ class RegexPatternPhp:
         ('list_size', 'count'),
         ('map_size', 'count'),
     )
-

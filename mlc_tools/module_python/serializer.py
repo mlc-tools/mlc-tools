@@ -3,8 +3,8 @@ from ..base.serializer_base import SerializerBase
 from ..core.object import Object, Objects
 from ..utils.error import Error
 from .regex import RegexPatternPython
-from .protocols import py_xml
-from .protocols import py_json
+from .protocols import PY_XML
+from .protocols import PY_JSON
 
 SERIALIZATION = 0
 DESERIALIZATION = 1
@@ -16,14 +16,14 @@ class Serializer(SerializerBase):
         SerializerBase.__init__(self)
 
     def get_protocol(self, serialize_format):
-        protocol = py_xml if serialize_format == 'xml' else py_json
+        protocol = PY_XML if serialize_format == 'xml' else PY_JSON
         if sys.version_info[0] == 3:
             protocol = protocol.replace('.iteritems()', '.items()')
         return protocol
 
     def create_serialization_function(self, cls, serialize_type, serialize_format):
         method = SerializerBase.create_serialization_function(self, cls, serialize_type, serialize_format)
-        
+
         use_factory = RegexPatternPython.FACTORY.search(method.body) is not None
         use_data_storage = 'DataStorage.shared()' in method.body
         imports = ''
@@ -50,23 +50,22 @@ class Serializer(SerializerBase):
         key_type = key.type
         value_type = value.type
         string = self.model.serialize_protocol[serialization_type]['map'][0]
-        a0 = obj_name
-        a1 = self.build_serialize_operation_('key', key_type, None, serialization_type,
-                                             key.template_args, False, '', key.is_link, serialize_format)
-        a2 = self.build_serialize_operation_('value', value_type, None, serialization_type,
-                                             value.template_args, value.is_pointer, '', value.is_link,
-                                             serialize_format)
-        a1 = a1.split('\n')
-        for index, a in enumerate(a1):
-            a1[index] = '    ' + a
-        a1 = '\n'.join(a1)
-        a2 = a2.split('\n')
-        for index, a in enumerate(a2):
-            a2[index] = '    ' + a
-        a2 = '\n'.join(a2)
-        return string.format(field=a0,
-                             key_serialize=a1,
-                             value_serialize=a2,
+        key_serialize = self.build_serialize_operation_('key', key_type, None, serialization_type,
+                                                        key.template_args, False, '', key.is_link, serialize_format)
+        value_serialize = self.build_serialize_operation_('value', value_type, None, serialization_type,
+                                                          value.template_args, value.is_pointer, '', value.is_link,
+                                                          serialize_format)
+        key_serialize = key_serialize.split('\n')
+        for index, line in enumerate(key_serialize):
+            key_serialize[index] = '    ' + line
+        key_serialize = '\n'.join(key_serialize)
+        value_serialize = value_serialize.split('\n')
+        for index, line in enumerate(value_serialize):
+            value_serialize[index] = '    ' + line
+        value_serialize = '\n'.join(value_serialize)
+        return string.format(field=obj_name,
+                             key_serialize=key_serialize,
+                             value_serialize=value_serialize,
                              owner='self.') + '\n'
 
     @staticmethod
@@ -74,7 +73,7 @@ class Serializer(SerializerBase):
         assert (value is None or isinstance(value, str))
         if value is None:
             return None
-        
+
         if value == 'true':
             return 'True'
         if value == 'false':
@@ -87,12 +86,12 @@ class Serializer(SerializerBase):
 
     def get_serialization_function_args(self, serialize_type, serialize_format):
         return ['xml', Objects.VOID] if serialize_format == 'xml' else ['dictionary', Objects.VOID]
-    
+
     def build_serialize_operation(self, obj, serialization_type, serialize_format):
         return self.build_serialize_operation_(obj.name, obj.type, obj.initial_value,
                                                serialization_type, obj.template_args, obj.is_pointer, 'self.',
                                                obj.is_link, serialize_format)
-        
+
     def build_serialize_operation_(self, obj_name, obj_type, obj_value, serialization_type, obj_template_args,
                                    obj_is_pointer, owner, is_link, serialize_format):
         index = 0
@@ -101,7 +100,7 @@ class Serializer(SerializerBase):
 
         type_ = obj_type
         cls = self.model.get_class(type_)
-        arg_0 = obj_template_args[0].type if len(obj_template_args) > 0 else 'unknown_arg'
+        arg_0 = obj_template_args[0].type if obj_template_args else 'unknown_arg'
         if cls and cls.type == 'enum':
             type_ = 'enum'
         elif obj_type not in self.model.simple_types and type_ != "list" and type_ != "map":
@@ -114,7 +113,7 @@ class Serializer(SerializerBase):
         elif obj_type in self.model.simple_types:
             type_ = obj_type
         else:
-            if len(obj_template_args) > 0:
+            if obj_template_args:
                 if type_ == "map":
                     if len(obj_template_args) != 2:
                         Error.exit(Error.MAP_TWO_ARGS, cls.name, obj_name)

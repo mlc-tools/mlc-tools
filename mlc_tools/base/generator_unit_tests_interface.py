@@ -4,7 +4,7 @@ from ..core.object import Object, Objects, AccessSpecifier
 from ..core.function import Function
 
 
-class GeneratorUnitTestsInterface:
+class GeneratorUnitTestsInterface(object):
 
     def __init__(self):
         self.tests = []

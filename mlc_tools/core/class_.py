@@ -75,7 +75,7 @@ class Class(Object):
             cls.side = self.side
             cls.is_test = self.is_test
             self.inner_classes.append(cls)
-            
+
             for obj in parser.model.objects:
                 if obj.type == inner_class_name:
                     obj.type = cls.name
@@ -92,7 +92,7 @@ class Class(Object):
 
         self.members = parser.model.objects
         self.functions = parser.model.functions
-        
+
         for member in self.members:
             member.set_default_initial_value()
         return

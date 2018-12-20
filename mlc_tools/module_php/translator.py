@@ -5,10 +5,10 @@ from ..base.translator_base import TranslatorBase
 
 
 class Translator(TranslatorBase):
-    
+
     def __init__(self):
         TranslatorBase.__init__(self)
-    
+
     def translate_function(self, cls, method, model):
         if not method.translated:
             body = '\n'.join(method.operations)
@@ -17,13 +17,13 @@ class Translator(TranslatorBase):
         else:
             if len(method.operations) > 0:
                 method.body = '\n        '.join(method.operations)
-    
+
     @staticmethod
     def translate_function_body(cls, func, model, args):
         func = Translator.replace_by_regex(func, model, args)
         func = Translator.add_imports(cls, func, model)
         return func
-    
+
     def convert_to_enum(self, cls):
         shift = 0
         cast = 'string'
@@ -46,7 +46,7 @@ class Translator(TranslatorBase):
                 values.append(m.initial_value)
             else:
                 m.initial_value = 'None'
-            
+
             shift += 1
         value = Object()
         value.initial_value = '{}::{}'.format(cls.name, cls.members[0].name)
@@ -55,7 +55,7 @@ class Translator(TranslatorBase):
         value.access = AccessSpecifier.private
         cls.members.append(value)
         return values
-    
+
     @staticmethod
     def add_imports(cls_owner, func, model):
         # if not func:
@@ -77,14 +77,14 @@ class Translator(TranslatorBase):
         # if 'random.' in func:
         #     func = 'import random\n' + func
         return func
-    
+
     @staticmethod
     def replace_by_regex(func, model, function_args):
         function_args = ', '.join(['$' + x[0] for x in function_args])
-        
+
         if not func and not function_args:
             return func
-    
+
         strings = []
         string_pattern = '@{__string_%d__}'
         while '"' in func:
@@ -99,10 +99,10 @@ class Translator(TranslatorBase):
                     break
                 p = func[right]
                 right += 1
-    
+
         for reg in RegexPatternPhp.FUNCTION:
             func = reg[0].sub(reg[1], func)
-    
+
         for key in RegexPatternPhp.VARIABLES:
             patterns_dict = RegexPatternPhp.VARIABLES[key]
             arr = key.findall(function_args + '\n' + func)
@@ -124,27 +124,27 @@ class Translator(TranslatorBase):
                             continue
                         # func = func.replace(ch + var, ch + '$' + var)
                         func = func[:start] + (ch + '$' + var) + func[n:]
-            
+
                 pattern = '^' + var
                 if pattern not in patterns_dict:
                     patterns_dict[pattern] = re.compile(pattern)
                 pattern = patterns_dict[pattern]
-            
+
                 func = pattern.sub('$' + var, func)
                 for ch in ['->']:
                     func = func.replace(ch + '$' + var, ch + var)
-    
+
         for reg in RegexPatternPhp.FUNCTION_2:
             func = reg[0].sub(reg[1], func)
-    
+
         for reg in RegexPatternPhp.REPLACES:
             func = func.replace(reg[0], reg[1])
-    
+
         for i, string in enumerate(strings):
             func = func.replace(string_pattern % i, string)
-    
+
         for cls in model.classes:
             if cls.name in func:
                 func = 'require_once "{}.php";\n'.format(cls.name) + func
-    
+
         return func

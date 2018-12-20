@@ -1,7 +1,7 @@
 
 
-class Language:
-    
+class Language(object):
+
     def __init__(self, module_lang, model):
         from pydoc import locate
         module_name = 'module_%s' % (module_lang if module_lang != 'py' else 'python')

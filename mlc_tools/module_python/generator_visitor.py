@@ -1,11 +1,11 @@
 from ..base.parser import Parser
-from ..core.object import *
+from ..core.object import Objects
 from ..core.class_ import Class
 from ..core.function import Function
 from ..utils.error import Error
 
 
-class GeneratorVisitor:
+class GeneratorVisitor(object):
 
     def __init__(self):
         self.model = None
@@ -32,7 +32,7 @@ class GeneratorVisitor:
             self.generate_acceptor_interface(base_class_name, visitors)
             for visitor in visitors:
                 self.add_accept_method(visitor, base_class_name)
-                
+
         # change name of methods to classes extends IVisitor interfaces
         for cls in model.classes:
             superclass_name = cls.superclasses[0] if cls.superclasses else None
@@ -59,7 +59,8 @@ class GeneratorVisitor:
         return None
 
     def generate_acceptor_interface(self, base_class_name, visitors):
-        assert (len(visitors) > 0)
+        assert visitors
+
         acceptor = Class()
         acceptor.name = 'IVisitor' + base_class_name
         acceptor.group = visitors[0].group
@@ -100,18 +101,17 @@ class GeneratorVisitor:
         acceptor.functions.sort(key=comparator)
 
     @staticmethod
-    def add_accept_method(cls, base_class_name):
+    def add_accept_method(class_, base_class_name):
         method = Function()
         method.name = 'accept'
         method.return_type = Objects.VOID
         method.args.append(['visitor', Parser.create_object(base_class_name + '*')])
         method.operations.append('visitor->visit(this);')
-        cls.functions.append(method)
-        
+        class_.functions.append(method)
+
     @staticmethod
-    def override_methods(cls):
-        for method in cls.functions:
+    def override_methods(class_):
+        for method in class_.functions:
             if method.name == 'visit' and len(method.args) == 1:
                 arg_type = method.args[0][1].type.replace('*', '')
                 method.name = 'visit_%s' % (arg_type[0].lower()) + arg_type[1:]
-                pass

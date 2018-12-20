@@ -5,7 +5,7 @@ from ..utils.error import Error
 from copy import deepcopy
 
 
-class Linker:
+class Linker(object):
 
     def __init__(self):
         pass

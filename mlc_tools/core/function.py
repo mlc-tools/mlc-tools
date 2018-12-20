@@ -2,7 +2,7 @@ from .modifiers import Modifiers
 from .object import Object, AccessSpecifier
 
 
-class Function:
+class Function(object):
 
     def __init__(self):
         self.operations = []

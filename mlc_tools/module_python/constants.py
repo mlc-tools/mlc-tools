@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 import json
 
 
-class Factory:
+class Factory(object):
 
     @staticmethod
     def build(type):

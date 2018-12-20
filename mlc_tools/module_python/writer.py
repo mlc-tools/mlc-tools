@@ -21,12 +21,12 @@ class Writer(WriterBase):
             else:
                 static_list += '    ' + self.write_object(obj) + '\n'
         slots = '__slots__ = [' + ', '.join(slots) + ']'
-        
+
         functions = ''
         for method in cls.functions:
-            f = self.write_function(method)
-            functions += f
-        
+            text = self.write_function(method)
+            functions += text
+
         imports = ''
         init_superclass = ''
         name = cls.name
@@ -37,7 +37,7 @@ class Writer(WriterBase):
         else:
             superclass_name = 'object'
         name += '(' + superclass_name + ')'
-        
+
         for obj in cls.members:
             type_class = self.model.get_class(obj.type)
             if type_class and type_class.type == 'enum':
@@ -59,7 +59,7 @@ class Writer(WriterBase):
                                   slots=slots)
         return [
             ('%s.py' % cls.name, self.prepare_file(out))
-            ]
+        ]
 
     def write_object(self, obj):
         imports = ''

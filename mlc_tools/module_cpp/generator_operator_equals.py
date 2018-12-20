@@ -2,11 +2,11 @@ from ..core.object import *
 from ..core.function import Function
 
 
-class GeneratorOperatorEquals:
-    
+class GeneratorOperatorEquals(object):
+
     def __init__(self):
         pass
-    
+
     def generate(self, model):
         for cls in model.classes:
             if cls.type == 'enum':
@@ -14,7 +14,7 @@ class GeneratorOperatorEquals:
             if cls.name in ['DataStorage']:
                 continue
             self.add_operators_equals(cls)
-            
+
     @staticmethod
     def add_operators_equals(cls):
         def get_const_ref():
@@ -23,7 +23,7 @@ class GeneratorOperatorEquals:
             ref.is_const = True
             ref.is_ref = True
             return ref
-        
+
         operator = Function()
         operator.name = 'operator =='
         operator.return_type = Objects.BOOL

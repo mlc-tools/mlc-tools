@@ -5,7 +5,7 @@ from ..core.function import Function
 from ..utils.error import Error
 
 
-class GeneratorVisitor:
+class GeneratorVisitor(object):
 
     def __init__(self):
         self.model = None
@@ -32,7 +32,7 @@ class GeneratorVisitor:
             self.generate_acceptor_interface(base_class_name, visitors)
             for visitor in visitors:
                 self.add_accept_method(visitor, base_class_name)
-                
+
         # change name of methods to classes extends IVisitor interfaces
         for cls in model.classes:
             superclass_name = cls.superclasses[0] if cls.superclasses else None
@@ -107,7 +107,7 @@ class GeneratorVisitor:
         method.args.append(['visitor', Parser.create_object(base_class_name + '*')])
         method.operations.append('$visitor->visit($this);')
         cls.functions.append(method)
-        
+
     @staticmethod
     def override_methods(cls):
         for method in cls.functions:

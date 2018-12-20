@@ -19,12 +19,12 @@ class Writer(WriterBase):
             declaration_list += declare + '\n'
             if init:
                 initialization_list += init + '\n'
-        
+
         functions = ''
         for method in cls.functions:
             f = self.write_function(method)
             functions += f
-        
+
         imports = ''
         name = cls.name
         extend = ''
@@ -54,7 +54,7 @@ class Writer(WriterBase):
 
         return [
             ('%s.php' % cls.name, self.prepare_file(out))
-            ]
+        ]
 
     def write_object(self, obj):
         out_init = ''
@@ -83,20 +83,20 @@ class Writer(WriterBase):
             if cls and cls.type == 'enum':
                 value = None
                 out_init = '$this->{} = {};'.format(obj.name, Serializer.convert_initialize_value(obj.initial_value))
-    
+
         accesses = {
             AccessSpecifier.public: 'public',
             AccessSpecifier.protected: 'protected',
             AccessSpecifier.private: 'private',
         }
-    
+
         if obj.is_static:
             out_declaration = accesses[obj.access] + ' static ${0} = {1};'
         else:
             out_declaration = accesses[obj.access] + ' ${0} = {1};'
         out_declaration = out_declaration.format(obj.name, Serializer.convert_initialize_value(value))
         return out_declaration, out_init
-    
+
     def prepare_file(self, text):
         text = text.replace('::TYPE', '::$TYPE')
         text = text.replace('nullptr', 'null')

@@ -33,10 +33,10 @@ class Translator(TranslatorBase):
     def convert_to_enum(self, cls):
         cast = 'int'
         values = []
-    
+
         def get_enum_value(cls_, index):
             return '(1 << {})'.format(index) if not cls_.is_numeric else str(index)
-        
+
         def translate_members():
             shift = 0
             for member in cls.members:
@@ -50,7 +50,7 @@ class Translator(TranslatorBase):
                     member.initial_value = get_enum_value(cls, shift)
                 values.append(1 << shift)
                 shift += 1
-    
+
         def add_method(type_, name, const):
             method = Function()
             method.return_type = type_
@@ -58,19 +58,19 @@ class Translator(TranslatorBase):
             method.is_const = const
             cls.functions.append(method)
             return method
-        
+
         def create_const_ref():
             const_ref = Object()
             const_ref.type = cls.name
             const_ref.is_const = True
             const_ref.is_ref = True
             return const_ref
-        
+
         def add_constructor_with_parameter():
             method = add_method(Object(), cls.name, False)
             method.args.append(['_value', Objects.INT])
             method.operations.append('value = _value;')
-            
+
         def add_constructor_copy():
             method = add_method(Object(), cls.name, False)
             method.args.append(['rhs', create_const_ref()])
@@ -87,17 +87,17 @@ class Translator(TranslatorBase):
                         return;
                     }}'''.format(obj.name))
             method.operations.append('value = 0;')
-            
+
         def add_operator_copy():
             method = add_method(create_const_ref(), 'operator =', False)
             method.args.append(['rhs', create_const_ref()])
             method.operations.extend(['value = rhs.value;', 'return *this;'])
-            
+
         def add_operator_copy_with_int():
             method = add_method(create_const_ref(), 'operator =', False)
             method.args.append(['rhs', Objects.INT])
             method.operations.extend(['value = rhs;', 'return *this;'])
-            
+
         def add_operator_copy_with_string():
             method = add_method(create_const_ref(), 'operator =', False)
             method.args.append(['_value', Objects.STRING])
@@ -109,7 +109,7 @@ class Translator(TranslatorBase):
                                     return *this;
                                 }}'''.format(obj.name))
             method.operations.append('return *this;')
-            
+
         def add_operator_equals():
             method = add_method(Objects.BOOL, 'operator ==', True)
             method.args.append(['rhs', create_const_ref()])
@@ -148,7 +148,7 @@ class Translator(TranslatorBase):
                                     return "{0}";
                                 }}'''.format(obj.name))
             method.operations.append('return std::string();')
-        
+
         def add_member_value():
             value = Object()
             value.initial_value = cls.members[0].name
@@ -171,7 +171,7 @@ class Translator(TranslatorBase):
         add_operator_cast_string()
         add_method_str()
         add_member_value()
-    
+
         return values
 
     @staticmethod

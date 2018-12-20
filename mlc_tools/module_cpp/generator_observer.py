@@ -129,8 +129,8 @@ namespace @{namespace}
 '''
 
 
-class GeneratorObserver:
-    
+class GeneratorObserver(object):
+
     def __init__(self):
         pass
 
@@ -141,7 +141,7 @@ class GeneratorObserver:
         cls.type = 'class'
         cls.auto_generated = False
         return cls
-    
+
     @staticmethod
     def get_observable_name():
         return 'Observable'

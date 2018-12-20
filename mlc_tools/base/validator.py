@@ -1,7 +1,7 @@
 from ..utils.error import Error
 
 
-class Validator:
+class Validator(object):
 
     def __init__(self):
         pass

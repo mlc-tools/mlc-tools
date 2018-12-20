@@ -2,7 +2,7 @@ import sys
 import re
 
 
-class RegexPatternPython:
+class RegexPatternPython(object):
 
     def __init__(self):
         pass
