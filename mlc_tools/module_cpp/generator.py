@@ -1,4 +1,4 @@
-from ..base.generator import *
+from ..base.generator import GeneratorBase
 from .generator_data_storage import GeneratorDataStorage
 from .generator_visitor import GeneratorVisitor
 from .generator_predefined_files import GeneratorPredefinedFiles

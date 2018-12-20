@@ -7,6 +7,19 @@ class AccessSpecifier(Enum):
     protected = 1
     private = 2
 
+    @staticmethod
+    def find_access(object_or_fucntion, string):
+        if Modifiers.private in string:
+            object_or_fucntion.access = AccessSpecifier.private
+            string = string.replace(Modifiers.private, '')
+        elif Modifiers.protected in string:
+            object_or_fucntion.access = AccessSpecifier.protected
+            string = string.replace(Modifiers.protected, '')
+        elif Modifiers.public in string:
+            object_or_fucntion.access = AccessSpecifier.public
+            string = string.replace(Modifiers.public, '')
+        return string
+
 
 class Object(object):
 
@@ -75,12 +88,7 @@ class Object(object):
         if self.is_link:
             self.is_pointer = True
 
-        if Modifiers.private in string:
-            self.access = AccessSpecifier.private
-        if Modifiers.protected in string:
-            self.access = AccessSpecifier.protected
-        if Modifiers.public in string:
-            self.access = AccessSpecifier.public
+        string = AccessSpecifier.find_access(self, string)
 
         string = string.replace(Modifiers.server, '')
         string = string.replace(Modifiers.client, '')
@@ -89,9 +97,6 @@ class Object(object):
         string = string.replace(Modifiers.static, '')
         string = string.replace(Modifiers.key, '')
         string = string.replace(Modifiers.link, '')
-        string = string.replace(Modifiers.private, '')
-        string = string.replace(Modifiers.protected, '')
-        string = string.replace(Modifiers.public, '')
         string = string.replace(Modifiers.ref, '')
         string = string.replace(Modifiers.pointer, '')
 

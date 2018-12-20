@@ -44,7 +44,8 @@ class GeneratorObserver(object):
     def get_observable_name():
         return 'Observable'
 
-    def generate(self, writer):
+    @staticmethod
+    def generate(writer):
         text = PREDEFINED
         filename = GeneratorObserver.get_observable_name() + '.php'
         text = text.replace('@{namespace}', 'mg')

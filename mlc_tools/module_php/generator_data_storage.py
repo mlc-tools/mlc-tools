@@ -1,6 +1,7 @@
-from ..base.generator_data_storage_base import *
+from ..base.generator_data_storage_base import GeneratorDataStorageBase
+from ..base.generator_data_storage_base import get_data_list_name, get_data_name
 from ..base.parser import Parser
-from ..core.object import *
+from ..core.object import Object, AccessSpecifier, Objects
 from ..core.function import Function
 
 
@@ -19,7 +20,6 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
         obj.name = '__instance'
         obj.initial_value = 'NULL'
         obj.is_static = True
-        obj.access = AccessSpecifier.private
         self.members.append(obj)
 
         obj = Object()
@@ -35,7 +35,6 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
         obj.name = 'PATH_TO_DATA'
         obj.initial_value = '"assets/data/data.xml"'
         obj.is_static = True
-        obj.access = AccessSpecifier.public
         self.members.append(obj)
 
         obj = Object()
@@ -129,7 +128,7 @@ if(DataStorage::$__instance == NULL)
         {
             return true;
         }
-        $diff = \strlen($haystack) - \strlen($needle);
+        $diff = \\strlen($haystack) - \\strlen($needle);
         return $diff >= 0 && strpos($haystack, $needle, $diff) !== false;
     }
 

@@ -1,5 +1,5 @@
 from ..base import WriterBase
-from ..core.object import *
+from ..core.object import AccessSpecifier
 from .serializer import Serializer
 
 
@@ -22,8 +22,8 @@ class Writer(WriterBase):
 
         functions = ''
         for method in cls.functions:
-            f = self.write_function(method)
-            functions += f
+            text = self.write_function(method)
+            functions += text
 
         imports = ''
         name = cls.name
@@ -49,9 +49,7 @@ class Writer(WriterBase):
                                   declarations=declaration_list,
                                   initialize_list=initialization_list,
                                   functions=functions,
-                                  imports=imports,
-                                  )
-
+                                  imports=imports)
         return [
             ('%s.php' % cls.name, self.prepare_file(out))
         ]
@@ -106,10 +104,7 @@ class Writer(WriterBase):
         text = list()
 
         def get_tabs(count):
-            out = ''
-            for index in range(count):
-                out += '\t'
-            return out
+            return '\t' * count
 
         for line in lines:
             line = line.strip()
@@ -122,10 +117,7 @@ class Writer(WriterBase):
             text.append(line)
         text = '\n'.join(text)
         for i in range(10):
-            tabs = '\n'
-            for k in range(i):
-                tabs += '\t'
-            tabs += '{'
+            tabs = '\n' + '\t' * i + '{'
             text = text.replace(tabs, ' {')
         text = text.replace('foreach(', 'foreach (')
         text = text.replace('for(', 'for (')

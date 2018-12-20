@@ -1,4 +1,4 @@
-cpp_xml = '''
+CPP_XML = '''
 #int
 #serialize:
 #with default value:
@@ -247,7 +247,7 @@ for(const auto& child : arr_$(FIELD))
 '''
 
 
-cpp_json = '''
+CPP_JSON = '''
 
 #int, bool, float, string
 #serialize:

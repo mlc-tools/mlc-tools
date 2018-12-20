@@ -24,7 +24,7 @@ class GeneratorUnitTestsInterface(object):
         model.classes.append(self.generate_all_tests_class())
 
     def generate_base_classes(self):
-        base = base_classes
+        base = BASE_CLASSES
         base = base.replace('@{all_methods}', str(self.tests_interface_methods_count))
         base = base.replace('@{implemented_methods}', str(self.tests_implemented_methods_count))
         self.model.parser.parse_text(base)
@@ -32,10 +32,10 @@ class GeneratorUnitTestsInterface(object):
     @staticmethod
     def get_member_name(cls_name):
         name_ = ''
-        for i, ch in enumerate(cls_name):
-            if ch.isupper() and i > 0:
+        for i, char in enumerate(cls_name):
+            if char.isupper() and i > 0:
                 name_ += '_'
-            name_ += ch.lower()
+            name_ += char.lower()
         return name_
 
     def generate_test_interface(self, cls):
@@ -62,7 +62,7 @@ class GeneratorUnitTestsInterface(object):
                 else:
                     self.tests_implemented_methods_count += 1
 
-        if len(test.functions) == 0:
+        if not test.functions:
             return None
 
         method = Function()
@@ -74,8 +74,8 @@ class GeneratorUnitTestsInterface(object):
             name = func.name
             if name == 'initialize' or name == 'execute':
                 continue
-            method.operations.append('result = this->{0}();'.format(name, name[5:]))
-            method.operations.append('this->logger->push(result, " - [{1}] tested");'.format(name, name[5:]))
+            method.operations.append('result = this->{}();'.format(name))
+            method.operations.append('this->logger->push(result, " - [{}] tested");'.format(name[5:]))
             method.operations.append(
                 'this->logger->push(result, "---------------------------------------------------------");')
             method.operations.append('this->logger->methods_count += 1;')
@@ -90,12 +90,12 @@ class GeneratorUnitTestsInterface(object):
         return test
 
     @staticmethod
-    def add_method(cls, name):
+    def add_method(class_, name):
         method = Function()
         method.name = name
         method.return_type = Objects.BOOL
         method.is_abstract = True
-        cls.functions.append(method)
+        class_.functions.append(method)
 
     def generate_all_tests_class(self,):
         test_all = Class()
@@ -138,7 +138,7 @@ class GeneratorUnitTestsInterface(object):
         return test_all
 
 
-base_classes = '''
+BASE_CLASSES = '''
 class tests/Logger<SerializedObject>:test:virtual
 {
     bool result = true

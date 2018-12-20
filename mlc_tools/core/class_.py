@@ -1,5 +1,5 @@
 import re
-from .object import *
+from .object import Object
 from .modifiers import Modifiers
 
 
@@ -65,9 +65,9 @@ class Class(Object):
 
             for cls in parser.model.classes:
                 pattern = re.compile(r'\b{}\b'.format(cls.name))
-                repl = self.name + cls.name
-                for i, op in enumerate(func.operations):
-                    func.operations[i] = re.sub(pattern, repl, op)
+                new_name = self.name + cls.name
+                for i, line in enumerate(func.operations):
+                    func.operations[i] = re.sub(pattern, new_name, line)
         for cls in parser.model.classes:
             inner_class_name = cls.name
             cls.name = self.name + cls.name
@@ -84,7 +84,7 @@ class Class(Object):
                         arg.type = cls.name
 
             for method in parser.model.functions:
-                for name, arg in method.args:
+                for _, arg in method.args:
                     if arg.type == inner_class_name:
                         arg.type = cls.name
                 if method.return_type.type == inner_class_name:
@@ -105,9 +105,9 @@ class Class(Object):
             func.is_virtual = self.is_virtual or \
                 func.is_virtual or \
                 func.is_abstract or \
-                self.has_equal_function_in_subclasses(func)
+                self.has_function_in_subclasses(func)
             func.is_virtual = func.is_virtual or \
-                self.has_equal_function_in_superclasses(func)
+                self.has_function_in_superclasses(func)
 
         if not self.is_abstract:
             for method in self.functions:
@@ -120,7 +120,7 @@ class Class(Object):
 
         self._linked = True
 
-    def has_equal_function_in_subclasses(self, method):
+    def has_function_in_subclasses(self, method):
         for subclass in self.subclasses:
             for func in subclass.functions:
                 equal = True
@@ -132,11 +132,11 @@ class Class(Object):
                     func.is_virtual = True
                     return True
         for subclass in self.subclasses:
-            if subclass.has_equal_function_in_subclasses(method):
+            if subclass.has_function_in_subclasses(method):
                 return True
         return False
 
-    def has_equal_function_in_superclasses(self, method):
+    def has_function_in_superclasses(self, method):
         for superclass in self.superclasses:
             for func in superclass.functions:
                 equal = True
@@ -147,7 +147,7 @@ class Class(Object):
                     func.is_virtual = True
                     return True
         for superclass in self.superclasses:
-            if superclass.has_equal_function_in_superclasses(method):
+            if superclass.has_function_in_superclasses(method):
                 return True
         return False
 

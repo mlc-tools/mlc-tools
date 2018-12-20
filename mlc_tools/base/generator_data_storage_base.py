@@ -12,10 +12,10 @@ def get_data_name(name):
     if name.find('Data') == 0:
         name = name[4:]
     name_ = ''
-    for i, ch in enumerate(name):
-        if ch.isupper() and i > 0:
+    for i, char in enumerate(name):
+        if char.isupper() and i > 0:
             name_ += '_'
-        name_ += ch.lower()
+        name_ += char.lower()
     return name_
 
 
@@ -27,11 +27,11 @@ def get_class_name_from_data_name(name):
     """
     upper = True
     name_ = ''
-    for ch in name:
-        if ch == '_':
+    for char in name:
+        if char == '_':
             upper = True
             continue
-        name_ += ch if not upper else ch.upper()
+        name_ += char if not upper else char.upper()
         upper = False
     return 'Data' + name_
 

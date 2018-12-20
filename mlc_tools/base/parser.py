@@ -21,7 +21,7 @@ class Parser(object):
     def parse_text(self, text):
         text = self.remove_comments(text)
         text = text.strip()
-        while len(text) > 0:
+        while text:
             if Parser._is_class(text):
                 text = self._create_class(text, False)
             elif Parser._is_interface(text):
@@ -160,10 +160,7 @@ class Parser(object):
 
         for arg in args:
             arg = arg.strip()
-
-            # TODO: deprecated. replace to assert
-            if arg.startswith('const '):
-                arg = arg[len('const '):]
+            assert not arg.startswith('const ')
 
             obj = Object()
             self.parse_object(obj, arg)
@@ -212,19 +209,19 @@ class Parser(object):
             text = text[text.find("{"):]
             counter = 0
             index = 0
-            for ch in text:
+            for char in text:
                 index += 1
-                if counter == 0 and ch == '{':
+                if counter == 0 and char == '{':
                     counter += 1
                     continue
-                if ch == '{':
+                if char == '{':
                     counter += 1
-                if ch == '}':
+                if char == '}':
                     counter -= 1
                 if counter == 0:
                     text = text[index:]
                     break
-                body += ch
+                body += char
         else:
             text = text[len(header):].strip()
         return body, header, text
@@ -250,13 +247,14 @@ class Parser(object):
         serialize_protocol = list()
         serialize_protocol.append({})
         serialize_protocol.append({})
-        for x in range(2):
+        for index in range(2):
             for type_ in supported_types:
                 simple = type_ in self.model.simple_types
-                p0 = self._load_protocol(lines, x, type_, True if simple else None, optional=type_ == 'list<enum>')
-                p1 = p0 if not simple else self._load_protocol(lines, x, type_, False)
-                serialize_protocol[x][type_] = []
-                serialize_protocol[x][type_].extend([p0, p1])
+                protocol_0 = self._load_protocol(lines, index, type_, True if simple else None,
+                                                 optional=type_ == 'list<enum>')
+                protocol_1 = protocol_0 if not simple else self._load_protocol(lines, index, type_, False)
+                serialize_protocol[index][type_] = []
+                serialize_protocol[index][type_].extend([protocol_0, protocol_1])
         self.model.serialize_protocol = serialize_protocol
 
     @staticmethod

@@ -56,14 +56,19 @@ class SerializerBase(object):
         cls.functions.append(method)
         return method
 
+    # pylint: disable=no-self-use
+    # pylint: disable=unused-argument
     def get_protocol(self, serialize_format):
         assert(False and "override me")
 
     def get_parent_serialize_format(self):
         assert(False and "override me")
 
-    def get_serialization_function_args(self, serialize_type, format_serialization):
+    def get_serialization_function_args(self, serialize_type, serialize_format):
         assert (False and "override me")
 
     def build_serialize_operation(self, obj, serialization_type, serialize_format):
         assert (False and "override me")
+
+    # pylint: enable=no-self-use
+    # pylint: enable=unused-argument

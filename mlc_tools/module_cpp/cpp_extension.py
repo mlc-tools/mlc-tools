@@ -1,4 +1,4 @@
-functions_hpp = '''
+FUNCTIONS_HPP = '''
 #ifndef __@{namespace}_functions_h__
 #define __@{namespace}_functions_h__
 
@@ -103,7 +103,8 @@ namespace @{namespace}
 
 #endif
 '''
-functions_cpp = '''
+
+FUNCTIONS_CPP = '''
 #include <cstdlib>
 #include <sstream>
 #include "@{namespace}_extensions.h"
@@ -315,7 +316,7 @@ namespace @{namespace}
 
 '''
 
-intrusive_hpp = '''#ifndef __intrusive_ptr__
+INTRUSIVE_HPP = '''#ifndef __intrusive_ptr__
 #define __intrusive_ptr__
 
 #include <assert.h>
@@ -488,7 +489,7 @@ namespace @{namespace}
 #endif
 '''
 
-factory_hpp = '''#ifndef __@{namespace}_Factory_h__
+FACTORY_HPP = '''#ifndef __@{namespace}_Factory_h__
 #define __@{namespace}_Factory_h__
 #include <string>
 #include <map>
@@ -639,9 +640,9 @@ namespace @{namespace}
 '''
 
 
-cpp_files = [
-    ['@{namespace}_extensions.h', functions_hpp],
-    ['@{namespace}_extensions.cpp', functions_cpp],
-    ['intrusive_ptr.h', intrusive_hpp],
-    ['@{namespace}_Factory.h', factory_hpp],
+FILES_DICT = [
+    ['@{namespace}_extensions.h', FUNCTIONS_HPP],
+    ['@{namespace}_extensions.cpp', FUNCTIONS_CPP],
+    ['intrusive_ptr.h', INTRUSIVE_HPP],
+    ['@{namespace}_Factory.h', FACTORY_HPP],
 ]

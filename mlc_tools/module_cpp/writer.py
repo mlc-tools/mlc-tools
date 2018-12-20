@@ -1,5 +1,5 @@
 from ..base import WriterBase
-from ..core.object import *
+from ..core.object import Object
 
 
 class Writer(WriterBase):
@@ -30,23 +30,23 @@ class Writer(WriterBase):
             (self.get_filename(cls, 'cpp'), self.prepare_file(source)),
         ]
 
-    def write_object(self, member):
+    def write_object(self, obj):
         declaration = ''
         initialization = ''
         static_initialization = ''
 
-        assert (isinstance(member.type, str))
+        assert (isinstance(obj.type, str))
         if self.current_cls.type == 'class':
-            declaration = self.write_member_declaration(member)
+            declaration = self.write_member_declaration(obj)
         elif self.current_cls.type == 'enum':
-            declaration = self.write_member_enum_declaration(member)
+            declaration = self.write_member_enum_declaration(obj)
 
-        if self.current_cls.type == 'enum' and member.name != 'value':
-            static_initialization = self.write_member_static_enum(self.current_cls, member)
-        elif member.is_static:
-            static_initialization = self.write_member_static_initialization(self.current_cls, member)
+        if self.current_cls.type == 'enum' and obj.name != 'value':
+            static_initialization = self.write_member_static_enum(self.current_cls, obj)
+        elif obj.is_static:
+            static_initialization = self.write_member_static_init(self.current_cls, obj)
         else:
-            initialization += self.write_member_initialization(member)
+            initialization += self.write_member_initialization(obj)
         return declaration, initialization, static_initialization
 
     def write_function(self, method):
@@ -61,19 +61,19 @@ class Writer(WriterBase):
             functions += method[0]
         members = ''
         for member in cls.members:
-            declaration, initialisation, static_initialization = self.objects_cache[member.name]
+            declaration, _, _ = self.objects_cache[member.name]
             members += declaration + '\n'
 
         virtual = 'virtual '
-        if not cls.is_virtual and len(cls.superclasses) == 0 and len(cls.subclasses) == 0:
+        if not cls.is_virtual and not cls.superclasses and not cls.subclasses:
             virtual = ''
         destructor = '{virtual}~{name}();'.format(virtual=virtual, name=cls.name)
 
         superclass = '' if not cls.superclasses else ' : public %s' % cls.superclasses[0].name
 
-        includes_s = self.build_includes_block(cls, includes)
-        forward_declarations_s = self.build_forward_declarations_block(forward_declarations)
-        forward_declarations_out_s = self.build_forward_declarations_block(forward_declarations_out)
+        includes_s = self.build_includes(cls, includes)
+        forward_declarations_s = self.build_forward_declarations(forward_declarations)
+        forward_declarations_out_s = self.build_forward_declarations(forward_declarations_out)
         header = HEADER.format(namespace=namespace,
                                class_name=class_name,
                                destructor=destructor,
@@ -82,8 +82,7 @@ class Writer(WriterBase):
                                forward_declarations_out=forward_declarations_out_s,
                                functions=functions,
                                members=members,
-                               superclass=superclass,
-                               )
+                               superclass=superclass)
         return header, includes, forward_declarations, forward_declarations_out
 
     def write_cpp(self, cls, includes, forw_declarations, forw_declarations_out):
@@ -95,7 +94,7 @@ class Writer(WriterBase):
         static_initializations = ''
         initializations = ''
         for member in cls.members:
-            declaration, initialisation, static_initialization = self.objects_cache[member.name]
+            _, initialisation, static_initialization = self.objects_cache[member.name]
             if initialisation:
                 div = ': ' if not initializations else ', '
                 initializations += div + initialisation + '\n'
@@ -126,8 +125,7 @@ class Writer(WriterBase):
                              functions=functions,
                              static_initializations=static_initializations,
                              initializations=initializations,
-                             registration=registration,
-                             )
+                             registration=registration)
 
     def write_function_hpp(self, method):
         string = '{virtual}{static}{type} {name}({args}){const}{override}{abstract};\n'
@@ -150,8 +148,7 @@ class Writer(WriterBase):
                              abstract=' = 0' if method.is_abstract else '',
                              type=return_type,
                              name=method.name,
-                             args=args
-                             )
+                             args=args)
 
     def write_function_cpp(self, method):
         if method.is_external or method.is_abstract:
@@ -180,8 +177,7 @@ class Writer(WriterBase):
                            name=method.name,
                            args=args,
                            class_name=self.current_cls.name,
-                           body=body
-                           )
+                           body=body)
 
     def write_member_declaration(self, obj):
         return self.write_named_object(obj, obj.name, False, True) + ';'
@@ -193,15 +189,14 @@ class Writer(WriterBase):
                                                                   name=obj.name,
                                                                   value=obj.initial_value)
 
-    def write_member_static_initialization(self, cls, obj):
+    def write_member_static_init(self, cls, obj):
         string = '{const}{type}{pointer} {owner}::{name}({initial_value});'
         return string.format(const='const ' if obj.is_const else '',
                              type=self.convert_type(obj.type),
                              pointer='*' if obj.is_pointer else '',
                              owner=cls.name,
                              name=obj.name,
-                             initial_value=obj.initial_value
-                             )
+                             initial_value=obj.initial_value)
 
     def write_member_static_enum(self, cls, obj):
         assert (self is not None)
@@ -213,7 +208,7 @@ class Writer(WriterBase):
             return 'nullptr'
         type_class = self.model.get_class(object_.type)
         if type_class and type_class.type == 'enum':
-            assert (len(type_class.members) > 0)
+            assert type_class.members
             return '{}::{}'.format(type_class.name, type_class.members[0].name)
 
         if object_.initial_value is None:
@@ -223,9 +218,7 @@ class Writer(WriterBase):
     def write_member_initialization(self, obj):
         string = '{name}({initial_value})'
         initial_value = self.convert_initial_value(obj)
-        return string.format(name=obj.name,
-                             initial_value=initial_value
-                             )
+        return string.format(name=obj.name, initial_value=initial_value)
 
     @staticmethod
     def write_named_object(obj, name, try_to_use_const_ref, use_intrusive):
@@ -257,8 +250,7 @@ class Writer(WriterBase):
                              name=(' ' + name) if name else '',
                              pointer='*' if obj.is_pointer else '',
                              ref='&' if is_ref else '',
-                             templates=templates,
-                             )
+                             templates=templates)
 
     @staticmethod
     def convert_type(type_of_object):
@@ -273,17 +265,14 @@ class Writer(WriterBase):
             return types[type_of_object]
         return type_of_object
 
-    def prepare_file(self, body):
+    def prepare_file(self, text):
         tabs = 0
 
-        lines = body.split('\n')
-        body = list()
+        lines = text.split('\n')
+        text = list()
 
         def get_tabs(count):
-            out = ''
-            for i in range(count):
-                out += '    '
-            return out
+            return '    ' * count
 
         for line in lines:
             line = line.strip()
@@ -294,22 +283,22 @@ class Writer(WriterBase):
             if 'public:' in line or 'protected:' in line or 'private:' in line:
                 backward = True
                 tabs -= 1
-            if len(line) > 0:
+            if line:
                 line = get_tabs(tabs) + line
             if backward:
                 tabs += 1
             if line.strip() and line.strip()[0] == '{':
                 tabs += 1
-            body.append(line)
-        body = '\n'.join(body)
-        body = body.strip().replace('\n\n\n', '\n\n') + '\n'
-        return body
+            text.append(line)
+        text = '\n'.join(text)
+        text = text.strip().replace('\n\n\n', '\n\n') + '\n'
+        return text
 
     @staticmethod
-    def get_filename(cls, ext):
-        filename = cls.name + '.' + ext
-        if cls.group:
-            filename = cls.group + '/' + filename
+    def get_filename(class_, ext):
+        filename = class_.name + '.' + ext
+        if class_.group:
+            filename = class_.group + '/' + filename
         return filename
 
     def get_includes_for_header(self, cls):
@@ -333,7 +322,7 @@ class Writer(WriterBase):
 
         # functions
         for method in cls.functions:
-            for name, argtype in method.args:
+            for _, argtype in method.args:
                 if 'pugi::' in argtype.type or 'Json::' in argtype.type:
                     add(forward_declarations_out, argtype)
                 else:
@@ -370,9 +359,9 @@ class Writer(WriterBase):
             name = type_.name
             if name not in hpp_includes and name in functions_text:
                 includes.add(name)
-        return self.build_includes_block(cls, includes)
+        return self.build_includes(cls, includes)
 
-    def build_includes_block(self, cls, includes):
+    def build_includes(self, cls, includes):
         types = {
             'std::list': '<vector>',
             'std::vector': '<vector>',
@@ -405,7 +394,7 @@ class Writer(WriterBase):
         return '\n'.join(result)
 
     @staticmethod
-    def build_forward_declarations_block(declarations):
+    def build_forward_declarations(declarations):
         ignore = [
             'std::list',
             'std::vector',

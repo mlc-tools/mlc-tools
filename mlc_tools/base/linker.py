@@ -1,8 +1,8 @@
+from copy import deepcopy
 from ..core.class_ import Class
-from ..core.object import *
+from ..core.object import Object, Objects, AccessSpecifier
 from ..core.function import Function
 from ..utils.error import Error
-from copy import deepcopy
 
 
 class Linker(object):
@@ -29,13 +29,13 @@ class Linker(object):
     @staticmethod
     def generate_inline_classes(model):
         for cls in model.classes:
-            Linker._generate_inline_classes(model, cls)
+            Linker._generate_inline_classes(cls)
 
     @staticmethod
-    def _generate_inline_classes(model, cls):
-        if len(cls.superclasses) == 0:
+    def _generate_inline_classes(class_):
+        if not class_.superclasses:
             return
-        for superclass in cls.superclasses:
+        for superclass in class_.superclasses:
             assert (isinstance(superclass, Class))
             if superclass.__class__ != Class:
                 Error.exit(Error.INTERNAL_ERROR)
@@ -44,7 +44,7 @@ class Linker(object):
                 continue
             for obj in superclass.members:
                 copy = deepcopy(obj)
-                cls.members.append(copy)
+                class_.members.append(copy)
             for func in superclass.functions:
                 disallow = False
                 disallow = disallow or func.name == 'operator =='
@@ -52,11 +52,11 @@ class Linker(object):
                 if disallow:
                     continue
                 copy = deepcopy(func)
-                cls.functions.append(copy)
+                class_.functions.append(copy)
 
-            superclass.subclasses.remove(cls)
+            superclass.subclasses.remove(class_)
 
-        cls.superclasses = [i for i in cls.superclasses if not i.is_inline]
+        class_.superclasses = [i for i in class_.superclasses if not i.is_inline]
 
     @staticmethod
     def convert_templates(model):
@@ -93,11 +93,11 @@ class Linker(object):
         for cls in model.classes:
             superclasses = []
             for name in cls.superclasses:
-                c = model.get_class(name)
-                if c is None:
+                superclass = model.get_class(name)
+                if superclass is None:
                     Error.exit(Error.UNKNOWN_SUPERCLASS, cls.name, name)
-                superclasses.append(c)
-                c.subclasses.append(cls)
+                superclasses.append(superclass)
+                superclass.subclasses.append(cls)
             cls.superclasses = superclasses
 
     @staticmethod
@@ -129,20 +129,20 @@ class Linker(object):
         model.functions = []
 
     @staticmethod
-    def add_get_type_function(cls):
+    def add_get_type_function(class_):
         member = Object()
         member.is_static = True
         member.is_const = True
         member.type = 'string'
         member.name = 'TYPE'
-        member.initial_value = '"{}"'.format(cls.name)
+        member.initial_value = '"{}"'.format(class_.name)
         member.access = AccessSpecifier.public
-        cls.members.append(member)
+        class_.members.append(member)
 
         method = Function()
         method.name = 'get_type'
         method.return_type = Objects.STRING
         method.is_const = True
-        method.operations.append('return {}::TYPE;'.format(cls.name))
-        cls.functions.append(method)
-        method.is_virtual = cls.is_virtual or len(cls.superclasses) or len(cls.subclasses)
+        method.operations.append('return {}::TYPE;'.format(class_.name))
+        class_.functions.append(method)
+        method.is_virtual = class_.is_virtual or class_.superclasses or class_.subclasses

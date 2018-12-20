@@ -1,6 +1,7 @@
 from ..base import Parser
-from ..base.generator_data_storage_base import *
-from ..core.object import *
+from ..base.generator_data_storage_base import GeneratorDataStorageBase
+from ..base.generator_data_storage_base import get_data_list_name, get_data_name
+from ..core.object import Object, Objects
 from ..core.function import Function
 
 

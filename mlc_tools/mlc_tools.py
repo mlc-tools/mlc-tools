@@ -68,7 +68,7 @@ class Mlc(object):
             result_files = []
             for path in files:
                 if path.endswith('.mlc'):
-                    if self.model.filter_code is not None and not self.model.filter_code(path):
+                    if callable(self.model.filter_code) and not self.model.filter_code(path):
                         continue
                     result_files.append(path)
             return result_files

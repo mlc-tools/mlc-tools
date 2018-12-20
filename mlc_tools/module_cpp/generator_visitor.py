@@ -1,4 +1,4 @@
-from ..core.object import *
+from ..core.object import Objects
 from ..core.class_ import Class
 from ..core.function import Function
 from ..base.parser import Parser
@@ -39,7 +39,6 @@ class GeneratorVisitor(object):
 
             superclass = self.model.get_class(superclass_name)
             if not superclass:
-                # TODO: remove print
                 if superclass_name.startswith('IVisitor'):
                     # Correct situation. The class can be inherited from the IVisitor interface
                     continue
@@ -49,7 +48,7 @@ class GeneratorVisitor(object):
         return None
 
     def generate_acceptor_interface(self, base_class_name, visitors):
-        assert (len(visitors) > 0)
+        assert visitors
         acceptor = Class()
         acceptor.name = 'IVisitor' + base_class_name
         acceptor.group = visitors[0].group
@@ -73,10 +72,10 @@ class GeneratorVisitor(object):
         acceptor.functions.sort(key=comparator)
 
     @staticmethod
-    def add_accept_method(cls, base_class_name):
+    def add_accept_method(class_, base_class_name):
         method = Function()
         method.name = 'accept'
         method.return_type = Objects.VOID
         method.args.append(['visitor', Parser.create_object('IVisitor' + base_class_name + '*')])
         method.operations.append('visitor->visit(this);')
-        cls.functions.append(method)
+        class_.functions.append(method)

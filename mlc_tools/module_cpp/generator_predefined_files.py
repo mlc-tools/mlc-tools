@@ -1,4 +1,4 @@
-from .cpp_extension import cpp_files
+from .cpp_extension import FILES_DICT
 
 
 class GeneratorPredefinedFiles(object):
@@ -12,7 +12,7 @@ class GeneratorPredefinedFiles(object):
 
     def generate(self, model, writer):
         self.generate_config_files(writer)
-        for pair in cpp_files:
+        for pair in FILES_DICT:
             filename = pair[0]
             if 'intrusive_ptr' in filename and not model.generate_intrusive:
                 continue

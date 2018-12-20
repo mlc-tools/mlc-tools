@@ -7,7 +7,7 @@ class Color(object):
     green = '\033[32m'
     orange = '\033[33m'
     light_grey = '\033[37m'
-    endc = '\033[0m'
+    end = '\033[0m'
 
 
 class Log(object):
@@ -20,21 +20,21 @@ class Log(object):
     @staticmethod
     def debug(msg):
         if not Log.disable_logs:
-            print(Color.light_grey + msg + Color.endc) if Log.use_colors else msg
+            print(Color.light_grey + msg + Color.end) if Log.use_colors else msg
 
     @staticmethod
     def error(msg):
-        print(Color.red + msg + Color.endc) if Log.use_colors else msg
+        print(Color.red + msg + Color.end) if Log.use_colors else msg
 
     @staticmethod
     def warning(msg):
         if not Log.disable_logs:
-            print(Color.orange + msg + Color.endc) if Log.use_colors else msg
+            print(Color.orange + msg + Color.end) if Log.use_colors else msg
 
     @staticmethod
     def message(msg):
         if not Log.disable_logs:
-            print(Color.green + msg + Color.endc) if Log.use_colors else msg
+            print(Color.green + msg + Color.end) if Log.use_colors else msg
 
 
 class Error(object):
@@ -56,6 +56,7 @@ class Error(object):
     ENUM_CANNOT_BE_COMBINATED = inspect.currentframe().f_lineno
     INTERNAL_ERROR = inspect.currentframe().f_lineno
     SYNTAX_WARNING = inspect.currentframe().f_lineno
+    UNKNOWN_DATA_TYPE = inspect.currentframe().f_lineno
 
     texts = {
         UNKNOWN_SERIALISED_TYPE: '[{}] unknown serialized serialized format. Base type - [{}]',
@@ -72,6 +73,7 @@ class Error(object):
         ENUM_CANNOT_BE_COMBINATED: 'Enum member [{}::{}] cannot be initialed by [{}] value',
         INTERNAL_ERROR: 'Internal error',
         SYNTAX_WARNING: 'Syntax warning: Found symbol ";" in member declaration: [{}]',
+        UNKNOWN_DATA_TYPE: 'Unknown data type [{}]->[{}]. please check configuration. File: [{}]',
     }
 
     @staticmethod

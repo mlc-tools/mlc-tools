@@ -1,4 +1,4 @@
-from ..core.object import *
+from ..core.object import Object, Objects
 from ..core.function import Function
 
 
@@ -16,10 +16,10 @@ class GeneratorOperatorEquals(object):
             self.add_operators_equals(cls)
 
     @staticmethod
-    def add_operators_equals(cls):
+    def add_operators_equals(class_):
         def get_const_ref():
             ref = Object()
-            ref.type = cls.name
+            ref.type = class_.name
             ref.is_const = True
             ref.is_ref = True
             return ref
@@ -31,12 +31,12 @@ class GeneratorOperatorEquals(object):
         operator.is_const = True
         operator.operations.append('bool result = true;')
         body_line = 'result = result && {0} == rhs.{0};'
-        for m in cls.members:
-            if m.is_static or m.is_const or m.type == 'Observable':
+        for member in class_.members:
+            if member.is_static or member.is_const or member.type == 'Observable':
                 continue
-            operator.operations.append(body_line.format(m.name))
+            operator.operations.append(body_line.format(member.name))
         operator.operations.append('return result;')
-        cls.functions.append(operator)
+        class_.functions.append(operator)
 
         operator = Function()
         operator.name = 'operator !='
@@ -45,9 +45,9 @@ class GeneratorOperatorEquals(object):
         operator.is_const = True
         operator.operations.append('bool result = false;')
         body_line = 'result = result || {0} != rhs.{0};'
-        for m in cls.members:
-            if m.is_static or m.is_const or m.type == 'Observable':
+        for member in class_.members:
+            if member.is_static or member.is_const or member.type == 'Observable':
                 continue
-            operator.operations.append(body_line.format(m.name))
+            operator.operations.append(body_line.format(member.name))
         operator.operations.append('return result;')
-        cls.functions.append(operator)
+        class_.functions.append(operator)

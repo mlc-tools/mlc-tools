@@ -1,6 +1,8 @@
 from .generator_unit_tests_interface import GeneratorUnitTestsInterface
 
 
+# pylint: disable=no-self-use
+# pylint: disable=unused-argument
 class GeneratorBase(object):
 
     def __init__(self):

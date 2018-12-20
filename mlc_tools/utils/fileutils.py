@@ -1,6 +1,5 @@
 import os
 import hashlib
-from os.path import isfile, isdir
 import tempfile
 
 
@@ -9,17 +8,17 @@ def _get_files_list(path, prefix):
         files = os.listdir(path)
         result_files = []
         for i in files:
-            if isdir(path + i):
+            if os.path.isdir(path + i):
                 result = _get_files_list(path + i + '/', prefix + i + '/')
-                for r in result:
-                    result_files.append(r)
-            if isfile(path + i):
+                for filename in result:
+                    result_files.append(filename)
+            if os.path.isfile(path + i):
                 result_files.append(prefix + i)
         return result_files
     except IOError:
         return []
-    except OSError as e:
-        print('Exception in [_get_files_list]:', e, path, prefix)
+    except OSError as exception:
+        print('Exception in [_get_files_list]:', exception, path, prefix)
         return []
 
 
@@ -87,22 +86,22 @@ def write(path, content):
     return rewrite
 
 
-_cache_file = tempfile.gettempdir() + '/bin/cache.tmp'
+__CACHE_FILES = tempfile.gettempdir() + '/bin/cache.tmp'
 
 
 def file_has_changes(path):
-    dictionary = load_dict(_cache_file)
+    dictionary = load_dict(__CACHE_FILES)
     if path in dictionary:
         cache = dictionary[path]
 
-        m = hashlib.md5()
-        m.update(open(path).read())
-        return not cache == str(m.hexdigest())
+        md5 = hashlib.md5()
+        md5.update(open(path).read())
+        return not cache == str(md5.hexdigest())
     return True
 
 
 def save_md5_to_cache(path):
-    create_dir_for_file(_cache_file)
-    m = hashlib.md5()
-    m.update(open(path).read())
-    save_dict(_cache_file, {path: m.hexdigest()})
+    create_dir_for_file(__CACHE_FILES)
+    md5 = hashlib.md5()
+    md5.update(open(path).read())
+    save_dict(__CACHE_FILES, {path: md5.hexdigest()})

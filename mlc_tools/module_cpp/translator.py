@@ -1,5 +1,5 @@
 from ..base.translator_base import TranslatorBase
-from ..core.object import *
+from ..core.object import Objects, Object, AccessSpecifier
 from ..core.function import Function
 from .regex import RegexPatternCpp
 
@@ -15,7 +15,7 @@ class Translator(TranslatorBase):
             body = self.translate_function_body(body)
             method.body = body
         else:
-            if len(method.operations) > 0:
+            if method.operations:
                 method.body = '\n'.join(method.operations)
             else:
                 method.body = ''
@@ -40,7 +40,7 @@ class Translator(TranslatorBase):
         def translate_members():
             shift = 0
             for member in cls.members:
-                if len(member.name):
+                if member.name:
                     continue
                 member.name = member.type
                 member.type = cast

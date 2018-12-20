@@ -94,11 +94,7 @@ class DataParser(object):
                 valid = class_.is_storage
                 break
         if not valid:
-            # TODO: Exit with error
-            print('Unknown data type [{}]->[{}]. please check configuration. File: [{}]'.format(type_,
-                                                                                                class_name,
-                                                                                                filename))
-            exit(-1)
+            Error.exit(Error.UNKNOWN_DATA_TYPE, type_, class_name, filename)
 
     def _flush_xml(self):
         root = ElementTree.Element('data')

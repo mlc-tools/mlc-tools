@@ -1,6 +1,6 @@
 import re
 from .regex import RegexPatternPhp
-from ..core.object import *
+from ..core.object import Object, AccessSpecifier
 from ..base.translator_base import TranslatorBase
 
 
@@ -15,37 +15,37 @@ class Translator(TranslatorBase):
             body = self.translate_function_body(cls, body, model, method.args)
             method.body = body
         else:
-            if len(method.operations) > 0:
+            if method.operations:
                 method.body = '\n        '.join(method.operations)
 
     @staticmethod
-    def translate_function_body(cls, func, model, args):
+    def translate_function_body(class_, func, model, args):
         func = Translator.replace_by_regex(func, model, args)
-        func = Translator.add_imports(cls, func, model)
+        func = Translator.add_imports(class_, func, model)
         return func
 
     def convert_to_enum(self, cls):
         shift = 0
         cast = 'string'
         values = []
-        for m in cls.members:
-            if len(m.name):
+        for member in cls.members:
+            if member.name:
                 continue
-            m.name = m.type
-            m.type = cast
-            m.is_static = True
-            m.is_const = True
-            if m.initial_value is None:
+            member.name = member.type
+            member.type = cast
+            member.is_static = True
+            member.is_const = True
+            if member.initial_value is None:
                 if cast == 'int':
-                    m.initial_value = '(1 << {})'.format(shift)
+                    member.initial_value = '(1 << {})'.format(shift)
                     values.append(1 << shift)
                 elif cast == 'string':
-                    m.initial_value = '"{}"'.format(m.name)
+                    member.initial_value = '"{}"'.format(member.name)
             elif cast == 'int':
                 # TODO if initialization is as enumerate of others members need throw error (example: one|two)
-                values.append(m.initial_value)
+                values.append(member.initial_value)
             else:
-                m.initial_value = 'None'
+                member.initial_value = 'None'
 
             shift += 1
         value = Object()
@@ -90,14 +90,14 @@ class Translator(TranslatorBase):
         while '"' in func:
             left = func.index('"')
             right = left + 1
-            p = ''
+            char = ''
             while right < len(func):
-                if func[right] == '"' and p != '\\':
+                if func[right] == '"' and char != '\\':
                     string = func[left:right + 1]
                     func = func[:left] + string_pattern % len(strings) + func[right + 1:]
                     strings.append(string)
                     break
-                p = func[right]
+                char = func[right]
                 right += 1
 
         for reg in RegexPatternPhp.FUNCTION:
@@ -108,22 +108,22 @@ class Translator(TranslatorBase):
             arr = key.findall(function_args + '\n' + func)
             dividers = ' +-*\\=()[]<>\t\n!,.;'
             for var in arr:
-                for ch in dividers:
+                for char in dividers:
                     i = 0
                     while i < len(func):
                         replace = False
-                        full = ch + var
+                        full = char + var
                         start = func.find(full, i)
                         if start == -1:
                             break
-                        n = start + len(full)
-                        i = n
-                        if n < len(func):
-                            replace = func[n] in dividers
+                        position = start + len(full)
+                        i = position
+                        if position < len(func):
+                            replace = func[position] in dividers
                         if not replace:
                             continue
                         # func = func.replace(ch + var, ch + '$' + var)
-                        func = func[:start] + (ch + '$' + var) + func[n:]
+                        func = func[:start] + (char + '$' + var) + func[position:]
 
                 pattern = '^' + var
                 if pattern not in patterns_dict:
@@ -131,8 +131,8 @@ class Translator(TranslatorBase):
                 pattern = patterns_dict[pattern]
 
                 func = pattern.sub('$' + var, func)
-                for ch in ['->']:
-                    func = func.replace(ch + '$' + var, ch + var)
+                for char in ['->']:
+                    func = func.replace(char + '$' + var, char + var)
 
         for reg in RegexPatternPhp.FUNCTION_2:
             func = reg[0].sub(reg[1], func)

@@ -1,4 +1,4 @@
-php_xml = '''
+PHP_XML = '''
 #string
 #serialize:
 #with default value:
@@ -207,7 +207,7 @@ $xml->addAttribute("$(FIELD)", $(OWNER)$(FIELD));
 $(OWNER)$(FIELD) = (string)($xml["$(FIELD)"]);
 '''
 
-php_json = '''
+PHP_JSON = '''
 
 #int,bool,float,string
 #serialize:

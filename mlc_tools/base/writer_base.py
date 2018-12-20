@@ -1,7 +1,10 @@
+import os
 from ..utils import fileutils
 from ..utils.error import Log
 
 
+# pylint: disable=no-self-use
+# pylint: disable=unused-argument
 class WriterBase(object):
 
     def __init__(self, out_directory):
@@ -18,7 +21,7 @@ class WriterBase(object):
 
         full_path = fileutils.normalize_path(self.out_directory) + filename
         self.created_files.append(filename)
-        exist = fileutils.isfile(full_path)
+        exist = os.path.isfile(full_path)
         if fileutils.write(full_path, content):
             msg = ' Create: {}' if not exist else ' Overwriting: {}'
             Log.debug(msg.format(filename))

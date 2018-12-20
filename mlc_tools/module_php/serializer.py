@@ -2,8 +2,8 @@ import sys
 from ..base.serializer_base import SerializerBase
 from ..core.object import Object, Objects
 from ..utils.error import Error
-from .protocols import php_xml
-from .protocols import php_json
+from .protocols import PHP_XML
+from .protocols import PHP_JSON
 from .regex import RegexPatternPhp
 
 SERIALIZATION = 0
@@ -16,7 +16,7 @@ class Serializer(SerializerBase):
         SerializerBase.__init__(self)
 
     def get_protocol(self, serialize_format):
-        protocol = php_xml if serialize_format == 'xml' else php_json
+        protocol = PHP_XML if serialize_format == 'xml' else PHP_JSON
         if sys.version_info[0] == 3:
             protocol = protocol.replace('.iteritems()', '.items()')
         return protocol
@@ -62,22 +62,22 @@ class Serializer(SerializerBase):
             value_declaration = '$value = {}();'.format(get_create_type_operation(value_type))
         else:
             value_declaration = ''
-        a0 = obj_name
-        a1 = self.build_serialize_operation_('key', key_type, None, serialization_type, key.template_args, False, '$',
-                                             key.is_link, serialize_format)
-        a2 = self.build_serialize_operation_('value', value_type, None, serialization_type, value.template_args,
-                                             value_is_pointer, '$', False, serialize_format)
-        a1 = a1.split('\n')
-        for index, a in enumerate(a1):
-            a1[index] = a
-        a1 = '\n'.join(a1)
-        a2 = a2.split('\n')
-        for index, a in enumerate(a2):
-            a2[index] = a
-        a2 = '\n'.join(a2)
-        return pattern.format(field=a0,
-                              key_serialize=a1,
-                              value_serialize=a2,
+        key_serialize = self.build_serialize_operation_('key', key_type, None, serialization_type, key.template_args,
+                                                        False, '$', key.is_link, serialize_format)
+        value_serialize = self.build_serialize_operation_('value', value_type, None, serialization_type,
+                                                          value.template_args,
+                                                          value_is_pointer, '$', False, serialize_format)
+        key_serialize = key_serialize.split('\n')
+        for index, line in enumerate(key_serialize):
+            key_serialize[index] = line
+        key_serialize = '\n'.join(key_serialize)
+        value_serialize = value_serialize.split('\n')
+        for index, line in enumerate(value_serialize):
+            value_serialize[index] = line
+        value_serialize = '\n'.join(value_serialize)
+        return pattern.format(field=obj_name,
+                              key_serialize=key_serialize,
+                              value_serialize=value_serialize,
                               key='{}',
                               owner='$this->',
                               value=value_declaration) + '\n'
@@ -109,7 +109,7 @@ class Serializer(SerializerBase):
 
         type_ = obj_type
         cls = self.model.get_class(type_)
-        arg_0 = obj_template_args[0].type if len(obj_template_args) > 0 else 'unknown_arg'
+        arg_0 = obj_template_args[0].type if obj_template_args else 'unknown_arg'
         if cls and cls.type == 'enum':
             type_ = 'enum'
         elif obj_type not in self.model.simple_types and type_ != "list" and type_ != "map":
@@ -122,7 +122,7 @@ class Serializer(SerializerBase):
         elif obj_type in self.model.simple_types:
             type_ = obj_type
         else:
-            if len(obj_template_args) > 0:
+            if obj_template_args:
                 if type_ == "map":
                     if len(obj_template_args) != 2:
                         Error.exit(Error.MAP_TWO_ARGS, cls.name, obj_name)

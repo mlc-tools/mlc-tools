@@ -26,8 +26,8 @@ class Model(object):
         self.generate_tests = False
         self.generate_intrusive = True
         self.generate_factory = True
-        self.filter_code = dummy
-        self.filter_data = dummy
+        self.filter_code = None
+        self.filter_data = None
         self.custom_generator = None
         self.additional_config_directories = []
         self.additional_data_directories = []
@@ -57,7 +57,3 @@ class Model(object):
 
     def is_side(self, side):
         return self.side == 'both' or side == self.side or side == 'both'
-
-
-def dummy(path):
-    return True
