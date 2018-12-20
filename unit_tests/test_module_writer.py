@@ -5,13 +5,13 @@ import sys
 import inspect
 
 sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) + '/..'))
-from mlc_tools.core.Object import Object, Objects
-from mlc_tools.core.Class import *
-from mlc_tools.core.Function import *
-from mlc_tools.base.Model import Model
-from mlc_tools.base.Language import Language
-from mlc_tools.base.Linker import Linker
-from mlc_tools.base.Validator import Validator
+from mlc_tools.core.object import Object, Objects
+from mlc_tools.core.class_ import *
+from mlc_tools.core.function import *
+from mlc_tools.base.model import Model
+from mlc_tools.base.language import Language
+from mlc_tools.base.linker import Linker
+from mlc_tools.base.validator import Validator
 
 
 def create_test_model():

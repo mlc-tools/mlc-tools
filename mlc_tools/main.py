@@ -1,5 +1,5 @@
-from .mlc_tools import Mlc
 import sys
+from .mlc_tools import Mlc
 
 
 def get_named_arg(name):

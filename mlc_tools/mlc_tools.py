@@ -1,3 +1,6 @@
+from __future__ import print_function
+import os
+import sys
 from .utils.Error import Log
 from .utils import fileutils
 from .base import Parser
@@ -5,12 +8,10 @@ from .base import Linker
 from .base import Validator
 from .base import DataParser
 from .base import Language
-from .base.Model import Model
-import os
-import sys
+from .base.model import Model
 
 
-class Mlc:
+class Mlc(object):
 
     def __init__(self, **kwargs):
         self.model = Model()
@@ -23,7 +24,8 @@ class Mlc:
         self.model.configs_directory = kwargs.get('configs_directory', self.model.configs_directory)
         self.model.out_directory = kwargs.get('out_directory', self.model.out_directory)
         self.model.data_directory = kwargs.get('data_directory', self.model.data_directory)
-        self.model.out_data_directory = kwargs.get('out_data_directory', self.model.out_data_directory)
+        self.model.out_data_directory = kwargs.get('out_data_directory',
+                                                   self.model.out_data_directory)
         self.model.language = kwargs.get('language', self.model.language)
         self.model.only_data = kwargs.get('only_data', self.model.only_data)
         self.model.namespace = kwargs.get('namespace', self.model.namespace)
@@ -32,15 +34,18 @@ class Mlc:
         self.model.test_script = kwargs.get('test_script', self.model.test_script)
         self.model.test_script_args = kwargs.get('test_script_args', self.model.test_script_args)
         self.model.generate_tests = kwargs.get('generate_tests', self.model.generate_tests)
-        self.model.generate_intrusive = kwargs.get('generate_intrusive', self.model.generate_intrusive)
+        self.model.generate_intrusive = kwargs.get('generate_intrusive',
+                                                   self.model.generate_intrusive)
         self.model.generate_factory = kwargs.get('generate_factory', self.model.generate_factory)
         self.model.out_directory = fileutils.normalize_path(self.model.out_directory)
         self.model.out_data_directory = fileutils.normalize_path(self.model.out_data_directory)
         if 'add_config' in kwargs:
-            self.model.additional_config_directories.append(fileutils.normalize_path(kwargs.get('add_config')))
+            directory = fileutils.normalize_path(kwargs.get('add_config'))
+            self.model.additional_config_directories.append(directory)
         if 'add_data' in kwargs:
-            self.model.additional_data_directories.append(fileutils.normalize_path(kwargs.get('add_data')))
-            
+            directory = fileutils.normalize_path(kwargs.get('add_data'))
+            self.model.additional_data_directories.append(directory)
+
     def add_config_directories(self, directory):
         self.model.additional_config_directories.append(fileutils.normalize_path(directory))
 

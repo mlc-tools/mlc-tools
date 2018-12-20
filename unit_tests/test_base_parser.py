@@ -5,10 +5,10 @@ import sys
 import inspect
 
 sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) + '/..'))
-from mlc_tools.core.Object import *
-from mlc_tools.core.Function import *
-from mlc_tools.base.Parser import Parser
-from mlc_tools.base.Model import Model
+from mlc_tools.core.object import *
+from mlc_tools.core.function import *
+from mlc_tools.base.parser import Parser
+from mlc_tools.base.model import Model
 
 
 class TestParseObject(unittest.TestCase):

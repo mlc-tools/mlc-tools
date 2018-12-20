@@ -5,8 +5,8 @@ import sys
 import inspect
 
 sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) + '/..'))
-from mlc_tools.base.Parser import *
-from mlc_tools.core.Object import *
+from mlc_tools.base.parser import *
+from mlc_tools.core.object import *
 
 
 class TestParseReturnType(unittest.TestCase):

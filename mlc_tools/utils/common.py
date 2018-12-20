@@ -71,7 +71,7 @@ def parse_object(obj, string):
 
 
 def tests():
-    from ..core.Object import Object
+    from ..core.object import Object
 
     def test_0():
         string = 'int a'
