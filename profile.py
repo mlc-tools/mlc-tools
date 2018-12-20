@@ -10,6 +10,8 @@ from mlc_tools.mlc_tools import Mlc
 #     generator.generate_data(game_root + '/config/data', game_root + '/tests/data')
 #
 #
+
+
 def test_game_m():
     project_root = '/Work/gushchin/marines/'
     generator = Mlc()
@@ -43,24 +45,24 @@ def test_game_m_php():
                        side='server')
 
 
-def get_profile_(function):
+def get_profile_(func):
     """ Returns performance statistics (as a string) for the given function.
     """
     def _run():
-        function()
+        func()
     import cProfile as profile
     import pstats
     import os
     import sys
     sys.modules['__main__'].__profile_run__ = _run
-    id = function.__name__ + '()'
-    profile.run('__profile_run__()', id)
-    p = pstats.Stats(id)
-    p.stream = open(id, 'w')
+    func_id = func.__name__ + '()'
+    profile.run('__profile_run__()', func_id)
+    p = pstats.Stats(func_id)
+    p.stream = open(func_id, 'w')
     p.sort_stats('time').print_stats(20)
     p.stream.close()
-    s = open(id).read()
-    os.remove(id)
+    s = open(func_id).read()
+    os.remove(func_id)
     return s
 
 

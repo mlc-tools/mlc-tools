@@ -1,5 +1,4 @@
 import inspect
-from enum import Enum
 
 
 class Color(object):

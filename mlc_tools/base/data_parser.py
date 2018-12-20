@@ -2,7 +2,7 @@ import xml.etree.ElementTree as ElementTree
 import xml.dom.minidom
 import json
 from ..utils import fileutils
-from ..utils.Error import Error
+from ..utils.error import Error
 from ..base.generator_data_storage_base import get_class_name_from_data_name
 from ..base.generator_data_storage_base import get_data_list_name, get_data_name
 

@@ -14,17 +14,18 @@ def get_root():
 
 
 def run_tests(generator, root, withdata=False, cpp=True, python=True, php=True):
-    def run(lang, format):
+    def run(lang, serialized_format):
+        out_directory = root + 'generated_%s' % (lang if lang != 'cpp' else lang + '/' + serialized_format)
         generator.generate(language=lang,
-                           out_directory=root + 'generated_%s' % (lang if lang != 'cpp' else lang + '/' + format)
+                           out_directory=out_directory
                            )
         if withdata:
-            generator.generate_data(data_directory=root + 'data_%s/' % format,
+            generator.generate_data(data_directory=root + 'data_%s/' % serialized_format,
                                     out_data_directory=root + 'assets')
         generator.run_test(test_script=root + 'test_%s.py' % lang,
-                           test_script_args=format)
+                           test_script_args=serialized_format)
         print('-----------------------------------------')
-        print('|  test with params [{}, {}] finished'.format(lang, format))
+        print('|  test with params [{}, {}] finished'.format(lang, serialized_format))
         print('-----------------------------------------')
 
     if cpp:
@@ -59,19 +60,18 @@ def test_functions():
 
 def test_database():
     root = get_root() + '/tests/test_database/'
-    generator = Mlc(configs_directory=root + 'config', generate_intrusive=True, generate_factory=True, generate_tests=True)
+    generator = Mlc(configs_directory=root + 'config',
+                    generate_intrusive=True,
+                    generate_factory=True,
+                    generate_tests=True)
     run_tests(generator, root)
 
 
 def test_serialize():
-    def execute(command):
-        p = os.system(command)
-        return p
-
     root = get_root()
     python = 'python3' if sys.version_info[0] == 3 else 'python'
     command = '{} {}/tests/test_serialize/run.py'.format(python, root)
-    result = execute(command)
+    result = os.system(command)
     if 0 != result:
         exit(1)
 

@@ -1,5 +1,6 @@
 import re
 
+
 class RegexPatternCpp:
     convert_c17_to_c14 = [
         (re.compile(r'for\s*\(auto&&\s*\[(\w+),\s*(\w+)\]\s*:\s*(.+)\)\s*{'), r'''for (auto&& pair : \3) \n{ \nauto& \1 = pair.first; \nauto& \2 = pair.second;

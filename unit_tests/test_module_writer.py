@@ -135,7 +135,7 @@ return result;
     def test_php(self):
         model = create_test_model()
         result = save_function('php', model)
-        self.assertEquals(result, ('function foo($a0, $a1)\n{\n    $result = $this->int_value;\n$result += $a0;\nreturn $result;\n\n}\n'))
+        self.assertEquals(result, 'function foo($a0, $a1)\n{\n    $result = $this->int_value;\n$result += $a0;\nreturn $result;\n\n}\n')
 
 
 def get_cpp():

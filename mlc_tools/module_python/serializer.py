@@ -1,8 +1,7 @@
 import sys
 from ..base.serializer_base import SerializerBase
-from ..core.class_ import Class
 from ..core.object import Object, Objects
-from ..utils.Error import Error
+from ..utils.error import Error
 from .regex import RegexPatternPython
 from .protocols import py_xml
 from .protocols import py_json

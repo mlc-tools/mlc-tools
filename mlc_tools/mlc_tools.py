@@ -1,7 +1,7 @@
 from __future__ import print_function
 import os
 import sys
-from .utils.Error import Log
+from .utils.error import Log
 from .utils import fileutils
 from .base import Parser
 from .base import Linker

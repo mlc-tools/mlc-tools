@@ -4,7 +4,6 @@ import os.path as fs
 
 
 def main(argv):
-
     root = fs.abspath(fs.dirname(__file__)) + '/'
     protocol = argv[1] if len(argv) > 1 else 'xml'
     if protocol == 'xml':
@@ -20,6 +19,7 @@ def main(argv):
 
     if os.system('{0}build_{1}/test_mlc_{1}'.format(root, protocol)) != 0:
         exit(1)
+
 
 if __name__ == '__main__':
     main(sys.argv)

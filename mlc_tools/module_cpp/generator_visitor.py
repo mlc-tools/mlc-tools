@@ -2,7 +2,7 @@ from ..core.object import *
 from ..core.class_ import Class
 from ..core.function import Function
 from ..base.parser import Parser
-from ..utils.Error import Error
+from ..utils.error import Error
 
 
 class GeneratorVisitor:

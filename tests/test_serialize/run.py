@@ -56,7 +56,8 @@ def run(protocol):
     result = True
     result = result and 0 == execute('cd {0}/test_serialize; {1} step_0.py'.format(root, python))
     result = result and 0 == execute('cd {0}/test_serialize; php step_1.php'.format(root))
-    result = result and 0 == execute('cd {0}/test_serialize; mkdir build_{1}; cd build_{1}; cmake ..; make -j8 install'.format(root, protocol))
+    result = result and 0 == execute('cd {0}/test_serialize; mkdir build_{1}; cd build_{1}; cmake ..; make -j8 install'.
+                                     format(root, protocol))
     result = result and 0 == execute('cd {0}/test_serialize; mkdir build_{1}; ./step_2'.format(root, protocol, python))
     result = result and 0 == execute('cd {0}/test_serialize; {1} step_3.py;'.format(root, python))
     if not result:
@@ -65,6 +66,7 @@ def run(protocol):
         exit(1)
 
     clean()
+
 
 if __name__ == '__main__':
     run('xml')

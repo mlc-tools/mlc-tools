@@ -1,4 +1,3 @@
-from ..core.object import *
 
 
 class TranslatorBase:

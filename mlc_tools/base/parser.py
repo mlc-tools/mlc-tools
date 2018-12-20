@@ -3,7 +3,7 @@ from ..base.model import Model
 from ..core.object import Object
 from ..core.class_ import Class
 from ..core.function import Function
-from ..utils.Error import Error
+from ..utils.error import Error
 from ..utils.common import parse_object, smart_split
 
 

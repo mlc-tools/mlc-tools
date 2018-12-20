@@ -1,6 +1,7 @@
 from ..core.class_ import Class
 from ..core.object import *
 from ..core.function import Function
+from ..utils.error import Error
 from copy import deepcopy
 
 

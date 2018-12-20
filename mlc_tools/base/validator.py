@@ -1,4 +1,4 @@
-from ..utils.Error import Error
+from ..utils.error import Error
 
 
 class Validator:

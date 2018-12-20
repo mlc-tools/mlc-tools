@@ -1,5 +1,5 @@
 from ..utils import fileutils
-from ..utils.Error import Log
+from ..utils.error import Log
 
 
 class WriterBase:

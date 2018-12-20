@@ -1,4 +1,3 @@
-import re
 from .modifiers import Modifiers
 from .object import Object, AccessSpecifier
 

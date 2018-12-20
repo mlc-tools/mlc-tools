@@ -1,6 +1,5 @@
-from ..core.class_ import Class
 from ..core.object import Object
-from ..utils.Error import Error
+from ..utils.error import Error
 from .protocols import cpp_xml
 from .protocols import cpp_json
 from ..base.serializer_base import SerializerBase
