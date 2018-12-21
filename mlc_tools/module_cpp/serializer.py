@@ -49,14 +49,13 @@ class Serializer(SerializerBase):
     def build_serialize_operation(self, obj, serialization_type, serialize_format):
         return self.build_serialize_operation_(obj.name, obj.type, obj.initial_value,
                                                serialization_type, obj.template_args, obj.is_pointer,
-                                               obj.is_link, serialize_format)
+                                               '', obj.is_link, serialize_format)
 
     def build_serialize_operation_(self, obj_name, obj_type, obj_value, serialization_type, obj_template_args,
-                                   obj_is_pointer, is_link, serialize_format):
+                                   obj_is_pointer, owner, is_link, serialize_format):
         index = 0
         if obj_value is None:
             index = 1
-
         type_ = obj_type
         if self.model.get_class(type_) and self.model.get_class(type_).type == 'enum':
             string = self._build_serialize_operation_enum(obj_name, serialization_type)
@@ -75,7 +74,8 @@ class Serializer(SerializerBase):
                     if len(obj_template_args) != 2:
                         Error.exit(Error.MAP_TWO_ARGS, self.current_class.name, obj_name)
                     if serialization_type == SERIALIZATION:
-                        return self.build_map_serialization(obj_name, obj_template_args, serialize_format)
+                        return self.build_map_serialization(obj_name, obj_template_args,
+                                                            serialization_type, serialize_format)
                     if serialization_type == DESERIALIZATION:
                         return self.build_map_deserialization(obj_name, obj_template_args, serialize_format)
                 else:
@@ -107,20 +107,17 @@ class Serializer(SerializerBase):
                                     namespace=self.namespace)
         return string + '\n\n'
 
-    def build_map_serialization(self, obj_name, obj_template_args, serialize_format):
+    def build_map_serialization(self, obj_name, obj_template_args, serialization_type, serialize_format):
         key = obj_template_args[0]
         value = obj_template_args[1]
-        assert (isinstance(key, Object))
-        assert (isinstance(value, Object))
-        assert (isinstance(key.type, str))
-        assert (isinstance(value.type, str))
+        assert isinstance(key, Object) and isinstance(value, Object)
         key_type = key.type
         value_type = value.type
-        pattern = self.serialize_protocol[SERIALIZATION]['map'][0]
+        pattern = self.serialize_protocol[serialization_type]['map'][0]
         key_serialize = self.build_serialize_operation_('key', key_type, None, SERIALIZATION, [],
-                                                        key.is_pointer, key.is_link, serialize_format)
+                                                        key.is_pointer, '', key.is_link, serialize_format)
         value_serialize = self.build_serialize_operation_('value', value_type, None, SERIALIZATION, value.template_args,
-                                                          value.is_pointer, value.is_link, serialize_format)
+                                                          value.is_pointer, '', value.is_link, serialize_format)
         return pattern.format(field=obj_name,
                               key_serialize=key_serialize,
                               value_serialize=value_serialize)
@@ -144,9 +141,9 @@ class Serializer(SerializerBase):
 
         value_is_pointer = value.is_pointer
         key_serialize = self.build_serialize_operation_('key', key_type, None, DESERIALIZATION, [],
-                                                        key.is_pointer, key.is_link, serialize_format)
+                                                        key.is_pointer, '', key.is_link, serialize_format)
         value_serialize = self.build_serialize_operation_('value', value_type, None, DESERIALIZATION,
-                                                          value.template_args, value_is_pointer,
+                                                          value.template_args, value_is_pointer, '',
                                                           value.is_link, serialize_format)
         value_init = Writer.write_named_object(value, '', False, False)
         if value.is_pointer:

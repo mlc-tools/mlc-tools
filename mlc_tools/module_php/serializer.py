@@ -1,13 +1,8 @@
-import sys
-from ..base.serializer_base import SerializerBase
+from ..base.serializer_base import SerializerBase, DESERIALIZATION
 from ..core.object import Object, Objects
-from ..utils.error import Error
 from .protocols import PHP_XML
 from .protocols import PHP_JSON
 from .regex import RegexPatternPhp
-
-SERIALIZATION = 0
-DESERIALIZATION = 1
 
 
 class Serializer(SerializerBase):
@@ -16,10 +11,7 @@ class Serializer(SerializerBase):
         SerializerBase.__init__(self)
 
     def get_protocol(self, serialize_format):
-        protocol = PHP_XML if serialize_format == 'xml' else PHP_JSON
-        if sys.version_info[0] == 3:
-            protocol = protocol.replace('.iteritems()', '.items()')
-        return protocol
+        return PHP_XML if serialize_format == 'xml' else PHP_JSON
 
     def create_serialization_function(self, cls, serialize_type, serialize_format):
         method = SerializerBase.create_serialization_function(self, cls, serialize_type, serialize_format)
@@ -42,10 +34,7 @@ class Serializer(SerializerBase):
     def build_map_serialization(self, obj_name, obj_template_args, serialization_type, serialize_format):
         key = obj_template_args[0]
         value = obj_template_args[1]
-        assert (isinstance(key, Object))
-        assert (isinstance(value, Object))
-        assert (isinstance(key.type, str))
-        assert (isinstance(value.type, str))
+        assert isinstance(key, Object) and isinstance(value, Object)
         key_type = key.type
         value_type = value.type
         pattern = self.serialize_protocol[serialization_type]['map'][0]
@@ -82,8 +71,7 @@ class Serializer(SerializerBase):
                               owner='$this->',
                               value=value_declaration) + '\n'
 
-    @staticmethod
-    def convert_initialize_value(value):
+    def convert_initialize_value(self, value):
         assert (value is None or isinstance(value, str))
 
         if value is None or value == 'nullptr' or value == 'None':
@@ -101,59 +89,5 @@ class Serializer(SerializerBase):
                                                serialization_type, obj.template_args, obj.is_pointer, '$this->',
                                                obj.is_link, serialize_format)
 
-    def build_serialize_operation_(self, obj_name, obj_type, obj_value, serialization_type, obj_template_args,
-                                   obj_is_pointer, owner, is_link, serialize_format):
-        index = 0
-        if obj_value is None:
-            index = 1
-
-        type_ = obj_type
-        cls = self.model.get_class(type_)
-        arg_0 = obj_template_args[0].type if obj_template_args else 'unknown_arg'
-        if cls and cls.type == 'enum':
-            type_ = 'enum'
-        elif obj_type not in self.model.simple_types and type_ != "list" and type_ != "map":
-            if is_link:
-                type_ = 'link'
-            elif obj_is_pointer:
-                type_ = "pointer"
-            else:
-                type_ = "serialized"
-        elif obj_type in self.model.simple_types:
-            type_ = obj_type
-        else:
-            if obj_template_args:
-                if type_ == "map":
-                    if len(obj_template_args) != 2:
-                        Error.exit(Error.MAP_TWO_ARGS, cls.name, obj_name)
-                    return self.build_map_serialization(obj_name, obj_template_args,
-                                                        serialization_type, serialize_format)
-                else:
-                    arg = obj_template_args[0]
-                    assert (isinstance(arg, Object))
-                    assert (isinstance(arg.type, str))
-                    arg_type = arg.type
-                    type_cls = self.model.get_class(arg.type)
-                    if arg.is_link:
-                        type_ = 'list<link>'
-                    elif arg_type in self.model.simple_types:
-                        type_ = "list<{}>".format(arg_type)
-                        obj_type = arg_type
-                    elif arg.is_pointer:
-                        type_ = "list<pointer>"
-                    elif type_cls.type == 'enum':
-                        type_ = 'list<string>'
-                        arg_0 = 'string'
-                    else:
-                        type_ = "list<serialized>"
-                        obj_type = arg_type
-        obj_value = Serializer.convert_initialize_value(obj_value)
-        string = self.serialize_protocol[serialization_type][type_][index]
-        string = string.format(field=obj_name,
-                               type=obj_type,
-                               default_value=obj_value,
-                               owner=owner,
-                               arg_0=arg_0,
-                               format=serialize_format)
-
+    def finalize_serialize_operation(self, string):
         return string + '\n'

@@ -92,7 +92,7 @@ class Writer(WriterBase):
             out_declaration = accesses[obj.access] + ' static ${0} = {1};'
         else:
             out_declaration = accesses[obj.access] + ' ${0} = {1};'
-        out_declaration = out_declaration.format(obj.name, Serializer.convert_initialize_value(value))
+        out_declaration = out_declaration.format(obj.name, Serializer().convert_initialize_value(value))
         return out_declaration, out_init
 
     def prepare_file(self, text):
