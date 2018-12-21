@@ -27,6 +27,7 @@ class AllTests<SerializedObject>
         result = logger->push(DataUnit::tests(logger), "Static data") && result;
         result = logger->push(AllTypes::tests(logger), "AllTypes tests") && result;
         result = logger->push(TestFactory::tests(logger), "TestFactory tests") && result;
+        result = logger->push(ExceptionTest::test(), "ExceptionTest") && result;
 
         return result;
     }

@@ -4,6 +4,7 @@ import re
 class RegexPatternPhp(object):
 
     FUNCTION = (
+        (re.compile(r'catch\((\w+)\s*(\w*)\)'), r'catch__\1__\2'),
         (re.compile(r'DataStorage::shared\(\).get<(\w+)>'), r'DataStorage::shared()->get\1'),
         (re.compile(r'Factory::(.+)<\w+>'), r'Factory::\1'),
         (re.compile(r'\.str\(\)'), r''),
@@ -73,6 +74,10 @@ class RegexPatternPhp(object):
         (re.compile(r'random_float\(\)'), r'(mt_rand() * 1.0 / mt_getrandmax())'),
         (re.compile(r'random_int\((.+?),\s*(.+)\)'), r'mt_rand(\1, \2-1)'),
         (re.compile(r'std::strcat\((.+?),\s*(.+?)\)'), r'((\1).(\2))'),
+
+        # Exception with try/catch block (one catch)
+        (re.compile(r'try\n\s*{([\s\S.]+?)}\n\s*catch__((\w+)__(\w*))\n\s+{([\s\S.]+?)}'),
+         r'try\n{\1}\ncatch(\3 $\4)\n{\5}')
     )
 
     VARIABLES = {

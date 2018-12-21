@@ -84,7 +84,8 @@ class Translator(TranslatorBase):
             if next_tab:
                 next_tab = False
                 tabs -= 1
-            if (line.startswith('for') or line.startswith('if') or line.startswith('else') or line.startswith('elif')) \
+            if (line.startswith('for') or line.startswith('if') or line.startswith('else') or line.startswith('elif')
+                    or line.startswith('try:') or line.strip().startswith('except')) \
                     and (i < len(lines) - 1 and '{' not in line and '{' not in lines[i + 1]):
                 next_tab = True
 

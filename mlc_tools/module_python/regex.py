@@ -73,6 +73,11 @@ class RegexPatternPython(object):
         (re.compile(r'\btoStr\((.+?)\)'), r'str(\1)'),
         (re.compile(r'std::strcat\((.+?),\s*(.+?)\)'), r'((\1)+(\2))'),
         (re.compile(r'\.at\((.*?)\)'), r'[\1]'),
+
+        # Exception with try/catch block (one catch)
+        (re.compile(r'try\n\s*{([\s\S.]+?)}\n\s*catch\(((\w+)\s*(\w*))\)\n\s+{([\s\S.]+?)}'),
+         r'try:\n{\n\1\n}\nexcept BaseException as \4:\n{\n\5\n}\n'),
+        (re.compile(r'throw Exception\((.*?)\)'), r'raise BaseException()'),
     )
 
     PEP8 = (
