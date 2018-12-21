@@ -1,4 +1,4 @@
-from ..base.parser import Parser
+from .parser import Parser
 from ..core.object import Objects
 from ..core.class_ import Class
 from ..core.function import Function
@@ -11,9 +11,11 @@ class GeneratorVisitor(object):
         self.model = None
         self.base_visitor_classes = {}
         self.acceptors_interfaces = []
+        self.support_override_methods = False
 
-    def generate(self, model):
+    def generate(self, model, support_override_methods):
         self.model = model
+        self.support_override_methods = support_override_methods
 
         # find visitor and bases classes
         for cls in model.classes:
@@ -33,15 +35,16 @@ class GeneratorVisitor(object):
             for visitor in visitors:
                 self.add_accept_method(visitor, base_class_name)
 
-        # change name of methods to classes extends IVisitor interfaces
-        for cls in model.classes:
-            superclass_name = cls.superclasses[0] if cls.superclasses else None
-            while superclass_name is not None:
-                if superclass_name in self.acceptors_interfaces:
-                    self.override_methods(cls)
-                    break
-                superclass = model.get_class(superclass_name)
-                superclass_name = superclass.superclasses[0] if superclass.superclasses else None
+        if not self.support_override_methods:
+            # change name of methods to classes extends IVisitor interfaces
+            for cls in model.classes:
+                superclass_name = cls.superclasses[0] if cls.superclasses else None
+                while superclass_name is not None:
+                    if superclass_name in self.acceptors_interfaces:
+                        self.override_methods(cls)
+                        break
+                    superclass = model.get_class(superclass_name)
+                    superclass_name = superclass.superclasses[0] if superclass.superclasses else None
 
     def get_base_visitor_name(self, cls):
         for superclass_name in cls.superclasses:
@@ -72,28 +75,33 @@ class GeneratorVisitor(object):
 
         for visitor in visitors:
             method = Function()
-            method.name = 'visit_' + visitor.name[0].lower() + visitor.name[1:]
+            if self.support_override_methods:
+                method.name = 'visit'
+            else:
+                method.name = 'visit_' + visitor.name[0].lower() + visitor.name[1:]
             method.return_type = Objects.VOID
             method.args.append(['ctx', Parser.create_object(visitor.name + '*')])
             method.is_abstract = True
+            method.args[0][1].denied_intrusive = True
             acceptor.functions.append(method)
 
-        method = Function()
-        acceptor.functions.append(method)
-        method.name = 'visit'
-        method.return_type = Objects.VOID
-        method.args.append(['ctx', Parser.create_object(base_class_name + '*')])
-        method.operations.append('''
-            if(!ctx)
-            {
-                return;
-            }''')
-        for visitor in visitors:
+        if not self.support_override_methods:
+            method = Function()
+            acceptor.functions.append(method)
+            method.name = 'visit'
+            method.return_type = Objects.VOID
+            method.args.append(['ctx', Parser.create_object(base_class_name + '*')])
             method.operations.append('''
-        else if($ctx->get_type() == {}::$TYPE)
-            {{
-                $this->visit_{}($ctx);
-            }}'''.format(visitor.name, visitor.name[0].lower() + visitor.name[1:]))
+                if(!ctx)
+                {
+                    return;
+                }''')
+            for visitor in visitors:
+                method.operations.append('''
+                else if(ctx->get_type() == {}::TYPE)
+                {{
+                    this->visit_{}(ctx);
+                }}'''.format(visitor.name, visitor.name[0].lower() + visitor.name[1:]))
 
         def comparator(func):
             return func.args[0][1]
@@ -104,13 +112,13 @@ class GeneratorVisitor(object):
         method = Function()
         method.name = 'accept'
         method.return_type = Objects.VOID
-        method.args.append(['visitor', Parser.create_object(base_class_name + '*')])
-        method.operations.append('$visitor->visit($this);')
+        method.args.append(['visitor', Parser.create_object('IVisitor' + base_class_name + '*')])
+        method.operations.append('visitor->visit(this);')
         class_.functions.append(method)
 
     @staticmethod
     def override_methods(class_):
         for method in class_.functions:
-            if method.name == 'visit' and method.args:
+            if method.name == 'visit' and len(method.args) == 1:
                 arg_type = method.args[0][1].type
                 method.name = 'visit_%s' % (arg_type[0].lower()) + arg_type[1:]
