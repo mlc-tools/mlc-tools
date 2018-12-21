@@ -80,7 +80,7 @@ class Writer(WriterBase):
             cls = self.model.get_class(obj.type)
             if cls and cls.type == 'enum':
                 value = None
-                out_init = '$this->{} = {};'.format(obj.name, Serializer.convert_initialize_value(obj.initial_value))
+                out_init = '$this->{} = {};'.format(obj.name, Serializer().convert_initialize_value(obj.initial_value))
 
         accesses = {
             AccessSpecifier.public: 'public',
