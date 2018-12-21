@@ -1,6 +1,5 @@
 from ..base.generator_data_storage_base import GeneratorDataStorageBase
 from ..base.generator_data_storage_base import get_data_list_name, get_data_name
-from ..base.parser import Parser
 from ..core.object import Object, AccessSpecifier, Objects
 from ..core.function import Function
 
@@ -15,12 +14,7 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
         model.classes.append(self)
 
     def create_shared_method(self):
-        obj = Object()
-        obj.type = self.name
-        obj.name = '__instance'
-        obj.initial_value = 'NULL'
-        obj.is_static = True
-        self.members.append(obj)
+        GeneratorDataStorageBase.create_shared_method(self)
 
         obj = Object()
         obj.type = self.name
@@ -46,14 +40,6 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
         self.members.append(obj)
 
         method = Function()
-        method.name = 'shared'
-        method.return_type = Parser.create_object(self.name)
-        method.is_static = True
-        method.translated = True
-        method.operations.extend(SHARED_METHOD.split('\n'))
-        self.functions.append(method)
-
-        method = Function()
         method.name = 'deserialize_xml'
         method.args.append(['xml', Objects.VOID])
         self.functions.append(method)
@@ -70,6 +56,9 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
         method.name = 'serialize_json'
         method.args.append(['xml', Objects.VOID])
         self.functions.append(method)
+
+    def get_shared_method_body(self):
+        return SHARED_METHOD
 
     def create_getters(self, classes):
         for class_ in classes:

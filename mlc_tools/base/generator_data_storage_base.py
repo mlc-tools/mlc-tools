@@ -1,6 +1,8 @@
 from ..core.class_ import Class
 from ..core.object import Object, Objects
 from ..core.object import AccessSpecifier
+from ..core.function import Function
+from ..base.parser import Parser
 
 
 def get_data_name(name):
@@ -107,7 +109,24 @@ class GeneratorDataStorageBase(Class):
         pass
 
     def create_shared_method(self):
-        pass
+        obj = Object()
+        obj.type = self.name
+        obj.name = '__instance'
+        obj.is_static = True
+        obj.is_pointer = True
+        obj.access = AccessSpecifier.private
+        self.members.append(obj)
+
+        method = Function()
+        method.name = 'shared'
+        method.return_type = Parser.create_object(self.name)
+        method.is_static = True
+        method.translated = True
+        method.operations.extend(self.get_shared_method_body().split('\n'))
+        self.functions.append(method)
+
+    def get_shared_method_body(self):
+        assert False and 'Override me'
 
     def create_getters(self, classes):
         pass
