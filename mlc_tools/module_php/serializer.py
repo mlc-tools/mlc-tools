@@ -29,7 +29,7 @@ class Serializer(SerializerBase):
         return method.body
 
     def get_parent_serialize_format(self):
-        return 'parent::{1}({2});\n'
+        return 'parent::{1}(${2});\n'
 
     def build_map_serialization(self, obj_name, obj_template_args, serialization_type, serialize_format):
         key = obj_template_args[0]
