@@ -3,7 +3,12 @@ import sys
 
 
 def main():
-    print sys.argv[1]
+    print sys.argv
+    job_number = sys.argv[2]
+    if not job_number.endswith('1'):
+        print 'skip'
+        exit(0)
+    
     version = open('mlc_tools/version.py').read().strip()
     versions = version[version.find("'") + 1: version.rfind("'")].split('.')
     versions[2] = sys.argv[1]
