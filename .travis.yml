@@ -25,6 +25,8 @@ install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -qq g++-5; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 90; fi
   - pip install enum --user
+  - sudo pip install twine
+  - sudo -H pip install six --upgrade
 
 matrix:
   exclude:
@@ -74,3 +76,10 @@ script:
   - cd tests/test_serialize
   - python run.py
   - popd
+
+deploy:
+  provider: script
+  script: python upload.py $TRAVIS_BUILD_NUMBER
+  skip_existing: true
+  on:
+    branch: v.0.3
