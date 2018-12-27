@@ -14,11 +14,22 @@ from mlc_tools.mlc_tools import Mlc
 
 def test_game_m():
     project_root = '/Work/gushchin/marines/'
+
+    def filter_code(file):
+        projects = ['vikings', 'td']
+        for proj in projects:
+            if file.startswith(proj) or file.startswith('{}config/unit_tests/'.format(project_root)):
+                return False
+        return True
+
     generator = Mlc()
+    # generator.set_filter_code(filter_code)
     generator.generate(language='cpp',
                        configs_directory=project_root + 'config',
-                       out_directory=project_root + 'client/project_marines/generated/web',
-                       # out_directory=project_root + 'tests/unit_tests/cpp/generated',
+                       # out_directory=project_root + 'client/project_marines/generated/web',
+                       out_directory=project_root + 'tests/unit_tests/cpp/generated',
+                       # generate_intrusive=False,
+                       generate_tests=True,
                        side='client'
                        )
     # generator.generate('php', 'xml', project_root + '/server/mg', 'server')
@@ -29,7 +40,16 @@ def test_game_m():
     
 def test_game_m_py():
     project_root = '/Work/gushchin/marines/'
+
+    def filter_code(file):
+        projects = ['vikings', 'td']
+        for proj in projects:
+            if file.startswith(proj) or file.startswith('unit_tests'):
+                return False
+        return True
+    
     generator = Mlc()
+    generator.filter_code = filter_code
     generator.generate(language='py',
                        configs_directory=project_root + 'config',
                        out_directory=project_root + '/tests/server/lib/mg',
@@ -38,10 +58,20 @@ def test_game_m_py():
     
 def test_game_m_php():
     project_root = '/Work/gushchin/marines/'
+
+    def filter_code(file):
+        projects = ['vikings', 'td']
+        for proj in projects:
+            if file.startswith(proj) or file.startswith('{}config/unit_tests/'.format(project_root)):
+                return False
+        return True
+    
     generator = Mlc()
+    generator.filter_code = filter_code
     generator.generate(language='php',
                        configs_directory=project_root + 'config',
                        out_directory=project_root + '/server/mg',
+                       generate_tests=True,
                        side='server')
 
 
@@ -66,6 +96,6 @@ def get_profile_(func):
     return s
 
 
-print(get_profile_(test_game_m))
+# print(get_profile_(test_game_m))
 # print(get_profile_(test_game_m_py))
-# print(get_profile_(test_game_m_php))
+print(get_profile_(test_game_m_php))

@@ -52,6 +52,12 @@ class Mlc(object):
     def add_data_directories(self, directory):
         self.model.additional_data_directories.append(fileutils.normalize_path(directory))
 
+    def set_filter_code(self, func):
+        self.model.filter_code = func
+
+    def set_filter_data(self, func):
+        self.model.filter_data = func
+
     def generate(self, **kwargs):
         self._parse_kwargs(**kwargs)
 
@@ -115,7 +121,7 @@ class Mlc(object):
             command = '{} {} {}'.format(python, self.model.test_script, self.model.test_script_args)
             Log.message('Run test (%s):' % command)
             if os.system(command) != 0:
-                print('TODO: exit - 1. mlc_tools.py 1')
+                print('\nTODO: exit - 1. tests not passed')
                 exit(1)
         if not os.path.isfile(self.model.test_script):
             Log.warning('Test script (%s) not founded' % self.model.test_script)
