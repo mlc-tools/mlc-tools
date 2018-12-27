@@ -57,7 +57,7 @@ class Writer(WriterBase):
     def write_object(self, obj):
         out_init = ''
         value = obj.initial_value
-        if value is None and not obj.is_pointer:
+        if (value is None or value == '"NONE"') and not obj.is_pointer:
             if obj.type == "string":
                 value = '""'
             elif obj.type == "int":
@@ -73,14 +73,12 @@ class Writer(WriterBase):
             elif obj.type == "map":
                 value = "array()"
             else:
-                if self.model.get_class(obj.type):
-                    value = 'null'
+                cls = self.model.get_class(obj.type)
+                if cls and cls.type == 'enum':
+                    value = None
+                    out_init = '$this->{} = {}::${};'.format(obj.name, cls.name, cls.members[0].name)
+                elif cls:
                     out_init = '$this->{} = new {}();'.format(obj.name, obj.type)
-        else:
-            cls = self.model.get_class(obj.type)
-            if cls and cls.type == 'enum':
-                value = None
-                out_init = '$this->{} = {};'.format(obj.name, Serializer().convert_initialize_value(obj.initial_value))
 
         accesses = {
             AccessSpecifier.public: 'public',
