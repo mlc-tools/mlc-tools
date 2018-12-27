@@ -59,6 +59,10 @@ class GeneratorVisitor(object):
                 Error.exit(Error.UNKNOWN_SUPERCLASS, cls.name, superclass_name)
             if superclass.is_visitor:
                 return superclass_name
+            
+            result = self.get_base_visitor_name(superclass)
+            if result:
+                return result
         return None
 
     def generate_acceptor_interface(self, base_class_name, visitors):

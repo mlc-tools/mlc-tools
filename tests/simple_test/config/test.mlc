@@ -146,12 +146,16 @@ class RequestFoo<Request>
 class RequestBar<Request>
 {
 }
+class RequestBar2<RequestBar>
+{
+}
 
 class RequestAcceptor<IVisitorRequest>
 {
     int base = 0
     int foo = 0
     int bar = 0
+    int bar2 = 0
     function void visit(Request* ctx)
     {
         this->base += 1;
@@ -168,6 +172,10 @@ class RequestAcceptor<IVisitorRequest>
     {
         this->bar += 1;
     }
+    function void visit(RequestBar2* ctx)
+    {
+        this->bar2 += 1;
+    }
 }
 
 class TestRequestAcceptor<ITestRequestAcceptor>
@@ -182,14 +190,25 @@ class TestRequestAcceptor<ITestRequestAcceptor>
         this->request->accept(&acceptor);
         result = result && acceptor.foo == 1;
         result = result && acceptor.bar == 0;
+        result = result && acceptor.bar2 == 0;
         result = result && acceptor.base == 0;
-
         acceptor.foo = 0;
+
         this->request = new RequestBar();
         this->request->accept(&acceptor);
         result = result && acceptor.foo == 0;
         result = result && acceptor.bar == 1;
+        result = result && acceptor.bar2 == 0;
         result = result && acceptor.base == 0;
+        acceptor.bar = 0;
+
+        this->request = new RequestBar2();
+        this->request->accept(&acceptor);
+        result = result && acceptor.foo == 0;
+        result = result && acceptor.bar == 0;
+        result = result && acceptor.bar2 == 1;
+        result = result && acceptor.base == 0;
+        acceptor.bar2 = 0;
 
         return result;
     }
