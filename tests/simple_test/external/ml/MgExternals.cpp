@@ -16,7 +16,7 @@
 
 
 
-#if MG_SERIALIZE_FORMAT == MG_XML
+#if SERIALIZE_FORMAT == XML
 
 mg::intrusive_ptr<mg::CommandBase> createCommand(const pugi::xml_node& xml)
 {
@@ -35,7 +35,7 @@ mg::intrusive_ptr<mg::CommandBase> createCommand(const std::string& payload)
 	return createCommand(root);
 }
 
-#elif MG_SERIALIZE_FORMAT == MG_JSON
+#elif SERIALIZE_FORMAT == JSON
 
 mg::intrusive_ptr<mg::CommandBase> createCommand(const Json::Value& json)
 {

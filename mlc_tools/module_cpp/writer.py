@@ -292,7 +292,7 @@ class Writer(WriterBase):
             text.append(line)
         text = '\n'.join(text)
         text = text.strip().replace('\n\n\n', '\n\n') + '\n'
-        return text
+        return WriterBase.prepare_file(self, text)
 
     @staticmethod
     def get_filename(class_, ext):

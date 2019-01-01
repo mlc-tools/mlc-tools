@@ -8,7 +8,7 @@ from .base import Linker
 from .base import Validator
 from .base import DataParser
 from .base import Language
-from .base.model import Model
+from .base.model import Model, SerializeFormat
 
 
 class Mlc(object):
@@ -45,7 +45,14 @@ class Mlc(object):
         if 'add_data' in kwargs:
             directory = fileutils.normalize_path(kwargs.get('add_data'))
             self.model.additional_data_directories.append(directory)
-
+        
+        if 'formats' in kwargs:
+            formats = kwargs['formats'].split(',')
+            self.model.serialize_formats = 0
+            for serialize_format, string_format in SerializeFormat.get_all():
+                if string_format in formats:
+                    self.model.serialize_formats = self.model.serialize_formats | serialize_format
+                    
     def add_config_directories(self, directory):
         self.model.additional_config_directories.append(fileutils.normalize_path(directory))
 
@@ -59,6 +66,7 @@ class Mlc(object):
         self.model.filter_data = func
 
     def generate(self, **kwargs):
+        self.model.clear_data()
         self._parse_kwargs(**kwargs)
 
         def get_config_files():
@@ -78,8 +86,6 @@ class Mlc(object):
                         continue
                     result_files.append(path)
             return result_files
-
-        self.model.clear_data()
 
         all_files = get_config_files()
         parser = Parser(self.model)

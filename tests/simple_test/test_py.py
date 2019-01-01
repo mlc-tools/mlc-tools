@@ -4,7 +4,7 @@ from generated_py.Logger import Logger
 from generated_py.RunAllTests import RunAllTests
 import os.path as fs
 import sys
-
+import inspect
 
 class LoggerImpl(Logger):
 

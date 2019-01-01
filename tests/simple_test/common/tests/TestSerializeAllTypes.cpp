@@ -84,12 +84,15 @@ bool test_all_types(mg::Logger* logger)
 		objA.object_ptr_map[mg::toStr(i)] = object_ptr;
 	}
 
+#if SERIALIZE_FORMAT == JSON
+    auto str = mg::Factory::serialize_command_to_json<mg::AllTypes>(&objA);
+	auto objB = mg::Factory::create_command_from_json<mg::AllTypes>(str);
+//    str = mg::Factory::serialize_command_to_xml<mg::AllTypes>(objB);
+#endif
+#if SERIALIZE_FORMAT == XML
     auto str = mg::Factory::serialize_command_to_xml<mg::AllTypes>(&objA);
-    logger->print_log(true, "Serialized string ObjA:\n" + str);
 	auto objB = mg::Factory::create_command_from_xml<mg::AllTypes>(str);
-    
-    str = mg::Factory::serialize_command_to_xml<mg::AllTypes>(objB);
-    logger->print_log(true, "Serialized string ObjB:\n" + str);
+#endif
 
 	auto result = true;
 	result = result && objA.int_value0 == objB->int_value0;
@@ -116,7 +119,7 @@ bool test_all_types(mg::Logger* logger)
     result = logger->push(objA.object_list == objB->object_list, "objA.object_list == objB->object_list");
     result = logger->push(objA.object_map == objB->object_map, "objA.object_map == objB->object_map");
     result = logger->push(objA.object_ptr_list.size() == objB->object_ptr_list.size(), "objA.object_ptr_list.size() == objB->object_ptr_list.size()");
-    
+
 	for(size_t i=0; i<objA.object_ptr_list.size(); ++i)
 		result = logger->push(*objA.object_ptr_list[i] == *objB->object_ptr_list[i], "*objA.object_ptr_list[i] == *objB->object_ptr_list[i]");
 	for (auto& pair : objA.object_ptr_map)

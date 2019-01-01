@@ -3,6 +3,18 @@ from ..utils import fileutils
 from ..utils.error import Log
 
 
+class SerializeFormat(object):
+    xml = 1
+    json = 2
+    
+    @staticmethod
+    def get_all():
+        return (
+            (SerializeFormat.xml, 'xml'),
+            (SerializeFormat.json, 'json'),
+        )
+    
+
 class Model(object):
 
     def __init__(self):
@@ -41,6 +53,7 @@ class Model(object):
         self.out_dict = None
         self.files = []
         self.created_files = []
+        self.serialize_formats = SerializeFormat.xml | SerializeFormat.json
 
     def clear_data(self):
         self.parser = None
@@ -49,6 +62,10 @@ class Model(object):
         self.objects = []
         self.functions = []
         self.classes_dict = {}
+        self.out_dict = None
+        self.files = []
+        self.created_files = []
+        self.serialize_formats = SerializeFormat.xml | SerializeFormat.json
 
     def get_class(self, name):
         if name in self.classes_dict:

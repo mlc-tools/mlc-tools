@@ -1,5 +1,5 @@
 from .cpp_extension import FILES_DICT
-
+from ..base.writer_base import WriterBase
 
 class GeneratorPredefinedFiles(object):
 
@@ -11,6 +11,8 @@ class GeneratorPredefinedFiles(object):
         return 'mg'
 
     def generate(self, model):
+        writer = WriterBase('')
+        writer.model = model
         self.generate_config_files(model)
         for pair in FILES_DICT:
             filename = pair[0]
@@ -21,6 +23,7 @@ class GeneratorPredefinedFiles(object):
             content = pair[1]
             content = content.replace('@{namespace}', self.get_namespace())
             content = content.replace('@{namespace_upper}', self.get_namespace().upper())
+            content = writer.prepare_file(content)
             filename = filename.replace('@{namespace}', self.get_namespace())
             model.add_file(filename, content)
 

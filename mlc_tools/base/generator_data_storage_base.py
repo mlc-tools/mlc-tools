@@ -3,6 +3,7 @@ from ..core.object import Object, Objects
 from ..core.object import AccessSpecifier
 from ..core.function import Function
 from ..base.parser import Parser
+from ..base.model import SerializeFormat
 
 
 def get_data_name(name):
@@ -98,8 +99,10 @@ class GeneratorDataStorageBase(Class):
         self.members.append(loaded)
 
         self.create_shared_method()
-        self.add_initialize_function_xml()
-        self.add_initialize_function_json()
+        if model.serialize_formats & SerializeFormat.xml:
+            self.add_initialize_function_xml()
+        if model.serialize_formats & SerializeFormat.json:
+            self.add_initialize_function_json()
         self.create_getters(model.classes)
 
     def add_initialize_function_xml(self):

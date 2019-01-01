@@ -1,6 +1,7 @@
 import os
 import inspect
 import sys
+from time import sleep
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
@@ -17,11 +18,13 @@ def run_tests(generator, root, withdata=False, cpp=True, python=True, php=True):
     def run(lang, serialized_format):
         out_directory = root + 'generated_%s' % (lang if lang != 'cpp' else lang + '/' + serialized_format)
         generator.generate(language=lang,
-                           out_directory=out_directory
+                           out_directory=out_directory,
+                           formats=serialized_format
                            )
         if withdata:
             generator.generate_data(data_directory=root + 'data_%s/' % serialized_format,
                                     out_data_directory=root + 'assets')
+        sleep(0.2)
         generator.run_test(test_script=root + 'test_%s.py' % lang,
                            test_script_args=serialized_format)
         print('-----------------------------------------')
@@ -29,13 +32,13 @@ def run_tests(generator, root, withdata=False, cpp=True, python=True, php=True):
         print('-----------------------------------------')
 
     if cpp:
-        # run('cpp', 'json')
+        run('cpp', 'json')
         run('cpp', 'xml')
     if python:
-        # run('py', 'json')
+        run('py', 'json')
         run('py', 'xml')
     if php:
-        # run('php', 'json')
+        run('php', 'json')
         run('php', 'xml')
 
 

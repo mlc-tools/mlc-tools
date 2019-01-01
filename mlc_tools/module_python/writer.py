@@ -123,7 +123,7 @@ class Writer(WriterBase):
         result.append('')
         text = '\n'.join(result)
         text = '# -*- coding: utf-8 -*-\n' + text
-        return text
+        return WriterBase.prepare_file(self, text)
 
     def get_method_arg_pattern(self, obj):
         return '{}={}' if obj.initial_value is not None else '{}'

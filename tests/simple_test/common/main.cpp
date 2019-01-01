@@ -26,19 +26,18 @@ extern mg::intrusive_ptr<mg::CommandBase> createCommand(const std::string& paylo
 std::string root = "../../";
 void initialize_data_storage()
 {
-//#if MG_SERIALIZE_FORMAT == MG_JSON
-//	std::fstream stream(root + "assets/data.json", std::ios::in);
-//    std::cout << "MG_SERIALIZE_FORMAT == MG_JSON\n";
-//#endif
-//#if MG_SERIALIZE_FORMAT == MG_XML
-//	std::fstream stream(root + "assets/data.xml", std::ios::in);
-//    std::cout << "MG_SERIALIZE_FORMAT == MG_XML\n";
-//#endif
-
+#if SERIALIZE_FORMAT == JSON
+	std::fstream stream(root + "assets/data.json", std::ios::in);
+    std::cout << "SERIALIZE_FORMAT == JSON\n";
+	std::string str((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
+	mg::DataStorage::shared().initialize_json(str);
+#endif
+#if SERIALIZE_FORMAT == XML
 	std::fstream stream(root + "assets/data.xml", std::ios::in);
-    std::cout << "MG_SERIALIZE_FORMAT == MG_XML\n";
+    std::cout << "SERIALIZE_FORMAT == XML\n";
 	std::string str((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
 	mg::DataStorage::shared().initialize_xml(str);
+#endif
 }
 
 

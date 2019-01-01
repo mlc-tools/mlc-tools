@@ -1,3 +1,4 @@
+from ..base.model import SerializeFormat
 from ..core.function import Function
 from ..core.object import Objects, Object
 from ..utils.error import Error
@@ -15,19 +16,16 @@ class SerializerBase(object):
 
     def generate_methods(self, model):
         self.model = model
-        model.parser.load_default_serialize_protocol(self.get_protocol('xml'))
-        self.serialize_protocol = model.serialize_protocol
-        for cls in model.classes:
-            self.current_class = cls
-            self.create_serialization_function(cls, SERIALIZATION, 'xml')
-            self.create_serialization_function(cls, DESERIALIZATION, 'xml')
-
-        model.parser.load_default_serialize_protocol(self.get_protocol('json'))
-        self.serialize_protocol = model.serialize_protocol
-        for cls in model.classes:
-            self.current_class = cls
-            self.create_serialization_function(cls, SERIALIZATION, 'json')
-            self.create_serialization_function(cls, DESERIALIZATION, 'json')
+        
+        formats = SerializeFormat.get_all()
+        for serialize_format, string_format in formats:
+            if model.serialize_formats & serialize_format:
+                model.parser.load_default_serialize_protocol(self.get_protocol(string_format))
+                self.serialize_protocol = model.serialize_protocol
+                for cls in model.classes:
+                    self.current_class = cls
+                    self.create_serialization_function(cls, SERIALIZATION, string_format)
+                    self.create_serialization_function(cls, DESERIALIZATION, string_format)
 
     def create_serialization_function(self, cls, serialize_type, serialize_format):
         method = Function()

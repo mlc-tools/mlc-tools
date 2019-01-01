@@ -1,4 +1,5 @@
-
+import re
+from .model import SerializeFormat
 
 # pylint: disable=no-self-use
 # pylint: disable=unused-argument
@@ -61,4 +62,11 @@ class WriterBase(object):
         return ''
 
     def prepare_file(self, text):
+        for format_code, format_string in SerializeFormat.get_all():
+            if not (self.model.serialize_formats & format_code):
+                pattern = re.compile(r'\{\{format=%s\}\}[\s\S]+?\{\{end_format=%s\}\}'%(format_string, format_string))
+                text = pattern.sub('', text)
+            else:
+                text = text.replace('{{format=%s}}' % format_string, '')
+                text = text.replace('{{end_format=%s}}' % format_string, '')
         return text
