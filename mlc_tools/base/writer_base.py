@@ -1,6 +1,3 @@
-import os
-from ..utils import fileutils
-from ..utils.error import Log
 
 
 # pylint: disable=no-self-use
@@ -14,24 +11,12 @@ class WriterBase(object):
         self.files = []
         self.created_files = []
 
-    def save_file(self, filename, content):
-        if self.model is not None and self.model.out_dict is not None:
-            self.model.out_dict[filename] = content
-            return
-
-        full_path = fileutils.normalize_path(self.out_directory) + filename
-        self.created_files.append(filename)
-        exist = os.path.isfile(full_path)
-        if fileutils.write(full_path, content):
-            msg = ' Create: {}' if not exist else ' Overwriting: {}'
-            Log.debug(msg.format(filename))
-
     def save(self, model):
         self.model = model
         for cls in model.classes:
             sources = self.write_class(cls)
             for filename, content in sources:
-                self.save_file(filename, content)
+                self.model.add_file(filename, content)
 
     def write_class(self, cls):
         return [('', '')]

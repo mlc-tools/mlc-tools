@@ -50,7 +50,7 @@ def create_test_model():
 def create_lang(lang, model):
     model.language = lang
     language = Language(lang, model)
-    language.get_generator().generate(model, language.get_writer())
+    language.get_generator().generate(model)
 
     Linker().link(model)
     Validator().validate(model)
@@ -61,6 +61,7 @@ def create_lang(lang, model):
 
 def save(lang, model):
     create_lang(lang, model).get_writer().save(model)
+    model.save_files()
 
 
 def save_object(lang, model):
@@ -88,8 +89,8 @@ class TestWriteClass(unittest.TestCase):
 
         hpp = model.out_dict['Test.h']
         cpp = model.out_dict['Test.cpp']
-        self.assertEquals(cpp, get_cpp())
-        self.assertEquals(hpp, get_hpp())
+        self.assertEqual(cpp, get_cpp())
+        self.assertEqual(hpp, get_hpp())
 
 
 class TestWriteObject(unittest.TestCase):
@@ -97,17 +98,17 @@ class TestWriteObject(unittest.TestCase):
     def test_cpp(self):
         model = create_test_model()
         result = save_object('cpp', model)
-        self.assertEquals(result, ('int int_value;', 'int_value(42)', ''))
+        self.assertEqual(result, ('int int_value;', 'int_value(42)', ''))
 
     def test_python(self):
         model = create_test_model()
         result = save_object('py', model)
-        self.assertEquals(result, 'self.int_value = 42')
+        self.assertEqual(result, 'self.int_value = 42')
 
     def test_php(self):
         model = create_test_model()
         result = save_object('php', model)
-        self.assertEquals(result, ('public $int_value = 42;', ''))
+        self.assertEqual(result, ('public $int_value = 42;', ''))
 
 
 class TestWriteFunction(unittest.TestCase):
@@ -124,18 +125,18 @@ return result;
 
         }
         \n        '''
-        self.assertEquals(result[0], hpp)
-        self.assertEquals(result[1], cpp)
+        self.assertEqual(result[0], hpp)
+        self.assertEqual(result[1], cpp)
 
     def test_python(self):
         model = create_test_model()
         result = save_function('py', model)
-        self.assertEquals(result, '\n    def foo(self, a0, a1):\n        result = self.int_value\n        result += a0\n        return result\n        \n        pass\n')
+        self.assertEqual(result, '\n    def foo(self, a0, a1):\n        result = self.int_value\n        result += a0\n        return result\n        \n        pass\n')
 
     def test_php(self):
         model = create_test_model()
         result = save_function('php', model)
-        self.assertEquals(result, 'function foo($a0, $a1)\n{\n    $result = $this->int_value;\n$result += $a0;\nreturn $result;\n\n}\n')
+        self.assertEqual(result, 'function foo($a0, $a1)\n{\n    $result = $this->int_value;\n$result += $a0;\nreturn $result;\n\n}\n')
 
 
 def get_cpp():

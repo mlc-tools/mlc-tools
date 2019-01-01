@@ -59,7 +59,7 @@ class GeneratorVisitor(object):
                 Error.exit(Error.UNKNOWN_SUPERCLASS, cls.name, superclass_name)
             if superclass.is_visitor:
                 return superclass_name
-            
+
             result = self.get_base_visitor_name(superclass)
             if result:
                 return result
@@ -108,7 +108,7 @@ class GeneratorVisitor(object):
                 }}'''.format(visitor.name, visitor.name[0].lower() + visitor.name[1:]))
 
         def comparator(func):
-            return func.args[0][1]
+            return func.args[0][1].type
         acceptor.functions.sort(key=comparator)
 
     @staticmethod

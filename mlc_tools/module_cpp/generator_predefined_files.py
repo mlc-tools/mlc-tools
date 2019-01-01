@@ -10,8 +10,8 @@ class GeneratorPredefinedFiles(object):
     def get_namespace():
         return 'mg'
 
-    def generate(self, model, writer):
-        self.generate_config_files(writer)
+    def generate(self, model):
+        self.generate_config_files(model)
         for pair in FILES_DICT:
             filename = pair[0]
             if 'intrusive_ptr' in filename and not model.generate_intrusive:
@@ -22,13 +22,13 @@ class GeneratorPredefinedFiles(object):
             content = content.replace('@{namespace}', self.get_namespace())
             content = content.replace('@{namespace_upper}', self.get_namespace().upper())
             filename = filename.replace('@{namespace}', self.get_namespace())
-            writer.save_file(filename, content)
+            model.add_file(filename, content)
 
-    def generate_config_files(self, writer):
+    def generate_config_files(self, model):
         pattern = '#ifndef __{0}_Config_h__\n#define __{0}_Config_h__\n\n{1}\n\n#endif //#ifndef __{0}_Config_h__'
         configs = list()
         configs.append('#define {}_JSON 1'.format(self.get_namespace().upper()))
         configs.append('#define {}_XML 2'.format(self.get_namespace().upper()))
         configs.append('\n#define {0}_SERIALIZE_FORMAT {0}_{1}'.format(self.get_namespace().upper(), 'XML'))
         filename_config = '{}_config.h'.format(self.get_namespace())
-        writer.save_file(filename_config, pattern.format(self.get_namespace(), '\n'.join(configs)))
+        model.add_file(filename_config, pattern.format(self.get_namespace(), '\n'.join(configs)))

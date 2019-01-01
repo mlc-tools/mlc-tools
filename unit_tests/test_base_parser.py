@@ -61,16 +61,16 @@ class TestParseFunction(unittest.TestCase):
         self.assertEqual(func.return_type.template_args[1].template_args[0].name, '')
         self.assertEqual(func.return_type.template_args[1].template_args[0].type, 'Foo')
 
-        self.assertEquals(func.args[0][0], 'arg0')
-        self.assertEquals(func.args[1][0], 'arg1')
+        self.assertEqual(func.args[0][0], 'arg0')
+        self.assertEqual(func.args[1][0], 'arg1')
         self.assertTrue(isinstance(func.args[0][1], Object))
         self.assertTrue(isinstance(func.args[1][1], Object))
-        self.assertEquals(func.args[0][1].name, 'arg0')
-        self.assertEquals(func.args[0][1].type, 'map')
+        self.assertEqual(func.args[0][1].name, 'arg0')
+        self.assertEqual(func.args[0][1].type, 'map')
         self.assertTrue(isinstance(func.args[0][1].template_args[0], Object))
         self.assertTrue(isinstance(func.args[0][1].template_args[1], Object))
-        self.assertEquals(func.args[1][1].name, 'arg1')
-        self.assertEquals(func.args[1][1].type, 'list')
+        self.assertEqual(func.args[1][1].name, 'arg1')
+        self.assertEqual(func.args[1][1].type, 'list')
         self.assertTrue(isinstance(func.args[0][1].template_args[0], Object))
 
     def test_2(self):
@@ -116,8 +116,8 @@ class TestParseClass(unittest.TestCase):
         parser = Parser(Model())
         parser.parse_text(text)
         foo = parser.model.classes[0]
-        self.assertEquals(foo.name, 'Foo')
-        self.assertEquals(foo.type, 'class')
+        self.assertEqual(foo.name, 'Foo')
+        self.assertEqual(foo.type, 'class')
         self.assertEqual(len(foo.members), 4)
         
         self.assertEqual(foo.members[0].type, 'int')
@@ -136,8 +136,8 @@ class TestParseClass(unittest.TestCase):
         parser = Parser(Model())
         parser.parse_text(text)
         foo = parser.model.classes[0]
-        self.assertEquals(foo.name, 'RewardsListHelper')
-        self.assertEquals(foo.type, 'class')
+        self.assertEqual(foo.name, 'RewardsListHelper')
+        self.assertEqual(foo.type, 'class')
         self.assertEqual(len(foo.members), 1)
 
 

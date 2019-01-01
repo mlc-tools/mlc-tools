@@ -89,7 +89,7 @@ class Mlc(object):
         # cpp
         # php
         language = Language(self.model.language, self.model)
-        language.get_generator().generate(self.model, language.get_writer())
+        language.get_generator().generate(self.model)
 
         Linker().link(self.model)
         Validator().validate(self.model)
@@ -97,6 +97,8 @@ class Mlc(object):
         language.get_translator().translate(self.model)
         language.get_serializer().generate_methods(self.model)
         language.get_writer().save(self.model)
+        self.model.save_files()
+        self.model.remove_old_files()
         # module_python
 
     def generate_data(self, **kwargs):

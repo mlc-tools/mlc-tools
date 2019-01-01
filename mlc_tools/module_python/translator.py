@@ -1,6 +1,5 @@
 import re
 from .regex import RegexPatternPython
-from ..core.object import Object, AccessSpecifier
 from ..base.translator_base import TranslatorBase
 
 

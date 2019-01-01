@@ -7,7 +7,7 @@ class GeneratorFactory(object):
         pass
 
     @staticmethod
-    def generate(model, writer):
+    def generate(model):
         line = '''
         if type == "{0}":
             from . import {0}
@@ -16,4 +16,4 @@ class GeneratorFactory(object):
         for cls in model.classes:
             builders += line.format(cls.name)
         content = FACTORY.format(builders=builders)
-        writer.save_file('Factory.py', content)
+        model.add_file('Factory.py', content)

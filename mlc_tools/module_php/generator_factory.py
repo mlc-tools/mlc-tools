@@ -6,9 +6,8 @@ class GeneratorFactory(object):
         pass
 
     @staticmethod
-    def generate(model, writer):
-        writer.model = model
-        writer.save_file('Factory.php', FACTORY)
+    def generate(model):
+        model.add_file('Factory.php', FACTORY)
 
 
 FACTORY = '''<?php
