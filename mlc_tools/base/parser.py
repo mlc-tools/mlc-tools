@@ -48,20 +48,34 @@ class Parser(object):
                 lines[i] = line[0:line.find('//')]
         text = '\n'.join(lines)
         return text
+    
+    def check_skip(self, line):
+        corresponds = True
+        first_match = True
+        for lang in ['cpp', 'py', 'php']:
+            if ':' + lang in line:
+                if first_match:
+                    first_match = False
+                    corresponds = False
+                corresponds = corresponds or self.model.is_lang(lang)
+                line = line.replace(':' + lang, '')
+        return not corresponds, line
 
     def _create_class(self, text, is_abstract):
         body, header, text = Parser.parse_body(text)
+        skip, header = self.check_skip(header)
         cls = Class()
         cls.parse(header)
         if is_abstract:
             cls.is_abstract = True
 
-        if not self.model.is_side(cls.side):
+        skip = skip or not self.model.is_side(cls.side)
+        if skip:
             if cls.is_storage:
                 self.model.classes_for_data.append(cls)
             return text
 
-        parser = Parser(Model())
+        parser = Parser(self.model.empty_copy())
         parser.model.side = self.model.side
         cls.parse_body(parser, body)
         if self.model.get_class(cls.name):
@@ -73,12 +87,17 @@ class Parser(object):
 
     def _create_enum_class(self, text):
         body, header, text = Parser.parse_body(text)
+
+        skip, header = self.check_skip(header)
+        if skip:
+            return text
+
         cls = Class()
         cls.type = 'enum'
         cls.parse(header)
         if not self.model.is_side(cls.side):
             return text
-        parser = Parser(Model())
+        parser = Parser(self.model.empty_copy())
         parser.model.side = self.model.side
         cls.parse_body(parser, body)
         self.model.classes.append(cls)
@@ -91,6 +110,11 @@ class Parser(object):
             text = text[text.find("\n") + 1:]
         else:
             text = ""
+
+        skip, header = self.check_skip(text)
+        if skip:
+            return text
+
         obj = Object()
         self.parse_object(obj, line)
         if self.model.is_side(obj.side):
@@ -99,6 +123,9 @@ class Parser(object):
 
     def _create_function(self, text):
         body, header, text = Parser.parse_body(text)
+        skip, header = self.check_skip(header)
+        if skip:
+            return text
         method = Function()
         self.parse_function_header(method, header)
         if self.model.is_side(method.side):

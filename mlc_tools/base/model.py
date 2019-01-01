@@ -1,6 +1,7 @@
 import os
 from ..utils import fileutils
 from ..utils.error import Log
+from copy import deepcopy
 
 
 class SerializeFormat(object):
@@ -54,6 +55,16 @@ class Model(object):
         self.files = []
         self.created_files = []
         self.serialize_formats = SerializeFormat.xml | SerializeFormat.json
+        
+    def empty_copy(self):
+        model = deepcopy(self)
+        model.classes = []
+        model.classes_for_data = []
+        model.objects = []
+        model.functions = []
+        model.classes_dict = {}
+        return model
+        
 
     def clear_data(self):
         self.parser = None
@@ -79,6 +90,9 @@ class Model(object):
 
     def is_side(self, side):
         return self.side == 'both' or side == self.side or side == 'both'
+
+    def is_lang(self, language):
+        return not language or language == self.language
 
     def add_file(self, local_path, content):
         self.files.append((local_path, content))

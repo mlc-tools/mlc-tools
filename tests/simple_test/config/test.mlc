@@ -1,12 +1,12 @@
 class SerializedObject:serialized:inline
 {
 	int:runtime _reference_counter = 1
-	function int retain()
+	function int retain():cpp
 	{
 		this->_reference_counter += 1;
 		return this->_reference_counter;
 	}
-	function int release()
+	function int release():cpp
 	{
 		this->_reference_counter -= 1;
 		auto c = this->_reference_counter;
@@ -414,21 +414,29 @@ class TestFactory<SerializedObject>
         return result;
     }
 
-    function bool test(Logger* logger):static
+    function bool test(Logger* logger):static:cpp
     {
         bool result = true;
-        /*
-        TODO: Use preprocessor
+
         auto command = new RequestBar();
+#if SERIALIZE_FORMAT == JSON
+        auto string = Factory::serialize_command_to_json<RequestBar>(command);
+        auto command2 = Factory::create_command_from_json<Request>(string);
+#endif
+#if SERIALIZE_FORMAT == XML
         auto string = Factory::serialize_command_to_xml<RequestBar>(command);
         auto command2 = Factory::create_command_from_xml<Request>(string);
-        result = logger->push(command2 != nullptr, " - TestFactory: commnd_2 deserialized") && result;
+#endif
+        result = logger->push(command2 != nullptr, " - TestFactory: command_2 deserialized") && result;
         if(result)
         {
-            result = logger->push(command2->get_type() == command->get_type(), " - TestFactory: commnd_type == commnd2_type deserialized") && result;
+            result = logger->push(command2->get_type() == command->get_type(), " - TestFactory: command_type == command2_type deserialized") && result;
         }
-        */
         return result;
+    }
+    function bool test(Logger* logger):static:py:php
+    {
+        return true;
     }
 }
 

@@ -7,6 +7,7 @@ import inspect
 sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) + '/..'))
 from mlc_tools.core.object import *
 from mlc_tools.base.parser import Parser
+from mlc_tools.base.model import Model
 
 
 class TestParseModifiersTypes(unittest.TestCase):
@@ -124,6 +125,33 @@ class TestParseComplexTypes(unittest.TestCase):
         self.assertEqual(obj.side, 'both')
         self.assertEqual(obj.access, AccessSpecifier.public)
 
+
+class TestParserOther(unittest.TestCase):
+    
+    def test_1(self):
+        parser = Parser(Model())
+        
+        parser.model.language = 'cpp'
+        self.assertTrue(parser.check_skip('function bool test(Logger* logger):static:py:php')[0])
+        self.assertFalse(parser.check_skip('function bool test(Logger* logger):static:py:cpp')[0])
+        self.assertFalse(parser.check_skip('function bool test(Logger* logger):static:cpp')[0])
+        self.assertTrue(parser.check_skip('function bool test(Logger* logger):static:php')[0])
+        self.assertTrue(parser.check_skip('function bool test(Logger* logger):static:py')[0])
+        
+        parser.model.language = 'py'
+        self.assertFalse(parser.check_skip('function bool test(Logger* logger):static:py:php')[0])
+        self.assertFalse(parser.check_skip('function bool test(Logger* logger):static:py:cpp')[0])
+        self.assertTrue(parser.check_skip('function bool test(Logger* logger):static:cpp')[0])
+        self.assertTrue(parser.check_skip('function bool test(Logger* logger):static:php')[0])
+        self.assertFalse(parser.check_skip('function bool test(Logger* logger):static:py')[0])
+        
+        parser.model.language = 'php'
+        self.assertFalse(parser.check_skip('function bool test(Logger* logger):static:py:php')[0])
+        self.assertTrue(parser.check_skip('function bool test(Logger* logger):static:py:cpp')[0])
+        self.assertTrue(parser.check_skip('function bool test(Logger* logger):static:cpp')[0])
+        self.assertFalse(parser.check_skip('function bool test(Logger* logger):static:php')[0])
+        self.assertTrue(parser.check_skip('function bool test(Logger* logger):static:py')[0])
+    
 
 if __name__ == '__main__':
     unittest.main()
