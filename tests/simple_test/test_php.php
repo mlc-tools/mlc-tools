@@ -4,10 +4,11 @@ require_once 'generated_php/DataStorage.php';
 require_once 'generated_php/AllTests.php';
 require_once 'generated_php/RunAllTests.php';
 require_once 'generated_php/Logger.php';
+require_once 'generated_php/config.php';
 
 $file = 'data.xml';
-if (count($argv) > 1) {
-	$file = 'data.'.$argv[1];
+if(!Config::$SUPPORT_XML_PROTOCOL){
+	$file = 'data.json';
 }
 
 $file = realpath(dirname(__FILE__))."/assets/$file";

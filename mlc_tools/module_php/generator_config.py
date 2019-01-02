@@ -12,8 +12,8 @@ class GeneratorConfig(object):
         filename = 'config.php'
 
         for serialize_format, format_string in SerializeFormat.get_all():
-            line = '\n\tpublic $SUPPORT_{}_PROTOCOL = {};'.format(format_string.upper(),
-                                                                  model.serialize_formats & serialize_format)
+            support = 'true' if model.serialize_formats & serialize_format != 0 else 'false'
+            line = '\n\tpublic static $SUPPORT_{}_PROTOCOL = {};'.format(format_string.upper(), support)
             content += line
         content = CONTENT.format(content)
         model.add_file(filename, content)
