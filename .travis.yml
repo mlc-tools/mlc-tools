@@ -82,4 +82,4 @@ deploy:
   script: cd tools/deploy && python upload.py $TRAVIS_BUILD_NUMBER $TRAVIS_JOB_NUMBER
   skip_existing: true
   on:
-    branch: v.0.3
+    branch: master
