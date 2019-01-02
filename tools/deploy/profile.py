@@ -1,3 +1,8 @@
+import sys
+import os
+import inspect
+
+sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) + '/../..'))
 from mlc_tools.mlc_tools import Mlc
 #
 #
@@ -36,8 +41,8 @@ def test_game_m():
     # generator.generate('py', 'xml', project_root + '/tests/server/lib/mg', 'client')
     # generator.generate('py', 'xml', project_root + '/tests/server/lib/mg_server', 'server')
     # tests
-    
-    
+
+
 def test_game_m_py():
     project_root = '/Work/gushchin/marines/'
 
@@ -47,15 +52,15 @@ def test_game_m_py():
             if file.startswith(proj) or file.startswith('unit_tests'):
                 return False
         return True
-    
+
     generator = Mlc()
     generator.filter_code = filter_code
     generator.generate(language='py',
                        configs_directory=project_root + 'config',
                        out_directory=project_root + '/tests/server/lib/mg',
                        side='client')
-    
-    
+
+
 def test_game_m_php():
     project_root = '/Work/gushchin/marines/'
 
@@ -65,7 +70,7 @@ def test_game_m_php():
             if file.startswith(proj) or file.startswith('{}config/unit_tests/'.format(project_root)):
                 return False
         return True
-    
+
     generator = Mlc()
     generator.filter_code = filter_code
     generator.generate(language='php',

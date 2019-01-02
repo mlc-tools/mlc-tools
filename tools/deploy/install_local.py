@@ -2,12 +2,12 @@ import os
 
 
 def main():
-    version = open('mlc_tools/version.py').read().strip()
+    version = open('../../mlc_tools/version.py').read().strip()
     versions = version[version.find("'") + 1: version.rfind("'")].split('.')
     versions[2] = str(int(versions[2]) + 1)
-    open('mlc_tools/version.py', 'w').write("__version__ = '{}'".format('.'.join(versions)))
+    open('../../mlc_tools/version.py', 'w').write("__version__ = '{}'".format('.'.join(versions)))
 
-    version = open('mlc_tools/version.py').read().strip()
+    version = open('../../mlc_tools/version.py').read().strip()
     version = version[version.find("'") + 1:]
     version = version[:version.find("'")]
 

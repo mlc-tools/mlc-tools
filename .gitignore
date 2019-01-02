@@ -38,7 +38,7 @@ mlc.sln
 /out
 /temp
 
-/dist
-/build
-/mlc_tools.egg-info
+/tools/deploy/dist
+/tools/deploy/build
+/tools/deploy/mlc_tools.egg-info
 .vscode/
