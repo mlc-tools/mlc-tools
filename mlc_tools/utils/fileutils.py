@@ -82,8 +82,10 @@ def write(path, content):
         rewrite = open(path).read() != content
     if rewrite:
         create_dir_for_file(path)
-        open(path, 'w').write(content)
-    return rewrite
+        stream = open(path, 'w')
+        stream.write(content)
+        return True, stream
+    return False, None
 
 
 __CACHE_FILES = tempfile.gettempdir() + '/bin/cache.tmp'

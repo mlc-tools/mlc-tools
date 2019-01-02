@@ -24,7 +24,6 @@ def run_tests(generator, root, withdata=False, cpp=True, python=True, php=True):
         if withdata:
             generator.generate_data(data_directory=root + 'data_%s/' % serialized_format,
                                     out_data_directory=root + 'assets')
-        sleep(0.4)
         generator.run_test(test_script=root + 'test_%s.py' % lang,
                            test_script_args=serialized_format)
         print('-----------------------------------------')

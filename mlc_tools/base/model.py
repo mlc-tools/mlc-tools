@@ -107,13 +107,18 @@ class Model(object):
                 self.out_dict[local_path] = content
             return
 
+        streams = []
         for local_path, content in self.files:
             self.created_files.append(local_path)
             full_path = fileutils.normalize_path(self.out_directory) + local_path
             exist = os.path.isfile(full_path)
-            if fileutils.write(full_path, content):
+            result, stream = fileutils.write(full_path, content)
+            if result:
+                streams.append(stream)
                 msg = ' Create: {}' if not exist else ' Overwriting: {}'
                 Log.debug(msg.format(local_path))
+        for stream in streams:
+            stream.close()
 
     def remove_old_files(self):
         files = fileutils.get_files_list(self.out_directory)
