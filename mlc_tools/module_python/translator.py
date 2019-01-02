@@ -38,13 +38,14 @@ class Translator(TranslatorBase):
         if RegexPatternPython.FACTORY.search(func):
             func = Translator.get_tabs(2) + 'from .Factory import Factory\n' + func
         for cls in model.classes:
-            if cls.name not in RegexPatternPython.regs_class_names:
-                RegexPatternPython.regs_class_names[cls.name] = re.compile(r'\b{}\b'.format(cls.name))
-            pattern = RegexPatternPython.regs_class_names[cls.name]
-            need = cls.name != cls_owner.name
-            need = need and pattern.search(func) is not None
-            if need:
-                func = Translator.get_tabs(2) + 'from .{0} import {0}\n'.format(cls.name) + func
+            if cls.name in func:
+                if cls.name not in RegexPatternPython.regs_class_names:
+                    RegexPatternPython.regs_class_names[cls.name] = re.compile(r'\b{}\b'.format(cls.name))
+                pattern = RegexPatternPython.regs_class_names[cls.name]
+                need = cls.name != cls_owner.name
+                need = need and pattern.search(func) is not None
+                if need:
+                    func = Translator.get_tabs(2) + 'from .{0} import {0}\n'.format(cls.name) + func
         if 'math.' in func:
             func = Translator.get_tabs(2) + 'import math\n' + func
         if 'random.' in func:

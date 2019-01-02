@@ -1,5 +1,5 @@
 import os
-from copy import deepcopy
+from copy import copy
 from ..utils import fileutils
 from ..utils.error import Log
 
@@ -57,7 +57,7 @@ class Model(object):
         self.serialize_formats = SerializeFormat.xml | SerializeFormat.json
 
     def empty_copy(self):
-        model = deepcopy(self)
+        model = copy(self)
         model.classes = []
         model.classes_for_data = []
         model.objects = []

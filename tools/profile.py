@@ -2,7 +2,7 @@ import sys
 import os
 import inspect
 
-sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) + '/../..'))
+sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) + '/..'))
 from mlc_tools.mlc_tools import Mlc
 #
 #
@@ -54,10 +54,11 @@ def test_game_m_py():
         return True
 
     generator = Mlc()
-    generator.filter_code = filter_code
+    # generator.filter_code = filter_code
     generator.generate(language='py',
                        configs_directory=project_root + 'config',
                        out_directory=project_root + '/tests/server/lib/mg',
+                       generate_tests=True,
                        side='client')
 
 
@@ -102,5 +103,5 @@ def get_profile_(func):
 
 
 # print(get_profile_(test_game_m))
-# print(get_profile_(test_game_m_py))
-print(get_profile_(test_game_m_php))
+print(get_profile_(test_game_m_py))
+# print(get_profile_(test_game_m_php))
