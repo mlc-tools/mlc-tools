@@ -87,9 +87,9 @@ class SerializerBase(object):
             index = 1
 
         type_ = obj_type
-        cls = self.model.get_class(type_)
+        cls = self.model.get_class(type_) if self.model.has_class(type_) else None
         arg_0 = obj_template_args[0].type if obj_template_args else 'unknown_arg'
-        if cls and cls.type == 'enum':
+        if cls is not None and cls.type == 'enum':
             type_ = 'enum'
         elif obj_type not in self.model.simple_types and type_ != "list" and type_ != "map":
             if is_link:
@@ -112,7 +112,7 @@ class SerializerBase(object):
                     assert (isinstance(arg, Object))
                     assert (isinstance(arg.type, str))
                     arg_type = arg.type
-                    type_cls = self.model.get_class(arg.type)
+                    type_cls = self.model.get_class(arg.type) if self.model.has_class(arg.type) else None
                     if arg.is_link:
                         type_ = 'list<link>'
                     elif arg_type in self.model.simple_types:
@@ -120,7 +120,7 @@ class SerializerBase(object):
                         obj_type = arg_type
                     elif arg.is_pointer:
                         type_ = "list<pointer>"
-                    elif type_cls.type == 'enum':
+                    elif type_cls is not None and type_cls.type == 'enum':
                         type_ = 'list<string>'
                         arg_0 = 'string'
                     else:

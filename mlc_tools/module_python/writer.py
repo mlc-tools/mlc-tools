@@ -39,8 +39,8 @@ class Writer(WriterBase):
         name += '(' + superclass_name + ')'
 
         for obj in cls.members:
-            type_class = self.model.get_class(obj.type)
-            if type_class and type_class.type == 'enum':
+            type_class = self.model.get_class(obj.type) if self.model.has_class(obj.type) else None
+            if type_class is not None and type_class.type == 'enum':
                 imports += '\nfrom .{0} import {0}'.format(type_class.name)
 
         for import_line in imports.split('\n'):
@@ -83,7 +83,7 @@ class Writer(WriterBase):
             if type_ == "map":
                 value = "{}"
             else:
-                if self.model.get_class(obj.type):
+                if self.model.has_class(obj.type):
                     value = obj.type + '()'
                     imports += 'from .{0} import {0}\n        '.format(obj.type)
         if value and value.endswith('f'):

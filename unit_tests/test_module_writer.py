@@ -38,7 +38,7 @@ def create_test_model():
 
     model = Model()
     # model.parser = Parser(model)
-    model.classes.append(cls)
+    model.add_class(cls)
     model.out_directory = '/Users/stereo7/mlc_tools_temp/'
     model.generate_tests = False
     model.generate_factory = False

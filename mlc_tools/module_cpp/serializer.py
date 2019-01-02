@@ -57,7 +57,7 @@ class Serializer(SerializerBase):
         if obj_value is None:
             index = 1
         type_ = obj_type
-        if self.model.get_class(type_) and self.model.get_class(type_).type == 'enum':
+        if self.model.has_class(type_) and self.model.get_class(type_).type == 'enum':
             string = self._build_serialize_operation_enum(obj_name, serialization_type)
             return string
         else:
@@ -84,14 +84,13 @@ class Serializer(SerializerBase):
                     assert (isinstance(arg.type, str))
                     arg_type = arg.type
                     template_args.append(self.convert_type(arg_type))
-                    type_cls = self.model.get_class(arg.type)
                     if arg.is_link:
                         type_ = 'list<link>'
                     elif arg_type in self.model.simple_types:
                         type_ = '{0}<{1}>'.format(type_, arg_type)
                     elif arg.is_pointer:
                         type_ = 'list<pointer>'
-                    elif type_cls.type == 'enum':
+                    elif self.model.has_class(arg.type) and self.model.get_class(arg.type).type == 'enum':
                         type_ = 'list<enum>'
                     else:
                         type_ = '{0}<serialized>'.format(type_)

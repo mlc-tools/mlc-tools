@@ -51,12 +51,13 @@ class GeneratorVisitor(object):
             if superclass_name in self.base_visitor_classes:
                 return superclass_name
 
-            superclass = self.model.get_class(superclass_name)
-            if not superclass:
+            if not self.model.has_class(superclass_name):
                 if superclass_name.startswith('IVisitor'):
                     # Correct situation. The class can be inherited from the IVisitor interface
                     continue
                 Error.exit(Error.UNKNOWN_SUPERCLASS, cls.name, superclass_name)
+            
+            superclass = self.model.get_class(superclass_name)
             if superclass.is_visitor:
                 return superclass_name
 
@@ -74,7 +75,7 @@ class GeneratorVisitor(object):
         acceptor.is_abstract = True
         acceptor.is_virtual = True
         acceptor.side = visitors[0].side
-        self.model.classes.append(acceptor)
+        self.model.add_class(acceptor)
         self.acceptors_interfaces.append(acceptor.name)
 
         for visitor in visitors:

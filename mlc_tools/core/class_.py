@@ -50,17 +50,17 @@ class Class(Object):
         parser.parse_text(body)
 
         for member in parser.model.objects:
-            if parser.model.get_class(member.type):
+            if parser.model.has_class(member.type):
                 member.type = self.name + member.type
             for i, arg in enumerate(member.template_args):
-                if parser.model.get_class(arg):
+                if parser.model.has_class(arg):
                     member.template_args[i] = self.name + member.template_args[i]
 
         for func in parser.model.functions:
-            if parser.model.get_class(func.return_type):
+            if parser.model.has_class(func.return_type):
                 func.return_type = self.name + func.return_type
             for arg in func.args:
-                if parser.model.get_class(arg[1]):
+                if parser.model.has_class(arg[1]):
                     arg[1] = self.name + arg[1]
 
             for cls in parser.model.classes:

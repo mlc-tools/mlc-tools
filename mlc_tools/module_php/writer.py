@@ -33,12 +33,12 @@ class Writer(WriterBase):
             extend = ' extends ' + cls.superclasses[0].name
             imports += include_patter.format(cls.superclasses[0].name)
         for obj in cls.members:
-            if self.model.get_class(obj.type):
+            if self.model.has_class(obj.type):
                 if obj.type != cls.name:
                     imports += include_patter.format(obj.type)
             elif obj.type == 'list' or obj.type == 'map':
                 for arg in obj.template_args:
-                    if self.model.get_class(arg.type) and arg.type != cls.name:
+                    if self.model.has_class(arg.type) and arg.type != cls.name:
                         imports += include_patter.format(arg.type)
         imports += include_patter.format('Factory')
         if 'DataStorage' in functions:
@@ -73,8 +73,8 @@ class Writer(WriterBase):
             elif obj.type == "map":
                 value = "array()"
             else:
-                cls = self.model.get_class(obj.type)
-                if cls and cls.type == 'enum':
+                cls = self.model.get_class(obj.type) if self.model.has_class(obj.type) else None
+                if cls is not None and cls.type == 'enum':
                     value = None
                     out_init = '$this->{} = {}::${};'.format(obj.name, cls.name, cls.members[0].name)
                 elif cls:

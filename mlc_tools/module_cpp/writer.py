@@ -1,5 +1,7 @@
+import re
 from ..base import WriterBase
 from ..core.object import Object
+from .regex import RegexPatternCpp
 
 
 class Writer(WriterBase):
@@ -206,8 +208,8 @@ class Writer(WriterBase):
     def convert_initial_value(self, object_):
         if object_.is_pointer and object_.initial_value == '0':
             return 'nullptr'
-        type_class = self.model.get_class(object_.type)
-        if type_class and type_class.type == 'enum':
+        type_class = self.model.get_class(object_.type) if self.model.has_class(object_.type) else None
+        if type_class is not None and type_class.type == 'enum':
             assert type_class.members
             return '{}::{}'.format(type_class.name, type_class.members[0].name)
 
@@ -353,12 +355,18 @@ class Writer(WriterBase):
             for arg in obj.template_args:
                 add(includes, arg)
 
-        if 'DataStorage::shared()' in functions_text:
+        if 'DataStorage::shared' in functions_text:
             includes.add('DataStorage')
         for type_ in self.model.classes:
             name = type_.name
             if name not in hpp_includes and name in functions_text:
-                includes.add(name)
+                if cls.name not in RegexPatternCpp.regs_class_names:
+                    RegexPatternCpp.regs_class_names[cls.name] = re.compile(r'\b{}\b'.format(cls.name))
+                pattern = RegexPatternCpp.regs_class_names[cls.name]
+                need = cls.name == name
+                need = need or pattern.search(functions_text) is not None
+                if need:
+                    includes.add(name)
         return self.build_includes(cls, includes)
 
     def build_includes(self, cls, includes):
@@ -380,8 +388,8 @@ class Writer(WriterBase):
                 result.append('#include %s' % types[typename])
                 continue
 
-            other_class = self.model.get_class(typename)
-            if other_class:
+            if self.model.has_class(typename):
+                other_class = self.model.get_class(typename)
                 include = '#include "'
                 if cls.group and other_class.group != cls.group:
                     include += '../'

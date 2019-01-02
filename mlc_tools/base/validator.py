@@ -15,8 +15,7 @@ class Validator(object):
             for member in cls.members:
                 if member.type == 'map':
                     key_type = member.template_args[0].type
-                    cls_type = model.get_class(key_type)
-                    if cls_type is not None and cls_type.type != 'enum':
+                    if model.has_class(key_type) and model.get_class(key_type).type != 'enum':
                         value_type = member.template_args[1].type
                         Error.exit(Error.OBJECT_IS_KEY_OF_MAP, cls.name, key_type, value_type, member.name)
                 if cls.type == 'enum' and member.initial_value is not None:

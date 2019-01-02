@@ -12,7 +12,7 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
 
     def generate(self, model):
         GeneratorDataStorageBase.generate(self, model)
-        model.classes.append(self)
+        model.add_class(self)
 
     def create_shared_method(self):
         method = Function()

@@ -20,8 +20,8 @@ class GeneratorUnitTestsInterface(object):
             if test:
                 tests.append(test)
         self.generate_base_classes()
-        model.classes.extend(tests)
-        model.classes.append(self.generate_all_tests_class())
+        model.add_classes(tests)
+        model.add_class(self.generate_all_tests_class())
 
     def generate_base_classes(self):
         base = BASE_CLASSES
@@ -54,8 +54,8 @@ class GeneratorUnitTestsInterface(object):
                 generated_functions.append('test_' + func.name)
                 self.tests_interface_methods_count += 1
 
-        impl = self.model.get_class(test.name[1:])
-        if impl:
+        if self.model.has_class(test.name[1:]):
+            impl = self.model.get_class(test.name[1:])
             for func in impl.functions:
                 if func.name.startswith('test_') and func.name not in generated_functions:
                     self.add_method(test, func.name)
@@ -105,7 +105,7 @@ class GeneratorUnitTestsInterface(object):
         test_all.superclasses.append('TestCase')
 
         for test in self.tests:
-            if self.model.get_class(test.name[1:]):
+            if self.model.has_class(test.name[1:]):
                 var_name = self.get_member_name(test.name[1:])
                 member = Object()
                 member.type = test.name[1:]

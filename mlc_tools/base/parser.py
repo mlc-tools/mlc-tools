@@ -78,11 +78,11 @@ class Parser(object):
         parser = Parser(self.model.empty_copy())
         parser.model.side = self.model.side
         cls.parse_body(parser, body)
-        if self.model.get_class(cls.name):
+        if self.model.has_class(cls.name):
             Error.exit(Error.DUBLICATE_CLASS, cls.name)
         for inner_cls in cls.inner_classes:
-            self.model.classes.append(inner_cls)
-        self.model.classes.append(cls)
+            self.model.add_class(inner_cls)
+        self.model.add_class(cls)
         return text
 
     def _create_enum_class(self, text):
@@ -100,7 +100,7 @@ class Parser(object):
         parser = Parser(self.model.empty_copy())
         parser.model.side = self.model.side
         cls.parse_body(parser, body)
-        self.model.classes.append(cls)
+        self.model.add_class(cls)
         return text
 
     def _create_member(self, text):
