@@ -111,7 +111,7 @@ class Parser(object):
         else:
             text = ""
 
-        skip, header = self.check_skip(text)
+        skip, line = self.check_skip(line)
         if skip:
             return text
 

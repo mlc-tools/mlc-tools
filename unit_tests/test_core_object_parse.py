@@ -127,7 +127,7 @@ class TestParseComplexTypes(unittest.TestCase):
 
 
 class TestParserOther(unittest.TestCase):
-    
+
     def test_1(self):
         parser = Parser(Model())
         
@@ -151,7 +151,29 @@ class TestParserOther(unittest.TestCase):
         self.assertTrue(parser.check_skip('function bool test(Logger* logger):static:cpp')[0])
         self.assertFalse(parser.check_skip('function bool test(Logger* logger):static:php')[0])
         self.assertTrue(parser.check_skip('function bool test(Logger* logger):static:py')[0])
+
+    def test_2(self):
+        parser = Parser(Model())
     
+        parser.model.language = 'cpp'
+        self.assertFalse(parser.check_skip('int:cpp test')[0])
+        self.assertEqual(parser.check_skip('int:client:cpp test')[1], 'int:client test')
+        
+    def test_3(self):
+        parser = Parser(Model())
+    
+        parser.model.language = 'cpp'
+        parser.parse_text('list<int>:static:cpp name')
+        obj = parser.model.objects[0]
+        self.assertEqual(obj.type, 'list')
+        self.assertEqual(obj.name, 'name')
+    
+        parser.model.language = 'py'
+        parser.parse_text('list<int>:static:cpp name')
+        obj = parser.model.objects[0]
+        self.assertEqual(obj.type, 'list')
+        self.assertEqual(obj.name, 'name')
+        
 
 if __name__ == '__main__':
     unittest.main()
