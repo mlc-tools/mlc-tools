@@ -16,7 +16,7 @@ class SerializerBase(object):
 
     def generate_methods(self, model):
         self.model = model
-        
+
         formats = SerializeFormat.get_all()
         for serialize_format, string_format in formats:
             if model.serialize_formats & serialize_format:

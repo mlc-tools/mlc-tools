@@ -45,14 +45,14 @@ class Mlc(object):
         if 'add_data' in kwargs:
             directory = fileutils.normalize_path(kwargs.get('add_data'))
             self.model.additional_data_directories.append(directory)
-        
+
         if 'formats' in kwargs:
             formats = kwargs['formats'].split(',')
             self.model.serialize_formats = 0
             for serialize_format, string_format in SerializeFormat.get_all():
                 if string_format in formats:
                     self.model.serialize_formats = self.model.serialize_formats | serialize_format
-                    
+
     def add_config_directories(self, directory):
         self.model.additional_config_directories.append(fileutils.normalize_path(directory))
 

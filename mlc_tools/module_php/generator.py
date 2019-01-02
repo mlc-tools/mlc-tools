@@ -3,6 +3,7 @@ from ..base.generator_visitor import GeneratorVisitor
 from .generator_data_storage import GeneratorDataStorage
 from .generator_factory import GeneratorFactory
 from .generator_observer import GeneratorObserver
+from .generator_config import GeneratorConfig
 
 
 class Generator(GeneratorBase):
@@ -16,3 +17,4 @@ class Generator(GeneratorBase):
         GeneratorVisitor().generate(model, False)
         GeneratorFactory().generate(model)
         GeneratorObserver().generate(model)
+        GeneratorConfig().generate(model)

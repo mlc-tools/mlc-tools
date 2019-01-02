@@ -1,5 +1,7 @@
 from .cpp_extension import FILES_DICT
 from ..base.writer_base import WriterBase
+from ..base.model import SerializeFormat
+
 
 class GeneratorPredefinedFiles(object):
 
@@ -30,8 +32,10 @@ class GeneratorPredefinedFiles(object):
     def generate_config_files(self, model):
         pattern = '#ifndef __{0}_Config_h__\n#define __{0}_Config_h__\n\n{1}\n\n#endif //#ifndef __{0}_Config_h__'
         configs = list()
-        configs.append('#define {}_JSON 1'.format(self.get_namespace().upper()))
-        configs.append('#define {}_XML 2'.format(self.get_namespace().upper()))
-        configs.append('\n#define {0}_SERIALIZE_FORMAT {0}_{1}'.format(self.get_namespace().upper(), 'XML'))
-        filename_config = '{}_config.h'.format(self.get_namespace())
+
+        for serialize_format, format_string in SerializeFormat.get_all():
+            support = 'true' if model.serialize_formats & serialize_format != 0 else 'false'
+            configs.append('#define SUPPORT_{}_PROTOCOL {}'.format(format_string.upper(), support))
+
+        filename_config = 'config.h'.format(self.get_namespace())
         model.add_file(filename_config, pattern.format(self.get_namespace(), '\n'.join(configs)))

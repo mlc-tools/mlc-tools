@@ -1,20 +1,20 @@
 import os
+from copy import deepcopy
 from ..utils import fileutils
 from ..utils.error import Log
-from copy import deepcopy
 
 
 class SerializeFormat(object):
     xml = 1
     json = 2
-    
+
     @staticmethod
     def get_all():
         return (
             (SerializeFormat.xml, 'xml'),
             (SerializeFormat.json, 'json'),
         )
-    
+
 
 class Model(object):
 
@@ -55,7 +55,7 @@ class Model(object):
         self.files = []
         self.created_files = []
         self.serialize_formats = SerializeFormat.xml | SerializeFormat.json
-        
+
     def empty_copy(self):
         model = deepcopy(self)
         model.classes = []
@@ -64,7 +64,6 @@ class Model(object):
         model.functions = []
         model.classes_dict = {}
         return model
-        
 
     def clear_data(self):
         self.parser = None

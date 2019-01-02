@@ -48,7 +48,7 @@ class Parser(object):
                 lines[i] = line[0:line.find('//')]
         text = '\n'.join(lines)
         return text
-    
+
     def check_skip(self, line):
         corresponds = True
         first_match = True

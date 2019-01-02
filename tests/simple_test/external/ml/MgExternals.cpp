@@ -12,11 +12,11 @@
 #include "core/CommandBase.h"
 #include "mg_Factory.h"
 #include <sstream>
-#include "mg_config.h"
+#include "config.h"
 
 
 
-#if SERIALIZE_FORMAT == XML
+#if SUPPORT_XML_PROTOCOL
 
 mg::intrusive_ptr<mg::CommandBase> createCommand(const pugi::xml_node& xml)
 {
@@ -35,7 +35,7 @@ mg::intrusive_ptr<mg::CommandBase> createCommand(const std::string& payload)
 	return createCommand(root);
 }
 
-#elif SERIALIZE_FORMAT == JSON
+#elif SUPPORT_JSON_PROTOCOL
 
 mg::intrusive_ptr<mg::CommandBase> createCommand(const Json::Value& json)
 {

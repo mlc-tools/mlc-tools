@@ -7,7 +7,7 @@ FUNCTIONS_HPP = '''
 #include <cmath>
 #include <string>
 #include <algorithm>
-#include "@{namespace}_config.h"
+#include "config.h"
 
 #include "pugixml/pugixml.hpp"
 #include "jsoncpp/json.h"
