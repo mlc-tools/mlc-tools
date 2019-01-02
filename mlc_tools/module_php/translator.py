@@ -17,9 +17,8 @@ class Translator(TranslatorBase):
             if method.operations:
                 method.body = '\n        '.join(method.operations)
 
-    @staticmethod
-    def translate_function_body(class_, func, model, args):
-        func = Translator.replace_by_regex(func, model, args)
+    def translate_function_body(self, class_, func, model, args):
+        func = self.replace_by_regex(func, model, args)
         func = Translator.add_imports(class_, func, model)
         return func
 
@@ -45,8 +44,7 @@ class Translator(TranslatorBase):
         #     func = 'import random\n' + func
         return func
 
-    @staticmethod
-    def replace_by_regex(func, model, function_args):
+    def replace_by_regex(self, func, model, function_args):
         function_args = ', '.join(['$' + x[0] for x in function_args])
 
         if not func and not function_args:
@@ -68,7 +66,7 @@ class Translator(TranslatorBase):
                 right += 1
 
         for reg in RegexPatternPhp.FUNCTION:
-            func = reg[0].sub(reg[1], func)
+            func = self.replace(func, reg)
 
         for key in RegexPatternPhp.VARIABLES:
             patterns_dict = RegexPatternPhp.VARIABLES[key]
@@ -102,7 +100,7 @@ class Translator(TranslatorBase):
                     func = func.replace(char + '$' + var, char + var)
 
         for reg in RegexPatternPhp.FUNCTION_2:
-            func = reg[0].sub(reg[1], func)
+            func = self.replace(func, reg)
 
         for reg in RegexPatternPhp.REPLACES:
             func = func.replace(reg[0], reg[1])

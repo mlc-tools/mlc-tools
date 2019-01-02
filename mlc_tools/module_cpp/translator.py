@@ -20,11 +20,10 @@ class Translator(TranslatorBase):
             else:
                 method.body = ''
 
-    @staticmethod
-    def translate_function_body(func):
+    def translate_function_body(self, func):
         if not func:
             func = ''
-        func = Translator.replace_by_regex(func)
+        func = self.replace_by_regex(func)
         # func = Translator.convert_braces_to_tabs(func)
         # func = Translator.remove_double_eol(func)
         # func = Translator.add_imports(cls, func, model)
@@ -174,12 +173,11 @@ class Translator(TranslatorBase):
 
         return values
 
-    @staticmethod
-    def replace_by_regex(body):
+    def replace_by_regex(self, body):
         for reg in RegexPatternCpp.FUNCTION:
-            body = reg[0].sub(reg[1], body)
+            body = self.replace(body, reg)
         for reg in RegexPatternCpp.REPLACES:
             body = body.replace(reg[0], reg[1])
         for reg in RegexPatternCpp.convert_c17_to_c14:
-            body = reg[0].sub(reg[1], body)
+            body = self.replace(body, reg)
         return body

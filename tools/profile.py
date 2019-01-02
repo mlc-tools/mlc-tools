@@ -102,6 +102,7 @@ def get_profile_(func):
     return s
 
 
-# print(get_profile_(test_game_m))
-print(get_profile_(test_game_m_py))
-# print(get_profile_(test_game_m_php))
+for i in range(3):
+    # print(get_profile_(test_game_m))
+    # print(get_profile_(test_game_m_py))
+    print(get_profile_(test_game_m_php))

@@ -47,3 +47,12 @@ class TranslatorBase(object):
         value.access = AccessSpecifier.private
         cls.members.append(value)
         return values
+    
+    def replace(self, text, pattern):
+        skip = len(pattern) > 2
+        filters = pattern[2] if len(pattern) > 2 else []
+        for filter in filters:
+            skip = skip and text.find(filter) == -1
+        if not skip:
+            text = pattern[0].sub(pattern[1], text)
+        return text

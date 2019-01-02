@@ -19,11 +19,10 @@ class Translator(TranslatorBase):
             else:
                 method.body = 'pass'
 
-    @staticmethod
-    def translate_function_body(class_, func, model):
+    def translate_function_body(self, class_, func, model):
         if not func:
             func = 'pass'
-        func = Translator.replace_by_regex(func)
+        func = self.replace_by_regex(func)
         func = Translator.convert_braces_to_tabs(func)
         func = Translator.remove_double_eol(func)
         func = Translator.add_imports(class_, func, model)
@@ -92,15 +91,13 @@ class Translator(TranslatorBase):
         func = '\n'.join(lines)
         return func
 
-    @staticmethod
-    def replace_by_regex(func):
+    def replace_by_regex(self, func):
         if not func:
             return func
         for reg in RegexPatternPython.FUNCTION:
-            func = reg[0].sub(reg[1], func)
+            func = self.replace(func, reg)
         for reg in RegexPatternPython.REPLACES:
             func = func.replace(reg[0], reg[1])
-
         return func
 
     @staticmethod
