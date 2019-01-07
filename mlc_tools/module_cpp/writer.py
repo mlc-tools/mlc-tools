@@ -110,7 +110,13 @@ class Writer(WriterBase):
 
         registration = 'REGISTRATION_OBJECT({0});\n'.format(cls.name)
         has_get_type = False
-        if cls.is_abstract:
+        is_abstract = cls.is_abstract
+        if not is_abstract:
+            for method in cls.functions:
+                if method.is_abstract:
+                    is_abstract = True
+                    break
+        if is_abstract:
             registration = ''
         for method in cls.functions:
             if method.name == 'get_type':
@@ -143,7 +149,8 @@ class Writer(WriterBase):
         assert (isinstance(method.return_type, Object))
         return_type = self.write_named_object(method.return_type, '', False, True)
 
-        return string.format(virtual='virtual ' if method.is_virtual else '',
+        virtual = 'virtual ' if method.is_virtual or method.is_abstract or self.current_cls.is_virtual else ''
+        return string.format(virtual=virtual,
                              static='static ' if method.is_static else '',
                              const=' const' if method.is_const else '',
                              override='',
