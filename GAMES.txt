@@ -1,3 +1,3 @@
 War Alert: Red Lords. Online RTS
     Android: https://play.google.com/store/apps/details?id=com.gdcompany.heroesarenasonline
-    iOS: -   https://itunes.apple.com/app/war-alert-red-lords/id1384472282
+    iOS: -

@@ -79,7 +79,7 @@ script:
 
 deploy:
   provider: script
-  script: cd tools/deploy && python upload.py $TRAVIS_BUILD_NUMBER $TRAVIS_JOB_NUMBER
+  script: python upload.py $TRAVIS_BUILD_NUMBER $TRAVIS_JOB_NUMBER
   skip_existing: true
   on:
     branch: master
