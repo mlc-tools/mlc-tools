@@ -92,13 +92,13 @@ class Mlc(object):
         parser.parse_files(all_files)
         self.model.parser = parser
 
-        # cpp
-        # php
         language = Language(self.model.language, self.model)
         language.get_generator().generate(self.model)
 
         Linker().link(self.model)
         Validator().validate(self.model)
+
+        self.run_user_generator()
 
         language.get_translator().translate(self.model)
         language.get_serializer().generate_methods(self.model)
@@ -133,7 +133,10 @@ class Mlc(object):
                 exit(1)
         if not os.path.isfile(self.model.test_script):
             Log.warning('Test script (%s) not founded' % self.model.test_script)
+            
+    def set_user_generator(self, generator):
+        self.model.custom_generator = generator
 
-    def run_user_generator(self, state):
+    def run_user_generator(self):
         if self.model.custom_generator:
-            self.model.custom_generator.execute(state)
+            self.model.custom_generator.execute(self.model)
