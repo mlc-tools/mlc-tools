@@ -26,6 +26,8 @@ def run_tests(generator, root, withdata=False, cpp=True, python=True, php=True):
                                     out_data_directory=root + 'assets')
         generator.run_test(test_script=root + 'test_%s.py' % lang,
                            test_script_args=serialized_format)
+        if lang == 'py':
+            sleep(0.5)
         print('-----------------------------------------')
         print('|  test with params [{}, {}] finished'.format(lang, serialized_format))
         print('-----------------------------------------')
