@@ -163,6 +163,16 @@ class TestCppWriterBuildIncludesWithGroups(unittest.TestCase):
         cls1.group = 'a'
         cls2.group = 'b'
         self.assertEqual(Writer.get_include_path_to_class(cls1, cls2), '"../b/cls2.h"')
+        
+    def test_get_path_to_root(self):
+        from mlc_tools.module_cpp.writer import Writer
+        cls = Class()
+        cls.name = 'cls'
+
+        cls.group = 'b'
+        self.assertEqual(Writer.get_path_to_root(cls), '../')
+        cls.group = ''
+        self.assertEqual(Writer.get_path_to_root(cls), '')
 
 
 def get_cpp():

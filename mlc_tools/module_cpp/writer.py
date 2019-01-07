@@ -127,6 +127,7 @@ class Writer(WriterBase):
         includes = self.get_includes_for_source(cls, functions, includes, forw_declarations, forw_declarations_out)
 
         return SOURCE.format(namespace=namespace,
+                             path_to_root=Writer.get_path_to_root(cls),
                              class_name=class_name,
                              destructor=destructor,
                              includes=includes,
@@ -412,6 +413,12 @@ class Writer(WriterBase):
             include += to_cls.group + '/'
         include += to_cls.name + '.h"'
         return include
+    
+    @staticmethod
+    def get_path_to_root(cls):
+        if cls.group:
+            return '../'
+        return ''
 
     @staticmethod
     def build_forward_declarations(declarations):
@@ -468,9 +475,9 @@ namespace {namespace}
 
 SOURCE = '''
 #include "intrusive_ptr.h"
-#include "{namespace}_Factory.h"
+#include "{path_to_root}{namespace}_Factory.h"
 {includes}
-#include "{namespace}_extensions.h"
+#include "{path_to_root}{namespace}_extensions.h"
 
 namespace {namespace}
 {{
