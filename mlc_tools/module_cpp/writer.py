@@ -397,16 +397,21 @@ class Writer(WriterBase):
 
             if self.model.has_class(typename):
                 other_class = self.model.get_class(typename)
-                include = '#include "'
-                if cls.group and other_class.group != cls.group:
-                    include += '../'
-                if other_class.group:
-                    include += other_class.group + '/'
-                include += other_class.name + '.h"'
+                include = '#include '
+                include += self.get_include_path_to_class(cls, other_class)
                 result.append(include)
-
         result = sorted(result)
         return '\n'.join(result)
+    
+    @staticmethod
+    def get_include_path_to_class(cls, to_cls):
+        include = '"'
+        if cls.group and to_cls.group != cls.group:
+            include += '../'
+        if to_cls.group and to_cls.group != cls.group:
+            include += to_cls.group + '/'
+        include += to_cls.name + '.h"'
+        return include
 
     @staticmethod
     def build_forward_declarations(declarations):

@@ -137,6 +137,32 @@ return result;
         model = create_test_model()
         result = save_function('php', model)
         self.assertEqual(result, 'function foo($a0, $a1)\n{\n    $result = $this->int_value;\n$result += $a0;\nreturn $result;\n\n}\n')
+        
+        
+class TestCppWriterBuildIncludesWithGroups(unittest.TestCase):
+    
+    def test_build_include(self):
+        from mlc_tools.module_cpp.writer import Writer
+        cls1 = Class()
+        cls1.name = 'cls1'
+        cls2 = Class()
+        cls2.name = 'cls2'
+
+        cls1.group = ''
+        cls2.group = ''
+        self.assertEqual(Writer.get_include_path_to_class(cls1, cls2), '"cls2.h"')
+        cls1.group = 'a'
+        cls2.group = ''
+        self.assertEqual(Writer.get_include_path_to_class(cls1, cls2), '"../cls2.h"')
+        cls1.group = ''
+        cls2.group = 'a'
+        self.assertEqual(Writer.get_include_path_to_class(cls1, cls2), '"a/cls2.h"')
+        cls1.group = 'a'
+        cls2.group = 'a'
+        self.assertEqual(Writer.get_include_path_to_class(cls1, cls2), '"cls2.h"')
+        cls1.group = 'a'
+        cls2.group = 'b'
+        self.assertEqual(Writer.get_include_path_to_class(cls1, cls2), '"../b/cls2.h"')
 
 
 def get_cpp():
