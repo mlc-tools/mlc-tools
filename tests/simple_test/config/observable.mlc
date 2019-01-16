@@ -1,0 +1,81 @@
+class observable/ObservableClass<SerializedObject>
+{
+	Observable<void()> eventTest
+}
+
+class observable/ListenerClass<SerializedObject>
+{
+	TestObservableClass* test
+
+	function void listen()
+	{
+	    this->test->value += 1;
+	}
+}
+
+class observable/TestObservableClass<ITestObservableClass>
+{
+	int value = 0
+    ObservableClass test
+
+	function bool test_1()
+	{
+	    this->value = 0;
+	    bool result = true;
+		this->test.eventTest.add(this, &TestObservableClass::listen);
+		this->test.eventTest.notify();
+		result = result && this->value == 1;
+
+		this->test.eventTest.remove(this);
+		this->test.eventTest.notify();
+		result = result && this->value == 1;
+		return result;
+	}
+
+	function bool test_notify_with_unsubscribe()
+	{
+	    this->value = 0;
+	    bool result = true;
+		this->test.eventTest.add(this, &TestObservableClass::listen_with_remove);
+		this->test.eventTest.notify();
+		result = result && this->value == 1;
+
+		this->test.eventTest.notify();
+		result = result && this->value == 1;
+		return result;
+	}
+
+	function bool test_listen_with_destroy_listener()
+	{
+	    this->value = 0;
+	    bool result = true;
+
+		auto listener = new ListenerClass();
+		listener->test = this;
+		this->test.eventTest.add(listener, &ListenerClass::listen);
+		this->test.eventTest.notify();
+		result = result && this->value == 1;
+
+		/*
+		TODO:
+		listener = new ListenerClass();
+		listener->test = this;
+		this->test.eventTest.add(listener, &ListenerClass::listen);
+		this->test.eventTest.notify();
+		result = result && this->value == 2;
+		*/
+
+		return result;
+	}
+
+	function void listen()
+	{
+		this->value += 1;
+	}
+
+	function void listen_with_remove()
+	{
+	    this->value += 1;
+		this->test.eventTest.remove(this);
+	}
+}

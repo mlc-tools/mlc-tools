@@ -133,7 +133,7 @@ class Mlc(object):
                 exit(1)
         if not os.path.isfile(self.model.test_script):
             Log.warning('Test script (%s) not founded' % self.model.test_script)
-            
+
     def set_user_generator(self, generator):
         self.model.custom_generator = generator
 

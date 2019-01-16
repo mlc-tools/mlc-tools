@@ -8,6 +8,8 @@ PREDEFINED = '''
 #include <functional>
 #include <map>
 #include <set>
+#include <thread>
+#include <unordered_map>
 
 namespace @{namespace}
 {
@@ -28,10 +30,11 @@ namespace @{namespace}
         add(T object, M method, P&&... placeholders)
         {
             auto tag = get_tag(object);
+            auto ptr = get_raw_pointer(object);
             if(is_locked())
-                _listeners_to_add[tag] = std::bind(method, object, std::forward<P>(placeholders)...);
+                _listeners_to_add[tag] = std::bind(method, ptr, std::forward<P>(placeholders)...);
             else
-                _listeners[tag] = std::bind(method, object, std::forward<P>(placeholders)...);
+                _listeners[tag] = std::bind(method, ptr, std::forward<P>(placeholders)...);
         }
 
         template<class T, class F>
@@ -67,6 +70,10 @@ namespace @{namespace}
         }
 
     private:
+        template<class T> long get_tag(intrusive_ptr<T> t)
+        {
+            return reinterpret_cast<long>(t.ptr());
+        }
         template<class T> typename std::enable_if<std::is_pointer<T>::value, long>::type get_tag(T t)
         {
             return reinterpret_cast<long>(t);
@@ -74,6 +81,15 @@ namespace @{namespace}
         template<class T> typename std::enable_if<std::is_integral<T>::value, long>::type get_tag(T t)
         {
             return static_cast<long>(t);
+        }
+        
+        template<class T> T* get_raw_pointer(intrusive_ptr<T> t)
+        {
+            return t.ptr();
+        }
+        template<class T> typename std::enable_if<std::is_pointer<T>::value, T>::type get_raw_pointer(T t)
+        {
+            return t;
         }
 
         void remove(long tag)
@@ -153,3 +169,5 @@ class GeneratorObserver(object):
         text = text.replace('@{namespace}', 'mg')
         text = text.replace('@{name}', GeneratorObserver.get_observable_name())
         model.add_file(filename, text)
+
+        model.add_class(GeneratorObserver.get_mock())

@@ -49,7 +49,7 @@ def parse_object(obj, string):
             templates = string[left+1:right]
             string = string[:left] + string[right+1:]
 
-    type_s = re.search(r'\w+[&\*]*', string).group(0)
+    type_s = re.search(r'\w+[&\*\(\)]*', string).group(0)
     string = string[len(type_s):]
     while True:
         match = re.search(r':\w+', string)

@@ -76,11 +76,11 @@ class Model(object):
         self.files = []
         self.created_files = []
         self.serialize_formats = SerializeFormat.xml | SerializeFormat.json
-        
+
     def add_class(self, cls):
         self.classes_dict[cls.name] = cls
         self.classes.append(cls)
-        
+
     def add_classes(self, classes):
         self.classes.extend(classes)
         for cls in classes:
@@ -88,10 +88,10 @@ class Model(object):
 
     def get_class(self, name):
         return self.classes_dict[name]
-        
+
     def has_class(self, name):
         return name in self.classes_dict
-    
+
     def is_side(self, side):
         return self.side == 'both' or side == self.side or side == 'both'
 

@@ -4,6 +4,7 @@ import re
 class RegexPatternPhp(object):
 
     FUNCTION = (
+        (re.compile(r'(\w+[\.>-]+\w+)\.add\((\w+),\s*&(\w+)::(\w+)'), r'\1.add(\2, "\4"', ['.add(']),
         (re.compile(r'catch\((\w+)\s*(\w*)\)'), r'catch__\1__\2', ['catch']),
         (re.compile(r'DataStorage::shared\(\).get<(\w+)>'), r'DataStorage::shared()->get\1', ['DataStorage::shared']),
         (re.compile(r'Factory::(.+)<\w+>'), r'Factory::\1', ['Factory:']),

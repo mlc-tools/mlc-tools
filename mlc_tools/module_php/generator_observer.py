@@ -6,20 +6,22 @@ class Observable{
     private $listeners = array();
     private $objects = array();
 
-    public function add($object, $callback){
+    public function add($object, $callback) {
         array_push($this->listeners, $callback);
         array_push($this->objects, $object);
     }
-    public function remove($object){
+    public function remove($object) {
         $index = array_search($object, $this->objects);
-        if($index !== false){
-            unset($this->listeners[$index]);
-            unset($this->objects[$index]);
+        if($index !== false) {
+            array_splice($this->listeners, $index, 1);
+            array_splice($this->objects, $index, 1);
         }
     }
     public function notify(...$arg){
-        foreach($this->listeners as $listener){
-            $listener(...$arg);
+        for ($i = 0; $i < count($this->listeners); ++$i) {
+            $func = $this->listeners[$i];
+            $obj = $this->objects[$i];
+            $obj->$func(...$arg);
         }
     }
 };
@@ -51,3 +53,5 @@ class GeneratorObserver(object):
         text = text.replace('@{namespace}', 'mg')
         text = text.replace('@{name}', GeneratorObserver.get_observable_name())
         model.add_file(filename, text)
+
+        model.add_class(GeneratorObserver.get_mock())

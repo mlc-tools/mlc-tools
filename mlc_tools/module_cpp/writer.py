@@ -392,6 +392,7 @@ class Writer(WriterBase):
         result = []
         for typename in includes:
             assert(isinstance(typename, str))
+            typename = typename.replace('()', '')
             if typename in types:
                 result.append('#include %s' % types[typename])
                 continue
@@ -403,7 +404,7 @@ class Writer(WriterBase):
                 result.append(include)
         result = sorted(result)
         return '\n'.join(result)
-    
+
     @staticmethod
     def get_include_path_to_class(cls, to_cls):
         include = '"'
@@ -413,7 +414,7 @@ class Writer(WriterBase):
             include += to_cls.group + '/'
         include += to_cls.name + '.h"'
         return include
-    
+
     @staticmethod
     def get_path_to_root(cls):
         if cls.group:
@@ -431,6 +432,7 @@ class Writer(WriterBase):
             'int',
             'bool',
             'float',
+            'void',
         ]
         predefined = {
             'Json::Value': 'namespace Json\n{\nclass Value;\n}\n',
@@ -438,6 +440,7 @@ class Writer(WriterBase):
         }
         result = []
         for declaration in declarations:
+            declaration = declaration.replace('()', '')
             if declaration in ignore:
                 continue
             if declaration in predefined:
