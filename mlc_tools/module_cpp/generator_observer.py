@@ -64,7 +64,7 @@ namespace @{namespace}
         }
 
         template<class T>
-        void remove(T* object)
+        void remove(T object)
         {
             remove(get_tag(object));
         }

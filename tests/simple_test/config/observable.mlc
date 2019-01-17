@@ -1,6 +1,7 @@
 class observable/ObservableClass<SerializedObject>
 {
 	Observable<void()> eventTest
+	Observable<void(int)> eventTestInt
 }
 
 class observable/ListenerClass<SerializedObject>
@@ -10,6 +11,11 @@ class observable/ListenerClass<SerializedObject>
 	function void listen()
 	{
 	    this->test->value += 1;
+	}
+
+	function void listen_int(int value)
+	{
+	    this->test->value = value;
 	}
 }
 
@@ -45,7 +51,7 @@ class observable/TestObservableClass<ITestObservableClass>
 		return result;
 	}
 
-	function bool test_listen_with_destroy_listener()
+	function bool test_listen_with_two()
 	{
 	    this->value = 0;
 	    bool result = true;
@@ -56,18 +62,30 @@ class observable/TestObservableClass<ITestObservableClass>
 		this->test.eventTest.notify();
 		result = result && this->value == 1;
 
-		/*
-		TODO:
-		listener = new ListenerClass();
-		listener->test = this;
-		this->test.eventTest.add(listener, &ListenerClass::listen);
+		auto listener2 = new ListenerClass();
+		listener2->test = this;
+		this->test.eventTest.add(listener2, &ListenerClass::listen);
 		this->test.eventTest.notify();
-		result = result && this->value == 2;
-		*/
+		result = result && this->value == 3;
+
+        this->test.eventTest.remove(listener);
+        this->test.eventTest.remove(listener2);
+        this->test.eventTest.notify();
+        result = result && this->value == 3;
+
 
 		return result;
 	}
-
+/*
+	function bool test_with_arg_int()
+	{
+		auto listener = new ListenerClass();
+		listener->test = this;
+		this->test.eventTest.add(listener, &ListenerClass::listen_int);
+		this->test.eventTest.notify();
+		result = result && this->value == 1;
+	}
+*/
 	function void listen()
 	{
 		this->value += 1;
