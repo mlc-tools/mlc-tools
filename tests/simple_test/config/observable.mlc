@@ -2,6 +2,10 @@ class observable/ObservableClass<SerializedObject>
 {
 	Observable<void()> eventTest
 	Observable<void(int)> eventTestInt
+	Observable<void(int, int)> eventTestInt2
+
+	//TODO: use string without std::string
+	Observable<void(int, std::string)> eventTestString
 }
 
 class observable/ListenerClass<SerializedObject>
@@ -16,6 +20,11 @@ class observable/ListenerClass<SerializedObject>
 	function void listen_int(int value)
 	{
 	    this->test->value = value;
+	}
+
+	function void listen_int_2(int a, int b)
+	{
+	    this->test->value = a + b;
 	}
 }
 
@@ -76,16 +85,33 @@ class observable/TestObservableClass<ITestObservableClass>
 
 		return result;
 	}
-/*
+
 	function bool test_with_arg_int()
 	{
+	    bool result = true;
 		auto listener = new ListenerClass();
 		listener->test = this;
-		this->test.eventTest.add(listener, &ListenerClass::listen_int);
-		this->test.eventTest.notify();
+		this->test.eventTestInt.add(listener, &ListenerClass::listen_int, std::placeholders::_1);
+		this->test.eventTestInt.notify(1);
 		result = result && this->value == 1;
+		this->test.eventTestInt.notify(10);
+		result = result && this->value == 10;
+		return result;
 	}
-*/
+
+	function bool test_with_arg_int_two()
+	{
+	    bool result = true;
+		auto listener = new ListenerClass();
+		listener->test = this;
+		this->test.eventTestInt2.add(listener, &ListenerClass::listen_int_2, std::placeholders::_1, std::placeholders::_2);
+		this->test.eventTestInt2.notify(1, 1);
+		result = result && this->value == 2;
+		this->test.eventTestInt2.notify(10, 10);
+		result = result && this->value == 20;
+		return result;
+	}
+
 	function void listen()
 	{
 		this->value += 1;

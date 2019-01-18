@@ -392,7 +392,6 @@ class Writer(WriterBase):
         result = []
         for typename in includes:
             assert(isinstance(typename, str))
-            typename = typename.replace('()', '')
             if typename in types:
                 result.append('#include %s' % types[typename])
                 continue
@@ -421,8 +420,7 @@ class Writer(WriterBase):
             return '../'
         return ''
 
-    @staticmethod
-    def build_forward_declarations(declarations):
+    def build_forward_declarations(self, declarations):
         ignore = [
             'std::list',
             'std::vector',
@@ -440,12 +438,11 @@ class Writer(WriterBase):
         }
         result = []
         for declaration in declarations:
-            declaration = declaration.replace('()', '')
             if declaration in ignore:
                 continue
             if declaration in predefined:
                 result.append(predefined[declaration])
-            else:
+            elif self.model.has_class(declaration):
                 result.append('class %s;' % declaration)
         result = sorted(result)
         return '\n'.join(result)

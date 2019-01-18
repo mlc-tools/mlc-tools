@@ -33,7 +33,7 @@ class TestParseObject(unittest.TestCase):
         self.assertEqual(obj.template_args[1].template_args[0].type, 'Foo')
         self.assertEqual(obj.template_args[1].template_args[0].name, '')
 
-    def test_observable_parce(self):
+    def test_observable_parse(self):
         parser = Parser(Model())
         text = 'void()'
         parser.parse_text(text)
@@ -48,6 +48,23 @@ class TestParseObject(unittest.TestCase):
         self.assertEqual(obj.name, 'eventTest')
         self.assertEqual(len(obj.template_args), 1)
         self.assertEqual(obj.template_args[0].type, 'void()')
+
+        parser.model.objects = []
+        text = 'Observable<void(int, int)> eventTest'
+        parser.parse_text(text)
+        obj = parser.model.objects[0]
+        self.assertEqual(obj.type, 'Observable')
+        self.assertEqual(obj.name, 'eventTest')
+        self.assertEqual(len(obj.template_args), 1)
+        self.assertEqual(obj.template_args[0].type, 'void(int, int)')
+        
+    def test_observalble_parse_with_arg(self):
+        parser = Parser(Model())
+        text = 'void(int)'
+        parser.parse_text(text)
+        obj = parser.model.objects[0]
+        self.assertEqual(obj.type, 'void(int)')
+        
 
 
 
