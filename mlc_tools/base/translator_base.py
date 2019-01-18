@@ -8,6 +8,9 @@ class TranslatorBase(object):
 
     def translate(self, model):
         for cls in model.classes:
+            for member in cls.members:
+                if member.type == 'Observable':
+                    member.is_runtime = True
             if cls.type == 'enum':
                 self.convert_to_enum(cls)
             for method in cls.functions:
@@ -47,7 +50,7 @@ class TranslatorBase(object):
         value.access = AccessSpecifier.private
         cls.members.append(value)
         return values
-    
+
     def replace(self, text, pattern):
         skip = len(pattern) > 2
         filters = pattern[2] if len(pattern) > 2 else []

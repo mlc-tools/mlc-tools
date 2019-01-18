@@ -26,12 +26,12 @@ class @{name}:
             self._add = {}
             self._remove = []
 
-    def _call(self, object, func, *args):
-        def isclass(obj):
-            return str(type(obj)) == "<type 'instance'>"
+    def _call(self, obj, func, *args):
+        def isclass(obj_):
+            return isinstance(obj_, object)
 
-        if isclass(object):
-            func(object, *args)
+        if isclass(obj):
+            func(obj, *args)
         else:
             func(*args)
 
@@ -83,3 +83,5 @@ class GeneratorObserver(object):
         text = text.replace('@{namespace}', 'mg')
         text = text.replace('@{name}', GeneratorObserver.get_observable_name())
         model.add_file(filename, text)
+
+        model.add_class(GeneratorObserver.get_mock())

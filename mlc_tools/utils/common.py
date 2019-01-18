@@ -16,9 +16,9 @@ def smart_split(string, divider):
         if char == divider and depth == 0:
             parts.append(string[start:curr])
             start = curr + 1
-        elif char == '<':
+        elif char in '<(':
             depth += 1
-        elif char == '>':
+        elif char in '>)':
             depth -= 1
     parts.append(string[start:])
     return parts
@@ -49,6 +49,10 @@ def parse_object(obj, string):
             templates = string[left+1:right]
             string = string[:left] + string[right+1:]
 
+    args = re.search(r'\(.*\)', string)
+    args = args.group(0) if args else None
+    if args:
+        string = string.replace(args, '')
     type_s = re.search(r'\w+[&\*]*', string).group(0)
     string = string[len(type_s):]
     while True:
@@ -61,7 +65,7 @@ def parse_object(obj, string):
 
     name_s = string.strip()
 
-    obj.type = type_s
+    obj.type = type_s + (args if args else '')
     obj.name = name_s
 
     obj.template_args = smart_split(templates, ',')

@@ -56,7 +56,7 @@ class GeneratorVisitor(object):
                     # Correct situation. The class can be inherited from the IVisitor interface
                     continue
                 Error.exit(Error.UNKNOWN_SUPERCLASS, cls.name, superclass_name)
-            
+
             superclass = self.model.get_class(superclass_name)
             if superclass.is_visitor:
                 return superclass_name

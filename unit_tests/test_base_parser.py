@@ -12,7 +12,7 @@ from mlc_tools.base.model import Model
 
 
 class TestParseObject(unittest.TestCase):
-    
+
     def test_1(self):
         parser = Parser(Model())
         text = 'map<int, list<Foo>> some_map'
@@ -32,10 +32,44 @@ class TestParseObject(unittest.TestCase):
         self.assertTrue(isinstance(obj.template_args[1].template_args[0], Object))
         self.assertEqual(obj.template_args[1].template_args[0].type, 'Foo')
         self.assertEqual(obj.template_args[1].template_args[0].name, '')
+
+    def test_observable_parse(self):
+        parser = Parser(Model())
+        text = 'void()'
+        parser.parse_text(text)
+        obj = parser.model.objects[0]
+        self.assertEqual(obj.type, 'void()')
+
+        parser.model.objects = []
+        text = 'Observable<void()> eventTest'
+        parser.parse_text(text)
+        obj = parser.model.objects[0]
+        self.assertEqual(obj.type, 'Observable')
+        self.assertEqual(obj.name, 'eventTest')
+        self.assertEqual(len(obj.template_args), 1)
+        self.assertEqual(obj.template_args[0].type, 'void()')
+
+        parser.model.objects = []
+        text = 'Observable<void(int, int)> eventTest'
+        parser.parse_text(text)
+        obj = parser.model.objects[0]
+        self.assertEqual(obj.type, 'Observable')
+        self.assertEqual(obj.name, 'eventTest')
+        self.assertEqual(len(obj.template_args), 1)
+        self.assertEqual(obj.template_args[0].type, 'void(int, int)')
+        
+    def test_observalble_parse_with_arg(self):
+        parser = Parser(Model())
+        text = 'void(int)'
+        parser.parse_text(text)
+        obj = parser.model.objects[0]
+        self.assertEqual(obj.type, 'void(int)')
         
 
+
+
 class TestParseFunction(unittest.TestCase):
-    
+
     def test_1(self):
         parser = Parser(Model())
         text = 'function map<int, list<Foo>> some_function(map<float, list<Bar>> arg0, list<int> arg1){}'
@@ -88,7 +122,7 @@ class TestParseFunction(unittest.TestCase):
         func = parser.model.functions[0]
         self.assertEqual(func.args[0][0], 'user')
         self.assertEqual(func.args[0][1].type, 'ModelUser')
-        
+
     def test_4(self):
         parser = Parser(Model())
         parser.parse_text('function DataAbility*:link get_non_random_ability():const:client')
@@ -119,13 +153,13 @@ class TestParseClass(unittest.TestCase):
         self.assertEqual(foo.name, 'Foo')
         self.assertEqual(foo.type, 'class')
         self.assertEqual(len(foo.members), 4)
-        
+
         self.assertEqual(foo.members[0].type, 'int')
         self.assertEqual(foo.members[0].name, 'int_name')
 
         self.assertEqual(foo.members[3].type, 'string')
         self.assertEqual(foo.members[3].name, 'INAPP')
-        
+
     def test_2(self):
         text = '''
         class RewardsListHelper<SerializedObject>
@@ -142,7 +176,7 @@ class TestParseClass(unittest.TestCase):
 
 
 class TestParseFunctionArgs(unittest.TestCase):
-    
+
     def test_arg_default_params(self):
         parser = Parser(Model())
         text = 'function ReturnValue& test_9(int i=0)'
@@ -152,12 +186,12 @@ class TestParseFunctionArgs(unittest.TestCase):
         self.assertEqual(func.name, 'test_9')
         self.assertEqual(len(func.args), 1)
         self.assertEqual(len(func.operations), 0)
-        
+
         arg = func.args[0][1]
         self.assertTrue(isinstance(arg, Object))
         self.assertEqual(arg.type, 'int')
         self.assertEqual(arg.initial_value, '0')
-    
+
     def test_arg_count_3(self):
         parser = Parser(Model())
         text = 'function ReturnValue& test_9(int a, int b, int c)'

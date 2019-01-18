@@ -1,0 +1,123 @@
+class observable/ObservableClass<SerializedObject>
+{
+	Observable<void()> eventTest
+	Observable<void(int)> eventTestInt
+	Observable<void(int, int)> eventTestInt2
+	Observable<void(int, string)> eventTestString
+}
+
+class observable/ListenerClass<SerializedObject>
+{
+	TestObservableClass* test
+
+	function void listen()
+	{
+	    this->test->value += 1;
+	}
+
+	function void listen_int(int value)
+	{
+	    this->test->value = value;
+	}
+
+	function void listen_int_2(int a, int b)
+	{
+	    this->test->value = a + b;
+	}
+}
+
+class observable/TestObservableClass<ITestObservableClass>
+{
+	int value = 0
+    ObservableClass test
+
+	function bool test_1()
+	{
+	    this->value = 0;
+	    bool result = true;
+		this->test.eventTest.add(this, &TestObservableClass::listen);
+		this->test.eventTest.notify();
+		result = result && this->value == 1;
+
+		this->test.eventTest.remove(this);
+		this->test.eventTest.notify();
+		result = result && this->value == 1;
+		return result;
+	}
+
+	function bool test_notify_with_unsubscribe()
+	{
+	    this->value = 0;
+	    bool result = true;
+		this->test.eventTest.add(this, &TestObservableClass::listen_with_remove);
+		this->test.eventTest.notify();
+		result = result && this->value == 1;
+
+		this->test.eventTest.notify();
+		result = result && this->value == 1;
+		return result;
+	}
+
+	function bool test_listen_with_two()
+	{
+	    this->value = 0;
+	    bool result = true;
+
+		auto listener = new ListenerClass();
+		listener->test = this;
+		this->test.eventTest.add(listener, &ListenerClass::listen);
+		this->test.eventTest.notify();
+		result = result && this->value == 1;
+
+		auto listener2 = new ListenerClass();
+		listener2->test = this;
+		this->test.eventTest.add(listener2, &ListenerClass::listen);
+		this->test.eventTest.notify();
+		result = result && this->value == 3;
+
+        this->test.eventTest.remove(listener);
+        this->test.eventTest.remove(listener2);
+        this->test.eventTest.notify();
+        result = result && this->value == 3;
+
+
+		return result;
+	}
+
+	function bool test_with_arg_int()
+	{
+	    bool result = true;
+		auto listener = new ListenerClass();
+		listener->test = this;
+		this->test.eventTestInt.add(listener, &ListenerClass::listen_int, std::placeholders::_1);
+		this->test.eventTestInt.notify(1);
+		result = result && this->value == 1;
+		this->test.eventTestInt.notify(10);
+		result = result && this->value == 10;
+		return result;
+	}
+
+	function bool test_with_arg_int_two()
+	{
+	    bool result = true;
+		auto listener = new ListenerClass();
+		listener->test = this;
+		this->test.eventTestInt2.add(listener, &ListenerClass::listen_int_2, std::placeholders::_1, std::placeholders::_2);
+		this->test.eventTestInt2.notify(1, 1);
+		result = result && this->value == 2;
+		this->test.eventTestInt2.notify(10, 10);
+		result = result && this->value == 20;
+		return result;
+	}
+
+	function void listen()
+	{
+		this->value += 1;
+	}
+
+	function void listen_with_remove()
+	{
+	    this->value += 1;
+		this->test.eventTest.remove(this);
+	}
+}

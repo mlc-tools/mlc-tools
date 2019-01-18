@@ -250,13 +250,23 @@ class Writer(WriterBase):
             is_ref = True
             is_const = True
 
+        modified_type = obj.type
+        if '(' in modified_type and ')' in modified_type:
+            left = modified_type.index('(')
+            right = modified_type.index(')')
+            args = modified_type[left+1:right]
+            args = args.split(',')
+            args = [Writer.convert_type(x.strip()) for x in args]
+            args = ', '.join(args)
+            modified_type = modified_type[0:left+1] + args + modified_type[right:]
+
         if use_intrusive and obj.is_pointer and not obj.is_const and not obj.is_link and not obj.denied_intrusive:
             string = string_pointer
         else:
             string = string_non_pointer
         return string.format(static='static ' if obj.is_static else '',
                              const='const ' if is_const else '',
-                             type=Writer.convert_type(obj.type),
+                             type=Writer.convert_type(modified_type),
                              name=(' ' + name) if name else '',
                              pointer='*' if obj.is_pointer else '',
                              ref='&' if is_ref else '',
@@ -403,7 +413,7 @@ class Writer(WriterBase):
                 result.append(include)
         result = sorted(result)
         return '\n'.join(result)
-    
+
     @staticmethod
     def get_include_path_to_class(cls, to_cls):
         include = '"'
@@ -413,15 +423,14 @@ class Writer(WriterBase):
             include += to_cls.group + '/'
         include += to_cls.name + '.h"'
         return include
-    
+
     @staticmethod
     def get_path_to_root(cls):
         if cls.group:
             return '../'
         return ''
 
-    @staticmethod
-    def build_forward_declarations(declarations):
+    def build_forward_declarations(self, declarations):
         ignore = [
             'std::list',
             'std::vector',
@@ -431,6 +440,7 @@ class Writer(WriterBase):
             'int',
             'bool',
             'float',
+            'void',
         ]
         predefined = {
             'Json::Value': 'namespace Json\n{\nclass Value;\n}\n',
@@ -442,7 +452,7 @@ class Writer(WriterBase):
                 continue
             if declaration in predefined:
                 result.append(predefined[declaration])
-            else:
+            elif self.model.has_class(declaration):
                 result.append('class %s;' % declaration)
         result = sorted(result)
         return '\n'.join(result)

@@ -15,6 +15,8 @@ class WriterBase(object):
     def save(self, model):
         self.model = model
         for cls in model.classes:
+            if not cls.auto_generated:
+                continue
             sources = self.write_class(cls)
             for filename, content in sources:
                 self.model.add_file(filename, content)

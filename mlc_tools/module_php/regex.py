@@ -4,6 +4,7 @@ import re
 class RegexPatternPhp(object):
 
     FUNCTION = (
+        (re.compile(r'(\w+[\.>-]+\w+)\.add\((\w+),\s*&(\w+)::(\w+)'), r'\1.add(\2, "\4"', ['.add(']),
         (re.compile(r'catch\((\w+)\s*(\w*)\)'), r'catch__\1__\2', ['catch']),
         (re.compile(r'DataStorage::shared\(\).get<(\w+)>'), r'DataStorage::shared()->get\1', ['DataStorage::shared']),
         (re.compile(r'Factory::(.+)<\w+>'), r'Factory::\1', ['Factory:']),
@@ -66,8 +67,7 @@ class RegexPatternPhp(object):
         (re.compile(r'([-0-9]*)->([-0-9]*)f\b'), r'\1.\2'),
         (re.compile(r'([-0-9]*)->f\\b'), r'\1.0'),
         (re.compile(r'\$return\s'), r'return', ['$return']),
-        (re.compile(r'(\$.+)->add\((\$.+),\s*(\w+)::\$(\w+),\s*std::\$placeholders::\$_\d\);'),
-         r'\1->add(\2, array(\2, "\4"));', ['std::$placeholders']),
+        (re.compile(r',\s*std::\$*placeholders::\$*_\d'), r'', ['std::$placeholders']),
         (re.compile(r'list_remove\((\$.+?),\s*([\$.\w]+?)\);'), r'array_splice(\1, array_search(\2, \1), 1);',
          ['list_remove']),
         (re.compile(r'list_clear\((.+?)\);'), r'\1 = array();', ['list_clear']),
