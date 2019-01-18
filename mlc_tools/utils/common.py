@@ -48,7 +48,7 @@ def parse_object(obj, string):
         if counter == 0 and right != left:
             templates = string[left+1:right]
             string = string[:left] + string[right+1:]
-    
+
     args = re.search(r'\(.*\)', string)
     args = args.group(0) if args else None
     if args:

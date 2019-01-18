@@ -3,9 +3,7 @@ class observable/ObservableClass<SerializedObject>
 	Observable<void()> eventTest
 	Observable<void(int)> eventTestInt
 	Observable<void(int, int)> eventTestInt2
-
-	//TODO: use string without std::string
-	Observable<void(int, std::string)> eventTestString
+	Observable<void(int, string)> eventTestString
 }
 
 class observable/ListenerClass<SerializedObject>
