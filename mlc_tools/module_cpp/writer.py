@@ -137,7 +137,7 @@ class Writer(WriterBase):
                              registration=registration)
 
     def write_function_hpp(self, method):
-        string = '{virtual}{static}{type} {name}({args}){const}{override}{abstract};\n'
+        string = '{virtual}{static}{type} {name}({args}){const}{override}{abstract}'
 
         args = list()
         for arg in method.args:
@@ -151,6 +151,22 @@ class Writer(WriterBase):
         return_type = self.write_named_object(method.return_type, '', False, True)
 
         virtual = 'virtual ' if method.is_virtual or method.is_abstract or self.current_cls.is_virtual else ''
+
+        body = ''
+        if method.template_args:
+            body = method.body
+            string += '''
+            {{
+            {body}
+            }}
+            '''
+            templates = ['class %s'%x for x in method.template_args]
+            templates = ', '.join(templates)
+            templates = 'template<%s> '%templates
+            string = templates + string
+        else:
+            string += ';\n'
+
         return string.format(virtual=virtual,
                              static='static ' if method.is_static else '',
                              const=' const' if method.is_const else '',
@@ -158,10 +174,13 @@ class Writer(WriterBase):
                              abstract=' = 0' if method.is_abstract else '',
                              type=return_type,
                              name=method.name,
-                             args=args)
+                             args=args,
+                             body=body)
 
     def write_function_cpp(self, method):
         if method.is_external or method.is_abstract:
+            return ''
+        if method.template_args:
             return ''
         if method.specific_implementations:
             return method.specific_implementations

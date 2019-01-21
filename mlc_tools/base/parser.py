@@ -179,9 +179,14 @@ class Parser(object):
 
     def parse_function_header(self, method, line):
         line = line.strip()
-        k = line.find('function')
-        if k == 0:
+
+        templates = re.findall(r'function<(\w+?)>', line)
+        if templates:
+            line = re.sub(r'function[<\w>]*', '', line)
+            method.template_args = templates
+        else:
             line = line[len('function'):].strip()
+
         args_s = line[line.find('(') + 1:line.rfind(')')]
         args = smart_split(args_s, ',')
 

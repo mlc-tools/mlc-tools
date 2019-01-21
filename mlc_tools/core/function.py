@@ -9,6 +9,7 @@ class Function(object):
         self.return_type = Object()
         self.name = ''
         self.args = []
+        self.template_args = []
         self.is_const = False
         self.is_external = False
         self.is_static = False

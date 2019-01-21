@@ -1,0 +1,17 @@
+class FunctionTemplates<SerializedObject>
+{
+    function<T> T add(T a, T b)
+    {
+        return a + b;
+    }
+}
+
+class TestFunctionTemplates<ITestFunctionTemplates>:test
+{
+    function void test_add()
+    {
+        FunctionTemplates f;
+
+        this->assertTrue(f.add(1, 2) == 3);
+    }
+}
