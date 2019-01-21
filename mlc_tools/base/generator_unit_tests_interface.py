@@ -153,29 +153,67 @@ class tests/TestCase<SerializedObject>:test
         this->logger = logger;
     }
     function void execute():abstract
-    function void assertTrue(bool expression, string message="")
+    function void add_result(bool result, string message):private
     {
-        if(this->result && !expression)
+        if(this->result && !result)
         {
             this->logger->message(get_type() + ":");
         }
-        if(!expression)
+        if(!result)
         {
             this->logger->message(" - Failed: " + message);
         }
-        this->result = this->result && expression;
+        this->result = this->result && result;
+    }
+    function void assertTrue(bool expression, string message="")
+    {
+        this->add_result(expression, message);
     }
     function void assertFalse(bool expression, string message="")
     {
-        if(this->result && expression)
-        {
-            this->logger->message(get_type() + ":");
-        }
-        if(expression)
-        {
-            this->logger->message(" - Failed: " + message);
-        }
-        this->result = this->result && !expression;
+        this->add_result(!expression, message);
+    }
+    function<T> void assertEqual(T left, T right, string message="")
+    {
+        this->add_result(left == right, message);
+    }
+    function<T> void assertNotEqual(T left, T right, string message="")
+    {
+        this->add_result(left != right, message);
+    }
+    function<T> void assertNull(T value, string message="")
+    {
+        this->add_result(value == nullptr, message);
+    }
+    function<T> void assertNotNull(T value, string message="")
+    {
+        this->add_result(value != nullptr, message);
+    }
+    function<Key, Value> void assertInMap(Key key, map<Key, Value>:const:ref map, string message="")
+    {
+        this->add_result(in_map(key, map), message);
+    }
+    function<Key, Value> void assertNotInMap(Key key, map<Key, Value>:const:ref map, string message="")
+    {
+        this->add_result(!in_map(key, map), message);
+    }
+    function<T> void assertInList(T item, list<T>:const:ref list, string message="")
+    {
+        this->add_result(in_list(item, list), message);
+    }
+    function<T> void assertNotInList(T item, list<T>:const:ref list, string message="")
+    {
+        this->add_result(!in_list(item, list), message);
+    }
+    function<T> void assertInRange(T value, T min_value, T max_value, string message="")
+    {
+        bool result = value >= min_value && value <= max_value;
+        this->add_result(result, message);
+    }
+    function<T> void assertNotInRange(T value, T min_value, T max_value, string message="")
+    {
+        bool result = value < min_value || value > max_value;
+        this->add_result(result, message);
     }
 }
 '''

@@ -55,6 +55,19 @@ class TestParseTemplates(unittest.TestCase):
         self.assertEqual(len(func.template_args), 1)
         self.assertEqual(func.template_args[0], 'T')
 
+    def test_parse_with_two_args(self):
+        func = Parser.create_function('function<Key, Value> void assertInMap(Key key, map<Key, Value>:const:ref map)')
+        self.assertEqual(func.name, 'assertInMap')
+        self.assertEqual(func.args[0][0], 'key')
+        self.assertEqual(func.args[0][1].type, 'Key')
+        self.assertEqual(func.args[1][0], 'map')
+        self.assertEqual(func.args[1][1].type, 'map')
+        self.assertEqual(func.return_type.type, 'void')
+        self.assertEqual(len(func.return_type.template_args), 0)
+        self.assertEqual(len(func.template_args), 2)
+        self.assertEqual(func.template_args[0], 'Key')
+        self.assertEqual(func.template_args[1], 'Value')
+
     def test_1(self):
         func = Parser.create_function('function bool std_functions(Logger* logger):static')
         self.assertEqual(func.name, 'std_functions')

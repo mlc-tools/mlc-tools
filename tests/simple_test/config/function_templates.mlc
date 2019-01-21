@@ -12,6 +12,15 @@ class TestFunctionTemplates<ITestFunctionTemplates>:test
     {
         FunctionTemplates f;
 
-        this->assertTrue(f.add(1, 2) == 3);
+        this->assertEqual(f.add(1, 2), 3, "add(1, 2) == 3");
+        this->assertEqual(f.add(-1.f, -2.f), -3.f, "add(-1, -2) == -3");
+    }
+    function void test_add_strings():cpp:py
+    {
+        FunctionTemplates f;
+        std::string a = "a";
+        std::string b = "b";
+        std::string c = "ab";
+        this->assertEqual(f.add(a, b), c, "add('a', 'b') == 'ab'");
     }
 }
