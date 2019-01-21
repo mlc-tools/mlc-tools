@@ -11,6 +11,7 @@ class Writer(WriterBase):
         self.current_cls = None
         self.objects_cache = {}
         self.methods_cache = []
+        self.methods_cache_with_templates = []
 
     def write_class(self, cls):
         self.current_cls = cls
@@ -24,6 +25,8 @@ class Writer(WriterBase):
         for method in cls.functions:
             hpp, cpp = self.write_function(method)
             self.methods_cache.append([hpp, cpp])
+            if method.template_args:
+                self.methods_cache_with_templates.append(hpp)
 
         header, includes, forward_declarations, forward_declarations_out = self.write_hpp(cls)
         source = self.write_cpp(cls, includes, forward_declarations, forward_declarations_out)
@@ -61,6 +64,8 @@ class Writer(WriterBase):
         functions = ''
         for method in self.methods_cache:
             functions += method[0]
+        for method in self.methods_cache_with_templates:
+            includes.update(self.get_includes_for_method(cls, method, includes))
         members = ''
         for member in cls.members:
             declaration, _, _ = self.objects_cache[member.name]
@@ -387,6 +392,13 @@ class Writer(WriterBase):
         includes.update(forw_declarations)
         includes.update(forw_declarations_out)
 
+        includes.update(self.get_includes_for_method(cls, functions_text, hpp_includes))
+
+        return self.build_includes(cls, includes)
+
+    def get_includes_for_method(self, cls, functions_text, hpp_includes):
+        includes = set()
+
         def add(set_, obj):
             set_.add(self.convert_type(obj.type))
             for arg in obj.template_args:
@@ -397,14 +409,14 @@ class Writer(WriterBase):
         for type_ in self.model.classes:
             name = type_.name
             if name not in hpp_includes and name in functions_text:
-                if cls.name not in RegexPatternCpp.regs_class_names:
-                    RegexPatternCpp.regs_class_names[cls.name] = re.compile(r'\b{}\b'.format(cls.name))
-                pattern = RegexPatternCpp.regs_class_names[cls.name]
+                if name not in RegexPatternCpp.regs_class_names:
+                    RegexPatternCpp.regs_class_names[name] = re.compile(r'\b{}\b'.format(name))
+                pattern = RegexPatternCpp.regs_class_names[name]
                 need = cls.name == name
                 need = need or pattern.search(functions_text) is not None
                 if need:
                     includes.add(name)
-        return self.build_includes(cls, includes)
+        return includes
 
     def build_includes(self, cls, includes):
         types = {

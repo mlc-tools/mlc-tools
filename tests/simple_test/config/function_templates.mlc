@@ -4,6 +4,19 @@ class FunctionTemplates<SerializedObject>
     {
         return a + b;
     }
+
+    function<T> void use_other_class(T t)
+    {
+        FunctionTemplatesSomeOtherClass obj;
+        obj.some_method();
+    }
+}
+
+class FunctionTemplatesSomeOtherClass<SerializedObject>
+{
+    function void some_method()
+    {
+    }
 }
 
 class TestFunctionTemplates<ITestFunctionTemplates>:test
@@ -22,5 +35,10 @@ class TestFunctionTemplates<ITestFunctionTemplates>:test
         std::string b = "b";
         std::string c = "ab";
         this->assertEqual(f.add(a, b), c, "add('a', 'b') == 'ab'");
+    }
+    function void test_use_other_class()
+    {
+        FunctionTemplates f;
+        f.use_other_class(0);
     }
 }
