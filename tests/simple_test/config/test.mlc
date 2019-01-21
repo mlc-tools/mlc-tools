@@ -23,11 +23,11 @@ class AllTests<SerializedObject>
     function bool run(Logger* logger):static
     {
         bool result = true;
-        result = logger->push(FunctionTest::tests(logger), "Function tests") && result;
-        result = logger->push(DataUnit::tests(logger), "Static data") && result;
-        result = logger->push(AllTypes::tests(logger), "AllTypes tests") && result;
-        result = logger->push(TestFactory::tests(logger), "TestFactory tests") && result;
-        result = logger->push(ExceptionTest::test(), "ExceptionTest") && result;
+        result = FunctionTest::tests(logger) && result;
+        result = DataUnit::tests(logger) && result;
+        result = AllTypes::tests(logger) && result;
+        result = TestFactory::tests(logger) && result;
+        result = ExceptionTest::test() && result;
 
         return result;
     }
@@ -181,36 +181,33 @@ class RequestAcceptor<IVisitorRequest>
 class TestRequestAcceptor<ITestRequestAcceptor>
 {
     Request* request
-    function bool test_visitor()
+    function void test_visitor()
     {
         RequestAcceptor acceptor;
 
-        bool result = true;
         this->request = new RequestFoo();
         this->request->accept(&acceptor);
-        result = result && acceptor.foo == 1;
-        result = result && acceptor.bar == 0;
-        result = result && acceptor.bar2 == 0;
-        result = result && acceptor.base == 0;
+        this->assertTrue(acceptor.foo == 1);
+        this->assertTrue(acceptor.bar == 0);
+        this->assertTrue(acceptor.bar2 == 0);
+        this->assertTrue(acceptor.base == 0);
         acceptor.foo = 0;
 
         this->request = new RequestBar();
         this->request->accept(&acceptor);
-        result = result && acceptor.foo == 0;
-        result = result && acceptor.bar == 1;
-        result = result && acceptor.bar2 == 0;
-        result = result && acceptor.base == 0;
+        this->assertTrue(acceptor.foo == 0);
+        this->assertTrue(acceptor.bar == 1);
+        this->assertTrue(acceptor.bar2 == 0);
+        this->assertTrue(acceptor.base == 0);
         acceptor.bar = 0;
 
         this->request = new RequestBar2();
         this->request->accept(&acceptor);
-        result = result && acceptor.foo == 0;
-        result = result && acceptor.bar == 0;
-        result = result && acceptor.bar2 == 1;
-        result = result && acceptor.base == 0;
+        this->assertTrue(acceptor.foo == 0);
+        this->assertTrue(acceptor.bar == 0);
+        this->assertTrue(acceptor.bar2 == 1);
+        this->assertTrue(acceptor.base == 0);
         acceptor.bar2 = 0;
-
-        return result;
     }
 }
 
@@ -265,7 +262,6 @@ class FunctionTest<SerializedObject>
         pointer->initialize();
         auto result = pointer->initialized;
         result = result && pointer->data_unit != nullptr;
-        logger->push(result, "Create new object in function");
         return result;
     }
 
@@ -280,7 +276,6 @@ class FunctionTest<SerializedObject>
             ++index;
         }
         result = result && index == count;
-        logger->push(result, "FOR(AUTO& PAIR : MAP)");
 
         index = 0;
         for(auto&& [name, unit] : units)
@@ -288,7 +283,6 @@ class FunctionTest<SerializedObject>
             ++index;
         }
         result = result && index == count;
-        logger->push(result, "FOR(AUTO&& [NAME, UNIT] : UNITS)");
 
         index = 0;
         for(int i=0; i<count; ++i)
@@ -296,7 +290,6 @@ class FunctionTest<SerializedObject>
             ++index;
         }
         result = result && index == count;
-        logger->push(result, "FOR(int i=0; i<count; ++i)");
 
         index = 0;
         for(int i=count; i>0; --i)
@@ -304,7 +297,6 @@ class FunctionTest<SerializedObject>
             ++index;
         }
         result = result && index == count;
-        logger->push(result, "FOR(int i=count; i>0; --i)");
 
         index = 0;
         auto count2 = count*2;
@@ -313,7 +305,6 @@ class FunctionTest<SerializedObject>
             ++index;
         }
         result = result && index == count;
-        logger->push(result, "FOR(int i=0; i<count*2; i+=2)");
 
         return result;
     }
@@ -330,7 +321,6 @@ class FunctionTest<SerializedObject>
             index++;
         }
         result = list_size(test_vector) == 10;
-        logger->push(result, "while index < 10");
         return result;
     }
 
@@ -364,8 +354,6 @@ class FunctionTest<SerializedObject>
             result = result && true;
         else if(false)
             result = false;
-
-        logger->push(result, "IF-ELSE");
         return result;
     }
 
@@ -382,7 +370,6 @@ class FunctionTest<SerializedObject>
         result = result && map_size(pointer->map) == 1;
         result = result && in_map(1, pointer->map);
 
-        logger->push(result, "std functions");
         return result;
     }
 
@@ -390,7 +377,6 @@ class FunctionTest<SerializedObject>
     {
         auto user = new TestUser1();
 		auto result = FunctionTest::test_1_1(user);
-		logger->push(result, "Functions: test 1");
 		return result;
 	}
     function bool test_1_1(TestUser1* user):static
@@ -427,10 +413,10 @@ class TestFactory<SerializedObject>
         auto string = Factory::serialize_command_to_xml<RequestBar>(command);
         auto command2 = Factory::create_command_from_xml<Request>(string);
 #endif
-        result = logger->push(command2 != nullptr, " - TestFactory: command_2 deserialized") && result;
+        result = (command2 != nullptr) && result;
         if(result)
         {
-            result = logger->push(command2->get_type() == command->get_type(), " - TestFactory: command_type == command2_type deserialized") && result;
+            result = (command2->get_type() == command->get_type()) && result;
         }
         return result;
     }
@@ -451,19 +437,16 @@ class DataComplexMap<SerializedObject>:storage
 
 class TestDataComplexMap<ITestDataComplexMap>:tests
 {
-    function bool test_foo()
+    function void test_foo()
     {
-        return true;
     }
-    function bool test_deserialize()
+    function void test_deserialize()
     {
         auto data = DataStorage::shared().get<DataComplexMap>("test");
-        bool result = true;
-        result = result && map_size(data->complex_map) == 1;
-        result = result && list_size(data->complex_map.at(1)) == 2;
-        result = result && data->complex_map.at(1)[0] == 1;
-        result = result && data->complex_map.at(1)[1] == 2;
-        return result;
+        this->assertTrue(map_size(data->complex_map) == 1);
+        this->assertTrue(list_size(data->complex_map.at(1)) == 2);
+        this->assertTrue(data->complex_map.at(1)[0] == 1);
+        this->assertTrue(data->complex_map.at(1)[1] == 2);
     }
 }
 

@@ -5,8 +5,8 @@ require_once 'generated_php/TestDataBase.php';
 require_once 'lib/php/DataBase.php';
 
 class LoggerImpl extends Logger {
-	function print_log($result, $message) {
-		echo ("\n$message: " .($result?"Ok":"Fail"));
+	function message($message) {
+		echo ("$message\n);
 	}
 };
 

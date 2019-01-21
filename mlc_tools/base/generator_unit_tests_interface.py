@@ -67,24 +67,13 @@ class GeneratorUnitTestsInterface(object):
 
         method = Function()
         method.name = 'execute'
-        method.return_type = Objects.BOOL
+        method.return_type = Objects.VOID
         test.functions.append(method)
-        method.operations.append('bool result = true;')
         for func in test.functions:
             name = func.name
             if name == 'initialize' or name == 'execute':
                 continue
-            method.operations.append('result = this->{}();'.format(name))
-            method.operations.append('this->logger->push(result, " - [{}] tested");'.format(name[5:]))
-            method.operations.append(
-                'this->logger->push(result, "---------------------------------------------------------");')
-            method.operations.append('this->logger->methods_count += 1;')
-            method.operations.append('if(!result)')
-            method.operations.append('{')
-            method.operations.append('    exit(1);')
-            method.operations.append('}')
-
-        method.operations.append('return this->logger->result;')
+            method.operations.append('this->{}();'.format(name))
 
         self.tests.append(test)
         return test
@@ -93,7 +82,7 @@ class GeneratorUnitTestsInterface(object):
     def add_method(class_, name):
         method = Function()
         method.name = name
-        method.return_type = Objects.BOOL
+        method.return_type = Objects.VOID
         method.is_abstract = True
         class_.functions.append(method)
 
@@ -102,7 +91,6 @@ class GeneratorUnitTestsInterface(object):
         test_all.type = 'class'
         test_all.name = 'RunAllTests'
         test_all.group = 'tests'
-        test_all.superclasses.append('TestCase')
 
         for test in self.tests:
             if self.model.has_class(test.name[1:]):
@@ -117,7 +105,6 @@ class GeneratorUnitTestsInterface(object):
         method.args.append(['logger', Parser.create_object('Logger*')])
         method.return_type = Objects.VOID
         test_all.functions.append(method)
-        method.operations.append('this->logger = logger;')
         for test in test_all.members:
             var_name = self.get_member_name(test.name)
             method.operations.append('this->{}.initialize(logger);'.format(var_name))
@@ -128,12 +115,13 @@ class GeneratorUnitTestsInterface(object):
         test_all.functions.append(method)
         for test in test_all.members:
             var_name = self.get_member_name(test.name)
-            method.operations.append('this->logger->push(true, "Test case [\" + this->{0}.get_type() + \"] started");'.
-                                     format(var_name))
-            method.operations.append('this->logger->push(this->{0}.execute(), '
-                                     '"Test case [\" + this->{0}.get_type() + \"] finished\\n");'.format(var_name))
-            method.operations.append('this->logger->class_count += 1;')
-        method.operations.append('return this->logger->result;')
+            method.operations.append('this->{0}.execute();'.format(var_name))
+
+        method.operations.append('bool result = true;')
+        for test in test_all.members:
+            var_name = self.get_member_name(test.name)
+            method.operations.append('result = result && this->{0}.result;'.format(var_name))
+        method.operations.append('return result;')
 
         return test_all
 
@@ -141,7 +129,6 @@ class GeneratorUnitTestsInterface(object):
 BASE_CLASSES = '''
 class tests/Logger<SerializedObject>:test:virtual
 {
-    bool result = true
     int tests_count
     int success_count
     int class_count = 0
@@ -149,29 +136,46 @@ class tests/Logger<SerializedObject>:test:virtual
     int all_methods_count = @{all_methods}
     int implemented_methods_count = @{implemented_methods}
     
-    function bool push(bool result, string message)
+    function void message(string message):abstract
+    function void log(string message)
     {
-        this->tests_count += 1;
-        if(result)
-            this->success_count += 1;
-        this->result = this->result && result;
-        this->print_log(result, message);
-        return result;
+        this->message(message);
     }
-    function void print_log(bool result, string message):abstract
 }
 
 class tests/TestCase<SerializedObject>:test
 {
     Logger*:runtime logger
+    bool:runtime result = true
 
     function void initialize(Logger* logger)
     {
         this->logger = logger;
     }
-    function bool execute()
+    function void execute():abstract
+    function void assertTrue(bool expression, string message="")
     {
-        return false;
+        if(this->result && !expression)
+        {
+            this->logger->message(get_type() + ":");
+        }
+        if(!expression)
+        {
+            this->logger->message(" - Failed: " + message);
+        }
+        this->result = this->result && expression;
+    }
+    function void assertFalse(bool expression, string message="")
+    {
+        if(this->result && expression)
+        {
+            this->logger->message(get_type() + ":");
+        }
+        if(expression)
+        {
+            this->logger->message(" - Failed: " + message);
+        }
+        this->result = this->result && !expression;
     }
 }
 '''

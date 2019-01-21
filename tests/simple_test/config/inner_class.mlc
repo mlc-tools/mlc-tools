@@ -26,25 +26,22 @@ class inner/OuterClass<SerializedObject>
 
 class inner/TestOuterClass<ITestOuterClass>:test
 {
-    function bool test_func()
+    function void test_func()
     {
         OuterClass cls;
         cls.func();
-        return true;
     }
-    function bool test_func2()
+    function void test_func2()
     {
         OuterClassInnerClass inner;
         OuterClass cls;
         cls.func2(inner);
-        return true;
     }
 }
 
 class inner/TestOuterClassInnerClass<ITestOuterClassInnerClass>:test
 {
-    function bool test_func()
+    function void test_func()
     {
-        return true;
     }
 }

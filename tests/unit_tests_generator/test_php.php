@@ -3,8 +3,8 @@ require_once 'generated_php/RunAllTests.php';
 require_once 'generated_php/Logger.php';
 
 class LoggerImpl extends Logger {
-	function print_log($result, $message) {
-		echo ("\n$message: " .($result?"Ok":"Fail"));
+	function message($message) {
+		echo ("$message\n");
 	}
 };
 

@@ -4,12 +4,12 @@ from generated_py.Logger import Logger
 from generated_py.RunAllTests import RunAllTests
 import os.path as fs
 import sys
-import inspect
+
 
 class LoggerImpl(Logger):
 
-    def print_log(self, result, message):
-        print('{}: {}'.format(message, result))
+    def message(self, message):
+        print(message)
 
 
 def initialize_data_storage(protocol):
@@ -29,7 +29,7 @@ def main(argv):
 
     tests = RunAllTests()
     tests.initialize(logger)
-    result = tests.execute() and result
+    result = result and tests.execute()
 
     exit(0 if result else -1)
 

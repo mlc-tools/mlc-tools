@@ -31,11 +31,10 @@ class TestDataBase<ITestDataBase>
     list<list<string>>:runtime response_all
     list<string>:runtime response_one
 
-    function bool test_connect()
+    function void test_connect()
     {
-        return true;
     }
-    function bool test_query_all()
+    function void test_query_all()
     {
         TestDataBase::db->connect("localhost", "test_database", "root", "112358");
         TestDataBase::db->query_all("CREATE TABLE IF NOT EXISTS test_db (id int, data text)");
@@ -46,9 +45,9 @@ class TestDataBase<ITestDataBase>
         auto result = this->log_all();
         TestDataBase::db->query_all("DROP TABLE test_db");
 
-        return result == "Response table:\n\t[1, test_data 1, ]\n\t[2, test_data 2, ]\n\t[3, test_data 3, ]\n";
+        this->assertTrue(result == "Response table:\n\t[1, test_data 1, ]\n\t[2, test_data 2, ]\n\t[3, test_data 3, ]\n");
     }
-    function bool test_query_one()
+    function void test_query_one()
     {
         TestDataBase::db->connect("localhost", "test_database", "root", "112358");
         TestDataBase::db->query_one("CREATE TABLE IF NOT EXISTS test_db (id int, data text)");
@@ -57,7 +56,7 @@ class TestDataBase<ITestDataBase>
         auto result = this->log_one();
         TestDataBase::db->query_one("DROP TABLE test_db");
 
-        return result == "Response row: [1, test_data, ]\n";
+        this->assertTrue(result == "Response row: [1, test_data, ]\n");
     }
 
     function string log_all()
@@ -72,7 +71,7 @@ class TestDataBase<ITestDataBase>
             }
             result = std::strcat(result, "]\n");
         }
-        this->logger->print_log(true, result);
+        this->logger->log(result);
         return result;
     }
 
@@ -84,7 +83,7 @@ class TestDataBase<ITestDataBase>
             result = std::strcat(result, cell + ", ");
         }
         result = std::strcat(result, "]\n");
-        this->logger->print_log(true, result);
+        this->logger->log(result);
         return result;
     }
 }

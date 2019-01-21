@@ -44,22 +44,18 @@ class Foo2<Foo>
 
 class TestFoo2<ITestFoo2>
 {
-    function bool test_virtual_method()
+    function void test_virtual_method()
     {
-        bool result = true;
-
         Base* a = new Base();
-        result = result && this->logger->push(a != nullptr, "    a != nullptr");
-        result = result && this->logger->push(a->virtual_method() == "Base", "    a->virtual_method() == Base");
+        this->assertNotNull(a, "Base* a != nullptr");
+        this->assertEqual(a->virtual_method(), "Base", "Correct result on call Base::virtual_method");
 
         Base* b = new Foo();
-        result = result && this->logger->push(b != nullptr, "    b != nullptr");
-        result = result && this->logger->push(b->virtual_method() == "Foo", "    b->virtual_method() == Foo");
+        this->assertNotNull(b, "Foo* b != nullptr");
+        this->assertEqual(b->virtual_method(), "Foo", "Correct result on call Foo::virtual_method");
 
         Base* c = new Foo2();
-        result = result && this->logger->push(c != nullptr, "    c != nullptr");
-        result = result && this->logger->push(c->virtual_method() == "Foo2", "    c->virtual_method() == Foo2");
-
-        return result;
+        this->assertNotNull(b, "Foo2* b != nullptr");
+        this->assertEqual(c->virtual_method(), "Foo2", "Correct result on call Foo2::virtual_method");
     }
 }

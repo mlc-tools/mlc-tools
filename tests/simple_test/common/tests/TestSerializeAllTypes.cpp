@@ -96,37 +96,37 @@ bool test_all_types(mg::Logger* logger)
 
 	auto result = true;
 	result = result && objA.int_value0 == objB->int_value0;
-    result = logger->push(objA.int_value1 == objB->int_value1, "objA.int_value1 == objB->int_value1");
-    result = logger->push(std::fabs(objA.float_value0 - objB->float_value0) < 0.0001f, "std::fabs(objA.float_value0 - objB->float_value0) < 0.0001f");
-    result = logger->push(std::fabs(objA.float_value1 - objB->float_value1) < 0.0001f, "std::fabs(objA.float_value1 - objB->float_value1) < 0.0001f");
-    result = logger->push(objA.bool_value0 == objB->bool_value0, "objA.bool_value0 == objB->bool_value0");
-    result = logger->push(objA.bool_value1 == objB->bool_value1, "objA.bool_value1 == objB->bool_value1");
-    result = logger->push(objA.str_value0 == objB->str_value0, "objA.str_value0 == objB->str_value0");
-    result = logger->push(objA.str_value1 == objB->str_value1, "objA.str_value1 == objB->str_value1");
-    result = logger->push(objA.int_list == objB->int_list, "objA.int_list == objB->int_list");
-    result = logger->push(objA.float_list == objB->float_list, "objA.float_list == objB->float_list");
-    result = logger->push(objA.bool_list == objB->bool_list, "objA.bool_list == objB->bool_list");
-    result = logger->push(objA.string_list == objB->string_list, "objA.string_list == objB->string_list");
-    result = logger->push(objA.int_string_map == objB->int_string_map, "objA.int_string_map == objB->int_string_map");
-    result = logger->push(objA.float_string_map == objB->float_string_map, "objA.float_string_map == objB->float_string_map");
-    result = logger->push(objA.bool_string_map == objB->bool_string_map, "objA.bool_string_map == objB->bool_string_map");
-    result = logger->push(objA.string_string_map == objB->string_string_map, "objA.string_string_map == objB->string_string_map");
-    result = logger->push(objA.string_int_map == objB->string_int_map, "objA.string_int_map == objB->string_int_map");
-    result = logger->push(objA.string_float_map == objB->string_float_map, "objA.string_float_map == objB->string_float_map");
-    result = logger->push(objA.string_bool_map == objB->string_bool_map, "objA.string_bool_map == objB->string_bool_map");
-    result = logger->push(objA.object == objB->object, "objA.object == objB->object");
-    result = logger->push(*objA.object_ptr == *objB->object_ptr, "*objA.object_ptr == *objB->object_ptr");
-    result = logger->push(objA.object_list == objB->object_list, "objA.object_list == objB->object_list");
-    result = logger->push(objA.object_map == objB->object_map, "objA.object_map == objB->object_map");
-    result = logger->push(objA.object_ptr_list.size() == objB->object_ptr_list.size(), "objA.object_ptr_list.size() == objB->object_ptr_list.size()");
+    result = result && objA.int_value1 == objB->int_value1;
+    result = result && std::fabs(objA.float_value0 - objB->float_value0) < 0.0001f;
+    result = result && std::fabs(objA.float_value1 - objB->float_value1) < 0.0001f;
+    result = result && objA.bool_value0 == objB->bool_value0;
+    result = result && objA.bool_value1 == objB->bool_value1;
+    result = result && objA.str_value0 == objB->str_value0;
+    result = result && objA.str_value1 == objB->str_value1;
+    result = result && objA.int_list == objB->int_list;
+    result = result && objA.float_list == objB->float_list;
+    result = result && objA.bool_list == objB->bool_list;
+    result = result && objA.string_list == objB->string_list;
+    result = result && objA.int_string_map == objB->int_string_map;
+    result = result && objA.float_string_map == objB->float_string_map;
+    result = result && objA.bool_string_map == objB->bool_string_map;
+    result = result && objA.string_string_map == objB->string_string_map;
+    result = result && objA.string_int_map == objB->string_int_map;
+    result = result && objA.string_float_map == objB->string_float_map;
+    result = result && objA.string_bool_map == objB->string_bool_map;
+    result = result && objA.object == objB->object;
+    result = result && *objA.object_ptr == *objB->object_ptr;
+    result = result && objA.object_list == objB->object_list;
+    result = result && objA.object_map == objB->object_map;
+    result = result && objA.object_ptr_list.size() == objB->object_ptr_list.size();
 
 	for(size_t i=0; i<objA.object_ptr_list.size(); ++i)
-		result = logger->push(*objA.object_ptr_list[i] == *objB->object_ptr_list[i], "*objA.object_ptr_list[i] == *objB->object_ptr_list[i]");
+		result = result && *objA.object_ptr_list[i] == *objB->object_ptr_list[i];
 	for (auto& pair : objA.object_ptr_map)
 	{
 		auto ptrA = pair.second;
 		auto ptrB = objB->object_ptr_map.at(pair.first);
-        result = logger->push(*ptrA == *ptrB, "*ptrA == *ptrB");
+        result = result && *ptrA == *ptrB;
 	}
 
 	return result;

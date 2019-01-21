@@ -31,83 +31,71 @@ class observable/TestObservableClass<ITestObservableClass>
 	int value = 0
     ObservableClass test
 
-	function bool test_1()
+	function void test_1()
 	{
 	    this->value = 0;
-	    bool result = true;
 		this->test.eventTest.add(this, &TestObservableClass::listen);
 		this->test.eventTest.notify();
-		result = result && this->value == 1;
+		this->assertTrue(this->value == 1);
 
 		this->test.eventTest.remove(this);
 		this->test.eventTest.notify();
-		result = result && this->value == 1;
-		return result;
+		this->assertTrue(this->value == 1);
 	}
 
-	function bool test_notify_with_unsubscribe()
+	function void test_notify_with_unsubscribe()
 	{
 	    this->value = 0;
-	    bool result = true;
 		this->test.eventTest.add(this, &TestObservableClass::listen_with_remove);
 		this->test.eventTest.notify();
-		result = result && this->value == 1;
+		this->assertTrue(this->value == 1);
 
 		this->test.eventTest.notify();
-		result = result && this->value == 1;
-		return result;
+		this->assertTrue(this->value == 1);
 	}
 
-	function bool test_listen_with_two()
+	function void test_listen_with_two()
 	{
 	    this->value = 0;
-	    bool result = true;
 
 		auto listener = new ListenerClass();
 		listener->test = this;
 		this->test.eventTest.add(listener, &ListenerClass::listen);
 		this->test.eventTest.notify();
-		result = result && this->value == 1;
+		this->assertTrue(this->value == 1);
 
 		auto listener2 = new ListenerClass();
 		listener2->test = this;
 		this->test.eventTest.add(listener2, &ListenerClass::listen);
 		this->test.eventTest.notify();
-		result = result && this->value == 3;
+		this->assertTrue(this->value == 3);
 
         this->test.eventTest.remove(listener);
         this->test.eventTest.remove(listener2);
         this->test.eventTest.notify();
-        result = result && this->value == 3;
-
-
-		return result;
+        this->assertTrue(this->value == 3);
 	}
 
-	function bool test_with_arg_int()
+	function void test_with_arg_int()
 	{
-	    bool result = true;
 		auto listener = new ListenerClass();
 		listener->test = this;
 		this->test.eventTestInt.add(listener, &ListenerClass::listen_int, std::placeholders::_1);
 		this->test.eventTestInt.notify(1);
-		result = result && this->value == 1;
+		this->assertTrue(this->value == 1);
 		this->test.eventTestInt.notify(10);
-		result = result && this->value == 10;
-		return result;
+		this->assertTrue(this->value == 10);
 	}
 
-	function bool test_with_arg_int_two()
+	function void test_with_arg_int_two()
 	{
-	    bool result = true;
 		auto listener = new ListenerClass();
 		listener->test = this;
 		this->test.eventTestInt2.add(listener, &ListenerClass::listen_int_2, std::placeholders::_1, std::placeholders::_2);
 		this->test.eventTestInt2.notify(1, 1);
-		result = result && this->value == 2;
+		this->assertTrue(this->value == 2);
 		this->test.eventTestInt2.notify(10, 10);
-		result = result && this->value == 20;
-		return result;
+		this->assertTrue(this->value == 20);
 	}
 
 	function void listen()
