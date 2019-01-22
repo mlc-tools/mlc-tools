@@ -183,8 +183,8 @@ class Parser(object):
         templates = re.findall(r'function<([\w, ]+?)>', line)
         if templates:
             line = re.sub(r'function<[\w, ]+?>', '', line)
-            method.template_args = smart_split(templates[0], ',')
-            method.template_args = [x.strip() for x in method.template_args]
+            method.template_types = smart_split(templates[0], ',')
+            method.template_types = [x.strip() for x in method.template_types]
         else:
             line = line[len('function'):].strip()
 

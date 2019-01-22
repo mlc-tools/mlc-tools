@@ -25,7 +25,7 @@ class Writer(WriterBase):
         for method in cls.functions:
             hpp, cpp = self.write_function(method)
             self.methods_cache.append([hpp, cpp])
-            if method.template_args:
+            if method.template_types:
                 self.methods_cache_with_templates.append(hpp)
 
         header, includes, forward_declarations, forward_declarations_out = self.write_hpp(cls)
@@ -158,14 +158,14 @@ class Writer(WriterBase):
         virtual = 'virtual ' if method.is_virtual or method.is_abstract or self.current_cls.is_virtual else ''
 
         body = ''
-        if method.template_args:
+        if method.template_types:
             body = method.body
             string += '''
             {{
             {body}
             }}
             '''
-            templates = ['class %s'%x for x in method.template_args]
+            templates = ['class %s'%x for x in method.template_types]
             templates = ', '.join(templates)
             templates = 'template<%s> '%templates
             string = templates + string
@@ -185,7 +185,7 @@ class Writer(WriterBase):
     def write_function_cpp(self, method):
         if method.is_external or method.is_abstract:
             return ''
-        if method.template_args:
+        if method.template_types:
             return ''
         if method.specific_implementations:
             return method.specific_implementations
