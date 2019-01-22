@@ -35,7 +35,6 @@ include_directories(
 )
 link_directories(
     /usr/local/lib/
-    ${ROOT}/../simple_test/external/sqlite3/bin/osx
 )
 
 add_executable(${PROJECT_NAME}
@@ -43,4 +42,4 @@ add_executable(${PROJECT_NAME}
     ${ROOT}/main.cpp
 )
 
-target_link_libraries(${PROJECT_NAME} pqxx pq sqlite3)
+target_link_libraries(${PROJECT_NAME})

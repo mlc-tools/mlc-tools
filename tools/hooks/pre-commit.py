@@ -5,18 +5,27 @@ import re
 root = os.path.abspath(os.path.dirname(__file__) + '/../..')
 
 
+def has_python_version(number):
+    result = os.system('python%d --version' % number)
+    return result == 0
+
+
 def run_mlc_build():
-    if 0 != os.system('python  {}/tests/mlc_build.py'.format(root)):
-        exit(1)
-    if 0 != os.system('python3 {}/tests/mlc_build.py'.format(root)):
-        exit(1)
+    if has_python_version(2):
+        if 0 != os.system('python  {}/tests/mlc_build.py'.format(root)):
+            exit(1)
+    if has_python_version(3):
+        if 0 != os.system('python3 {}/tests/mlc_build.py'.format(root)):
+            exit(1)
 
 
 def run_unit_tests():
-    if 0 != os.system('python -m unittest discover -s {0}/unit_tests'.format(root)):
-        exit(1)
-    if 0 != os.system('python3 -m unittest discover -s {0}/unit_tests'.format(root)):
-        exit(1)
+    if has_python_version(2):
+        if 0 != os.system('python -m unittest discover -s {0}/unit_tests'.format(root)):
+            exit(1)
+    if has_python_version(3):
+        if 0 != os.system('python3 -m unittest discover -s {0}/unit_tests'.format(root)):
+            exit(1)
 
 
 def run_pylint():
