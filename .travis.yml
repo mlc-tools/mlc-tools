@@ -71,6 +71,75 @@ script:
   - cd ..
   - popd
 
+  # test functions:
+
+  - pushd .
+  - python -m mlc_tools.main -i tests/test_functions/config -o tests/test_functions/generated_cpp/xml -f xml -l cpp -generate_tests yes
+  - python -m mlc_tools.main -i tests/test_functions/config -o tests/test_functions/generated_cpp/json -f json -l cpp -generate_tests yes
+
+  - cd tests/test_functions
+
+  - mkdir build_xml
+  - cd build_xml
+  - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DBUILD_XML=ON -DBUILD_JSON=OFF
+  - cmake --build .
+  - ./test_mlc_xml ../
+  - cd ..
+
+  - mkdir build_json
+  - cd build_json
+  - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DBUILD_XML=OFF -DBUILD_JSON=ON
+  - cmake --build .
+  - ./test_mlc_json ../
+  - cd ..
+  - popd
+
+  # test virtual methods:
+
+  - pushd .
+  - python -m mlc_tools.main -i tests/test_virtual_methods -o tests/test_virtual_methods/generated_cpp/xml -f xml -l cpp -generate_tests yes
+  - python -m mlc_tools.main -i tests/test_virtual_methods -o tests/test_virtual_methods/generated_cpp/json -f json -l cpp -generate_tests yes
+
+  - cd tests/test_virtual_methods
+
+  - mkdir build_xml
+  - cd build_xml
+  - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DBUILD_XML=ON -DBUILD_JSON=OFF
+  - cmake --build .
+  - ./test_mlc_xml ../
+  - cd ..
+
+  - mkdir build_json
+  - cd build_json
+  - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DBUILD_XML=OFF -DBUILD_JSON=ON
+  - cmake --build .
+  - ./test_mlc_json ../
+  - cd ..
+  - popd
+
+  # test virtual methods:
+
+  - pushd .
+  - python -m mlc_tools.main -i tests/unit_tests_generator -o tests/unit_tests_generator/generated_cpp/xml -f xml -l cpp -generate_tests yes
+  - python -m mlc_tools.main -i tests/unit_tests_generator -o tests/unit_tests_generator/generated_cpp/json -f json -l cpp -generate_tests yes
+
+  - cd tests/unit_tests_generator
+
+  - mkdir build_xml
+  - cd build_xml
+  - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DBUILD_XML=ON -DBUILD_JSON=OFF
+  - cmake --build .
+  - ./test_mlc_xml ../
+  - cd ..
+
+  - mkdir build_json
+  - cd build_json
+  - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DBUILD_XML=OFF -DBUILD_JSON=ON
+  - cmake --build .
+  - ./test_mlc_json ../
+  - cd ..
+  - popd
+
   # test serialize:
   - pushd .
   - cd tests/test_serialize
