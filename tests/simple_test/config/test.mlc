@@ -450,6 +450,11 @@ class TestDataComplexMap<ITestDataComplexMap>:tests
     }
 }
 
+class TestStaticPointer<SerializedObject>:tests
+{
+    CommandBase*:static command
+}
+
 
 
 

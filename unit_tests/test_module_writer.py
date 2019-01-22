@@ -189,6 +189,23 @@ class TestCppWriterBuildIncludesWithGroups(unittest.TestCase):
         self.assertIn('std::map', includes, '<map> in includes')
 
 
+class TestCppWriterWriteObject(unittest.TestCase):
+
+    def test_0(self):
+        from mlc_tools.module_cpp.writer import Writer
+        model = create_test_model()
+        lang = create_lang('cpp', model)
+        writer = lang.get_writer()
+
+        member = Parser.create_object('DataBase*:static db')
+        model.classes[0].members.append(member)
+
+        self.assertEqual(writer.write_member_declaration(member), 'static intrusive_ptr<DataBase> db;')
+        self.assertEqual(writer.write_member_static_init(model.classes[0], member),
+                         'intrusive_ptr<DataBase> Test::db(nullptr);')
+
+
+
 def get_cpp():
     return '''#include "intrusive_ptr.h"
 #include "mg_Factory.h"

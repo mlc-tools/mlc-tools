@@ -223,14 +223,21 @@ class Writer(WriterBase):
                                                                   name=obj.name,
                                                                   value=obj.initial_value)
 
-    def write_member_static_init(self, cls, obj):
-        string = '{const}{type}{pointer} {owner}::{name}({initial_value});'
+    def write_member_static_init(self, cls, obj, use_intrusive=True):
+        string_pointer = '{const}intrusive_ptr<{type}> {owner}::{name}({initial_value});'
+        string_non_pointer = '{const}{type}{pointer} {owner}::{name}({initial_value});'
+
+        if use_intrusive and obj.is_pointer and not obj.is_const and not obj.is_link and not obj.denied_intrusive:
+            string = string_pointer
+        else:
+            string = string_non_pointer
+
         return string.format(const='const ' if obj.is_const else '',
                              type=self.convert_type(obj.type),
                              pointer='*' if obj.is_pointer else '',
                              owner=cls.name,
                              name=obj.name,
-                             initial_value=obj.initial_value)
+                             initial_value=self.convert_initial_value(obj))
 
     def write_member_static_enum(self, cls, obj):
         assert (self is not None)
@@ -238,7 +245,7 @@ class Writer(WriterBase):
         return string.format(owner=cls.name, name=obj.name)
 
     def convert_initial_value(self, object_):
-        if object_.is_pointer and object_.initial_value == '0':
+        if object_.is_pointer and (object_.initial_value == '0' or object_.initial_value is None):
             return 'nullptr'
         type_class = self.model.get_class(object_.type) if self.model.has_class(object_.type) else None
         if type_class is not None and type_class.type == 'enum':
