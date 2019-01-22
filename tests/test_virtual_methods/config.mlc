@@ -50,6 +50,8 @@ class TestFoo2<ITestFoo2>
 
         Base* a = new Base();
         result = this->logger->push(a != nullptr, "    a != nullptr");
+        a->virtual_method();
+        result = this->logger->push(true, "    test call");
         result = this->logger->push(a->virtual_method() == "Base", "    a->virtual_method() == Base");
 
         Base* b = new Foo();
