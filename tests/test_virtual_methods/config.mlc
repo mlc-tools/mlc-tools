@@ -48,14 +48,14 @@ class TestFoo2<ITestFoo2>
     {
         Base* a = new Base();
         this->assertNotNull(a, "Base* a != nullptr");
-        this->assertEqual(a->virtual_method(), "Base", "Correct result on call Base::virtual_method");
+        this->assertEqual(a->virtual_method(), Base::TYPE, "Correct result on call Base::virtual_method");
 
         Base* b = new Foo();
         this->assertNotNull(b, "Foo* b != nullptr");
-        this->assertEqual(b->virtual_method(), "Foo", "Correct result on call Foo::virtual_method");
+        this->assertEqual(b->virtual_method(), Foo::TYPE, "Correct result on call Foo::virtual_method");
 
         Base* c = new Foo2();
         this->assertNotNull(b, "Foo2* b != nullptr");
-        this->assertEqual(c->virtual_method(), "Foo2", "Correct result on call Foo2::virtual_method");
+        this->assertEqual(c->virtual_method(), Foo2::TYPE, "Correct result on call Foo2::virtual_method");
     }
 }

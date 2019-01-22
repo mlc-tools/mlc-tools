@@ -193,7 +193,6 @@ def get_cpp():
     return '''#include "intrusive_ptr.h"
 #include "mg_Factory.h"
 #include "Test.h"
-#include <string>
 #include "mg_extensions.h"
 
 namespace mg
