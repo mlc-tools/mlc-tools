@@ -32,7 +32,12 @@ foreach(FILE ${SRC})
 endforeach()
 
 
-add_definitions(-w -std=c++14)
+if(WIN32)
+	add_definitions(-W1 -std=c++14)
+else()
+	add_definitions(-Wall -std=c++14)
+endif()
+
 add_definitions(-DSERVER=1)
 add_definitions(-DCLIENT=2)
 add_definitions(-DBUILD_SIDE=${BUILD_SIDE})

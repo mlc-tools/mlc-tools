@@ -117,7 +117,7 @@ script:
   - cd ..
   - popd
 
-  # test virtual methods:
+  # test unit tests generator:
 
   - pushd .
   - python -m mlc_tools.main -i tests/unit_tests_generator -o tests/unit_tests_generator/generated_cpp/xml -f xml -l cpp -generate_tests yes

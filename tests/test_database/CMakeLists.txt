@@ -24,7 +24,11 @@ file(GLOB_RECURSE SRC
                         ${ROOT}/lib/cpp/*.h
 )
 
-add_definitions(-w -std=c++14)
+if(WIN32)
+    add_definitions(-W1 -std=c++14)
+else()
+    add_definitions(-Wall -std=c++14)
+endif()
 
 include_directories(
     ${ROOT}/generated_cpp/${TYPE}/

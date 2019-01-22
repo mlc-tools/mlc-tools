@@ -5,13 +5,17 @@ SET(EXTERNAL ${CMAKE_SOURCE_DIR}/../simple_test/external)
 
 project(step_2)
 
-file(GLOB_RECURSE SRC 
+file(GLOB_RECURSE SRC
 						${EXTERNAL}/pugixml/*.cpp
 						${EXTERNAL}/jsoncpp/*.cpp
 						${ROOT}/generated_cpp/*.cpp
 						)
 
-add_definitions(-w -std=c++14)
+if(WIN32)
+	add_definitions(-W1 -std=c++14)
+else()
+	add_definitions(-Wall -std=c++14)
+endif()
 
 include_directories(
 	${ROOT}/generated_cpp/
@@ -19,7 +23,7 @@ include_directories(
 	${EXTERNAL}/ml
 )
 
-add_executable(${PROJECT_NAME} 
+add_executable(${PROJECT_NAME}
 	${SRC}
 	${ROOT}/step_2.cpp
 )
