@@ -5,8 +5,8 @@ from generated_py.RunAllTests import RunAllTests
 
 class LoggerImpl(Logger):
 
-    def print_log(self, result, message):
-        print('{}: {}'.format(message, result))
+    def message(self, message):
+        print(message)
 
 
 def main(argv):

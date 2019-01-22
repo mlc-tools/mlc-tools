@@ -48,8 +48,6 @@ bool test_compare()
 
 	if (!result)
 		std::cout << "Test compare enum fields failed." << std::endl;
-	else
-		std::cout << "Test compare enum fields success." << std::endl;
 	return result;
 }
 

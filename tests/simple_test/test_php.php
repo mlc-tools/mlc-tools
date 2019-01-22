@@ -17,8 +17,8 @@ DataStorage::$PATH_TO_DATA = $file;
 DataStorage::shared()->loadAllDataUnits();
 
 class LoggerImpl extends Logger {
-	function print_log($result, $message) {
-		echo ("\n$message: " .($result?"Ok":"Fail"));
+	function message($message) {
+		echo ($message."\n");
 	}
 };
 
@@ -29,7 +29,7 @@ $result = AllTests::run($logger) and $result;
 
 $tests = new RunAllTests();
 $tests->initialize($logger);
-$result = $tests->execute() && $result;
+$result = $result && $tests->execute();
 
 echo ("\n\n");
 exit($result == true?0:1);

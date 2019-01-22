@@ -11,6 +11,7 @@ class Writer(WriterBase):
         self.current_cls = None
         self.objects_cache = {}
         self.methods_cache = []
+        self.methods_cache_with_templates = []
 
     def write_class(self, cls):
         self.current_cls = cls
@@ -24,6 +25,8 @@ class Writer(WriterBase):
         for method in cls.functions:
             hpp, cpp = self.write_function(method)
             self.methods_cache.append([hpp, cpp])
+            if method.template_types:
+                self.methods_cache_with_templates.append(hpp)
 
         header, includes, forward_declarations, forward_declarations_out = self.write_hpp(cls)
         source = self.write_cpp(cls, includes, forward_declarations, forward_declarations_out)
@@ -61,6 +64,8 @@ class Writer(WriterBase):
         functions = ''
         for method in self.methods_cache:
             functions += method[0]
+        for method in self.methods_cache_with_templates:
+            includes.update(self.get_includes_for_method(cls, method, includes))
         members = ''
         for member in cls.members:
             declaration, _, _ = self.objects_cache[member.name]
@@ -137,7 +142,7 @@ class Writer(WriterBase):
                              registration=registration)
 
     def write_function_hpp(self, method):
-        string = '{virtual}{static}{type} {name}({args}){const}{override}{abstract};\n'
+        string = '{virtual}{static}{type} {name}({args}){const}{override}{abstract}'
 
         args = list()
         for arg in method.args:
@@ -151,6 +156,22 @@ class Writer(WriterBase):
         return_type = self.write_named_object(method.return_type, '', False, True)
 
         virtual = 'virtual ' if method.is_virtual or method.is_abstract or self.current_cls.is_virtual else ''
+
+        body = ''
+        if method.template_types:
+            body = method.body
+            string += '''
+            {{
+            {body}
+            }}
+            '''
+            templates = ['class %s'%x for x in method.template_types]
+            templates = ', '.join(templates)
+            templates = 'template<%s> '%templates
+            string = templates + string
+        else:
+            string += ';\n'
+
         return string.format(virtual=virtual,
                              static='static ' if method.is_static else '',
                              const=' const' if method.is_const else '',
@@ -158,10 +179,13 @@ class Writer(WriterBase):
                              abstract=' = 0' if method.is_abstract else '',
                              type=return_type,
                              name=method.name,
-                             args=args)
+                             args=args,
+                             body=body)
 
     def write_function_cpp(self, method):
         if method.is_external or method.is_abstract:
+            return ''
+        if method.template_types:
             return ''
         if method.specific_implementations:
             return method.specific_implementations
@@ -341,9 +365,12 @@ class Writer(WriterBase):
             parse_object(member)
 
         # functions
+        std_includes = ['map', 'list', 'string']
         for method in cls.functions:
             for _, argtype in method.args:
-                if 'pugi::' in argtype.type or 'Json::' in argtype.type:
+                if argtype.type in std_includes:
+                    add(includes, argtype)
+                elif 'pugi::' in argtype.type or 'Json::' in argtype.type:
                     add(forward_declarations_out, argtype)
                 else:
                     add(forward_declarations, argtype)
@@ -368,6 +395,13 @@ class Writer(WriterBase):
         includes.update(forw_declarations)
         includes.update(forw_declarations_out)
 
+        includes.update(self.get_includes_for_method(cls, functions_text, hpp_includes))
+
+        return self.build_includes(cls, includes)
+
+    def get_includes_for_method(self, cls, functions_text, hpp_includes):
+        includes = set()
+
         def add(set_, obj):
             set_.add(self.convert_type(obj.type))
             for arg in obj.template_args:
@@ -378,14 +412,14 @@ class Writer(WriterBase):
         for type_ in self.model.classes:
             name = type_.name
             if name not in hpp_includes and name in functions_text:
-                if cls.name not in RegexPatternCpp.regs_class_names:
-                    RegexPatternCpp.regs_class_names[cls.name] = re.compile(r'\b{}\b'.format(cls.name))
-                pattern = RegexPatternCpp.regs_class_names[cls.name]
+                if name not in RegexPatternCpp.regs_class_names:
+                    RegexPatternCpp.regs_class_names[name] = re.compile(r'\b{}\b'.format(name))
+                pattern = RegexPatternCpp.regs_class_names[name]
                 need = cls.name == name
                 need = need or pattern.search(functions_text) is not None
                 if need:
                     includes.add(name)
-        return self.build_includes(cls, includes)
+        return includes
 
     def build_includes(self, cls, includes):
         types = {

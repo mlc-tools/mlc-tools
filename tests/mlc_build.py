@@ -93,11 +93,14 @@ def test_virtual_methods():
 
 
 if __name__ == '__main__':
-    simple_test()
-    test_serialize()
-    test_functions()
-    unit_tests_generator()
-    test_virtual_methods()
+    if len(sys.argv) == 1:
+        simple_test()
+        test_serialize()
+        test_functions()
+        unit_tests_generator()
+        test_virtual_methods()
+    else:
+        exec(sys.argv[1])
 
     # Dont run this test in CI
     # test_database()

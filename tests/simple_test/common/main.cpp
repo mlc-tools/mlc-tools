@@ -43,9 +43,9 @@ void initialize_data_storage()
 class Logger : public mg::Logger
 {
 public:
-    virtual void print_log(bool result, const std::string& message) override
+    virtual void message(const std::string& message) override
     {
-        std::cout << message << " " << (result? "Ok" : "Fail") << std::endl;
+        std::cout << message << std::endl;
     }
 };
 
@@ -63,14 +63,14 @@ int main(int argc, char ** args)
 
 	Logger logger;
 
-	result = logger.push(test_enum(), "test_enum");
-    result = logger.push(test_side(), "test_side");
-    result = logger.push(test_all_types(&logger), "test_all_types");
+	result = test_enum();
+    result = test_side();
+    result = test_all_types(&logger);
 	result = mg::AllTests::run(&logger) && result;
 
     mg::RunAllTests test;
     test.initialize(&logger);
-    result = test.execute() && result;
+    result = result && test.execute();
 
     std::cout << "====================================" << std::endl;
     std::cout << "Sumary: " << std::endl;

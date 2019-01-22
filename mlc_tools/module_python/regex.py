@@ -30,7 +30,7 @@ class RegexPatternPython(object):
         (re.compile(r'if\s*\(\s*(.+)\s*\)'), r'if \1:', ['if']),
         (re.compile(r'if\s*!(.+):'), r'if not \1:', ['if']),
         (re.compile(r'else'), r'else:', ['else']),
-        (re.compile(r'in_map\s*\(\s*(.+),\s*(.+)\s*\)'), r'(\1 in \2)', ['in_map']),
+        (re.compile(r'in_map\s*\(\s*(.+?),\s*(.+?)\s*\)'), r'(\1 in \2)', ['in_map']),
         (re.compile(r'in_list\s*\(\s*(.+),\s*(.+)\s*\)'), r'(\1 in \2)', ['in_list']),
         (re.compile(r'list_push\s*\(\s*(.+),\s*(.+)\s*\)'), r'\1.append(\2)', ['list_push']),
         (re.compile(r'list_remove\s*\(\s*(.+),\s*(.+)\s*\)'), r'\1.remove(\2)', ['list_remove']),

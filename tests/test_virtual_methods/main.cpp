@@ -6,9 +6,9 @@
 class Logger : public mg::Logger
 {
 public:
-    virtual void print_log(bool result, const std::string& message) override
+    virtual void message(const std::string& message) override
     {
-        std::cout << message << " " << (result? "Ok" : "Fail") << std::endl;
+        std::cout << message << std::endl;
     }
 };
 

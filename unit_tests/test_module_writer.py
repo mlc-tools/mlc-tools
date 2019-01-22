@@ -9,6 +9,7 @@ from mlc_tools.core.object import Object, Objects
 from mlc_tools.core.class_ import *
 from mlc_tools.core.function import *
 from mlc_tools.base.model import Model
+from mlc_tools.base.parser import Parser
 from mlc_tools.base.language import Language
 from mlc_tools.base.linker import Linker
 from mlc_tools.base.validator import Validator
@@ -137,10 +138,10 @@ return result;
         model = create_test_model()
         result = save_function('php', model)
         self.assertEqual(result, 'function foo($a0, $a1)\n{\n    $result = $this->int_value;\n$result += $a0;\nreturn $result;\n\n}\n')
-        
-        
+
+
 class TestCppWriterBuildIncludesWithGroups(unittest.TestCase):
-    
+
     def test_build_include(self):
         from mlc_tools.module_cpp.writer import Writer
         cls1 = Class()
@@ -163,7 +164,7 @@ class TestCppWriterBuildIncludesWithGroups(unittest.TestCase):
         cls1.group = 'a'
         cls2.group = 'b'
         self.assertEqual(Writer.get_include_path_to_class(cls1, cls2), '"../b/cls2.h"')
-        
+
     def test_get_path_to_root(self):
         from mlc_tools.module_cpp.writer import Writer
         cls = Class()
@@ -174,12 +175,24 @@ class TestCppWriterBuildIncludesWithGroups(unittest.TestCase):
         cls.group = ''
         self.assertEqual(Writer.get_path_to_root(cls), '')
 
+    def test_get_includes_for_header_cpp(self):
+        from mlc_tools.module_cpp.writer import Writer
+        # get_includes_for_header
+        cls = Class()
+        cls.name = 'cls'
+
+        method = Parser.create_function('function void assertInMap(int key, map<int, int>:const:ref map)')
+        cls.functions.append(method)
+
+        writer = Writer('')
+        includes, f, f_out = writer.get_includes_for_header(cls)
+        self.assertIn('std::map', includes, '<map> in includes')
+
 
 def get_cpp():
     return '''#include "intrusive_ptr.h"
 #include "mg_Factory.h"
 #include "Test.h"
-#include <string>
 #include "mg_extensions.h"
 
 namespace mg

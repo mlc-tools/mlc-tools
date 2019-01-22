@@ -11,18 +11,18 @@ def has_python_version(number):
 
 
 def run_mlc_build():
-    if has_python_version(2):
-        if 0 != os.system('python  {}/tests/mlc_build.py'.format(root)):
-            exit(1)
+    if 0 != os.system('python  {}/tests/mlc_build.py'.format(root)):
+        exit(1)
+
     if has_python_version(3):
         if 0 != os.system('python3 {}/tests/mlc_build.py'.format(root)):
             exit(1)
 
 
 def run_unit_tests():
-    if has_python_version(2):
-        if 0 != os.system('python -m unittest discover -s {0}/unit_tests'.format(root)):
-            exit(1)
+    if 0 != os.system('python -m unittest discover -s {0}/unit_tests'.format(root)):
+        exit(1)
+
     if has_python_version(3):
         if 0 != os.system('python3 -m unittest discover -s {0}/unit_tests'.format(root)):
             exit(1)

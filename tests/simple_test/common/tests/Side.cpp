@@ -26,7 +26,8 @@ bool test_side()
 
     result = result && server != nullptr;
     result = result && test_common();
-    std::cout << "Test side (server) finished " << (result ? "success" : "with errors") << std::endl;
+    if(!result)
+        std::cout << "Test side (server) finished with errors" << std::endl;
     return result;
 }
 
@@ -41,7 +42,8 @@ bool test_side()
 
     result = result && client != nullptr;
     result = result && test_common();
-    std::cout << "Test side (client) finished " << (result ? "success" : "with errors") << std::endl;
+    if(!result)
+        std::cout << "Test side (client) finished with errors" << std::endl;
     return result;
 }
 
