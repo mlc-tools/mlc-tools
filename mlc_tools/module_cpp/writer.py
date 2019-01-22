@@ -365,9 +365,12 @@ class Writer(WriterBase):
             parse_object(member)
 
         # functions
+        std_includes = ['map', 'list', 'string']
         for method in cls.functions:
             for _, argtype in method.args:
-                if 'pugi::' in argtype.type or 'Json::' in argtype.type:
+                if argtype.type in std_includes:
+                    add(includes, argtype)
+                elif 'pugi::' in argtype.type or 'Json::' in argtype.type:
                     add(forward_declarations_out, argtype)
                 else:
                     add(forward_declarations, argtype)
