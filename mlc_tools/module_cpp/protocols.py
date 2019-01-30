@@ -307,8 +307,7 @@ for(const auto& t : $(FIELD))
 auto& arr_$(FIELD) = json["$(FIELD)"];
 for(int i = 0; i < arr_$(FIELD).size(); ++i)
 {
-    $(FIELD).emplace_back();
-    $(FIELD).back() = $(NAMESPACE)::get<$(ARG_0)>(arr_$(FIELD)[i]);
+    $(FIELD).push_back($(NAMESPACE)::get<$(ARG_0)>(arr_$(FIELD)[i]));
 }
 
 #list<int>, list<float>, list<string>
