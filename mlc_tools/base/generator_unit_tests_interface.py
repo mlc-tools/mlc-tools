@@ -157,7 +157,7 @@ class tests/TestCase<SerializedObject>:test
     {
         if(this->result && !result)
         {
-            this->logger->message(get_type() + ":");
+            this->logger->message(this->get_type() + ":");
         }
         if(!result)
         {
