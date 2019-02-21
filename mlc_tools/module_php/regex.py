@@ -71,6 +71,7 @@ class RegexPatternPhp(object):
         (re.compile(r'list_remove\((\$.+?),\s*([\$.\w]+?)\);'), r'array_splice(\1, array_search(\2, \1), 1);',
          ['list_remove']),
         (re.compile(r'list_clear\((.+?)\);'), r'\1 = array();', ['list_clear']),
+        (re.compile(r'list_resize\s*\(\s*(.+),\s*(.+)\s*\)'), r'\1 = array_fill(0, \2, NULL);', ['list_resize']),
         (re.compile(r'string_empty\((.+?)\)'), r'empty(\1)', ['string_empty']),
         (re.compile(r'random_float\(\)'), r'(mt_rand() * 1.0 / mt_getrandmax())', ['random_float']),
         (re.compile(r'random_int\((.+?),\s*(.+)\)'), r'mt_rand(\1, \2-1)', ['random_int']),

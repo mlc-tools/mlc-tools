@@ -53,6 +53,12 @@ namespace @{namespace}
         vector.clear();
     }
 
+    template <class T>
+    void list_resize(std::vector<T>& vector, int size)
+    {
+        vector.resize(size);
+    }
+
     template <class T, class P>
     int map_size(const std::map<T, P>& map)
     {
@@ -69,7 +75,7 @@ namespace @{namespace}
         auto iter = map.find(key);
         if(iter != map.end())
         {
-            map.erase(iter); 
+            map.erase(iter);
         }
     }
 

@@ -109,6 +109,19 @@ class TestTranslates<ITestTranslates>
         list_clear(vector);
         this->assertTrue(list_size(vector) == 0);
     }
+    function void test_list_resize()
+    {
+        list<int> vector;
+
+        list_resize(vector, 1);
+        this->assertTrue(list_size(vector) == 1);
+
+        list_resize(vector, 2);
+        this->assertTrue(list_size(vector) == 2);
+
+        list_resize(vector, 10);
+        this->assertTrue(list_size(vector) == 10);
+    }
     function void test_string_empty()
     {
         this->assertTrue(string_empty(""));
