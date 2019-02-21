@@ -39,7 +39,7 @@ class RegexPatternPython(object):
         (re.compile(r'list_resize\s*\(\s*(.+),\s*(.+)\s*\)'), r'\1 = [None for _ in range(int(\2))]', ['list_resize']),
         (re.compile(r'map_size\s*\('), r'len(', ['map_size']),
         (re.compile(r'map_clear\s*\(\s*(.+)\s*\)'), r'\1 = dict()', ['map_clear']),
-        (re.compile(r'map_remove\s*\(\s*(.+),\s*(.+)\s*\)'), r'if \2 in \1: \n del \1[\2]', ['map_remove']),
+        (re.compile(r'map_remove\s*\(\s*(.+),\s*(.+)\s*\)'), r'\1.pop(\2, None)', ['map_remove']),
         (re.compile(r'string_empty\((.+?)\)'), r'(not (\1))', ['string_empty']),
         (re.compile(r'string_size\((.+?)\)'), r'len(\1)', ['string_size']),
         (re.compile(r'(\w+)\s+(\w+);'), r'\2 = \1()'),
