@@ -37,6 +37,7 @@ tests/*/build*
 mlc.sln
 /out
 /temp
+temp.py
 
 /dist
 /build

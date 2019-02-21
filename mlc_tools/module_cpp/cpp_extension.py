@@ -58,6 +58,20 @@ namespace @{namespace}
     {
         return static_cast<int>(map.size());
     }
+    template <class T, class P>
+    void map_clear(std::map<T, P>& map)
+    {
+        map.clear();
+    }
+    template <class T, class P>
+    void map_remove(std::map<T, P>& map, const T& key)
+    {
+        auto iter = map.find(key);
+        if(iter != map.end())
+        {
+            map.erase(iter); 
+        }
+    }
 
     bool string_empty(const std::string& string);
     int string_size(const std::string& string);
