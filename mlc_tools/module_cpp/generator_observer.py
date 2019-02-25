@@ -6,10 +6,10 @@ PREDEFINED = '''
 #define __@{namespace}_@{name}_h__
 #include <assert.h>
 #include <functional>
-#include <map>
 #include <set>
 #include <thread>
 #include <unordered_map>
+#include "intrusive_ptr.h"
 
 namespace @{namespace}
 {
