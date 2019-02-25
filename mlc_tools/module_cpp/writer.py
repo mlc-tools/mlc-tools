@@ -274,6 +274,14 @@ class Writer(WriterBase):
         for arg in obj.template_args:
             assert(isinstance(arg, Object))
             templates.append(Writer.write_named_object(arg, '', False, True))
+            if arg.callable_args is not None:
+                callable_args = []
+                for callable in arg.callable_args:
+                    callable_args.append(Writer.write_named_object(callable, '', True, False))
+                callable_args = '({})'.format(', '.join(callable_args))
+                templates[-1] += callable_args
+
+
         templates = ('<' + ', '.join(templates) + '>') if templates else ''
         is_ref = obj.is_ref
         is_const = obj.is_const
@@ -361,6 +369,9 @@ class Writer(WriterBase):
             set_.add(self.convert_type(obj.type))
             for arg in obj.template_args:
                 add(forward_declarations, arg)
+            if obj.callable_args is not None:
+                for arg in obj.callable_args:
+                    add(forward_declarations, arg)
 
         # members
         for member in cls.members:

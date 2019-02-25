@@ -4,6 +4,9 @@ class observable/ObservableClass<SerializedObject>
 	Observable<void(int)> eventTestInt
 	Observable<void(int, int)> eventTestInt2
 	Observable<void(int, string)> eventTestString
+	Observable<void(string)> eventTestString2
+	Observable<void(DataUnit:link)> eventTestDataLink
+	Observable<void(DataUnit*)> eventTestDataPointer
 }
 
 class observable/ListenerClass<SerializedObject>
@@ -23,6 +26,15 @@ class observable/ListenerClass<SerializedObject>
 	function void listen_int_2(int a, int b)
 	{
 	    this->test->value = a + b;
+	}
+
+	function void listen_link(DataUnit:link data)
+	{
+	    this->test->value = 1;
+	}
+	function void listen_pointer(DataUnit* data)
+	{
+	    this->test->value = 1;
 	}
 }
 
@@ -85,6 +97,7 @@ class observable/TestObservableClass<ITestObservableClass>
 		this->assertTrue(this->value == 1);
 		this->test.eventTestInt.notify(10);
 		this->assertTrue(this->value == 10);
+		this->test.eventTestInt.remove(listener);
 	}
 
 	function void test_with_arg_int_two()
@@ -96,6 +109,33 @@ class observable/TestObservableClass<ITestObservableClass>
 		this->assertTrue(this->value == 2);
 		this->test.eventTestInt2.notify(10, 10);
 		this->assertTrue(this->value == 20);
+		this->test.eventTestInt2.remove(listener);
+	}
+
+	function void test_with_data()
+	{
+	    auto data = DataStorage::shared().get<DataUnit>("unitname1");
+		auto listener = new ListenerClass();
+		listener->test = this;
+		this->test.eventTestDataLink.add(listener, &ListenerClass::listen_link, std::placeholders::_1);
+
+		this->value = 0;
+		this->test.eventTestDataLink.notify(data);
+		this->assertEqual(this->value, 1);
+		this->test.eventTestDataLink.remove(listener);
+	}
+
+	function void test_with_pointer()
+	{
+	    auto unit = new DataUnit();
+		auto listener = new ListenerClass();
+		listener->test = this;
+		this->test.eventTestDataPointer.add(listener, &ListenerClass::listen_pointer, std::placeholders::_1);
+
+		this->value = 0;
+		this->test.eventTestDataPointer.notify(unit);
+		this->assertEqual(this->value, 1);
+		this->test.eventTestDataPointer.remove(listener);
 	}
 
 	function void listen()

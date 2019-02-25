@@ -26,6 +26,7 @@ class Object(object):
     def __init__(self, type_=''):
         self.type = type_
         self.template_args = []
+        self.callable_args = None
         self.name = ''
         self.initial_value = None
         self.is_pointer = False
