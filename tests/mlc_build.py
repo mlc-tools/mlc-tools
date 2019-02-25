@@ -54,12 +54,14 @@ def simple_test():
     generator.add_config_directories(root + 'config_additional')
     generator.add_data_directories(root + 'data_additional')
     run_tests(generator, root, True)
+    return 0
 
 
 def test_functions():
     root = get_root() + '/tests/test_functions/'
     generator = Mlc(configs_directory=root + 'config', generate_intrusive=True, generate_factory=True)
     run_tests(generator, root)
+    return 0
 
 
 def test_database():
@@ -69,6 +71,7 @@ def test_database():
                     generate_factory=True,
                     generate_tests=True)
     run_tests(generator, root)
+    return 0
 
 
 def test_serialize():
@@ -78,18 +81,21 @@ def test_serialize():
     result = os.system(command)
     if 0 != result:
         exit(1)
+    return 0
 
 
 def unit_tests_generator():
     root = get_root() + '/tests/unit_tests_generator/'
     generator = Mlc(configs_directory=root, generate_intrusive=True, generate_factory=True, generate_tests=True)
     run_tests(generator, root)
+    return 0
 
 
 def test_virtual_methods():
     root = get_root() + '/tests/test_virtual_methods/'
     generator = Mlc(configs_directory=root, generate_intrusive=True, generate_factory=True, generate_tests=True)
     run_tests(generator, root, python=False, php=False)
+    return 0
 
 
 if __name__ == '__main__':

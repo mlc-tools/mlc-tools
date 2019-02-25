@@ -1,4 +1,5 @@
 
+from .writer import Writer
 
 class GeneratorFactory(object):
 
@@ -7,7 +8,10 @@ class GeneratorFactory(object):
 
     @staticmethod
     def generate(model):
-        model.add_file('Factory.php', FACTORY)
+        writer = Writer('')
+        writer.model = model
+        content = writer.prepare_file(FACTORY)
+        model.add_file('Factory.php', content)
 
 
 FACTORY = '''<?php
@@ -20,6 +24,7 @@ class Factory
         return new $type;
     }
 
+    {{format=xml}}
     static function create_command_from_xml($payload)
     {
         $xml     = simplexml_load_string($payload);
@@ -36,6 +41,16 @@ class Factory
         $command->serialize_xml($xml);
         return $xml->asXML();
     }
+        
+    static function clone_object($obj)
+    {
+        $payload = Factory::serialize_command_to_xml($obj);
+        $clone = Factory::create_command_from_xml($payload);
+        return $clone;
+    }
+
+    {{end_format=xml}}
+    {{format=json}}
     
     static function create_command_from_json($payload)
     {
@@ -54,6 +69,16 @@ class Factory
         $command->serialize_json($json->$type);
         return json_encode($json, JSON_PRETTY_PRINT);
     }
+    {{end_format=json}}
+    
+    {{format=only_json}}
+    static function clone_object($obj)
+    {
+        $payload = Factory::serialize_command_to_json($obj);
+        $clone = Factory::create_command_from_json($payload);
+        return $clone;
+    }
+    {{end_format=only_json}}
 
 };
 

@@ -71,4 +71,12 @@ class WriterBase(object):
             else:
                 text = text.replace('{{format=%s}}' % format_string, '')
                 text = text.replace('{{end_format=%s}}' % format_string, '')
+
+            if self.model.serialize_formats == format_code:
+                text = text.replace('{{format=only_%s}}' % format_string, '')
+                text = text.replace('{{end_format=only_%s}}' % format_string, '')
+            else:
+                pattern = re.compile(r'\{\{format=only_%s\}\}[\s\S]+?\{\{end_format=only_%s\}\}' % (format_string, format_string))
+                text = pattern.sub('', text)
+
         return text

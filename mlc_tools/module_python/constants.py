@@ -10,6 +10,7 @@ class Factory(object):
 {builders}
         return None
 
+    {{{{format=xml}}}}
     @staticmethod
     def create_command_from_xml(string):
         root = ET.fromstring(string)
@@ -26,6 +27,15 @@ class Factory(object):
         return ET.tostring(root)
 
     @staticmethod
+    def clone_object(obj):
+        payload = Factory.serialize_command_to_xml(obj)
+        clone = Factory.create_command_from_xml(payload)
+        return clone
+        
+    {{{{end_format=xml}}}}
+    {{{{format=json}}}}
+
+    @staticmethod
     def create_command_from_json(string):
         dictionary = json.loads(string)
         for key in dictionary:
@@ -40,4 +50,13 @@ class Factory(object):
         js[command.get_type()] = dict()
         command.serialize_json(js[command.get_type()])
         return json.dumps(js)
+    {{{{end_format=json}}}}
+
+    {{{{format=only_json}}}}
+    @staticmethod
+    def clone_object(obj):
+        payload = Factory.serialize_command_to_json(obj)
+        clone = Factory.create_command_from_json(payload)
+        return clone
+    {{{{end_format=only_json}}}}
 '''
