@@ -5,6 +5,19 @@ class Translates<SerializedObject>
 
     }
 }
+class Point<SerializedObject>
+{
+    int x
+    int y
+
+    function Point create(int x, int y):static
+    {
+        Point point;
+        point.x = x;
+        point.y = y;
+        return point;
+    }
+}
 class TestTranslates<ITestTranslates>
 {
     function void test_dummy_function()
@@ -146,5 +159,15 @@ class TestTranslates<ITestTranslates>
 
         this->assertTrue(in_map(2, map));
         this->assertFalse(in_map(1, map));
+    }
+
+    function void test_list_push()
+    {
+        // https://trello.com/c/86FPV2aa/21-fixes.
+        list<Point> result;
+        Point point;
+        point.x = 1;
+        point.y = 2;
+        list_push(result, Point::create(point.x, point.y-1));
     }
 }

@@ -78,6 +78,7 @@ class RegexPatternPhp(object):
         (re.compile(r'std::strcat\((.+?),\s*(.+?)\)'), r'((\1).(\2))', ['std::strcat']),
         (re.compile(r'map_clear\s*\(\s*(.+)\s*\)'), r'\1 = array()', ['map_clear']),
         (re.compile(r'map_remove\s*\(\s*(.+),\s*(.+)\s*\)'), r'unset(\1[\2])', ['map_remove']),
+        (re.compile(r'list_push\s*\((.+)\)'), r'array_push(\1)', ['list_push']),
 
         # Exception with try/catch block (one catch)
         (re.compile(r'try\n\s*{([\s\S.]+?)}\n\s*catch__((\w+)__(\w*))\n\s+{([\s\S.]+?)}'),
@@ -109,7 +110,6 @@ class RegexPatternPhp(object):
         ('std::sqrt', 'sqrt'),
         ('in_list(', 'in_array('),
         ('in_map', 'array_key_exists'),
-        ('list_push', 'array_push'),
         ('list_size', 'count'),
         ('map_size', 'count'),
     )
