@@ -16,13 +16,15 @@ class SerializerBase(object):
 
     def generate_methods(self, model):
         self.model = model
+        self.load_protocols()
 
+    def load_protocols(self):
         formats = SerializeFormat.get_all()
         for serialize_format, string_format in formats:
-            if model.serialize_formats & serialize_format:
-                model.parser.load_default_serialize_protocol(self.get_protocol(string_format))
-                self.serialize_protocol = model.serialize_protocol
-                for cls in model.classes:
+            if self.model.serialize_formats & serialize_format:
+                self.model.parser.load_default_serialize_protocol(self.get_protocol(string_format))
+                self.serialize_protocol = self.model.serialize_protocol
+                for cls in self.model.classes:
                     self.current_class = cls
                     self.create_serialization_function(cls, SERIALIZATION, string_format)
                     self.create_serialization_function(cls, DESERIALIZATION, string_format)
