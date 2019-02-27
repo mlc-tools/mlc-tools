@@ -591,6 +591,7 @@ namespace @{namespace}
             result->release();
             return result;
         }
+        
         {{format=json}}
         template <class TType>
         static std::string serialize_command_to_json(intrusive_ptr<TType> command)
@@ -616,7 +617,6 @@ namespace @{namespace}
             command->deserialize_json(json[type]);
             return command;
         }
-        {{end_format=json}}{{format=only_json}}
         template <class TType>
         static intrusive_ptr<TType> clone_object(intrusive_ptr<TType> object)
         {
@@ -624,7 +624,9 @@ namespace @{namespace}
             auto clone = Factory::create_command_from_json<TType>(payload);
             return clone;
         }
-        {{end_format=only_json}}{{format=xml}}
+        {{end_format=json}}
+        
+        {{format=xml}}
         template <class TType>
         static std::string serialize_command_to_xml(intrusive_ptr<TType> command)
         {
@@ -658,7 +660,7 @@ namespace @{namespace}
             command->deserialize_xml(root);
             return command;
         }
-        {{end_format=xml}}{{format=only_xml}}
+
         template <class TType>
         static intrusive_ptr<TType> clone_object(intrusive_ptr<TType> object)
         {
@@ -666,7 +668,76 @@ namespace @{namespace}
             auto clone = Factory::create_command_from_xml<TType>(payload);
             return clone;
         }
-        {{end_format=only_xml}}
+        {{end_format=xml}}
+        
+        {{format=both}}
+        template <class TType>
+        static std::string serialize_command_to_xml(intrusive_ptr<TType> command)
+        {
+            pugi::xml_document doc;
+            auto root = doc.append_child(command->get_type().c_str());
+            command->serialize_xml(root);
+            
+            std::stringstream stream;
+            pugi::xml_writer_stream writer(stream);
+            #ifdef NDEBUG
+            doc.save(writer,
+                     "",
+                     pugi::format_no_declaration | pugi::format_raw,
+                     pugi::xml_encoding::encoding_utf8);
+            #else
+            doc.save(writer,
+                     PUGIXML_TEXT(" "),
+                     pugi::format_no_declaration | pugi::format_indent,
+                     pugi::xml_encoding::encoding_utf8);
+            #endif
+            return stream.str();
+        }
+        
+        template <class TType>
+        static intrusive_ptr<TType> create_command_from_xml(const std::string& payload)
+        {
+            pugi::xml_document doc;
+            doc.load(payload.c_str());
+            auto root = doc.root().first_child();
+            auto command = shared().build<TType>(root.name());
+            command->deserialize_xml(root);
+            return command;
+        }
+        
+        template <class TType>
+        static std::string serialize_command_to_json(intrusive_ptr<TType> command)
+        {
+            Json::Value json;
+            command->serialize_json(json[command->get_type()]);
+            
+            Json::StreamWriterBuilder wbuilder;
+            wbuilder["indentation"] = "";
+            return Json::writeString(wbuilder, json);
+        }
+        
+        template <class TType>
+        static intrusive_ptr<TType> create_command_from_json(const std::string& payload)
+        {
+            Json::Value json;
+            Json::Reader reader;
+            reader.parse(payload, json);
+            
+            auto type = json.getMemberNames()[0];
+            auto command = shared().build<TType>(type);
+            if (command != nullptr)
+            command->deserialize_json(json[type]);
+            return command;
+        }
+        
+        template <class TType>
+        static intrusive_ptr<TType> clone_object(intrusive_ptr<TType> object)
+        {
+            auto payload = Factory::serialize_command_to_json<TType>(object);
+            auto clone = Factory::create_command_from_json<TType>(payload);
+            return clone;
+        }
+        {{end_format=both}}
     private:
         std::map<std::string, IBuilder*> _builders;
     };
