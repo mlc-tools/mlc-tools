@@ -75,7 +75,6 @@ class Model(object):
         self.out_dict = None
         self.files = []
         self.created_files = []
-        # self.serialize_formats = SerializeFormat.xml | SerializeFormat.json
 
     def add_class(self, cls):
         self.classes_dict[cls.name] = cls

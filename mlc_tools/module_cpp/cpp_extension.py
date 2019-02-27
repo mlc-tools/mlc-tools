@@ -616,9 +616,7 @@ namespace @{namespace}
             command->deserialize_json(json[type]);
             return command;
         }
-        {{end_format=json}}
-        
-        {{format=only_json}}
+        {{end_format=json}}{{format=only_json}}
         template <class TType>
         static intrusive_ptr<TType> clone_object(intrusive_ptr<TType> object)
         {
@@ -626,9 +624,7 @@ namespace @{namespace}
             auto clone = Factory::create_command_from_json<TType>(payload);
             return clone;
         }
-        {{end_format=only_json}}
-
-        {{format=xml}}
+        {{end_format=only_json}}{{format=xml}}
         template <class TType>
         static std::string serialize_command_to_xml(intrusive_ptr<TType> command)
         {
@@ -662,8 +658,7 @@ namespace @{namespace}
             command->deserialize_xml(root);
             return command;
         }
-        {{end_format=xml}}
-        {{format=only_xml}}
+        {{end_format=xml}}{{format=only_xml}}
         template <class TType>
         static intrusive_ptr<TType> clone_object(intrusive_ptr<TType> object)
         {
