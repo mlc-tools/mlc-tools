@@ -205,6 +205,54 @@ class TestCppWriterWriteObject(unittest.TestCase):
                          'intrusive_ptr<DataBase> Test::db(nullptr);')
 
 
+class TestWriterPrepareFile(unittest.TestCase):
+
+    def test_xml(self):
+        from mlc_tools.base.model import SerializeFormat
+        writer = self.create_writer()
+        writer.model.serialize_formats = SerializeFormat.xml
+        text = writer.prepare_file(TestWriterPrepareFile.get_text())
+        self.assertIn('xml_functional', text)
+        self.assertNotIn('json_functional', text)
+        self.assertNotIn('both_functional', text)
+        self.assertNotIn('format=', text)
+
+    def test_json(self):
+        from mlc_tools.base.model import SerializeFormat
+        writer = self.create_writer()
+        writer.model.serialize_formats = SerializeFormat.json
+        text = writer.prepare_file(TestWriterPrepareFile.get_text())
+        self.assertNotIn('xml_functional', text)
+        self.assertIn('json_functional', text)
+        self.assertNotIn('both_functional', text)
+        self.assertNotIn('format=', text)
+
+    def test_both(self):
+        from mlc_tools.base.model import SerializeFormat
+        writer = self.create_writer()
+        writer.model.serialize_formats = SerializeFormat.xml | SerializeFormat.json
+        text = writer.prepare_file(TestWriterPrepareFile.get_text())
+        self.assertNotIn('xml_functional', text)
+        self.assertNotIn('json_functional', text)
+        self.assertIn('both_functional', text)
+        self.assertNotIn('format=', text)
+
+    @staticmethod
+    def create_writer():
+        from mlc_tools.base.writer_base import WriterBase
+        writer = WriterBase('')
+        writer.model = Model()
+        return writer
+
+    @staticmethod
+    def get_text():
+        text = '''
+        {{format=xml}}xml_functional{{end_format=xml}}
+        {{format=json}}json_functional{{end_format=json}}
+        {{format=both}}both_functional{{end_format=both}}
+        '''
+        return text
+
 
 def get_cpp():
     return '''#include "intrusive_ptr.h"

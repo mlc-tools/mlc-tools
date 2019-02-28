@@ -1,6 +1,7 @@
 import re
 from .model import SerializeFormat
 
+
 # pylint: disable=no-self-use
 # pylint: disable=unused-argument
 class WriterBase(object):
@@ -64,11 +65,30 @@ class WriterBase(object):
         return ''
 
     def prepare_file(self, text):
+
+        def remove_content(txt, type):
+            pattern = re.compile(r'\{\{format=%s\}\}[\s\S]+?\{\{end_format=%s\}\}' % (type, type))
+            txt = pattern.sub('', txt)
+            return txt
+
+        def remove_marker(txt, type):
+            txt = txt.replace('{{format=%s}}' % type, '')
+            txt = txt.replace('{{end_format=%s}}' % type, '')
+            return txt
+
+        all = SerializeFormat.xml | SerializeFormat.json
         for format_code, format_string in SerializeFormat.get_all():
-            if not (self.model.serialize_formats & format_code):
-                pattern = re.compile(r'\{\{format=%s\}\}[\s\S]+?\{\{end_format=%s\}\}'%(format_string, format_string))
-                text = pattern.sub('', text)
+            if self.model.serialize_formats == all:
+                text = remove_content(text, format_string)
             else:
-                text = text.replace('{{format=%s}}' % format_string, '')
-                text = text.replace('{{end_format=%s}}' % format_string, '')
+                if not (self.model.serialize_formats & format_code):
+                    text = remove_content(text, format_string)
+                else:
+                    text = remove_marker(text, format_string)
+
+        if self.model.serialize_formats != all:
+            text = remove_content(text, 'both')
+        else:
+            text = remove_marker(text, 'both')
+
         return text

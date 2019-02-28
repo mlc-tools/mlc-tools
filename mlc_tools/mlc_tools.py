@@ -105,7 +105,6 @@ class Mlc(object):
         language.get_writer().save(self.model)
         self.model.save_files()
         self.model.remove_old_files()
-        # module_python
 
     def generate_data(self, **kwargs):
         self._parse_kwargs(**kwargs)
