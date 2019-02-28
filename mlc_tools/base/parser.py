@@ -159,8 +159,13 @@ class Parser(object):
         if expression:
             obj.initial_value = expression
 
-        # parse type, name, tempalte arguments
+        # parse type, name, template arguments
         parse_object(obj, line)
+
+        has_callable, obj.callable_args, obj.type = self.parse_function_args(obj.type)
+        obj.callable_args = [a[1] for a in obj.callable_args]
+        if not has_callable:
+            obj.callable_args = None
 
         # parse specific modifiers
         obj.type = obj.find_modifiers(obj.type)
@@ -188,18 +193,9 @@ class Parser(object):
         else:
             line = line[len('function'):].strip()
 
-        args_s = line[line.find('(') + 1:line.rfind(')')]
-        args = smart_split(args_s, ',')
+        has_callable, method.args, line = self.parse_function_args(line)
+        assert has_callable
 
-        for arg in args:
-            arg = arg.strip()
-            assert not arg.startswith('const ')
-
-            obj = Object()
-            self.parse_object(obj, arg)
-            method.args.append([obj.name, obj])
-
-        line = line[:line.find('(')] + line[line.rfind(')') + 1:]
         line = line.replace(';', '')
         line = re.sub(r'{.*}', '', line)
         k = line.rfind(' ')
@@ -213,6 +209,27 @@ class Parser(object):
         self.parse_object(method.return_type, return_s)
 
         return method
+
+    def parse_function_args(self, line):
+        result = []
+        left = line.find('(')
+        last = line.rfind(')')
+        if left == -1 or last == -1 or last < left:
+            return False, result, line
+
+        args_s = line[line.find('(') + 1:line.rfind(')')]
+        args = smart_split(args_s, ',')
+
+        for arg in args:
+            arg = arg.strip()
+            assert not arg.startswith('const ')
+
+            obj = Object()
+            self.parse_object(obj, arg)
+            result.append([obj.name, obj])
+
+        line = line[:line.find('(')] + line[line.rfind(')') + 1:]
+        return True, result, line
 
     @staticmethod
     def _is_class(line):
