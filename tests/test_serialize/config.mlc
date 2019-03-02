@@ -62,6 +62,7 @@ class TestData<SerializedObject>
 	map<string, bool> string_bool_map
 	TestObject object
 	TestObject* object_ptr
+	list<TestObject> object_list
 	list<TestObject*> object_ptr_list
 	map<string, TestObject*> object_ptr_map
 	TestEnum enum_value
@@ -116,6 +117,13 @@ class TestData<SerializedObject>
 		list_push(this->enum_list, TestEnum::value_2);
 		list_push(this->enum_list, TestEnum::value_3);
 		list_push(this->enum_list, TestEnum::value_1);
+
+		TestObject obj1;
+		obj1.value = 1;
+		TestObject obj2;
+		obj2.value = 2;
+		list_push(this->object_list, obj1);
+		list_push(this->object_list, obj2);
 	}
 
 	function bool equal(TestData* r)
@@ -154,7 +162,13 @@ class TestData<SerializedObject>
 		result = result && map_size(this->object_ptr_map) == map_size(r->object_ptr_map);
 		result = result && this->enum_value == r->enum_value;
 		result = result && this->enum_map == r->enum_map;
-		auto size = list_size(this->object_ptr_list);
+
+		auto size = list_size(this->object_list);
+		for(int i=0; i<size; ++i)
+		{
+			result = result && this->object_list[i].equal(&r->object_list[i]);
+		}
+		size = list_size(this->object_ptr_list);
 		for(int i=0; i<size; ++i)
 		{
 			result = result && this->object_ptr_list[i]->equal(r->object_ptr_list[i]);
@@ -163,9 +177,9 @@ class TestData<SerializedObject>
 		{
 			result = result && this->object_ptr_map[key]->equal(r->object_ptr_map[key]);
 		}
-		
+
 		result = result && this->enum_list == r->enum_list;
-		
+
 
 		return result;
 	}
