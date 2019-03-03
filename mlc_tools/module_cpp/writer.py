@@ -467,18 +467,18 @@ class Writer(WriterBase):
         return '\n'.join(result)
 
     @staticmethod
-    def get_include_path_to_class(cls, to_cls):
+    def get_include_path_to_class(cls_, to_cls):
         include = '"'
-        if cls.group and to_cls.group != cls.group:
+        if cls_.group and to_cls.group != cls_.group:
             include += '../'
-        if to_cls.group and to_cls.group != cls.group:
+        if to_cls.group and to_cls.group != cls_.group:
             include += to_cls.group + '/'
         include += to_cls.name + '.h"'
         return include
 
     @staticmethod
-    def get_path_to_root(cls):
-        if cls.group:
+    def get_path_to_root(cls_):
+        if cls_.group:
             return '../'
         return ''
 

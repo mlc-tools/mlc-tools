@@ -1,0 +1,92 @@
+class compare/CompareTestWithoutPointer<SerializedObject>
+{
+    int a
+    string b
+
+    function void test(){}
+}
+
+class compare/CompareTestWithPointer<SerializedObject>
+{
+    CompareTestWithoutPointer* pointer
+}
+
+
+class compare/TestCompareTestWithoutPointer<ITestCompareTestWithoutPointer>
+{
+    function void test_test(){}
+
+    function void test_without_pointer_compare()
+    {
+        CompareTestWithoutPointer o1;
+        CompareTestWithoutPointer o2;
+
+        o1.a = 1;
+        o1.b = "string";
+
+        o2.a = 1;
+        o2.b = "string";
+
+        this->assertFalse(o1 != o2, "TestCompare false. !=");
+        this->assertFalse(o2 != o1, "TestCompare false. !=");
+        this->assertTrue(o1 == o2, "TestCompare. ==");
+        this->assertTrue(o2 == o1, "TestCompare. ==");
+        this->assertEqual(o1, o2, "TestCompare. equal");
+        this->assertEqual(o2, o1, "TestCompare. equal");
+
+        o2.b = "other";
+        this->assertTrue(o1 != o2, "TestCompare. !=");
+        this->assertTrue(o2 != o1, "TestCompare. !=");
+        this->assertFalse(o1 == o2, "TestCompare false. ==");
+        this->assertFalse(o2 == o1, "TestCompare false. ==");
+        this->assertNotEqual(o1, o2, "TestCompare. not equal");
+        this->assertNotEqual(o2, o1, "TestCompare. not equal");
+
+        o2.a = 2;
+        o2.b = "string";
+        this->assertTrue(o1 != o2, "TestCompare. !=");
+        this->assertFalse(o1 == o2, "TestCompare false. ==");
+        this->assertNotEqual(o1, o2, "TestCompare. not equal");
+
+        o2.a = 2;
+        o2.b = "other";
+        this->assertTrue(o1 != o2, "TestCompare. !=");
+        this->assertFalse(o1 == o2, "TestCompare false. ==");
+        this->assertNotEqual(o1, o2, "TestCompare. not equal");
+    }
+
+    function void test_with_pointer_compare()
+    {
+        CompareTestWithPointer o1;
+        CompareTestWithPointer o2;
+
+        this->assertTrue(o1 == o2, "TestCompare with null pointer. ==");
+        this->assertTrue(o2 == o1, "TestCompare with null pointer. ==");
+
+
+        o1.pointer = new CompareTestWithoutPointer();
+        o1.pointer->a = 1;
+        o1.pointer->b = "string";
+
+        this->assertTrue(o1 != o2, "TestCompare with null pointer. !=");
+        this->assertTrue(o2 != o1, "TestCompare with null pointer. !=");
+
+
+        o2.pointer = new CompareTestWithoutPointer();
+        o2.pointer->a = 1;
+        o2.pointer->b = "string";
+
+        this->assertTrue(o1 == o2, "TestCompare with pointer. ==");
+        this->assertEqual(o1, o2, "TestCompare with pointer. equal");
+
+        o2.pointer->a = 2;
+        o2.pointer->b = "other";
+        this->assertTrue(o1 != o2, "TestCompare with pointer. !=");
+        this->assertTrue(o2 != o1, "TestCompare with pointer. !=");
+        this->assertFalse(o1 == o2, "TestCompare with pointer false. ==");
+        this->assertFalse(o2 == o1, "TestCompare with pointer false. ==");
+        this->assertNotEqual(o1, o2, "TestCompare with pointer. not equal");
+        this->assertNotEqual(o2, o1, "TestCompare with pointer. not equal");
+    }
+}
+

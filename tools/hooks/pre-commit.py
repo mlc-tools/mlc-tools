@@ -36,10 +36,10 @@ def run_pylint():
     if not groups:
         return
     current, previuos, delta = groups[0]
-    if float(current) < 9.9:
+    if float(current) < 9.95:
         print('Low rated')
         exit(1)
-    if float(delta) < -0.1:
+    if float(delta) < 0.0:
         print('Low delta')
         exit(1)
     if 'unused-import' in out:
@@ -47,6 +47,9 @@ def run_pylint():
         exit(1)
     if 'trailing - whitespace' in out:
         print('Please remove a trailing - whitespace warning. see pylint')
+        exit(1)
+    if 'no-name-in-module' in out:
+        print('Please check a imports. see pylint no-name-in-module warning')
         exit(1)
 
 

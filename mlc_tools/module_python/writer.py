@@ -150,6 +150,8 @@ class {name}:
     def __init__(self):
 {init_superclass}
 {initialize_list}
+    def __hash__(self):
+        return id(self)
 {functions}'''
 
 PATTERN_METHOD = '''

@@ -286,15 +286,13 @@ namespace mg
     bool Test::operator ==(const Test& rhs) const
     {
         bool result = true;
-        result = result && int_value == rhs.int_value;
+        result = result && this->int_value == rhs.int_value;
         return result;
     }
 
     bool Test::operator !=(const Test& rhs) const
     {
-        bool result = false;
-        result = result || int_value != rhs.int_value;
-        return result;
+        return !(*this == rhs);
     }
 
     std::string Test::get_type() const

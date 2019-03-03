@@ -4,6 +4,7 @@ from .generator_data_storage import GeneratorDataStorage
 from .generator_factory import GeneratorFactory
 from .generator_package import GeneratorPackage
 from .generator_observer import GeneratorObserver
+from .generator_operator_equals import GeneratorOperatorEquals
 
 
 class Generator(GeneratorBase):
@@ -18,3 +19,4 @@ class Generator(GeneratorBase):
         GeneratorFactory().generate(model)
         GeneratorPackage().generate(model)
         GeneratorObserver().generate(model)
+        GeneratorOperatorEquals().generate(model)
