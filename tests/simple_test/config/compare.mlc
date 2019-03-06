@@ -1,4 +1,9 @@
-class compare/CompareTestWithoutPointer<SerializedObject>
+class compare/CompareTestBase<SerializedObject>
+{
+    int id
+}
+
+class compare/CompareTestWithoutPointer<CompareTestBase>
 {
     int a
     string b
@@ -21,9 +26,11 @@ class compare/TestCompareTestWithoutPointer<ITestCompareTestWithoutPointer>
         CompareTestWithoutPointer o1;
         CompareTestWithoutPointer o2;
 
+        o1.id = 1;
         o1.a = 1;
         o1.b = "string";
 
+        o2.id = 1;
         o2.a = 1;
         o2.b = "string";
 
@@ -33,6 +40,14 @@ class compare/TestCompareTestWithoutPointer<ITestCompareTestWithoutPointer>
         this->assertTrue(o2 == o1, "TestCompare. ==");
         this->assertEqual(o1, o2, "TestCompare. equal");
         this->assertEqual(o2, o1, "TestCompare. equal");
+
+        o2.id = 2;
+        this->assertTrue(o1 != o2, "TestCompare. !=");
+        this->assertTrue(o2 != o1, "TestCompare. !=");
+        this->assertFalse(o1 == o2, "TestCompare false. ==");
+        this->assertFalse(o2 == o1, "TestCompare false. ==");
+        this->assertNotEqual(o1, o2, "TestCompare. not equal");
+        this->assertNotEqual(o2, o1, "TestCompare. not equal");
 
         o2.b = "other";
         this->assertTrue(o1 != o2, "TestCompare. !=");

@@ -21,3 +21,6 @@ class GeneratorOperatorEquals(GeneratorOperatorEqualsBase):
 
     def get_not_equal_method_operation(self):
         return 'return !(this == rhs);'
+
+    def get_call_superclass_equal(self):
+        return '{}.{}(self, rhs);'

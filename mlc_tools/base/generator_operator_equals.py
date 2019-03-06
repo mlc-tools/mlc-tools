@@ -5,9 +5,10 @@ from ..core.object import Object, Objects
 class GeneratorOperatorEqualsBase(object):
 
     def __init__(self):
-        pass
+        self.model = None
 
     def generate(self, model):
+        self.model = model
         for cls in model.classes:
             if cls.type == 'enum':
                 continue
@@ -32,7 +33,14 @@ class GeneratorOperatorEqualsBase(object):
         operator.return_type = Objects.BOOL
         operator.args.append(['rhs', GeneratorOperatorEqualsBase.get_const_ref(cls)])
         operator.is_const = True
-        operator.operations.append('bool result = true;')
+
+        superclass = self.model.get_class(cls.superclasses[0]) if cls.superclasses else None
+        if not superclass or superclass.is_inline:
+            operator.operations.append('bool result = true;')
+        else:
+            pattern = self.get_call_superclass_equal()
+            operator.operations.append('bool result = ' + pattern.
+                                       format(cls.superclasses[0], self.get_equal_method_name()))
         for member in cls.members:
             if member.is_static or member.is_const or member.type == 'Observable':
                 continue
@@ -62,3 +70,6 @@ class GeneratorOperatorEqualsBase(object):
 
     def get_not_equal_method_operation(self):
         return ''
+
+    def get_call_superclass_equal(self):
+        return 'this->{}::{}(rhs);'
