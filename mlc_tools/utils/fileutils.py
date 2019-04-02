@@ -67,10 +67,10 @@ def save_dict(path, dict_):
         dictionary = load_dict(path)
         for key in dict_:
             dictionary[key] = dict_[key]
-        file_ = open(path, 'w')
-        for key in dictionary:
-            string = key + ' ' + dictionary[key] + '\n'
-            file_.write(string)
+        with open(path, 'w') as stream:
+            for key in dictionary:
+                string = key + ' ' + dictionary[key] + '\n'
+                stream.write(string)
     except IOError:
         return False
     return True
@@ -79,12 +79,13 @@ def save_dict(path, dict_):
 def write(path, content):
     rewrite = True
     if os.path.exists(path):
-        rewrite = open(path).read() != content
+        with open(path) as stream:
+            rewrite = stream.read() != content
     if rewrite:
         create_dir_for_file(path)
-        stream = open(path, 'w')
-        stream.write(content)
-        return True, stream
+        with open(path, 'w') as stream:
+            stream.write(content)
+            return True, stream
     return False, None
 
 
