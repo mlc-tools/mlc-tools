@@ -8,6 +8,7 @@ FUNCTIONS_HPP = '''
 #include <string>
 #include <algorithm>
 #include "config.h"
+#include <assert.h>
 
 #include "pugixml/pugixml.hpp"
 #include "jsoncpp/json.h"
@@ -34,11 +35,25 @@ namespace @{namespace}
     }
 
     template <class T, class I>
+    void list_insert(std::vector<T>& list, size_t index, const I& t)
+    {
+        assert(index <= list.size());
+        list.insert(list.begin() + index, t);
+    }
+
+    template <class T, class I>
     void list_remove(std::vector<T>& list, const I& t)
     {
         auto iter = std::find(list.begin(), list.end(), t);
         if(iter != list.end())
             list.erase(iter);
+    }
+
+    template <class T>
+    void list_erase(std::vector<T>& list, size_t index)
+    {
+        assert(index < list.size());
+        list.erase(list.begin() + index);
     }
 
     template <class T>

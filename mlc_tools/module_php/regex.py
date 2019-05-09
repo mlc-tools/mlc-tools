@@ -70,6 +70,8 @@ class RegexPatternPhp(object):
         (re.compile(r',\s*std::\$*placeholders::\$*_\d'), r'', ['std::$placeholders']),
         (re.compile(r'list_remove\((\$.+?),\s*([\$.\w]+?)\);'), r'array_splice(\1, array_search(\2, \1), 1);',
          ['list_remove']),
+        (re.compile(r'list_erase\((\$.+?),\s*([\$.\w]+?)\);'), r'array_splice(\1, \2, 1);',
+         ['list_erase']),
         (re.compile(r'list_clear\((.+?)\);'), r'\1 = array();', ['list_clear']),
         (re.compile(r'list_resize\s*\(\s*(.+),\s*(.+)\s*\)'), r'\1 = array_fill(0, \2, NULL);', ['list_resize']),
         (re.compile(r'string_empty\((.+?)\)'), r'empty(\1)', ['string_empty']),
@@ -79,6 +81,8 @@ class RegexPatternPhp(object):
         (re.compile(r'map_clear\s*\(\s*(.+)\s*\)'), r'\1 = array()', ['map_clear']),
         (re.compile(r'map_remove\s*\(\s*(.+),\s*(.+)\s*\)'), r'unset(\1[\2])', ['map_remove']),
         (re.compile(r'list_push\s*\((.+)\)'), r'array_push(\1)', ['list_push']),
+        (re.compile(r'list_insert\s*\((\$.+?),\s*([\$.\w]+?),\s*([\$.\w]+?)\)'), r'array_splice(\1, \2, 0, \3);',
+         ['list_insert']),
 
         # Exception with try/catch block (one catch)
         (re.compile(r'try\n\s*{([\s\S.]+?)}\n\s*catch__((\w+)__(\w*))\n\s+{([\s\S.]+?)}'),
