@@ -80,16 +80,10 @@ class Writer(WriterBase):
                 elif cls:
                     out_init = '$this->{} = new {}();'.format(obj.name, obj.type)
 
-        accesses = {
-            AccessSpecifier.public: 'public',
-            AccessSpecifier.protected: 'protected',
-            AccessSpecifier.private: 'private',
-        }
-
         if obj.is_static:
-            out_declaration = accesses[obj.access] + ' static ${0} = {1};'
+            out_declaration = AccessSpecifier.to_string(obj.access) + ' static ${0} = {1};'
         else:
-            out_declaration = accesses[obj.access] + ' ${0} = {1};'
+            out_declaration = AccessSpecifier.to_string(obj.access) + ' ${0} = {1};'
         out_declaration = out_declaration.format(obj.name, Serializer().convert_initialize_value(value))
         return out_declaration, out_init
 
@@ -157,7 +151,7 @@ class {name} {extend}
 ?>
 '''
 
-PATTERN_METHOD = '''function {name}({args})
+PATTERN_METHOD = '''{access} function {name}({args})
 {{
     {body}
 }}

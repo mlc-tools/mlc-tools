@@ -4,10 +4,14 @@ interface model/ModelBase<SerializedObject>
 
 class model/ModelCity<ModelBase>
 {
-	int id
+	int:private id
 	int owner
 
 	function int some_function(string resource)
+	{
+	    return 0;
+	}
+	function int some_private_function(string resource):private
 	{
 	    return 0;
 	}

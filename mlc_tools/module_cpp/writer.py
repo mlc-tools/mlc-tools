@@ -1,6 +1,6 @@
 import re
 from ..base import WriterBase
-from ..core.object import Object
+from ..core.object import Object, AccessSpecifier
 from .regex import RegexPatternCpp
 
 
@@ -10,13 +10,13 @@ class Writer(WriterBase):
         WriterBase.__init__(self, out_directory)
         self.current_cls = None
         self.objects_cache = {}
-        self.methods_cache = []
+        self.methods_cache = {}
         self.methods_cache_with_templates = []
 
     def write_class(self, cls):
         self.current_cls = cls
         self.objects_cache = {}
-        self.methods_cache = []
+        self.methods_cache = {}
 
         for member in cls.members:
             declaration, initialisation, static_initialization = self.write_object(member)
@@ -24,7 +24,7 @@ class Writer(WriterBase):
 
         for method in cls.functions:
             hpp, cpp = self.write_function(method)
-            self.methods_cache.append([hpp, cpp])
+            self.methods_cache[method] = ([hpp, cpp])
             if method.template_types:
                 self.methods_cache_with_templates.append(hpp)
 
@@ -62,12 +62,23 @@ class Writer(WriterBase):
         class_name = cls.name
         includes, forward_declarations, forward_declarations_out = self.get_includes_for_header(cls)
         functions = ''
-        for method in self.methods_cache:
-            functions += method[0]
+
+        access = AccessSpecifier.public
+        for method in cls.functions:
+            hpp = self.methods_cache[method][0]
+            if access != method.access:
+                functions += AccessSpecifier.to_string(method.access) + ':\n'
+                access = method.access
+            functions += hpp
         for method in self.methods_cache_with_templates:
             includes.update(self.get_includes_for_method(cls, method, includes))
         members = ''
+
+        access = AccessSpecifier.public
         for member in cls.members:
+            if access != member.access:
+                members += AccessSpecifier.to_string(member.access) + ':\n'
+                access = member.access
             declaration, _, _ = self.objects_cache[member.name]
             members += declaration + '\n'
 
@@ -96,8 +107,9 @@ class Writer(WriterBase):
         namespace = 'mg'
         class_name = cls.name
         functions = ''
-        for method in self.methods_cache:
-            functions += method[1]
+        for method in cls.functions:
+            cpp = self.methods_cache[method][1]
+            functions += cpp
         static_initializations = ''
         initializations = ''
         for member in cls.members:

@@ -1,5 +1,6 @@
 import re
 from .model import SerializeFormat
+from ..core.object import AccessSpecifier
 
 
 # pylint: disable=no-self-use
@@ -43,7 +44,8 @@ class WriterBase(object):
 
         text = self.get_method_pattern().format(name=method.name,
                                                 args=args,
-                                                body=method.body)
+                                                body=method.body,
+                                                access=AccessSpecifier.to_string(method.access))
         if method.is_static:
             text = self.add_static_modifier_to_method(text)
         return text
