@@ -57,7 +57,8 @@ class Writer(WriterBase):
     def write_object(self, obj):
         out_init = ''
         value = obj.initial_value
-        if (value is None or value == '"NONE"') and not obj.is_pointer:
+        cls_type = self.model.get_class(obj.type) if self.model.has_class(obj.type) else None
+        if ((value is None or value == '"NONE"') and not obj.is_pointer) or (cls_type and cls_type.type == 'enum'):
             if obj.type == "string":
                 value = '""'
             elif obj.type == "int":
@@ -73,11 +74,14 @@ class Writer(WriterBase):
             elif obj.type == "map":
                 value = "array()"
             else:
-                cls = self.model.get_class(obj.type) if self.model.has_class(obj.type) else None
-                if cls is not None and cls.type == 'enum':
+                if cls_type is not None and cls_type.type == 'enum':
                     value = None
-                    out_init = '$this->{} = {}::${};'.format(obj.name, cls.name, cls.members[0].name)
-                elif cls:
+                    if obj.initial_value:
+                        initial_value = obj.initial_value.replace('::', '::$')
+                    else:
+                        initial_value = '{}::${}'.format(cls_type.name, cls_type.members[0].name)
+                    out_init = '$this->{} = {};'.format(obj.name, initial_value)
+                elif cls_type:
                     out_init = '$this->{} = new {}();'.format(obj.name, obj.type)
 
         if obj.is_static:

@@ -264,7 +264,7 @@ class Writer(WriterBase):
         if object_.is_pointer and (object_.initial_value == '0' or object_.initial_value is None):
             return 'nullptr'
         type_class = self.model.get_class(object_.type) if self.model.has_class(object_.type) else None
-        if type_class is not None and type_class.type == 'enum':
+        if type_class is not None and type_class.type == 'enum' and object_.initial_value is None:
             assert type_class.members
             return '{}::{}'.format(type_class.name, type_class.members[0].name)
 
