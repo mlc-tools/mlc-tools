@@ -1,0 +1,17 @@
+class ExceptionTest<SerializedObject>
+{
+    function bool test():static
+    {
+        int k = -1;
+        try
+        {
+            k=0;
+            throw new Exception();
+        }
+        catch(Exception e)
+        {
+            k=1;
+        }
+        return k == 1;
+    }
+}

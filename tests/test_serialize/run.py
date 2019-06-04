@@ -7,7 +7,7 @@ currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentfram
 parentdir = os.path.abspath(currentdir + '/../../')
 sys.path.insert(0, parentdir)
 
-from mlc_tools import Generator
+from mlc_tools import Mlc
 
 root = os.path.dirname(os.path.abspath(__file__)) + '/..'
 
@@ -20,8 +20,14 @@ def execute(command):
 def generate(lang, protocol):
     global root
     test_dir = root + '/test_serialize/'
-    generator = Generator(configs_directory=test_dir, side='client', disable_logs='no', generate_tests='no', generate_intrusive='yes', generate_factory='yes')
-    generator.generate(lang, protocol, test_dir + 'generated_%s' % lang)
+    generator = Mlc(configs_directory=test_dir,
+                    side='client',
+                    disable_logs=False,
+                    generate_tests='no',
+                    generate_intrusive='yes',
+                    generate_factory='yes')
+    generator.generate(language=lang,
+                       out_directory=test_dir + 'generated_%s' % lang)
 
 
 def clean():
@@ -50,7 +56,8 @@ def run(protocol):
     result = True
     result = result and 0 == execute('cd {0}/test_serialize; {1} step_0.py'.format(root, python))
     result = result and 0 == execute('cd {0}/test_serialize; php step_1.php'.format(root))
-    result = result and 0 == execute('cd {0}/test_serialize; mkdir build_{1}; cd build_{1}; cmake ..; make -j8 install'.format(root, protocol))
+    result = result and 0 == execute('cd {0}/test_serialize; mkdir build_{1}; cd build_{1}; cmake ..; make -j8 install'.
+                                     format(root, protocol))
     result = result and 0 == execute('cd {0}/test_serialize; mkdir build_{1}; ./step_2'.format(root, protocol, python))
     result = result and 0 == execute('cd {0}/test_serialize; {1} step_3.py;'.format(root, python))
     if not result:
@@ -59,6 +66,7 @@ def run(protocol):
         exit(1)
 
     clean()
+
 
 if __name__ == '__main__':
     run('xml')

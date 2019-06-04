@@ -5,71 +5,213 @@ class Translates<SerializedObject>
 
     }
 }
+class Point<SerializedObject>
+{
+    int x
+    int y
+
+    function Point create(int x, int y):static
+    {
+        Point point;
+        point.x = x;
+        point.y = y;
+        return point;
+    }
+}
 class TestTranslates<ITestTranslates>
 {
-    function bool test_dummy_function()
+    function void test_dummy_function()
     {
-        return true;
     }
-    function bool test_strcat()
+    function void test_strcat()
     {
         std::string a = "a";
         std::string b = "b";
         std::string c = std::strcat(a, b);
-        return c == "ab";
+        this->assertTrue(c == "ab", "std::strcat correct");
     }
-    function bool test_strcat2()
+    function void test_strcat2()
     {
         std::string c = std::strcat("a", "b");
-        return c == "ab";
+        this->assertTrue(c == "ab", "std::strcat correct");
     }
-    function bool test_create_objects()
+    function void test_create_objects()
     {
         auto object = new Translates();
-        return object != nullptr;
+        this->assertTrue(object != nullptr, "Create object by new");
     }
-    function bool test_listmap()
+    function void test_list()
     {
         list<int> l0;
         list<int*> l1;
         list<std::string> l2;
         list<intrusive_ptr<Translates>> l3;
 
-        map<int, int> m0;
-        map<int, int*> m1;
-        map<std::string, std::string> m2;
-        map<std::string, Translates*> m3;
-
         list_push(l0, 1);
         list_push(l1, nullptr);
         list_push(l2, "");
         list_push(l3, new Translates());
+
+        this->assertTrue(in_list(1, l0));
+        this->assertTrue(in_list(nullptr, l1));
+        this->assertTrue(in_list("", l2));
+        this->assertTrue(list_size(l3) == 1);
+    }
+
+    function void test_map()
+    {
+        map<int, int> m0;
+        map<int, int*> m1;
+        map<std::string, std::string> m2;
+        map<std::string, Translates*> m3;
 
         m0[0] = 1;
         m1[0] = nullptr;
         m2[""] = "";
         m3[""] = new Translates();
 
-        return true;
+        this->assertTrue(in_map(0, m0));
+        this->assertTrue(m0[0] == 1);
+
+        this->assertTrue(in_map(0, m1));
+        this->assertTrue(m1[0] == nullptr);
+
+        this->assertTrue(in_map("", m2));
+        this->assertTrue(m2[""] == "");
+
+        this->assertTrue(map_size(m3) == 1);
     }
-    function bool test_to_str()
+    function void test_to_str()
     {
         int a = 1;
         std::string s = "1";
-        return toStr(a) == s;
+        this->assertTrue(toStr(a) == s);
     }
-    function bool test_at()
+    function void test_at()
     {
-        bool result = true;
-
         list<int> vector;
         list_push(vector, 1);
-        result = vector.at(0) == 1;
+        this->assertTrue(vector.at(0) == 1);
 
         map<int, int> map;
         map[0] = 1;
-        result = map.at(0) == 1;
+        this->assertTrue(map.at(0) == 1);
+    }
+    function void test_list_remove()
+    {
+        list<int> vector;
+        list_push(vector, 1);
+        list_push(vector, 2);
+        list_push(vector, 3);
+        list_push(vector, 4);
 
-        return result;
+        list_remove(vector, 2);
+        this->assertTrue(list_size(vector) == 3);
+        this->assertTrue(vector[0] == 1);
+        this->assertTrue(vector[1] == 3);
+        this->assertTrue(vector[2] == 4);
+    }
+    function void test_list_clear()
+    {
+        list<int> vector;
+        list_push(vector, 1);
+        list_push(vector, 2);
+        list_push(vector, 3);
+        list_push(vector, 4);
+
+        list_clear(vector);
+        this->assertTrue(list_size(vector) == 0);
+    }
+    function void test_list_resize()
+    {
+        list<int> vector;
+
+        list_resize(vector, 1);
+        this->assertTrue(list_size(vector) == 1);
+
+        list_resize(vector, 2);
+        this->assertTrue(list_size(vector) == 2);
+
+        list_resize(vector, 10);
+        this->assertTrue(list_size(vector) == 10);
+    }
+    function void test_string_empty()
+    {
+        this->assertTrue(string_empty(""));
+        this->assertFalse(string_empty("s"));
+        this->assertFalse(string_empty("1"));
+        this->assertFalse(string_empty("."));
+    }
+    function void test_map_clear()
+    {
+        map<int, int> map;
+        map[1] = 2;
+        map[2] = 3;
+        map_clear(map);
+        this->assertEqual(map_size(map), 0, "Map is empty");
+    }
+    function void test_map_remove()
+    {
+        map<int, int> map;
+        map[1] = 2;
+        map[2] = 3;
+        map_remove(map, 1);
+
+        this->assertTrue(in_map(2, map));
+        this->assertFalse(in_map(1, map));
+    }
+
+    function void test_list_push()
+    {
+        // https://trello.com/c/86FPV2aa/21-fixes.
+        list<Point> result;
+        Point point;
+        point.x = 1;
+        point.y = 2;
+        list_push(result, Point::create(point.x, point.y-1));
+    }
+
+    function void test_list_insert()
+    {
+        list<int> vector;
+
+        list_insert(vector, 0, 1);
+        this->assertTrue(list_size(vector) == 1);
+        this->assertTrue(vector[0] == 1);
+
+        list_insert(vector, 0, 2);
+        this->assertTrue(list_size(vector) == 2);
+        this->assertTrue(vector[0] == 2);
+        this->assertTrue(vector[1] == 1);
+
+        list_insert(vector, 1, 3);
+        this->assertTrue(list_size(vector) == 3);
+        this->assertTrue(vector[0] == 2);
+        this->assertTrue(vector[1] == 3);
+        this->assertTrue(vector[2] == 1);
+    }
+
+    function void test_list_erase()
+    {
+        list<int> vector;
+        list_push(vector, 1);
+        list_push(vector, 2);
+        list_push(vector, 3);
+        list_push(vector, 4);
+
+        list_erase(vector, 0);
+        this->assertTrue(list_size(vector) == 3);
+        this->assertTrue(vector[0] == 2);
+        this->assertTrue(vector[1] == 3);
+        this->assertTrue(vector[2] == 4);
+
+        list_erase(vector, 1);
+        this->assertTrue(list_size(vector) == 2);
+        this->assertTrue(vector[0] == 2);
+        this->assertTrue(vector[1] == 4);
+
+        list_erase(vector, 1);
+        this->assertTrue(list_size(vector) == 1);
+        this->assertTrue(vector[0] == 2);
     }
 }

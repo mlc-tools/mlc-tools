@@ -9,8 +9,8 @@ from lib.py.db import DataBasePostgreSql
 
 class LoggerImpl(Logger):
 
-    def print_log(self, result, message):
-        print('{}: {}'.format(message, result))
+    def message(self, message):
+        print(message)
 
 
 def run_test(class_):

@@ -13,7 +13,7 @@ endif(BUILD_XML)
 
 project(test_mlc_${TYPE})
 
-file(GLOB_RECURSE SRC 
+file(GLOB_RECURSE SRC
 						${ROOT}/common/*.cpp *.h
 						${ROOT}/external/ml/*.cpp *.h
 						${ROOT}/external/pugixml/*.cpp *.h
@@ -21,7 +21,7 @@ file(GLOB_RECURSE SRC
 						${ROOT}/generated_cpp/${TYPE}/*.cpp *.h
 						)
 
-foreach(FILE ${SRC}) 
+foreach(FILE ${SRC})
   get_filename_component(PARENT_DIR ${FILE} PATH)
 
   string(REPLACE "${ROOT}" "" GROUP "${PARENT_DIR}")
@@ -32,10 +32,24 @@ foreach(FILE ${SRC})
 endforeach()
 
 
-add_definitions(-w -std=c++14)
+if(WIN32)
+	add_definitions(-W1 -std=c++14)
+else()
+	add_definitions(-Wall -std=c++14)
+endif()
+
 add_definitions(-DSERVER=1)
 add_definitions(-DCLIENT=2)
 add_definitions(-DBUILD_SIDE=${BUILD_SIDE})
+
+add_definitions(-DXML=1)
+add_definitions(-DJSON=2)
+if(BUILD_XML)
+    add_definitions(-DSERIALIZE_FORMAT=XML)
+elseif(BUILD_JSON)
+    add_definitions(-DSERIALIZE_FORMAT=JSON)
+endif(BUILD_XML)
+
 
 include_directories(
 	${ROOT}/generated_cpp/${TYPE}/
@@ -44,7 +58,7 @@ include_directories(
 	${ROOT}/external/ml
 )
 
-add_executable(${PROJECT_NAME} 
+add_executable(${PROJECT_NAME}
 	${SRC}
 )
 

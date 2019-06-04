@@ -20,10 +20,13 @@ before_install:
   # C++14
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get update -qq; fi
-install: 
+install:
   # C++14
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -qq g++-5; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 90; fi
+  - pip install enum --user
+  - sudo pip install twine
+  - sudo -H pip install six --upgrade
 
 matrix:
   exclude:
@@ -38,18 +41,25 @@ matrix:
 
 
 script:
+
+  # unit tests
+  - pushd .
+  - cd unit_tests
+  - python -m unittest discover
+  - popd
+
   # simple test:
 
   - pushd .
-  - python -m mlc_tools.main -i tests/simple_test/config -o tests/simple_test/generated_cpp/xml -f xml -l cpp -side server -data tests/simple_test/data_xml -data_out tests/simple_test/assets -generate_tests yes
-  - python -m mlc_tools.main -i tests/simple_test/config -o tests/simple_test/generated_cpp/json -f json -l cpp -side client -data tests/simple_test/data_json -data_out tests/simple_test/assets -generate_tests yes
-  
+  - python -m mlc_tools.main -i tests/simple_test/config -o tests/simple_test/generated_cpp/xml -f xml -l cpp -side server -data tests/simple_test/data_xml -data_out tests/simple_test/assets -generate_tests yes -add_config tests/simple_test/config_additional -add_data tests/simple_test/data_additional
+  - python -m mlc_tools.main -i tests/simple_test/config -o tests/simple_test/generated_cpp/json -f json -l cpp -side client -data tests/simple_test/data_json -data_out tests/simple_test/assets -generate_tests yes -add_config tests/simple_test/config_additional -add_data tests/simple_test/data_additional
+
   - cd tests/simple_test
 
   - mkdir build_xml
   - cd build_xml
-  - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DBUILD_XML=ON -DBUILD_JSON=OFF -DBUILD_SIDE=SERVER 
-  - make
+  - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DBUILD_XML=ON -DBUILD_JSON=OFF -DBUILD_SIDE=SERVER
+  - cmake --build .
   - ./test_mlc_xml ../
   - cd ..
 
@@ -61,8 +71,84 @@ script:
   - cd ..
   - popd
 
+  # test functions:
+
+  - pushd .
+  - python -m mlc_tools.main -i tests/test_functions/config -o tests/test_functions/generated_cpp/xml -f xml -l cpp -generate_tests yes
+  - python -m mlc_tools.main -i tests/test_functions/config -o tests/test_functions/generated_cpp/json -f json -l cpp -generate_tests yes
+
+  - cd tests/test_functions
+
+  - mkdir build_xml
+  - cd build_xml
+  - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DBUILD_XML=ON -DBUILD_JSON=OFF
+  - cmake --build .
+  - ./test_mlc_xml ../
+  - cd ..
+
+  - mkdir build_json
+  - cd build_json
+  - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DBUILD_XML=OFF -DBUILD_JSON=ON
+  - cmake --build .
+  - ./test_mlc_json ../
+  - cd ..
+  - popd
+
+  # test virtual methods:
+
+  - pushd .
+  - python -m mlc_tools.main -i tests/test_virtual_methods -o tests/test_virtual_methods/generated_cpp/xml -f xml -l cpp -generate_tests yes
+  - python -m mlc_tools.main -i tests/test_virtual_methods -o tests/test_virtual_methods/generated_cpp/json -f json -l cpp -generate_tests yes
+
+  - cd tests/test_virtual_methods
+
+  - mkdir build_xml
+  - cd build_xml
+  - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DBUILD_XML=ON -DBUILD_JSON=OFF
+  - cmake --build .
+  - ./test_mlc_xml ../
+  - cd ..
+
+  - mkdir build_json
+  - cd build_json
+  - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DBUILD_XML=OFF -DBUILD_JSON=ON
+  - cmake --build .
+  - ./test_mlc_json ../
+  - cd ..
+  - popd
+
+  # test unit tests generator:
+
+  - pushd .
+  - python -m mlc_tools.main -i tests/unit_tests_generator -o tests/unit_tests_generator/generated_cpp/xml -f xml -l cpp -generate_tests yes
+  - python -m mlc_tools.main -i tests/unit_tests_generator -o tests/unit_tests_generator/generated_cpp/json -f json -l cpp -generate_tests yes
+
+  - cd tests/unit_tests_generator
+
+  - mkdir build_xml
+  - cd build_xml
+  - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DBUILD_XML=ON -DBUILD_JSON=OFF
+  - cmake --build .
+  - ./test_mlc_xml ../
+  - cd ..
+
+  - mkdir build_json
+  - cd build_json
+  - cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DTARGET_CPU=$TARGET_CPU -DBUILD_XML=OFF -DBUILD_JSON=ON
+  - cmake --build .
+  - ./test_mlc_json ../
+  - cd ..
+  - popd
+
   # test serialize:
   - pushd .
   - cd tests/test_serialize
   - python run.py
   - popd
+
+deploy:
+  provider: script
+  script: python upload.py $TRAVIS_BUILD_NUMBER $TRAVIS_JOB_NUMBER
+  skip_existing: true
+  on:
+    branch: master

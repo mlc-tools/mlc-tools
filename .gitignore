@@ -23,8 +23,8 @@ tests/*/generated*
 tests/*/build*
 
 
-/.idea/
-/.sublime/
+.idea/
+.sublime/
 
 .DS_Store
 *.pyc
@@ -36,10 +36,8 @@ tests/*/build*
 
 mlc.sln
 /out
-mlc.sublime-project
-mlc.sublime-workspace
-
-/javascript
+/temp
+temp.py
 
 /dist
 /build

@@ -1,5 +1,4 @@
 from generated_py.TestData import TestData
-from generated_py.config import *
 import xml.etree.ElementTree as ET
 import json
 
@@ -7,9 +6,9 @@ import json
 data = TestData()
 data.initialize()
 
-if MG_SERIALIZE_FORMAT == MG_XML:
+if True:  # MG_SERIALIZE_FORMAT == MG_XML:
     root = ET.Element('data')
-    data.serialize(root)
+    data.serialize_xml(root)
     string = str(ET.tostring(root))
     string = string.strip()
     string = string.replace('\\n', '\n')
@@ -21,6 +20,6 @@ if MG_SERIALIZE_FORMAT == MG_XML:
     open('data.py.xml', 'w').write(str(string))
 else:
     dict_ = {}
-    data.serialize(dict_)
+    data.serialize_json(dict_)
     string = json.dumps(dict_, indent=1)
     open('data.py.json', 'w').write(string)

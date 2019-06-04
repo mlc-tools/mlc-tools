@@ -1,6 +1,6 @@
 class SerializedObject:serialized
 {
-	int _reference_counter:runtime = 1
+	int:runtime _reference_counter = 1
 	function int retain()
 	{
 		this->_reference_counter += 1;
@@ -27,24 +27,20 @@ class Foo<SerializedObject>
 
 class TestSerializedObject<ITestSerializedObject>:test
 {
-    function bool test_retain()
+    function void test_retain()
     {
-        return true;
     }
-    function bool test_release()
+    function void test_release()
     {
-        return true;
     }
 }
 
 class TestFoo<ITestFoo>:test
 {
-    function bool test_foo()
+    function void test_foo()
     {
-        return true;
     }
-    function bool test_bar()
+    function void test_bar()
     {
-        return true;
     }
 }

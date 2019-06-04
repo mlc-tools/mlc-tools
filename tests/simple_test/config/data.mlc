@@ -16,12 +16,20 @@ class data/DataUnit<SerializedObject>:storage
 
 	function bool tests(Logger* logger):static
 	{
+	    auto data = DataStorage::shared().get<DataUnit>("unitname1");
+
 	    auto result = true;
-	    result = logger->push(DataUnit::test_links(logger), " - DataUnit: links") && result;
-	    result = logger->push(DataUnit::test_enums(logger), " - DataUnit: enums") && result;
-	    result = logger->push(DataUnit::test_list_links(logger), " - DataUnit: list_links") && result;
-	    result = logger->push(DataUnit::test_map_links(logger), " - DataUnit: map_links") && result;
+	    result = DataUnit::test_0(data) && result;
+	    result = DataUnit::test_links(logger) && result;
+	    result = DataUnit::test_enums(logger) && result;
+	    result = DataUnit::test_list_links(logger) && result;
+	    result = DataUnit::test_map_links(logger) && result;
 	    return result;
+	}
+
+	function bool test_0(DataUnit:link data):static
+	{
+	    return true;
 	}
 
 	function bool test_1(Logger* logger):static
@@ -42,7 +50,7 @@ class data/DataUnit<SerializedObject>:storage
         bool result = true;
 
         auto units_map = DataStorage::shared().units;
-        result = logger->push(2 == map_size(units_map), " - Two units in storage") && result;
+        result = (2 == map_size(units_map)) && result;
 
         auto unit1 = DataStorage::shared().get<DataUnit>("unitname1");
         auto unit2 = DataStorage::shared().get<DataUnit>("unitname2");
@@ -122,4 +130,14 @@ class data/VisualUnit<SerializedObject>
 {
 	string name
 	string icon
+}
+
+class TestDataAdd<ITestDataAdd>:test
+{
+    function void test_test()
+    {
+        DataStorage::shared().get<DataAdd>("add_data");
+        auto& mapdata = DataStorage::shared().adds;
+        this->assertTrue(in_map("add_data", mapdata), "Additional data in DataStorage");
+    }
 }

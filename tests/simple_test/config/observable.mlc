@@ -1,0 +1,151 @@
+class observable/ObservableClass<SerializedObject>
+{
+	Observable<void()> eventTest
+	Observable<void(int)> eventTestInt
+	Observable<void(int, int)> eventTestInt2
+	Observable<void(int, string)> eventTestString
+	Observable<void(string)> eventTestString2
+	Observable<void(DataUnit:link)> eventTestDataLink
+	Observable<void(DataUnit*)> eventTestDataPointer
+}
+
+class observable/ListenerClass<SerializedObject>
+{
+	TestObservableClass* test
+
+	function void listen()
+	{
+	    this->test->value += 1;
+	}
+
+	function void listen_int(int value)
+	{
+	    this->test->value = value;
+	}
+
+	function void listen_int_2(int a, int b)
+	{
+	    this->test->value = a + b;
+	}
+
+	function void listen_link(DataUnit:link data)
+	{
+	    this->test->value = 1;
+	}
+	function void listen_pointer(DataUnit* data)
+	{
+	    this->test->value = 1;
+	}
+}
+
+class observable/TestObservableClass<ITestObservableClass>
+{
+	int value = 0
+    ObservableClass test
+
+	function void test_1()
+	{
+	    this->value = 0;
+		this->test.eventTest.add(this, &TestObservableClass::listen);
+		this->test.eventTest.notify();
+		this->assertTrue(this->value == 1);
+
+		this->test.eventTest.remove(this);
+		this->test.eventTest.notify();
+		this->assertTrue(this->value == 1);
+	}
+
+	function void test_notify_with_unsubscribe()
+	{
+	    this->value = 0;
+		this->test.eventTest.add(this, &TestObservableClass::listen_with_remove);
+		this->test.eventTest.notify();
+		this->assertTrue(this->value == 1);
+
+		this->test.eventTest.notify();
+		this->assertTrue(this->value == 1);
+	}
+
+	function void test_listen_with_two()
+	{
+	    this->value = 0;
+
+		auto listener = new ListenerClass();
+		listener->test = this;
+		this->test.eventTest.add(listener, &ListenerClass::listen);
+		this->test.eventTest.notify();
+		this->assertTrue(this->value == 1);
+
+		auto listener2 = new ListenerClass();
+		listener2->test = this;
+		this->test.eventTest.add(listener2, &ListenerClass::listen);
+		this->test.eventTest.notify();
+		this->assertTrue(this->value == 3);
+
+        this->test.eventTest.remove(listener);
+        this->test.eventTest.remove(listener2);
+        this->test.eventTest.notify();
+        this->assertTrue(this->value == 3);
+	}
+
+	function void test_with_arg_int()
+	{
+		auto listener = new ListenerClass();
+		listener->test = this;
+		this->test.eventTestInt.add(listener, &ListenerClass::listen_int, std::placeholders::_1);
+		this->test.eventTestInt.notify(1);
+		this->assertTrue(this->value == 1);
+		this->test.eventTestInt.notify(10);
+		this->assertTrue(this->value == 10);
+		this->test.eventTestInt.remove(listener);
+	}
+
+	function void test_with_arg_int_two()
+	{
+		auto listener = new ListenerClass();
+		listener->test = this;
+		this->test.eventTestInt2.add(listener, &ListenerClass::listen_int_2, std::placeholders::_1, std::placeholders::_2);
+		this->test.eventTestInt2.notify(1, 1);
+		this->assertTrue(this->value == 2);
+		this->test.eventTestInt2.notify(10, 10);
+		this->assertTrue(this->value == 20);
+		this->test.eventTestInt2.remove(listener);
+	}
+
+	function void test_with_data()
+	{
+	    auto data = DataStorage::shared().get<DataUnit>("unitname1");
+		auto listener = new ListenerClass();
+		listener->test = this;
+		this->test.eventTestDataLink.add(listener, &ListenerClass::listen_link, std::placeholders::_1);
+
+		this->value = 0;
+		this->test.eventTestDataLink.notify(data);
+		this->assertEqual(this->value, 1);
+		this->test.eventTestDataLink.remove(listener);
+	}
+
+	function void test_with_pointer()
+	{
+	    auto unit = new DataUnit();
+		auto listener = new ListenerClass();
+		listener->test = this;
+		this->test.eventTestDataPointer.add(listener, &ListenerClass::listen_pointer, std::placeholders::_1);
+
+		this->value = 0;
+		this->test.eventTestDataPointer.notify(unit);
+		this->assertEqual(this->value, 1);
+		this->test.eventTestDataPointer.remove(listener);
+	}
+
+	function void listen()
+	{
+		this->value += 1;
+	}
+
+	function void listen_with_remove()
+	{
+	    this->value += 1;
+		this->test.eventTest.remove(this);
+	}
+}

@@ -1,12 +1,12 @@
 class SerializedObject:serialized:inline
 {
-	int _reference_counter:runtime = 1
-	function int retain()
+	int:runtime:cpp _reference_counter = 1
+	function int retain():cpp
 	{
 		this->_reference_counter += 1;
 		return this->_reference_counter;
 	}
-	function int release()
+	function int release():cpp
 	{
 		this->_reference_counter -= 1;
 		auto c = this->_reference_counter;
@@ -23,10 +23,11 @@ class AllTests<SerializedObject>
     function bool run(Logger* logger):static
     {
         bool result = true;
-        result = logger->push(FunctionTest::tests(logger), "Function tests") && result;
-        result = logger->push(DataUnit::tests(logger), "Static data") && result;
-        result = logger->push(AllTypes::tests(logger), "AllTypes tests") && result;
-        result = logger->push(TestFactory::tests(logger), "TestFactory tests") && result;
+        result = FunctionTest::tests(logger) && result;
+        result = DataUnit::tests(logger) && result;
+        result = AllTypes::tests(logger) && result;
+        result = TestFactory::tests(logger) && result;
+        result = ExceptionTest::test() && result;
 
         return result;
     }
@@ -34,7 +35,7 @@ class AllTests<SerializedObject>
 
 class core/CommandBase<SerializedObject>
 {
-	int user_id:key = 0
+	int:key user_id = 0
 	int current_time = 0
 }
 
@@ -51,7 +52,7 @@ class AllTypes<SerializedObject>
 	float float_value0 = 0
 	float float_value1
 	bool bool_value0 = true
-	bool bool_value1
+	bool bool_value1 = false
 	string str_value0 = ""
 	string str_value1
 	list<int> int_list
@@ -72,6 +73,9 @@ class AllTypes<SerializedObject>
 	list<AllTypesChildren*> object_ptr_list
 	map<string, AllTypesChildren> object_map
 	map<string, AllTypesChildren*> object_ptr_map
+
+	list<TestEnum> enum_list
+	map<TestEnum, int> enum_map
 
     function void initialize()
     {
@@ -115,6 +119,11 @@ class AllTypes<SerializedObject>
         this->object_ptr = new AllTypesChildren();
         this->object_ptr->value = 0;
 
+        list_push(this->enum_list, TestEnum::value1);
+        list_push(this->enum_list, TestEnum::value2);
+
+        this->enum_map[TestEnum::value1] = 1;
+        this->enum_map[TestEnum::value2] = 2;
     }
 
     function bool tests(Logger* logger):static
@@ -137,12 +146,16 @@ class RequestFoo<Request>
 class RequestBar<Request>
 {
 }
+class RequestBar2<RequestBar>
+{
+}
 
 class RequestAcceptor<IVisitorRequest>
 {
     int base = 0
     int foo = 0
     int bar = 0
+    int bar2 = 0
     function void visit(Request* ctx)
     {
         this->base += 1;
@@ -159,30 +172,42 @@ class RequestAcceptor<IVisitorRequest>
     {
         this->bar += 1;
     }
+    function void visit(RequestBar2* ctx)
+    {
+        this->bar2 += 1;
+    }
 }
 
 class TestRequestAcceptor<ITestRequestAcceptor>
 {
     Request* request
-    function bool test_visitor()
+    function void test_visitor()
     {
         RequestAcceptor acceptor;
 
-        bool result = true;
         this->request = new RequestFoo();
         this->request->accept(&acceptor);
-        result = result && acceptor.foo == 1;
-        result = result && acceptor.bar == 0;
-        result = result && acceptor.base == 0;
-
+        this->assertTrue(acceptor.foo == 1);
+        this->assertTrue(acceptor.bar == 0);
+        this->assertTrue(acceptor.bar2 == 0);
+        this->assertTrue(acceptor.base == 0);
         acceptor.foo = 0;
+
         this->request = new RequestBar();
         this->request->accept(&acceptor);
-        result = result && acceptor.foo == 0;
-        result = result && acceptor.bar == 1;
-        result = result && acceptor.base == 0;
+        this->assertTrue(acceptor.foo == 0);
+        this->assertTrue(acceptor.bar == 1);
+        this->assertTrue(acceptor.bar2 == 0);
+        this->assertTrue(acceptor.base == 0);
+        acceptor.bar = 0;
 
-        return result;
+        this->request = new RequestBar2();
+        this->request->accept(&acceptor);
+        this->assertTrue(acceptor.foo == 0);
+        this->assertTrue(acceptor.bar == 0);
+        this->assertTrue(acceptor.bar2 == 1);
+        this->assertTrue(acceptor.base == 0);
+        acceptor.bar2 = 0;
     }
 }
 
@@ -196,20 +221,25 @@ enum TestEnum:numeric
     value2
 }
 
-enum TestEnumValue1<TestEnum>
+class TestEnumValue1<TestEnum>
 {
 	int parameter
 }
 
-enum TestEnumValue2<TestEnum>
+class TestEnumValue2<TestEnum>
 {
 	int parameter
+}
+
+class TestToFor<TestEnum>
+{
+	int some_count
 }
 
 class FunctionTest<SerializedObject>
 {
-    bool initialized = false;
-    DataUnit*:link data_unit;
+    bool initialized = false
+    DataUnit*:link data_unit
     list<int> list
     map<int, int> map
 
@@ -237,7 +267,6 @@ class FunctionTest<SerializedObject>
         pointer->initialize();
         auto result = pointer->initialized;
         result = result && pointer->data_unit != nullptr;
-        logger->push(result, "Create new object in function");
         return result;
     }
 
@@ -252,7 +281,6 @@ class FunctionTest<SerializedObject>
             ++index;
         }
         result = result && index == count;
-        logger->push(result, "FOR(AUTO& PAIR : MAP)");
 
         index = 0;
         for(auto&& [name, unit] : units)
@@ -260,7 +288,6 @@ class FunctionTest<SerializedObject>
             ++index;
         }
         result = result && index == count;
-        logger->push(result, "FOR(AUTO&& [NAME, UNIT] : UNITS)");
 
         index = 0;
         for(int i=0; i<count; ++i)
@@ -268,7 +295,6 @@ class FunctionTest<SerializedObject>
             ++index;
         }
         result = result && index == count;
-        logger->push(result, "FOR(int i=0; i<count; ++i)");
 
         index = 0;
         for(int i=count; i>0; --i)
@@ -276,7 +302,6 @@ class FunctionTest<SerializedObject>
             ++index;
         }
         result = result && index == count;
-        logger->push(result, "FOR(int i=count; i>0; --i)");
 
         index = 0;
         auto count2 = count*2;
@@ -285,7 +310,23 @@ class FunctionTest<SerializedObject>
             ++index;
         }
         result = result && index == count;
-        logger->push(result, "FOR(int i=0; i<count*2; i+=2)");
+
+        index = 0;
+        int step = 2;
+        for(int i=0; i<10; i+=step)
+        {
+            index += 1;
+        }
+        result = result && index == 5;
+
+        TestToFor test_value;
+        test_value.some_count = 2;
+        index = 0;
+        for(int i=0; i<test_value.some_count; ++i)
+        {
+            index += 1;
+        }
+        result = result && index == test_value.some_count;
 
         return result;
     }
@@ -302,7 +343,6 @@ class FunctionTest<SerializedObject>
             index++;
         }
         result = list_size(test_vector) == 10;
-        logger->push(result, "while index < 10");
         return result;
     }
 
@@ -336,8 +376,6 @@ class FunctionTest<SerializedObject>
             result = result && true;
         else if(false)
             result = false;
-
-        logger->push(result, "IF-ELSE");
         return result;
     }
 
@@ -354,7 +392,6 @@ class FunctionTest<SerializedObject>
         result = result && map_size(pointer->map) == 1;
         result = result && in_map(1, pointer->map);
 
-        logger->push(result, "std functions");
         return result;
     }
 
@@ -362,7 +399,6 @@ class FunctionTest<SerializedObject>
     {
         auto user = new TestUser1();
 		auto result = FunctionTest::test_1_1(user);
-		logger->push(result, "Functions: test 1");
 		return result;
 	}
     function bool test_1_1(TestUser1* user):static
@@ -386,18 +422,29 @@ class TestFactory<SerializedObject>
         return result;
     }
 
-    function bool test(Logger* logger):static
+    function bool test(Logger* logger):static:cpp
     {
         bool result = true;
+
         auto command = new RequestBar();
-        auto string = Factory::serialize_command<RequestBar>(command);
-        auto command2 = Factory::create_command<Request>(string);
-        result = logger->push(command2 != nullptr, " - TestFactory: commnd_2 deserialized") && result;
+#if SERIALIZE_FORMAT == JSON
+        auto string = Factory::serialize_command_to_json<RequestBar>(command);
+        auto command2 = Factory::create_command_from_json<Request>(string);
+#endif
+#if SERIALIZE_FORMAT == XML
+        auto string = Factory::serialize_command_to_xml<RequestBar>(command);
+        auto command2 = Factory::create_command_from_xml<Request>(string);
+#endif
+        result = (command2 != nullptr) && result;
         if(result)
         {
-            result = logger->push(command2->get_type() == command->get_type(), " - TestFactory: commnd_type == commnd2_type deserialized") && result;
+            result = (command2->get_type() == command->get_type()) && result;
         }
         return result;
+    }
+    function bool test(Logger* logger):static:py:php
+    {
+        return true;
     }
 }
 
@@ -412,20 +459,22 @@ class DataComplexMap<SerializedObject>:storage
 
 class TestDataComplexMap<ITestDataComplexMap>:tests
 {
-    function bool test_foo()
+    function void test_foo()
     {
-        return true;
     }
-    function bool test_deserialize()
+    function void test_deserialize()
     {
         auto data = DataStorage::shared().get<DataComplexMap>("test");
-        bool result = true;
-        result = result && map_size(data->complex_map) == 1;
-        result = result && list_size(data->complex_map.at(1)) == 2;
-        result = result && data->complex_map.at(1)[0] == 1;
-        result = result && data->complex_map.at(1)[1] == 2;
-        return result;
+        this->assertTrue(map_size(data->complex_map) == 1);
+        this->assertTrue(list_size(data->complex_map.at(1)) == 2);
+        this->assertTrue(data->complex_map.at(1)[0] == 1);
+        this->assertTrue(data->complex_map.at(1)[1] == 2);
     }
+}
+
+class TestStaticPointer<SerializedObject>:tests
+{
+    CommandBase*:static command
 }
 
 

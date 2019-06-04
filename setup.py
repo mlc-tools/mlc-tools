@@ -3,10 +3,11 @@ import mlc_tools.version
 
 setup(
     name='mlc-tools',
-    version=mlc_tools.__version__,
+    version=mlc_tools.version,
     packages=find_packages(),
     long_description="mlc-tools",
     install_requires=[
+        'enum'
     ]
     # entry_points={
     #     'console_scripts':

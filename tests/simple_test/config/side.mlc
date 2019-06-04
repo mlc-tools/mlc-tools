@@ -14,8 +14,8 @@ class SideTestClient<SerializedObject>:client
 
 class SideTestCommon<SerializedObject>
 {
-    string server_value:server = "server"
-    string client_value:client = "client"
+    string:server server_value = "server"
+    string:client client_value = "client"
 
     function string get_value():server
     {

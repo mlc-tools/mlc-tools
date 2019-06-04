@@ -1,0 +1,61 @@
+class SerializedObject:serialized:inline
+{
+	int:runtime _reference_counter = 1
+	function int retain()
+	{
+		this->_reference_counter += 1;
+		return this->_reference_counter;
+	}
+	function int release()
+	{
+		this->_reference_counter -= 1;
+		auto c = this->_reference_counter;
+		if( c == 0)
+		{
+			delete this;
+		}
+		return c;
+	}
+}
+
+class Base<SerializedObject>
+{
+    function string virtual_method()
+    {
+        return "Base";
+    }
+}
+
+class Foo<Base>
+{
+    function string virtual_method()
+    {
+        return "Foo";
+    }
+}
+
+class Foo2<Foo>
+{
+    function string virtual_method()
+    {
+        return "Foo2";
+    }
+}
+
+class TestFoo2<ITestFoo2>
+{
+    function void test_virtual_method()
+    {
+        Base* a = new Base();
+        this->assertNotNull(a, "Base* a != nullptr");
+        this->assertEqual(a->virtual_method(), Base::TYPE, "Correct result on call Base::virtual_method");
+
+        Base* b = new Foo();
+        this->assertNotNull(b, "Foo* b != nullptr");
+        this->assertEqual(b->virtual_method(), Foo::TYPE, "Correct result on call Foo::virtual_method");
+
+        Base* c = new Foo2();
+        this->assertNotNull(b, "Foo2* b != nullptr");
+        this->assertEqual(c->virtual_method(), Foo2::TYPE, "Correct result on call Foo2::virtual_method");
+    }
+}

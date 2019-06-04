@@ -12,18 +12,18 @@
 #include "core/CommandBase.h"
 #include "mg_Factory.h"
 #include <sstream>
-#include "mg_config.h"
+#include "config.h"
 
 
 
-#if MG_SERIALIZE_FORMAT == MG_XML
+#if SUPPORT_XML_PROTOCOL
 
 mg::intrusive_ptr<mg::CommandBase> createCommand(const pugi::xml_node& xml)
 {
 	auto type = xml.name();
 	auto command = mg::Factory::shared().build<mg::CommandBase>(type);
 	if (command != nullptr)
-		command->deserialize(xml);
+		command->deserialize_xml(xml);
 	return command;
 }
 
@@ -35,14 +35,14 @@ mg::intrusive_ptr<mg::CommandBase> createCommand(const std::string& payload)
 	return createCommand(root);
 }
 
-#elif MG_SERIALIZE_FORMAT == MG_JSON
+#elif SUPPORT_JSON_PROTOCOL
 
 mg::intrusive_ptr<mg::CommandBase> createCommand(const Json::Value& json)
 {
 	auto type = json.getMemberNames()[0];
 	auto command = mg::Factory::shared().build<mg::CommandBase>(type);
 	if (command != nullptr)
-		command->deserialize(json[type]);
+		command->deserialize_json(json[type]);
 	return command;
 }
 

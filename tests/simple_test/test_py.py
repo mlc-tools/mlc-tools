@@ -8,14 +8,17 @@ import sys
 
 class LoggerImpl(Logger):
 
-    def print_log(self, result, message):
-        print('{}: {}'.format(message, result))
+    def message(self, message):
+        print(message)
 
 
 def initialize_data_storage(protocol):
-    file = fs.abspath(fs.dirname(__file__)) + '/assets/data.' + protocol
-    content = open(file).read()
-    DataStorage.shared().initialize(content)
+    filepath = fs.abspath(fs.dirname(__file__)) + '/assets/data.' + protocol
+    content = open(filepath).read()
+    if protocol == 'json':
+        DataStorage.shared().initialize_json(content)
+    elif protocol == 'xml':
+        DataStorage.shared().initialize_xml(content)
 
 
 def main(argv):
@@ -26,7 +29,7 @@ def main(argv):
 
     tests = RunAllTests()
     tests.initialize(logger)
-    result = tests.execute() and result
+    result = result and tests.execute()
 
     exit(0 if result else -1)
 

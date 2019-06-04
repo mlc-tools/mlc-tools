@@ -1,0 +1,41 @@
+class clone/CloneObject<SerializedObject>
+{
+    int t
+
+    function void foo()
+    {
+    }
+}
+
+class clone/CloneObject2<CloneObject>
+{
+    CloneObject* ptr
+
+    function void foo()
+    {
+    }
+}
+
+class clone/TestCloneObject<ITestCloneObject>:test
+{
+    function void test_foo()
+    {
+        auto object_a = new CloneObject();
+        object_a->t = 1;
+
+        auto object_b = Factory::clone_object(object_a);
+        this->assertEqual(object_a->t, object_b->t);
+    }
+    function void test_clone2()
+    {
+        auto object_a = new CloneObject2();
+        object_a->t = 1;
+        object_a->ptr = new CloneObject();
+        object_a->ptr->t = 10;
+
+        auto object_b = Factory::clone_object(object_a);
+        this->assertEqual(object_a->t, object_b->t);
+        this->assertEqual(object_a->ptr->t, object_b->ptr->t);
+    }
+}
+

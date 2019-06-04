@@ -21,5 +21,6 @@ def main(argv):
     if os.system('{0}build_{1}/test_mlc_{1}'.format(root, protocol)) != 0:
         exit(1)
 
+
 if __name__ == '__main__':
     main(sys.argv)
