@@ -154,7 +154,7 @@ class Writer(WriterBase):
                              registration=registration)
 
     def write_function_hpp(self, method):
-        string = '{virtual}{static}{type} {name}({args}){const}{override}{abstract}'
+        string = '{virtual}{static}{friend}{type} {name}({args}){const}{override}{abstract}'
 
         args = list()
         for arg in method.args:
@@ -186,13 +186,15 @@ class Writer(WriterBase):
 
         return string.format(virtual=virtual,
                              static='static ' if method.is_static else '',
+                             friend='friend ' if method.is_friend else '',
                              const=' const' if method.is_const else '',
-                             override='',
                              abstract=' = 0' if method.is_abstract else '',
+                             override='',
                              type=return_type,
                              name=method.name,
                              args=args,
-                             body=body)
+                             body=body,
+                             )
 
     def write_function_cpp(self, method):
         if method.is_external or method.is_abstract:
@@ -202,7 +204,8 @@ class Writer(WriterBase):
         if method.specific_implementations:
             return method.specific_implementations
 
-        text = '''{type} {class_name}::{name}({args}){const}
+        scope = (self.current_cls.name + '::') if not method.is_friend else ''
+        text = '''{type} {scope}{name}({args}){const}
         {{
         {body}
         }}
@@ -222,8 +225,9 @@ class Writer(WriterBase):
                            type=return_type,
                            name=method.name,
                            args=args,
-                           class_name=self.current_cls.name,
-                           body=body)
+                           scope=scope,
+                           body=body,
+                           )
 
     def write_member_declaration(self, obj):
         return self.write_named_object(obj, obj.name, False, True) + ';'
