@@ -61,8 +61,9 @@ def create_lang(lang, model):
 
 
 def save(lang, model):
-    create_lang(lang, model).get_writer().save(model)
-    model.save_files()
+    lang = create_lang(lang, model)
+    lang.get_writer().save(model)
+    lang.save_plugin.save_files()
 
 
 def save_object(lang, model):

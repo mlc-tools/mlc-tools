@@ -158,7 +158,7 @@ class Writer(WriterBase):
 
         args = list()
         for arg in method.args:
-            assert(isinstance(arg[1], Object))
+            assert (isinstance(arg[1], Object))
             args.append(self.write_named_object(arg[1], arg[0], True, False))
             if arg[1].initial_value is not None:
                 args[-1] += '=' + self.convert_initial_value(arg[1])
@@ -177,9 +177,9 @@ class Writer(WriterBase):
             {body}
             }}
             '''
-            templates = ['class %s'%x for x in method.template_types]
+            templates = ['class %s' % x for x in method.template_types]
             templates = ', '.join(templates)
-            templates = 'template<%s> '%templates
+            templates = 'template<%s> ' % templates
             string = templates + string
         else:
             string += ';\n'
@@ -193,8 +193,7 @@ class Writer(WriterBase):
                              type=return_type,
                              name=method.name,
                              args=args,
-                             body=body,
-                             )
+                             body=body)
 
     def write_function_cpp(self, method):
         if method.is_external or method.is_abstract:
@@ -215,7 +214,7 @@ class Writer(WriterBase):
 
         args = list()
         for arg in method.args:
-            assert(isinstance(arg[1], Object))
+            assert (isinstance(arg[1], Object))
             args.append(self.write_named_object(arg[1], arg[0], True, False))
         args = ', '.join(args)
 
@@ -226,8 +225,7 @@ class Writer(WriterBase):
                            name=method.name,
                            args=args,
                            scope=scope,
-                           body=body,
-                           )
+                           body=body)
 
     def write_member_declaration(self, obj):
         return self.write_named_object(obj, obj.name, False, True) + ';'
@@ -288,7 +286,7 @@ class Writer(WriterBase):
         string_pointer = '{static}{const}intrusive_ptr<{type}{templates}>{ref}{name}'
         templates = []
         for arg in obj.template_args:
-            assert(isinstance(arg, Object))
+            assert (isinstance(arg, Object))
             templates.append(Writer.write_named_object(arg, '', False, True))
             if arg.callable_args is not None:
                 callable_args = []
@@ -296,7 +294,6 @@ class Writer(WriterBase):
                     callable_args.append(Writer.write_named_object(callable, '', True, False))
                 callable_args = '({})'.format(', '.join(callable_args))
                 templates[-1] += callable_args
-
 
         templates = ('<' + ', '.join(templates) + '>') if templates else ''
         is_ref = obj.is_ref
@@ -309,11 +306,11 @@ class Writer(WriterBase):
         if '(' in modified_type and ')' in modified_type:
             left = modified_type.index('(')
             right = modified_type.index(')')
-            args = modified_type[left+1:right]
+            args = modified_type[left + 1:right]
             args = args.split(',')
             args = [Writer.convert_type(x.strip()) for x in args]
             args = ', '.join(args)
-            modified_type = modified_type[0:left+1] + args + modified_type[right:]
+            modified_type = modified_type[0:left + 1] + args + modified_type[right:]
 
         if use_intrusive and obj.is_pointer and not obj.is_const and not obj.is_link and not obj.denied_intrusive:
             string = string_pointer
@@ -469,7 +466,7 @@ class Writer(WriterBase):
         }
         result = []
         for typename in includes:
-            assert(isinstance(typename, str))
+            assert (isinstance(typename, str))
             if typename in types:
                 result.append('#include %s' % types[typename])
                 continue

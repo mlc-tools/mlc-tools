@@ -15,7 +15,7 @@ class GeneratorPackage(object):
             support = True if model.serialize_formats & serialize_format else False
             content += '\n    SUPPORT_{}_PROTOCOL = {}'.format(format_string.upper(), support)
         content = CONTENT.format(content)
-        model.add_file(filename, content)
+        model.add_file(None, filename, content)
 
 
 CONTENT = '''

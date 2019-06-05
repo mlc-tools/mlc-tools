@@ -92,6 +92,8 @@ class Writer(WriterBase):
         return out_declaration, out_init
 
     def prepare_file(self, text):
+        text = WriterBase.prepare_file(self, text)
+
         text = text.replace('::TYPE', '::$TYPE')
         text = text.replace('nullptr', 'null')
 
@@ -120,7 +122,7 @@ class Writer(WriterBase):
         text = text.replace('if(', 'if (')
         text = text.replace('  extends', ' extends')
         text = text.strip()
-        return WriterBase.prepare_file(self, text)
+        return text
 
     def get_method_arg_pattern(self, obj):
         return '${}={}' if obj.initial_value is not None else '${}'

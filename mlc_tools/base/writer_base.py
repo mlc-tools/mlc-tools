@@ -21,7 +21,7 @@ class WriterBase(object):
                 continue
             sources = self.write_class(cls)
             for filename, content in sources:
-                self.model.add_file(filename, content)
+                self.model.add_file(cls, filename, content)
 
     def write_class(self, cls):
         return [('', '')]

@@ -1,7 +1,4 @@
-import os
 from copy import copy
-from ..utils import fileutils
-from ..utils.error import Log
 
 
 class SerializeFormat(object):
@@ -48,6 +45,7 @@ class Model(object):
         self.additional_config_directories = []
         self.additional_data_directories = []
         self.serialize_protocol = []
+        self.join_to_one_file = False
 
         self.simple_types = ["int", "float", "bool", "string"]
 
@@ -97,31 +95,5 @@ class Model(object):
     def is_lang(self, language):
         return not language or language == self.language
 
-    def add_file(self, local_path, content):
-        self.files.append((local_path, content))
-
-    def save_files(self):
-        if isinstance(self.out_dict, dict):
-            for local_path, content in self.files:
-                self.out_dict[local_path] = content
-            return
-
-        streams = []
-        for local_path, content in self.files:
-            self.created_files.append(local_path)
-            full_path = fileutils.normalize_path(self.out_directory) + local_path
-            exist = os.path.isfile(full_path)
-            result, stream = fileutils.write(full_path, content)
-            if result:
-                streams.append(stream)
-                msg = ' Create: {}' if not exist else ' Overwriting: {}'
-                Log.debug(msg.format(local_path))
-        for stream in streams:
-            stream.close()
-
-    def remove_old_files(self):
-        files = fileutils.get_files_list(self.out_directory)
-        for local_path in files:
-            if local_path not in self.created_files and not local_path.endswith('.pyc'):
-                os.remove(self.out_directory + local_path)
-                Log.debug('Removed {}'.format(local_path))
+    def add_file(self, cls, local_path, content):
+        self.files.append((cls, local_path, content))

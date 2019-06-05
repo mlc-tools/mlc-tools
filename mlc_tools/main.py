@@ -34,6 +34,7 @@ def main():
     add('-o', 'out_directory')
     add('-l', 'language')
     add('-f', 'formats')
+    add('-j', 'join_to_one_file')
     add('-side')
     add('-data', 'data_directory')
     add('-data_out', 'out_data_directory')

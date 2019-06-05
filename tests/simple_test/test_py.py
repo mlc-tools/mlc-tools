@@ -1,9 +1,13 @@
-from generated_py.AllTests import AllTests
-from generated_py.DataStorage import DataStorage
-from generated_py.Logger import Logger
-from generated_py.RunAllTests import RunAllTests
 import os.path as fs
 import sys
+
+try:
+    from generated_py.AllTests import AllTests
+    from generated_py.DataStorage import DataStorage
+    from generated_py.RunAllTests import RunAllTests
+    from generated_py.Logger import Logger
+except ImportError:
+    from generated_py.mg import *
 
 
 class LoggerImpl(Logger):
