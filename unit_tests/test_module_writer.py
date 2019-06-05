@@ -61,8 +61,9 @@ def create_lang(lang, model):
 
 
 def save(lang, model):
-    create_lang(lang, model).get_writer().save(model)
-    model.save_files()
+    lang = create_lang(lang, model)
+    lang.get_writer().save(model)
+    lang.save_plugin.save_files()
 
 
 def save_object(lang, model):
@@ -137,7 +138,7 @@ return result;
     def test_php(self):
         model = create_test_model()
         result = save_function('php', model)
-        self.assertEqual(result, 'function foo($a0, $a1)\n{\n    $result = $this->int_value;\n$result += $a0;\nreturn $result;\n\n}\n')
+        self.assertEqual(result, 'public function foo($a0, $a1)\n{\n    $result = $this->int_value;\n$result += $a0;\nreturn $result;\n\n}\n')
 
 
 class TestCppWriterBuildIncludesWithGroups(unittest.TestCase):

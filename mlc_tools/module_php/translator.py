@@ -23,7 +23,8 @@ class Translator(TranslatorBase):
         return func
 
     @staticmethod
-    def add_imports(cls_owner, func, model):
+    # def add_imports(cls_owner, func, model):
+    def add_imports(_, func, __):
         # if not func:
         #     return func
         # if 'DataStorage' in func:

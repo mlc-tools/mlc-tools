@@ -10,6 +10,7 @@ class Language(object):
         self.translator = locate('mlc_tools.%s.Translator' % module_name)()
         self.serializer = locate('mlc_tools.%s.Serializer' % module_name)()
         self.writer = locate('mlc_tools.%s.Writer' % module_name)(model.out_directory)
+        self.save_plugin = locate('mlc_tools.%s.SavePlugin' % module_name)(model)
         self.writer.model = model
         self.writer.serializer = self.serializer
 

@@ -1,10 +1,12 @@
 <?php
 
-require_once 'generated_php/DataStorage.php';
-require_once 'generated_php/AllTests.php';
-require_once 'generated_php/RunAllTests.php';
-require_once 'generated_php/Logger.php';
-require_once 'generated_php/config.php';
+if((@include 'generated_php/mg.php') === false) {
+    require_once 'generated_php/DataStorage.php';
+    require_once 'generated_php/AllTests.php';
+    require_once 'generated_php/RunAllTests.php';
+    require_once 'generated_php/Logger.php';
+    require_once 'generated_php/config.php';
+}
 
 $file = 'data.xml';
 if(!Config::$SUPPORT_XML_PROTOCOL){

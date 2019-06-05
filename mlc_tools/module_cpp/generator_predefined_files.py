@@ -27,7 +27,7 @@ class GeneratorPredefinedFiles(object):
             content = content.replace('@{namespace_upper}', self.get_namespace().upper())
             content = writer.prepare_file(content)
             filename = filename.replace('@{namespace}', self.get_namespace())
-            model.add_file(filename, content)
+            model.add_file(None, filename, content)
 
     def generate_config_files(self, model):
         pattern = '#ifndef __{0}_Config_h__\n#define __{0}_Config_h__\n\n{1}\n\n#endif //#ifndef __{0}_Config_h__'
@@ -37,4 +37,4 @@ class GeneratorPredefinedFiles(object):
             support = 'true' if model.serialize_formats & serialize_format != 0 else 'false'
             configs.append('#define SUPPORT_{}_PROTOCOL {}'.format(format_string.upper(), support))
 
-        model.add_file('config.h', pattern.format(self.get_namespace(), '\n'.join(configs)))
+        model.add_file(None, 'config.h', pattern.format(self.get_namespace(), '\n'.join(configs)))

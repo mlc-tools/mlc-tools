@@ -1,6 +1,6 @@
 import re
 from ..base import WriterBase
-from ..core.object import Object
+from ..core.object import Object, AccessSpecifier
 from .regex import RegexPatternCpp
 
 
@@ -10,13 +10,13 @@ class Writer(WriterBase):
         WriterBase.__init__(self, out_directory)
         self.current_cls = None
         self.objects_cache = {}
-        self.methods_cache = []
+        self.methods_cache = {}
         self.methods_cache_with_templates = []
 
     def write_class(self, cls):
         self.current_cls = cls
         self.objects_cache = {}
-        self.methods_cache = []
+        self.methods_cache = {}
 
         for member in cls.members:
             declaration, initialisation, static_initialization = self.write_object(member)
@@ -24,7 +24,7 @@ class Writer(WriterBase):
 
         for method in cls.functions:
             hpp, cpp = self.write_function(method)
-            self.methods_cache.append([hpp, cpp])
+            self.methods_cache[method] = ([hpp, cpp])
             if method.template_types:
                 self.methods_cache_with_templates.append(hpp)
 
@@ -62,12 +62,23 @@ class Writer(WriterBase):
         class_name = cls.name
         includes, forward_declarations, forward_declarations_out = self.get_includes_for_header(cls)
         functions = ''
-        for method in self.methods_cache:
-            functions += method[0]
+
+        access = AccessSpecifier.public
+        for method in cls.functions:
+            hpp = self.methods_cache[method][0]
+            if access != method.access:
+                functions += AccessSpecifier.to_string(method.access) + ':\n'
+                access = method.access
+            functions += hpp
         for method in self.methods_cache_with_templates:
             includes.update(self.get_includes_for_method(cls, method, includes))
         members = ''
+
+        access = AccessSpecifier.public
         for member in cls.members:
+            if access != member.access:
+                members += AccessSpecifier.to_string(member.access) + ':\n'
+                access = member.access
             declaration, _, _ = self.objects_cache[member.name]
             members += declaration + '\n'
 
@@ -96,8 +107,9 @@ class Writer(WriterBase):
         namespace = 'mg'
         class_name = cls.name
         functions = ''
-        for method in self.methods_cache:
-            functions += method[1]
+        for method in cls.functions:
+            cpp = self.methods_cache[method][1]
+            functions += cpp
         static_initializations = ''
         initializations = ''
         for member in cls.members:
@@ -142,11 +154,11 @@ class Writer(WriterBase):
                              registration=registration)
 
     def write_function_hpp(self, method):
-        string = '{virtual}{static}{type} {name}({args}){const}{override}{abstract}'
+        string = '{virtual}{static}{friend}{type} {name}({args}){const}{override}{abstract}'
 
         args = list()
         for arg in method.args:
-            assert(isinstance(arg[1], Object))
+            assert (isinstance(arg[1], Object))
             args.append(self.write_named_object(arg[1], arg[0], True, False))
             if arg[1].initial_value is not None:
                 args[-1] += '=' + self.convert_initial_value(arg[1])
@@ -165,18 +177,19 @@ class Writer(WriterBase):
             {body}
             }}
             '''
-            templates = ['class %s'%x for x in method.template_types]
+            templates = ['class %s' % x for x in method.template_types]
             templates = ', '.join(templates)
-            templates = 'template<%s> '%templates
+            templates = 'template<%s> ' % templates
             string = templates + string
         else:
             string += ';\n'
 
         return string.format(virtual=virtual,
                              static='static ' if method.is_static else '',
+                             friend='friend ' if method.is_friend else '',
                              const=' const' if method.is_const else '',
-                             override='',
                              abstract=' = 0' if method.is_abstract else '',
+                             override='',
                              type=return_type,
                              name=method.name,
                              args=args,
@@ -190,7 +203,8 @@ class Writer(WriterBase):
         if method.specific_implementations:
             return method.specific_implementations
 
-        text = '''{type} {class_name}::{name}({args}){const}
+        scope = (self.current_cls.name + '::') if not method.is_friend else ''
+        text = '''{type} {scope}{name}({args}){const}
         {{
         {body}
         }}
@@ -200,7 +214,7 @@ class Writer(WriterBase):
 
         args = list()
         for arg in method.args:
-            assert(isinstance(arg[1], Object))
+            assert (isinstance(arg[1], Object))
             args.append(self.write_named_object(arg[1], arg[0], True, False))
         args = ', '.join(args)
 
@@ -210,7 +224,7 @@ class Writer(WriterBase):
                            type=return_type,
                            name=method.name,
                            args=args,
-                           class_name=self.current_cls.name,
+                           scope=scope,
                            body=body)
 
     def write_member_declaration(self, obj):
@@ -248,7 +262,7 @@ class Writer(WriterBase):
         if object_.is_pointer and (object_.initial_value == '0' or object_.initial_value is None):
             return 'nullptr'
         type_class = self.model.get_class(object_.type) if self.model.has_class(object_.type) else None
-        if type_class is not None and type_class.type == 'enum':
+        if type_class is not None and type_class.type == 'enum' and object_.initial_value is None:
             assert type_class.members
             return '{}::{}'.format(type_class.name, type_class.members[0].name)
 
@@ -272,7 +286,7 @@ class Writer(WriterBase):
         string_pointer = '{static}{const}intrusive_ptr<{type}{templates}>{ref}{name}'
         templates = []
         for arg in obj.template_args:
-            assert(isinstance(arg, Object))
+            assert (isinstance(arg, Object))
             templates.append(Writer.write_named_object(arg, '', False, True))
             if arg.callable_args is not None:
                 callable_args = []
@@ -280,7 +294,6 @@ class Writer(WriterBase):
                     callable_args.append(Writer.write_named_object(callable, '', True, False))
                 callable_args = '({})'.format(', '.join(callable_args))
                 templates[-1] += callable_args
-
 
         templates = ('<' + ', '.join(templates) + '>') if templates else ''
         is_ref = obj.is_ref
@@ -293,11 +306,11 @@ class Writer(WriterBase):
         if '(' in modified_type and ')' in modified_type:
             left = modified_type.index('(')
             right = modified_type.index(')')
-            args = modified_type[left+1:right]
+            args = modified_type[left + 1:right]
             args = args.split(',')
             args = [Writer.convert_type(x.strip()) for x in args]
             args = ', '.join(args)
-            modified_type = modified_type[0:left+1] + args + modified_type[right:]
+            modified_type = modified_type[0:left + 1] + args + modified_type[right:]
 
         if use_intrusive and obj.is_pointer and not obj.is_const and not obj.is_link and not obj.denied_intrusive:
             string = string_pointer
@@ -453,7 +466,7 @@ class Writer(WriterBase):
         }
         result = []
         for typename in includes:
-            assert(isinstance(typename, str))
+            assert (isinstance(typename, str))
             if typename in types:
                 result.append('#include %s' % types[typename])
                 continue

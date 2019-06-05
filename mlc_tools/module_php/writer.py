@@ -57,7 +57,8 @@ class Writer(WriterBase):
     def write_object(self, obj):
         out_init = ''
         value = obj.initial_value
-        if (value is None or value == '"NONE"') and not obj.is_pointer:
+        cls_type = self.model.get_class(obj.type) if self.model.has_class(obj.type) else None
+        if ((value is None or value == '"NONE"') and not obj.is_pointer) or (cls_type and cls_type.type == 'enum'):
             if obj.type == "string":
                 value = '""'
             elif obj.type == "int":
@@ -73,27 +74,26 @@ class Writer(WriterBase):
             elif obj.type == "map":
                 value = "array()"
             else:
-                cls = self.model.get_class(obj.type) if self.model.has_class(obj.type) else None
-                if cls is not None and cls.type == 'enum':
+                if cls_type is not None and cls_type.type == 'enum':
                     value = None
-                    out_init = '$this->{} = {}::${};'.format(obj.name, cls.name, cls.members[0].name)
-                elif cls:
+                    if obj.initial_value:
+                        initial_value = obj.initial_value.replace('::', '::$')
+                    else:
+                        initial_value = '{}::${}'.format(cls_type.name, cls_type.members[0].name)
+                    out_init = '$this->{} = {};'.format(obj.name, initial_value)
+                elif cls_type:
                     out_init = '$this->{} = new {}();'.format(obj.name, obj.type)
 
-        accesses = {
-            AccessSpecifier.public: 'public',
-            AccessSpecifier.protected: 'protected',
-            AccessSpecifier.private: 'private',
-        }
-
         if obj.is_static:
-            out_declaration = accesses[obj.access] + ' static ${0} = {1};'
+            out_declaration = AccessSpecifier.to_string(obj.access) + ' static ${0} = {1};'
         else:
-            out_declaration = accesses[obj.access] + ' ${0} = {1};'
+            out_declaration = AccessSpecifier.to_string(obj.access) + ' ${0} = {1};'
         out_declaration = out_declaration.format(obj.name, Serializer().convert_initialize_value(value))
         return out_declaration, out_init
 
     def prepare_file(self, text):
+        text = WriterBase.prepare_file(self, text)
+
         text = text.replace('::TYPE', '::$TYPE')
         text = text.replace('nullptr', 'null')
 
@@ -122,7 +122,7 @@ class Writer(WriterBase):
         text = text.replace('if(', 'if (')
         text = text.replace('  extends', ' extends')
         text = text.strip()
-        return WriterBase.prepare_file(self, text)
+        return text
 
     def get_method_arg_pattern(self, obj):
         return '${}={}' if obj.initial_value is not None else '${}'
@@ -157,7 +157,7 @@ class {name} {extend}
 ?>
 '''
 
-PATTERN_METHOD = '''function {name}({args})
+PATTERN_METHOD = '''{access} function {name}({args})
 {{
     {body}
 }}

@@ -13,11 +13,11 @@ class GeneratorFactory(object):
         writer.model = model
         line = '''
         if type == "{0}":
-            from . import {0}
-            return {0}.{0}()'''
+            from .{0} import {0}
+            return {0}()'''
         builders = ''
         for cls in model.classes:
             builders += line.format(cls.name)
         content = FACTORY.format(builders=builders)
         content = writer.prepare_file(content)
-        model.add_file('Factory.py', content)
+        model.add_file(None, 'Factory.py', content)

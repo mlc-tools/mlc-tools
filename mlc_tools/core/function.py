@@ -16,6 +16,7 @@ class Function(object):
         self.is_abstract = False
         self.is_template = False
         self.is_virtual = False
+        self.is_friend = False
         self.side = 'both'
         self.access = AccessSpecifier.public
         self.body = ''

@@ -39,6 +39,7 @@ class Mlc(object):
         self.model.generate_factory = kwargs.get('generate_factory', self.model.generate_factory)
         self.model.out_directory = fileutils.normalize_path(self.model.out_directory)
         self.model.out_data_directory = fileutils.normalize_path(self.model.out_data_directory)
+        self.model.join_to_one_file = kwargs.get('join_to_one_file', self.model.join_to_one_file)
         if 'add_config' in kwargs:
             directory = fileutils.normalize_path(kwargs.get('add_config'))
             self.model.additional_config_directories.append(directory)
@@ -103,8 +104,7 @@ class Mlc(object):
         language.get_translator().translate(self.model)
         language.get_serializer().generate_methods(self.model)
         language.get_writer().save(self.model)
-        self.model.save_files()
-        self.model.remove_old_files()
+        language.save_plugin.save_files(self.model.join_to_one_file)
 
     def generate_data(self, **kwargs):
         self._parse_kwargs(**kwargs)

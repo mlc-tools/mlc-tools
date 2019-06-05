@@ -1,7 +1,7 @@
 import os
-import inspect
 import sys
-from time import sleep
+import glob
+import inspect
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
@@ -14,33 +14,49 @@ def get_root():
     return os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + '/..')
 
 
-def run_tests(generator, root, withdata=False, cpp=True, python=True, php=True):
-    def run(lang, serialized_format):
+def run_tests(generator, root, withdata=False, cpp=True, python=True, php=True, with_join=False):
+    def run(lang, serialized_format, join_to_one_file=False):
         out_directory = root + 'generated_%s' % (lang if lang != 'cpp' else lang + '/' + serialized_format)
+
+        # clean python pyc files:
+        def clean_pyc():
+            temp_files = glob.glob(out_directory + '/*.pyc')
+            for filePath in temp_files:
+                try:
+                    os.remove(filePath)
+                except OSError:
+                    pass
+
+        clean_pyc()
         generator.generate(language=lang,
                            out_directory=out_directory,
-                           formats=serialized_format
+                           formats=serialized_format,
+                           join_to_one_file=join_to_one_file,
                            )
         if withdata:
             generator.generate_data(data_directory=root + 'data_%s/' % serialized_format,
                                     out_data_directory=root + 'assets')
         generator.run_test(test_script=root + 'test_%s.py' % lang,
                            test_script_args=serialized_format)
-        if lang == 'py':
-            sleep(0.5)
+        clean_pyc()
         print('-----------------------------------------')
         print('|  test with params [{}, {}] finished'.format(lang, serialized_format))
         print('-----------------------------------------')
+
 
     if cpp:
         run('cpp', 'json')
         run('cpp', 'xml')
     if python:
-        run('py', 'json')
-        run('py', 'xml')
+        run('py', 'json', False)
+        run('py', 'xml', False)
+        with_join and run('py', 'json', True)
+        with_join and run('py', 'xml', True)
     if php:
-        run('php', 'json')
-        run('php', 'xml')
+        run('php', 'json', False)
+        run('php', 'xml', False)
+        with_join and run('php', 'json', True)
+        with_join and run('php', 'xml', True)
 
 
 def simple_test():
@@ -53,7 +69,7 @@ def simple_test():
                     generate_factory=True)
     generator.add_config_directories(root + 'config_additional')
     generator.add_data_directories(root + 'data_additional')
-    run_tests(generator, root, True)
+    run_tests(generator, root, True, with_join=True)
     return 0
 
 

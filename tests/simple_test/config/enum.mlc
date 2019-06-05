@@ -1,0 +1,38 @@
+enum FooEnum
+{
+    foo
+    bar
+}
+
+class FooEnumTestParent
+{
+    function void dummy()
+    {
+    }
+}
+
+class TestFooEnumTestParent<ITestFooEnumTestParent>:test
+{
+    FooEnum enumValue
+    FooEnum enumFoo = FooEnum::foo
+    FooEnum enumBar = FooEnum::bar
+
+    function void test_dummy()
+    {
+    }
+
+    function void test_compare()
+    {
+        this->enumValue = FooEnum::foo;
+
+        this->assertTrue(this->enumValue == FooEnum::foo, "enumValue == FooEnum::foo correct");
+        this->assertTrue(this->enumValue == "foo", "enumValue == 'foo' correct");
+        this->assertTrue("foo" == this->enumValue, "'foo' == enumValue correct");
+    }
+
+    function void test_initialize()
+    {
+        this->assertTrue(this->enumFoo == FooEnum::foo, "enumFoo initialized as FooEnum::foo correct");
+        this->assertTrue(this->enumBar == FooEnum::bar, "enumBar initialized as FooEnum::bar correct");
+    }
+}

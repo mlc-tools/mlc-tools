@@ -11,7 +11,7 @@ class GeneratorFactory(object):
         writer = Writer('')
         writer.model = model
         content = writer.prepare_file(FACTORY)
-        model.add_file('Factory.php', content)
+        model.add_file(None, 'Factory.php', content)
 
 
 FACTORY = '''<?php

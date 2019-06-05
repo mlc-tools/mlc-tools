@@ -20,6 +20,14 @@ class AccessSpecifier(Enum):
             string = string.replace(Modifiers.public, '')
         return string
 
+    @staticmethod
+    def to_string(access):
+        return {
+            AccessSpecifier.public: 'public',
+            AccessSpecifier.protected: 'protected',
+            AccessSpecifier.private: 'private',
+        }[access]
+
 
 class Object(object):
 

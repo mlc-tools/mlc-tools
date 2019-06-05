@@ -82,6 +82,6 @@ class GeneratorObserver(object):
         filename = GeneratorObserver.get_observable_name() + '.py'
         text = text.replace('@{namespace}', 'mg')
         text = text.replace('@{name}', GeneratorObserver.get_observable_name())
-        model.add_file(filename, text)
+        model.add_file(None, filename, text)
 
         model.add_class(GeneratorObserver.get_mock())
