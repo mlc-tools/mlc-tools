@@ -442,7 +442,7 @@ class TestFactory<SerializedObject>
         }
         return result;
     }
-    function bool test(Logger* logger):static:py:php
+    function bool test(Logger* logger):static:py:php:js
     {
         return true;
     }

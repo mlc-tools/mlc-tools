@@ -128,7 +128,7 @@ class Writer(WriterBase):
     def get_method_arg_pattern(self, obj):
         return '{}={}' if obj.initial_value is not None else '{}'
 
-    def get_method_pattern(self):
+    def get_method_pattern(self, method):
         return PATTERN_METHOD
 
     def get_required_args_to_function(self, method):

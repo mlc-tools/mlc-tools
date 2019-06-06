@@ -14,7 +14,7 @@ def get_root():
     return os.path.abspath(os.path.dirname(os.path.abspath(__file__)) + '/..')
 
 
-def run_tests(generator, root, withdata=False, cpp=True, python=True, php=True, with_join=False):
+def run_tests(generator, root, withdata=False, cpp=True, python=True, php=True, js=True, with_join=False):
     def run(lang, serialized_format, join_to_one_file=False):
         out_directory = root + 'generated_%s' % (lang if lang != 'cpp' else lang + '/' + serialized_format)
 
@@ -57,6 +57,9 @@ def run_tests(generator, root, withdata=False, cpp=True, python=True, php=True, 
         run('php', 'xml', False)
         with_join and run('php', 'json', True)
         with_join and run('php', 'xml', True)
+    if js:
+        run('js', 'json')
+        # run('js', 'xml')
 
 
 def simple_test():

@@ -13,6 +13,7 @@ class WriterBase(object):
         self.out_directory = out_directory
         self.files = []
         self.created_files = []
+        self.current_class = None
 
     def save(self, model):
         self.model = model
@@ -42,10 +43,11 @@ class WriterBase(object):
             args.append(pattern.format(name, self.serializer.convert_initialize_value(arg.initial_value)))
         args = ', '.join(args)
 
-        text = self.get_method_pattern().format(name=method.name,
-                                                args=args,
-                                                body=method.body,
-                                                access=AccessSpecifier.to_string(method.access))
+        text = self.get_method_pattern(method).format(name=method.name,
+                                                      args=args,
+                                                      body=method.body,
+                                                      access=AccessSpecifier.to_string(method.access),
+                                                      class_name=self.current_class.name)
         if method.is_static:
             text = self.add_static_modifier_to_method(text)
         return text
@@ -53,7 +55,7 @@ class WriterBase(object):
     def get_method_arg_pattern(self, obj):
         return '${}={}' if obj.initial_value is not None else '${}'
 
-    def get_method_pattern(self):
+    def get_method_pattern(self, method):
         return '{name}({args})\n{body}'
 
     def get_required_args_to_function(self, method):
@@ -61,6 +63,7 @@ class WriterBase(object):
 
     def add_static_modifier_to_method(self, text):
         return 'static ' + text
+
     # End Function methods
 
     def write_object(self, obj):

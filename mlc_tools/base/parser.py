@@ -52,7 +52,7 @@ class Parser(object):
     def check_skip(self, line):
         corresponds = True
         first_match = True
-        for lang in ['cpp', 'py', 'php']:
+        for lang in ['cpp', 'py', 'php', 'js']:
             if ':' + lang in line:
                 if first_match:
                     first_match = False
