@@ -100,25 +100,25 @@ for(let dict in arr_$(FIELD))
 #list<pointer>
 #serialize
 json['$(FIELD)'] = [];
-let arr = json['$(FIELD)'];
+let arr_$(FIELD) = json['$(FIELD)'];
 for(let t in $(OWNER)$(FIELD))
 {
-    arr.push($({}));
-    arr[-1][t.get_type()] = {};
-    t.serialize_$(FORMAT)(arr[-1][t.get_type()]);
+    arr_$(FIELD).push($({}));
+    arr_$(FIELD)[-1][t.get_type()] = {};
+    t.serialize_$(FORMAT)(arr_$(FIELD)[-1][t.get_type()]);
 }
 #deserialize
 $(OWNER)$(FIELD) = [];
-let arr = dictionary['$(FIELD)'];
-let size = arr.length;
-for(let index in range(size))
+let arr_$(FIELD) = dictionary['$(FIELD)'];
+let size_$(FIELD) = arr_$(FIELD).length;
+for(let index in range(size_$(FIELD)))
 {
-    for(let key in arr[index])
+    for(let key in arr_$(FIELD)[index])
     {
-        let value = arr[index][key];
+        let value = arr_$(FIELD)[index][key];
         let obj = Factory.build(key);
         $(OWNER)$(FIELD).push(obj);
-        $(OWNER)$(FIELD)[-1].deserialize_$(FORMAT)(arr[index][key]);
+        $(OWNER)$(FIELD)[-1].deserialize_$(FORMAT)(arr_$(FIELD)[index][key]);
         break;
     }
 }
@@ -128,22 +128,21 @@ for(let index in range(size))
 #serialize:
 json['$(FIELD)'] = $(OWNER)$(FIELD).name;
 #deserialize:
-let name = json["$(FIELD)"];
-$(OWNER)$(FIELD) = DataStorage.shared().get$(TYPE)(name);
+$(OWNER)$(FIELD) = DataStorage.shared().get$(TYPE)(json["$(FIELD)"]);
 
 
 #list<link>
 #serialize:
 json['$(FIELD)'] = [];
-let arr = json['$(FIELD)'];
+let arr_$(FIELD) = json['$(FIELD)'];
 for(let t in $(OWNER)$(FIELD))
 {
-    arr.push(t.name);
+    arr_$(FIELD).push(t.name);
 }
 #deserialize:
 $(OWNER)$(FIELD) = [];
-let arr = json['$(FIELD)'];
-for(let name in arr)
+let arr_$(FIELD) = json['$(FIELD)'];
+for(let name in arr_$(FIELD))
 {
     let data = DataStorage.shared().get$(ARG_0)(name);
     $(OWNER)$(FIELD).push(data);
@@ -154,7 +153,7 @@ for(let name in arr)
 #serialize
 let json_cache_$(FIELD) = json;
 let arr_$(FIELD) = [];
-json['$(FIELD)'] = arr;
+json['$(FIELD)'] = arr_$(FIELD);
 for(let key in $(OWNER)$(FIELD))
 {
     let value = $(OWNER)$(FIELD)[key];

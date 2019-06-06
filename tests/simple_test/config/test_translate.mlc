@@ -214,4 +214,32 @@ class TestTranslates<ITestTranslates>
         this->assertTrue(list_size(vector) == 1);
         this->assertTrue(vector[0] == 2);
     }
+
+    function void test_translate_declare_empty_string()
+    {
+        //mock data
+        map<int, std::string> possible_objects;
+        possible_objects[1] = "1";
+        list<int> indexes;
+        list_push(indexes, 1);
+
+        //from production code
+        for(auto index : indexes)
+        {
+            std::string object_name;
+            for(auto&& [key, value] : possible_objects)
+            {
+                object_name = key;
+                break;
+            }
+        }
+        this->assertTrue(false, "test ");
+    }
+    function void test_translate_for_with_size_t()
+    {
+        size_t count = 1;
+        for(size_t i=0; i<count; ++i)
+        {
+        }
+    }
 }
