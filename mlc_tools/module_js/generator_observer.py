@@ -17,7 +17,7 @@ class Observable
     }
     remove(object)
     {
-        let index = this.listeners.indexOf(object);
+        let index = this.objects.indexOf(object);
         if(index != -1)
         {
             this.listeners.splice(index, 1);
@@ -30,7 +30,7 @@ class Observable
         {
             let object = this.objects[index];
             let callback = this.listeners[index];
-            callback.call(object, arguments);
+            callback.apply(object, arguments);
         }
     }
 }

@@ -233,7 +233,6 @@ class TestTranslates<ITestTranslates>
                 break;
             }
         }
-        this->assertTrue(false, "test ");
     }
     function void test_translate_for_with_size_t()
     {

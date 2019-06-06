@@ -20,7 +20,6 @@ let tests = new mg.RunAllTests();
 tests.initialize(logger);
 result = result && tests.execute();
 
-console.log(result);
 if(!result){
     throw 'Tests not passed'
 }
