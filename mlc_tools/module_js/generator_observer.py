@@ -4,7 +4,7 @@ from ..core.class_ import Class
 PREDEFINED = '''
 class Observable
 {
-    construct()
+    constructor()
     {
         this.listeners = [];
         this.objects = [];
@@ -12,26 +12,26 @@ class Observable
 
     add(object, callback)
     {
-        //array_push($this->listeners, $callback);
-        //array_push($this->objects, $object);
+        this.objects.push(object);
+        this.listeners.push(callback);
     }
     remove(object)
     {
-        //$index = array_search($object, $this->objects);
-        //if($index !== false)
-        //{
-        //    array_splice($this->listeners, $index, 1);
-        //    array_splice($this->objects, $index, 1);
-        //}
+        let index = this.listeners.indexOf(object);
+        if(index != -1)
+        {
+            this.listeners.splice(index, 1);
+            this.objects.splice(index, 1);
+        }
     }
-    notify(args) // ...args
+    notify()
     {
-        //for ($i = 0; $i < count($this->listeners); ++$i)
-        //{
-        //    $func = $this->listeners[$i];
-        //    $obj = $this->objects[$i];
-        //    $obj->$func(...$arg);
-        //}
+        for (let index in this.listeners)
+        {
+            let object = this.objects[index];
+            let callback = this.listeners[index];
+            callback.call(object, arguments);
+        }
     }
 }
 

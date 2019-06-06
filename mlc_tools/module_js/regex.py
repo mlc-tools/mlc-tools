@@ -92,7 +92,11 @@ class RegexPatternJs(object):
         # (re.compile(r'([-0-9]*)->([-0-9]*)f\b'), r'\1.\2'),
         # (re.compile(r'([-0-9]*)->f\\b'), r'\1.0'),
         # (re.compile(r'\$return\s'), r'return', ['$return']),
+
+        # add listener to Observable
+        (re.compile(r'(\w+\.\w+)\.add\((\w+), \w+::(\w+)(.+)\);'), r'\1.add(\2, \2.\3\4);', ['']),
         (re.compile(r',\s*std::placeholders::_\d'), r'', ['std::placeholders']),
+
         # (re.compile(r'list_remove\((\$.+?),\s*([\$.\w]+?)\);'), r'array_splice(\1, array_search(\2, \1), 1);',
         #  ['list_remove']),
         # (re.compile(r'list_erase\((\$.+?),\s*([\$.\w]+?)\);'), r'array_splice(\1, \2, 1);',

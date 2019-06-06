@@ -48,11 +48,11 @@ class observable/TestObservableClass<ITestObservableClass>
 	    this->value = 0;
 		this->test.eventTest.add(this, &TestObservableClass::listen);
 		this->test.eventTest.notify();
-		this->assertTrue(this->value == 1);
+		this->assertTrue(this->value == 1, "test_1 1: value == 1");
 
 		this->test.eventTest.remove(this);
 		this->test.eventTest.notify();
-		this->assertTrue(this->value == 1);
+		this->assertTrue(this->value == 1, "test_1 2: value == 1");
 	}
 
 	function void test_notify_with_unsubscribe()
