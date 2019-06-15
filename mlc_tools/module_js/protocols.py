@@ -121,9 +121,16 @@ for(let index in range(size_$(FIELD)))
 
 #link
 #serialize:
-json['$(FIELD)'] = $(OWNER)$(FIELD).name;
+if($(OWNER)$(FIELD))
+{
+    json['$(FIELD)'] = $(OWNER)$(FIELD).name;
+}
 #deserialize:
-$(OWNER)$(FIELD) = DataStorage.shared().get$(TYPE)(json["$(FIELD)"]);
+let name_$(FIELD) = json["$(FIELD)"];
+if(name_$(FIELD))
+{
+    $(OWNER)$(FIELD) = DataStorage.shared().get$(TYPE)(name_$(FIELD));
+}
 
 
 #list<link>

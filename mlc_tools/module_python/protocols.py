@@ -316,10 +316,12 @@ $(OWNER)$(FIELD) = list()
 #serialize:
 from .$(TYPE) import $(TYPE)
         from .$(TYPE) import $(TYPE)
-        dictionary['$(FIELD)'] = $(OWNER)$(FIELD).name
+        if $(OWNER)$(FIELD):
+            dictionary['$(FIELD)'] = $(OWNER)$(FIELD).name
 #deserialize:
 name = dictionary["$(FIELD)"]
-        $(OWNER)$(FIELD) = DataStorage.shared().get$(TYPE)(name)
+        if name:
+            $(OWNER)$(FIELD) = DataStorage.shared().get$(TYPE)(name)
 
 
 #list<link>
