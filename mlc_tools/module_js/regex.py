@@ -86,9 +86,7 @@ class RegexPatternJs(object):
 
         (re.compile(r'map_clear\s*\(\s*(.+)\s*\)'), r'\1 = {}', ['map_clear']),
         (re.compile(r'map_remove\s*\(\s*(.+),\s*(.+)\s*\)'), r'delete (\1[\2])', ['map_remove']),
-    )
 
-    FUNCTION_2 = (
         # (re.compile(r'->\$(\w+)\('), r'.\1(', ['.']),
         # (re.compile(r'([-0-9]*)->([-0-9]*)f\b'), r'\1.\2'),
         # (re.compile(r'([-0-9]*)->f\\b'), r'\1.0'),

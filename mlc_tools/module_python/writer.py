@@ -8,7 +8,6 @@ class Writer(WriterBase):
         WriterBase.__init__(self, out_directory)
 
     def write_class(self, cls):
-        self.current_class = cls
         self.set_initial_values(cls)
 
         initialize_list = ''

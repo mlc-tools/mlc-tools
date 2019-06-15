@@ -16,9 +16,7 @@ class GeneratorOperatorValueOf(object):
     def add_value_of(class_):
         if class_.is_inline:
             return
-        for method in class_.functions:
-            if method.name == 'valueOf':
-                return
+
         method = Function()
         method.name = 'valueOf'
         method.return_type = Objects.STRING

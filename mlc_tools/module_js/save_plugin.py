@@ -6,9 +6,6 @@ class SavePlugin(SavePluginBase):
     def __init__(self, model):
         SavePluginBase.__init__(self, model)
 
-    def __remove_old_files(self):
-        pass
-
     def save_files(self, combine_to_one=True):
         SavePluginBase.save_files(self, True)
 
@@ -18,7 +15,7 @@ class SavePlugin(SavePluginBase):
         return header, file_name
 
     def _finalize_combine_file(self, content):
-        return content + ''
+        return content
 
     def _remove_includes(self, file_content):
         return file_content

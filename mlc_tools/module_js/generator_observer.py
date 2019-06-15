@@ -2,7 +2,7 @@ from ..core.class_ import Class
 
 
 PREDEFINED = '''
-class Observable
+class @{name}
 {
     constructor()
     {
@@ -59,7 +59,6 @@ class GeneratorObserver(object):
     def generate(model):
         text = PREDEFINED
         filename = GeneratorObserver.get_observable_name() + '.js'
-        text = text.replace('@{namespace}', 'mg')
         text = text.replace('@{name}', GeneratorObserver.get_observable_name())
 
         mock = GeneratorObserver.get_mock()

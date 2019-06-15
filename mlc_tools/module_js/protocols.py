@@ -1,9 +1,4 @@
-JS_XML = '''
-
-'''
-
 JS_JSON = '''
-
 #int, bool, float, string
 #serialize:
 #with default value:

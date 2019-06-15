@@ -13,7 +13,6 @@ class Writer(WriterBase):
         self.methods_cache_with_templates = []
 
     def write_class(self, cls):
-        self.current_class = cls
         self.objects_cache = {}
         self.methods_cache = {}
 

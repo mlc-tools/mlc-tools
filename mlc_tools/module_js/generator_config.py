@@ -20,9 +20,4 @@ class GeneratorConfig(object):
             line = '\nexports.SUPPORT_{0}_PROTOCOL = SUPPORT_{0}_PROTOCOL;'.format(format_string.upper())
             content += line
 
-        content = CONTENT.format(content)
         model.add_file(None, filename, content)
-
-
-CONTENT = '''{0}
-'''

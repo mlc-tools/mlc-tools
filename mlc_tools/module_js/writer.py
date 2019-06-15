@@ -7,7 +7,6 @@ class Writer(WriterBase):
         WriterBase.__init__(self, out_directory)
 
     def write_class(self, cls):
-        self.current_class = cls
         self.set_initial_values(cls)
 
         members_list = ''
@@ -32,13 +31,11 @@ class Writer(WriterBase):
             extend = ' extends ' + cls.superclasses[0].name
         out = PATTERN_FILE.format(name=name,
                                   extend=extend,
-                                  members_list=members_list,
-                                  static_list=static_list,
-                                  functions=functions,
+                                  members_list=members_list.strip(),
+                                  static_list=static_list.strip(),
+                                  functions=functions.strip(),
                                   superclass_construct='super()' if cls.superclasses else '')
-        return [
-            ('%s.js' % cls.name, self.prepare_file(out))
-        ]
+        return [('%s.js' % cls.name, self.prepare_file(out))]
 
     def write_object(self, obj):
         member = ''
@@ -99,10 +96,6 @@ class Writer(WriterBase):
         for i in range(10):
             tabs = '\n' + '\t' * i + '{'
             text = text.replace(tabs, ' {')
-        # text = text.replace('foreach(', 'foreach (')
-        # text = text.replace('for(', 'for (')
-        # text = text.replace('if(', 'if (')
-        # text = text.replace('  extends', ' extends')
         return text
 
     def get_method_arg_pattern(self, obj):
@@ -119,7 +112,6 @@ class Writer(WriterBase):
 
 
 PATTERN_FILE = '''
-
 class {name} {extend}
 {{
     constructor()
@@ -127,12 +119,10 @@ class {name} {extend}
         {superclass_construct}
         //members:
         {members_list}
-    }}
-    
+}}
     //functions
     {functions}
 }}
-
 //static
 {static_list}
 exports.{name} = {name};
@@ -150,5 +140,4 @@ PATTERN_STATIC_METHOD = '''
 {{
     {body}
 }};
-
 '''

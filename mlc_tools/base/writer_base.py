@@ -20,6 +20,7 @@ class WriterBase(object):
         for cls in model.classes:
             if not cls.auto_generated:
                 continue
+            self.current_class = cls
             sources = self.write_class(cls)
             for filename, content in sources:
                 self.model.add_file(cls, filename, content)

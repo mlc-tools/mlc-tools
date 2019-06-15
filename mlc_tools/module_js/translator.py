@@ -13,15 +13,14 @@ class Translator(TranslatorBase):
             body = self.translate_function_body(cls, body, model, method.args)
             method.body = body
         else:
-            if method.operations:
-                method.body = '\n        '.join(method.operations)
+            method.body = '\n'.join(method.operations)
 
     def translate_function_body(self, _, func, model, args):
         func = self.replace_by_regex(func, model, args)
         return func
 
     def replace_by_regex(self, func, _, function_args):
-        function_args = ', '.join(['$' + x[0] for x in function_args])
+        function_args = ', '.join([x[0] for x in function_args])
 
         if not func and not function_args:
             return func
@@ -42,9 +41,6 @@ class Translator(TranslatorBase):
                 right += 1
 
         for reg in RegexPatternJs.FUNCTION:
-            func = self.replace(func, reg)
-
-        for reg in RegexPatternJs.FUNCTION_2:
             func = self.replace(func, reg)
 
         for reg in RegexPatternJs.REPLACES:

@@ -1,6 +1,5 @@
 from ..base.serializer_base import SerializerBase
 from ..core.object import Object, Objects
-from .protocols import JS_XML
 from .protocols import JS_JSON
 from .regex import RegexPatternJs
 
@@ -11,7 +10,8 @@ class Serializer(SerializerBase):
         SerializerBase.__init__(self)
 
     def get_protocol(self, serialize_format):
-        return JS_XML if serialize_format == 'xml' else JS_JSON
+        assert (serialize_format == 'json')
+        return JS_JSON
 
     def create_serialization_function(self, cls, serialize_type, serialize_format):
         return SerializerBase.create_serialization_function(self, cls, serialize_type, serialize_format)
@@ -30,13 +30,13 @@ class Serializer(SerializerBase):
 
         def get_create_type_operation(type_):
             types = {
-                'list': 'array',
-                'map': 'array',
+                'list': '[]',
+                'map': '{}',
             }
             return types[type_] if type_ in types else 'new ' + type_
 
         if value_type not in self.model.simple_types:
-            value_declaration = 'let value = new {}();'.format(get_create_type_operation(value_type))
+            value_declaration = 'let value = {}();'.format(get_create_type_operation(value_type))
         else:
             value_declaration = ''
         key_serialize = self.build_serialize_operation_('key', key_type, None, serialization_type, key.template_args,
@@ -70,7 +70,7 @@ class Serializer(SerializerBase):
         return value
 
     def get_serialization_function_args(self, serialize_type, serialize_format):
-        return ['xml', Objects.VOID] if serialize_format == 'xml' else ['json', Objects.VOID]
+        return ['json', Objects.VOID]
 
     def build_serialize_operation(self, obj, serialization_type, serialize_format):
         return self.build_serialize_operation_(obj.name, obj.type, obj.initial_value,
