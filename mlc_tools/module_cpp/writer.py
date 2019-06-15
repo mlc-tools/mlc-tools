@@ -8,13 +8,12 @@ class Writer(WriterBase):
 
     def __init__(self, out_directory):
         WriterBase.__init__(self, out_directory)
-        self.current_cls = None
         self.objects_cache = {}
         self.methods_cache = {}
         self.methods_cache_with_templates = []
 
     def write_class(self, cls):
-        self.current_cls = cls
+        self.current_class = cls
         self.objects_cache = {}
         self.methods_cache = {}
 
@@ -41,15 +40,15 @@ class Writer(WriterBase):
         static_initialization = ''
 
         assert (isinstance(obj.type, str))
-        if self.current_cls.type == 'class':
+        if self.current_class.type == 'class':
             declaration = self.write_member_declaration(obj)
-        elif self.current_cls.type == 'enum':
+        elif self.current_class.type == 'enum':
             declaration = self.write_member_enum_declaration(obj)
 
-        if self.current_cls.type == 'enum' and obj.name != 'value':
-            static_initialization = self.write_member_static_enum(self.current_cls, obj)
+        if self.current_class.type == 'enum' and obj.name != 'value':
+            static_initialization = self.write_member_static_enum(self.current_class, obj)
         elif obj.is_static:
-            static_initialization = self.write_member_static_init(self.current_cls, obj)
+            static_initialization = self.write_member_static_init(self.current_class, obj)
         else:
             initialization += self.write_member_initialization(obj)
         return declaration, initialization, static_initialization
@@ -167,7 +166,7 @@ class Writer(WriterBase):
         assert (isinstance(method.return_type, Object))
         return_type = self.write_named_object(method.return_type, '', False, True)
 
-        virtual = 'virtual ' if method.is_virtual or method.is_abstract or self.current_cls.is_virtual else ''
+        virtual = 'virtual ' if method.is_virtual or method.is_abstract or self.current_class.is_virtual else ''
 
         body = ''
         if method.template_types:
@@ -203,7 +202,7 @@ class Writer(WriterBase):
         if method.specific_implementations:
             return method.specific_implementations
 
-        scope = (self.current_cls.name + '::') if not method.is_friend else ''
+        scope = (self.current_class.name + '::') if not method.is_friend else ''
         text = '''{type} {scope}{name}({args}){const}
         {{
         {body}

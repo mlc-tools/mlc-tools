@@ -37,6 +37,7 @@ tests/*/build*
 mlc.sln
 /out
 /temp
+/venv/
 temp.py
 
 /dist

@@ -131,7 +131,8 @@ class Mlc(object):
                 print('\nTODO: exit - 1. tests not passed')
                 exit(1)
         if not os.path.isfile(self.model.test_script):
-            Log.warning('Test script (%s) not founded' % self.model.test_script)
+            Log.error('Test script (%s) not founded' % self.model.test_script)
+            exit(1)
 
     def set_user_generator(self, generator):
         self.model.custom_generator = generator

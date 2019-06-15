@@ -69,14 +69,14 @@ def save(lang, model):
 def save_object(lang, model):
     cls = model.get_class('Test')
     writer = create_lang(lang, model).get_writer()
-    writer.current_cls = cls
+    writer.current_class = cls
     return writer.write_object(cls.members[0])
 
 
 def save_function(lang, model):
     cls = model.get_class('Test')
     writer = create_lang(lang, model).get_writer()
-    writer.current_cls = cls
+    writer.current_class = cls
     return writer.write_function(cls.functions[0])
 
 

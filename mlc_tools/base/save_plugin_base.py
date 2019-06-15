@@ -18,7 +18,7 @@ class SavePluginBase(object):
 
         for stream in self.streams:
             stream.close()
-        # self.__remove_old_files()
+        self.__remove_old_files()
 
     # To override methods:
     def _create_combine_file_header(self):
