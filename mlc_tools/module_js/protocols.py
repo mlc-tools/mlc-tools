@@ -84,7 +84,7 @@ json['$(FIELD)'] = arr_$(FIELD);
 #deserialize
 $(OWNER)$(FIELD) = [];
 let arr_$(FIELD) = json['$(FIELD)'];
-for(let dict in arr_$(FIELD))
+for(let dict of arr_$(FIELD))
 {
     let obj = new $(TYPE)();
     obj.deserialize_$(FORMAT)(dict);
@@ -104,9 +104,9 @@ for(let t in $(OWNER)$(FIELD))
 }
 #deserialize
 $(OWNER)$(FIELD) = [];
-let arr_$(FIELD) = dictionary['$(FIELD)'];
+let arr_$(FIELD) = json['$(FIELD)'];
 let size_$(FIELD) = arr_$(FIELD).length;
-for(let index in range(size_$(FIELD)))
+for(let index in size_$(FIELD))
 {
     for(let key in arr_$(FIELD)[index])
     {
