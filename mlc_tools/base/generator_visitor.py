@@ -96,14 +96,12 @@ class GeneratorVisitor(object):
             method.name = 'visit'
             method.return_type = Objects.VOID
             method.args.append(['ctx', Parser.create_object(base_class_name + '*')])
-            method.operations.append('''
-                if(!ctx)
+            method.operations.append('''if(!ctx)
                 {
                     return;
                 }''')
             for visitor in visitors:
-                method.operations.append('''
-                else if(ctx->get_type() == {}::TYPE)
+                method.operations.append('''else if(ctx->get_type() == {}::TYPE)
                 {{
                     this->visit_{}(ctx);
                 }}'''.format(visitor.name, visitor.name[0].lower() + visitor.name[1:]))
