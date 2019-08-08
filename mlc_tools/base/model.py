@@ -90,7 +90,7 @@ class Model(object):
         return name in self.classes_dict
 
     def is_side(self, side):
-        return self.side == 'both' or side == self.side or side == 'both'
+        return self.side == 'both' or side in [self.side, 'both']
 
     def is_lang(self, language):
         return not language or language == self.language

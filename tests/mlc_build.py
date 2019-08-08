@@ -97,7 +97,7 @@ def test_serialize():
     command = '{} {}/tests/test_serialize/run.py'.format(python, root)
     result = os.system(command)
     if 0 != result:
-        exit(1)
+        sys.exit(1)
     return 0
 
 

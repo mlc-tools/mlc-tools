@@ -62,7 +62,7 @@ class Serializer(SerializerBase):
                              owner='self.') + '\n'
 
     def convert_initialize_value(self, value):
-        assert (value is None or isinstance(value, str))
+        assert value is None or isinstance(value, str)
         if value is None:
             return None
 

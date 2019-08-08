@@ -80,7 +80,7 @@ class GeneratorDataStorageBase(Class):
         self.is_serialized = True
 
         for class_ in model.classes:
-            if class_.is_storage and (class_.side == model.side or class_.side == 'both'):
+            if class_.is_storage and (class_.side in [model.side, 'both']):
                 obj = Object()
                 obj.type = 'map'
                 obj.name = get_data_list_name(get_data_name(class_.name))

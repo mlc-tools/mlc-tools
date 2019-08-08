@@ -62,7 +62,7 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
 
     def create_getters(self, classes):
         for class_ in classes:
-            if class_.is_storage and (class_.side == self.model.side or class_.side == 'both'):
+            if class_.is_storage and class_.side in [self.model.side, 'both']:
                 map_name = get_data_list_name(get_data_name(class_.name))
                 method = Function()
                 method.name = 'get' + class_.name

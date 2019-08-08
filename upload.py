@@ -7,8 +7,8 @@ def main():
     job_number = sys.argv[2]
     if not job_number.endswith('1'):
         print 'skip'
-        exit(0)
-    
+        sys.exit(0)
+
     version = open('mlc_tools/version.py').read().strip()
     versions = version[version.find("'") + 1: version.rfind("'")].split('.')
     versions[2] = sys.argv[1]
@@ -22,10 +22,10 @@ def main():
 
     if 0 != os.system('python setup.py sdist'):
         print 'Error: sdist'
-        exit(-1)
+        sys.exit(-1)
     if 0 != os.system('twine upload dist/mlc-tools-{}.tar.gz -u $PYPI_USERNAME -p $PYPI_PASSWORD '.format(version)):
         print 'Error: twine upload'
-        exit(-1)
+        sys.exit(-1)
     print 'Done'
 
 

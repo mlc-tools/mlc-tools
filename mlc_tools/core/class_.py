@@ -95,7 +95,6 @@ class Class(Object):
 
         for member in self.members:
             member.set_default_initial_value()
-        return
 
     def on_linked(self, model):
         if self._linked:

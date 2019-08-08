@@ -63,7 +63,7 @@ def run(protocol):
     if not result:
         clean()
         print('Error')
-        exit(1)
+        sys.exit(1)
 
     clean()
 

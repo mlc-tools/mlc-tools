@@ -18,7 +18,8 @@ class LoggerImpl(Logger):
 
 def initialize_data_storage(protocol):
     filepath = fs.abspath(fs.dirname(__file__)) + '/assets/data.' + protocol
-    content = open(filepath).read()
+    with open(filepath) as f:
+        content = f.read()
     if protocol == 'json':
         DataStorage.shared().initialize_json(content)
     elif protocol == 'xml':
@@ -35,7 +36,7 @@ def main(argv):
     tests.initialize(logger)
     result = result and tests.execute()
 
-    exit(0 if result else -1)
+    sys.exit(0 if result else -1)
 
 
 if __name__ == '__main__':

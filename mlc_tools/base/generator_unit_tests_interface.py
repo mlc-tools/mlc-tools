@@ -71,7 +71,7 @@ class GeneratorUnitTestsInterface(object):
         test.functions.append(method)
         for func in test.functions:
             name = func.name
-            if name == 'initialize' or name == 'execute':
+            if name in ['initialize', 'execute']:
                 continue
             method.operations.append('this->{}();'.format(name))
 

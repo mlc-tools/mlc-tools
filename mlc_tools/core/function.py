@@ -1,3 +1,4 @@
+import sys
 from .modifiers import Modifiers
 from .object import Object, AccessSpecifier
 
@@ -46,7 +47,7 @@ class Function(object):
                     counters[div] += 1 if char == div[0] else -1
             if counters_sum() < 0:
                 print('error parsing function "{}" body'.format(self.name))
-                exit(-1)
+                sys.exit(-1)
             operation += char
             if counters_sum() == 0 and char in ';}':
                 operations.append(operation.strip())
@@ -54,7 +55,6 @@ class Function(object):
                 continue
         operations.append(operation.strip())
         self.operations = [o for o in operations if o]
-        return
 
     def find_modifiers(self, string):
         if Modifiers.server in string:

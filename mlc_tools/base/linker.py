@@ -36,7 +36,7 @@ class Linker(object):
         if not class_.superclasses:
             return
         for superclass in class_.superclasses:
-            assert (isinstance(superclass, Class))
+            assert isinstance(superclass, Class)
             if superclass.__class__ != Class:
                 Error.exit(Error.INTERNAL_ERROR)
 

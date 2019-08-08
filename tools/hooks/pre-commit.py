@@ -1,5 +1,6 @@
 import os
 import re
+import sys
 
 
 root = os.path.abspath(os.path.dirname(__file__) + '/../..')
@@ -12,20 +13,20 @@ def has_python_version(number):
 
 def run_mlc_build():
     if 0 != os.system('python  {}/tests/mlc_build.py'.format(root)):
-        exit(1)
+        sys.exit(1)
 
     if has_python_version(3):
         if 0 != os.system('python3 {}/tests/mlc_build.py'.format(root)):
-            exit(1)
+            sys.exit(1)
 
 
 def run_unit_tests():
     if 0 != os.system('python -m unittest discover -s {0}/unit_tests'.format(root)):
-        exit(1)
+        sys.exit(1)
 
     if has_python_version(3):
         if 0 != os.system('python3 -m unittest discover -s {0}/unit_tests'.format(root)):
-            exit(1)
+            sys.exit(1)
 
 
 def run_pylint():
@@ -38,19 +39,19 @@ def run_pylint():
     current, previuos, delta = groups[0]
     if float(current) < 9.95:
         print('Low rated')
-        exit(1)
+        sys.exit(1)
     if float(delta) < 0.0:
         print('Low delta')
-        exit(1)
+        sys.exit(1)
     if 'unused-import' in out:
         print('Please remove a unused-import warning. see pylint')
-        exit(1)
+        sys.exit(1)
     if 'trailing - whitespace' in out:
         print('Please remove a trailing - whitespace warning. see pylint')
-        exit(1)
+        sys.exit(1)
     if 'no-name-in-module' in out:
         print('Please check a imports. see pylint no-name-in-module warning')
-        exit(1)
+        sys.exit(1)
 
 
 if __name__ == '__main__':

@@ -35,7 +35,7 @@ class Writer(WriterBase):
             if self.model.has_class(obj.type):
                 if obj.type != cls.name:
                     imports += include_patter.format(obj.type)
-            elif obj.type == 'list' or obj.type == 'map':
+            elif obj.type in ['list', 'map']:
                 for arg in obj.template_args:
                     if self.model.has_class(arg.type) and arg.type != cls.name:
                         imports += include_patter.format(arg.type)
@@ -57,7 +57,7 @@ class Writer(WriterBase):
         out_init = ''
         value = obj.initial_value
         cls_type = self.model.get_class(obj.type) if self.model.has_class(obj.type) else None
-        if ((value is None or value == '"NONE"') and not obj.is_pointer) or (cls_type and cls_type.type == 'enum'):
+        if (value in [None, '"NONE"'] and not obj.is_pointer) or (cls_type and cls_type.type == 'enum'):
             if obj.type == "string":
                 value = '""'
             elif obj.type == "int":
