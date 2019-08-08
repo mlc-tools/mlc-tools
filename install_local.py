@@ -1,5 +1,5 @@
 import os
-
+import sys
 
 def main():
     version = open('mlc_tools/version.py').read().strip()
@@ -13,7 +13,7 @@ def main():
 
     if 0 != os.system('python setup.py install --user'):
         print 'Error: install'
-        exit(-1)
+        sys.exit(-1)
 
 
 if __name__ == '__main__':
