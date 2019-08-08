@@ -10,7 +10,7 @@ class Serializer(SerializerBase):
         SerializerBase.__init__(self)
 
     def get_protocol(self, serialize_format):
-        assert (serialize_format == 'json')
+        assert serialize_format == 'json'
         return JS_JSON
 
     def create_serialization_function(self, cls, serialize_type, serialize_format):
@@ -61,9 +61,9 @@ class Serializer(SerializerBase):
                               value_type=value.type) + '\n'
 
     def convert_initialize_value(self, value):
-        assert (value is None or isinstance(value, str))
+        assert value is None or isinstance(value, str)
 
-        if value is None or value == 'nullptr' or value == 'None':
+        if value in [None, 'nullptr', 'None']:
             value = 'null'
         value = value.replace('::', '.')
         value = RegexPatternJs.INITIALIZE[0].sub(RegexPatternJs.INITIALIZE[1], value)

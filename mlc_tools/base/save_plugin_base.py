@@ -27,7 +27,7 @@ class SavePluginBase(object):
     def _finalize_combine_file(self, content):
         return content
 
-    def _is_need_save_file_on_combine(self, file_name):
+    def _is_need_save_file_on_combine(self, _):
         return False
 
     def _remove_includes(self, file_content):
@@ -44,7 +44,6 @@ class SavePluginBase(object):
                 self.__save_file(local_path, combine_file)
 
         self.__save_file(file_path, combine_file)
-        return
 
     def __save_all(self):
         if isinstance(self.model.out_dict, dict):

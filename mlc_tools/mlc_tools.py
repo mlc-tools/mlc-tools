@@ -1,6 +1,9 @@
 from __future__ import print_function
+
+import collections
 import os
 import sys
+import subprocess
 from .utils.error import Log
 from .utils import fileutils
 from .base import Parser
@@ -83,7 +86,7 @@ class Mlc(object):
             result_files = []
             for path in files:
                 if path.endswith('.mlc'):
-                    if callable(self.model.filter_code) and not self.model.filter_code(path):
+                    if isinstance(self.model.filter_code, collections.Callable) and not self.model.filter_code(path):
                         continue
                     result_files.append(path)
             return result_files
@@ -127,12 +130,13 @@ class Mlc(object):
             python = 'python3' if sys.version_info[0] == 3 else 'python'
             command = '{} {} {}'.format(python, self.model.test_script, self.model.test_script_args)
             Log.message('Run test (%s):' % command)
-            if os.system(command) != 0:
+
+            if subprocess.call([python, self.model.test_script, self.model.test_script_args]):
                 print('\nTODO: exit - 1. tests not passed')
-                exit(1)
+                sys.exit(1)
         if not os.path.isfile(self.model.test_script):
             Log.error('Test script (%s) not founded' % self.model.test_script)
-            exit(1)
+            sys.exit(1)
 
     def set_user_generator(self, generator):
         self.model.custom_generator = generator

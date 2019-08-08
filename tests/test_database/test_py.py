@@ -28,7 +28,7 @@ def main(argv):
     result = run_test(DataBaseMysql) and result
     result = run_test(DataBaseSqlite) and result
     result = run_test(DataBasePostgreSql) and result
-    exit(0 if result else -1)
+    sys.exit(0 if result else -1)
 
 
 if __name__ == '__main__':

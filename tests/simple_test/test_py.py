@@ -18,7 +18,8 @@ class LoggerImpl(Logger):
 
 def initialize_data_storage(protocol):
     filepath = fs.abspath(fs.dirname(__file__)) + '/assets/data.' + protocol
-    content = open(filepath).read()
+    with open(filepath) as f:
+        content = f.read()
     if protocol == 'json':
         DataStorage.shared().initialize_json(content)
     elif protocol == 'xml':

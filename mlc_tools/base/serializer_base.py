@@ -58,25 +58,25 @@ class SerializerBase(object):
     # pylint: disable=no-self-use
     # pylint: disable=unused-argument
     def get_protocol(self, serialize_format):
-        assert(False and "override me")
+        assert False and "override me"
 
     def get_parent_serialize_format(self):
-        assert(False and "override me")
+        assert False and "override me"
 
     def get_serialization_function_args(self, serialize_type, serialize_format):
-        assert (False and "override me")
+        assert False and "override me"
 
     def build_serialize_operation(self, obj, serialization_type, serialize_format):
-        assert (False and "override me")
+        assert False and "override me"
 
     def build_map_serialization(self, obj_name, obj_template_args, serialization_type, serialize_format):
-        assert (False and "override me")
+        assert False and "override me"
 
     def finalize_serialize_operation(self, string):
-        assert (False and "override me")
+        assert False and "override me"
 
     def convert_initialize_value(self, value):
-        assert (False and "override me")
+        assert False and "override me"
     # pylint: enable=no-self-use
     # pylint: enable=unused-argument
 
@@ -107,25 +107,26 @@ class SerializerBase(object):
                         Error.exit(Error.MAP_TWO_ARGS, cls.name, obj_name)
                     return self.build_map_serialization(obj_name, obj_template_args,
                                                         serialization_type, serialize_format)
+
+                arg = obj_template_args[0]
+                assert isinstance(arg, Object)
+                assert isinstance(arg.type, str)
+                arg_type = arg.type
+                type_cls = self.model.get_class(arg.type) if self.model.has_class(arg.type) else None
+                if arg.is_link:
+                    type_ = 'list<link>'
+                elif arg_type in self.model.simple_types:
+                    type_ = "list<{}>".format(arg_type)
+                    obj_type = arg_type
+                elif arg.is_pointer:
+                    type_ = "list<pointer>"
+                elif type_cls is not None and type_cls.type == 'enum':
+                    type_ = 'list<string>'
+                    arg_0 = 'string'
                 else:
-                    arg = obj_template_args[0]
-                    assert (isinstance(arg, Object))
-                    assert (isinstance(arg.type, str))
-                    arg_type = arg.type
-                    type_cls = self.model.get_class(arg.type) if self.model.has_class(arg.type) else None
-                    if arg.is_link:
-                        type_ = 'list<link>'
-                    elif arg_type in self.model.simple_types:
-                        type_ = "list<{}>".format(arg_type)
-                        obj_type = arg_type
-                    elif arg.is_pointer:
-                        type_ = "list<pointer>"
-                    elif type_cls is not None and type_cls.type == 'enum':
-                        type_ = 'list<string>'
-                        arg_0 = 'string'
-                    else:
-                        type_ = "list<serialized>"
-                        obj_type = arg_type
+                    type_ = "list<serialized>"
+                    obj_type = arg_type
+
         obj_value = self.convert_initialize_value(obj_value)
         string = self.serialize_protocol[serialization_type][type_][index]
         string = string.format(field=obj_name,

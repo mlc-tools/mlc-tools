@@ -1,3 +1,4 @@
+import sys
 from enum import Enum
 from .modifiers import Modifiers
 
@@ -55,7 +56,7 @@ class Object(object):
             right = self.type.rindex('>', left) if left != -1 else -1
         except ValueError:
             # TODO: remove exception
-            exit(1)
+            sys.exit(1)
         if left > -1 and right > -1:
             args = self.type[left + 1:right].split(',')
             self.type = self.type[0:left]

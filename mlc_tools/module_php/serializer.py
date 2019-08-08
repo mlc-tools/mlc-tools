@@ -72,9 +72,9 @@ class Serializer(SerializerBase):
                               value=value_declaration) + '\n'
 
     def convert_initialize_value(self, value):
-        assert (value is None or isinstance(value, str))
+        assert value is None or isinstance(value, str)
 
-        if value is None or value == 'nullptr' or value == 'None':
+        if value in [None, 'nullptr', 'None']:
             value = 'null'
         if value and value.startswith('this'):
             value = '$' + value

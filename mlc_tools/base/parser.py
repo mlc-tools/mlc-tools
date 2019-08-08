@@ -1,4 +1,5 @@
 import re
+import sys
 from ..base.model import Model
 from ..core.object import Object
 from ..core.class_ import Class
@@ -11,7 +12,6 @@ class Parser(object):
 
     def __init__(self, model):
         self.model = model
-        return
 
     def parse_files(self, files):
         for path in files:
@@ -366,5 +366,5 @@ class Parser(object):
             print('in_serialize', in_serialize)
             print('in_initial_value', in_initial_value)
             print(def_)
-            exit(-1)
+            sys.exit(-1)
         return pattern

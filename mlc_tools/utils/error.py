@@ -1,3 +1,4 @@
+import sys
 import inspect
 
 
@@ -79,7 +80,7 @@ class Error(object):
     @staticmethod
     def exit(*args):
         Log.error((' Error {}: ' + Error.texts[args[0]]).format(args[0], *args[1:]))
-        exit(args[0])
+        sys.exit(args[0])
 
     @staticmethod
     def warning(*args):

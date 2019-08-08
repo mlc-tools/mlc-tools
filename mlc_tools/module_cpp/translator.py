@@ -124,7 +124,7 @@ class Translator(TranslatorBase):
             method.args.append(['rhs', Objects.STRING])
             method.operations.append('return *this == {}(rhs);'.format(cls.name))
 
-        def add_friend_operator_equals_with_string():
+        def add_friend_equals_with_string():
             method = add_method(Objects.BOOL, 'operator ==', False)
             method.is_friend = True
             method.args.append(['lhs', Objects.STRING])
@@ -178,7 +178,7 @@ class Translator(TranslatorBase):
         add_operator_equals()
         add_operator_equals_with_int()
         add_operator_equals_with_string()
-        add_friend_operator_equals_with_string()
+        add_friend_equals_with_string()
         add_operator_less()
         add_cast_to_int()
         add_operator_cast_string()

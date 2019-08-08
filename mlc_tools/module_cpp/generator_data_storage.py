@@ -38,7 +38,7 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
     def generate_implementations(self, classes, getter):
         implementations = ''
         for class_ in classes:
-            if class_.is_storage and (class_.side == self.model.side or class_.side == 'both'):
+            if class_.is_storage and class_.side in [self.model.side, 'both']:
                 impl = '''
                 template<>const {type}* DataStorage::get(const std::string& name) const
                 {{

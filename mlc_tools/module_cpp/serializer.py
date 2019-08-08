@@ -60,50 +60,50 @@ class Serializer(SerializerBase):
         if self.model.has_class(type_) and self.model.get_class(type_).type == 'enum':
             string = self._build_serialize_operation_enum(obj_name, serialization_type)
             return string
-        else:
-            if obj_type not in self.model.simple_types and type_ != 'list' and type_ != 'map':
-                if is_link:
-                    type_ = 'link'
-                elif obj_is_pointer:
-                    type_ = 'pointer'
+
+        if obj_type not in self.model.simple_types and type_ != 'list' and type_ != 'map':
+            if is_link:
+                type_ = 'link'
+            elif obj_is_pointer:
+                type_ = 'pointer'
+            else:
+                type_ = 'serialized'
+        template_args = list()
+        if obj_template_args:
+            if type_ == 'map':
+                if len(obj_template_args) != 2:
+                    Error.exit(Error.MAP_TWO_ARGS, self.current_class.name, obj_name)
+                if serialization_type == SERIALIZATION:
+                    return self.build_map_serialization(obj_name, obj_template_args,
+                                                        serialization_type, serialize_format)
+                if serialization_type == DESERIALIZATION:
+                    return self.build_map_deserialization(obj_name, obj_template_args, serialize_format)
+            else:
+                arg = obj_template_args[0]
+                assert isinstance(arg, Object)
+                assert isinstance(arg.type, str)
+                arg_type = arg.type
+                template_args.append(self.convert_type(arg_type))
+                if arg.is_link:
+                    type_ = 'list<link>'
+                elif arg_type in self.model.simple_types:
+                    type_ = '{0}<{1}>'.format(type_, arg_type)
+                elif arg.is_pointer:
+                    type_ = 'list<pointer>'
+                elif self.model.has_class(arg.type) and self.model.get_class(arg.type).type == 'enum':
+                    type_ = 'list<enum>'
                 else:
-                    type_ = 'serialized'
-            template_args = list()
-            if obj_template_args:
-                if type_ == 'map':
-                    if len(obj_template_args) != 2:
-                        Error.exit(Error.MAP_TWO_ARGS, self.current_class.name, obj_name)
-                    if serialization_type == SERIALIZATION:
-                        return self.build_map_serialization(obj_name, obj_template_args,
-                                                            serialization_type, serialize_format)
-                    if serialization_type == DESERIALIZATION:
-                        return self.build_map_deserialization(obj_name, obj_template_args, serialize_format)
-                else:
-                    arg = obj_template_args[0]
-                    assert (isinstance(arg, Object))
-                    assert (isinstance(arg.type, str))
-                    arg_type = arg.type
-                    template_args.append(self.convert_type(arg_type))
-                    if arg.is_link:
-                        type_ = 'list<link>'
-                    elif arg_type in self.model.simple_types:
-                        type_ = '{0}<{1}>'.format(type_, arg_type)
-                    elif arg.is_pointer:
-                        type_ = 'list<pointer>'
-                    elif self.model.has_class(arg.type) and self.model.get_class(arg.type).type == 'enum':
-                        type_ = 'list<enum>'
-                    else:
-                        type_ = '{0}<serialized>'.format(type_)
-            if type_ not in self.serialize_protocol[serialization_type]:
-                Error.exit(Error.UNKNOWN_SERIALISED_TYPE, type_, obj_type)
-            pattern = self.serialize_protocol[serialization_type][type_][index]
-            string = pattern.format(field=obj_name,
-                                    type=self.convert_type(obj_type),
-                                    default_value=obj_value,
-                                    arg_0=template_args[0] if template_args else '',
-                                    arg_1=template_args[1] if len(template_args) > 1 else '',
-                                    format=serialize_format,
-                                    namespace=self.namespace)
+                    type_ = '{0}<serialized>'.format(type_)
+        if type_ not in self.serialize_protocol[serialization_type]:
+            Error.exit(Error.UNKNOWN_SERIALISED_TYPE, type_, obj_type)
+        pattern = self.serialize_protocol[serialization_type][type_][index]
+        string = pattern.format(field=obj_name,
+                                type=self.convert_type(obj_type),
+                                default_value=obj_value,
+                                arg_0=template_args[0] if template_args else '',
+                                arg_1=template_args[1] if len(template_args) > 1 else '',
+                                format=serialize_format,
+                                namespace=self.namespace)
         return string + '\n\n'
 
     def build_map_serialization(self, obj_name, obj_template_args, serialization_type, serialize_format):
@@ -124,10 +124,10 @@ class Serializer(SerializerBase):
     def build_map_deserialization(self, obj_name, obj_template_args, serialize_format):
         key = obj_template_args[0]
         value = obj_template_args[1]
-        assert (isinstance(key, Object))
-        assert (isinstance(value, Object))
-        assert (isinstance(key.type, str))
-        assert (isinstance(value.type, str))
+        assert isinstance(key, Object)
+        assert isinstance(value, Object)
+        assert isinstance(key.type, str)
+        assert isinstance(value.type, str)
         key_type = key.type
         value_type = value.type
         pattern = self.serialize_protocol[DESERIALIZATION]['map'][0]

@@ -38,7 +38,7 @@ class Writer(WriterBase):
         initialization = ''
         static_initialization = ''
 
-        assert (isinstance(obj.type, str))
+        assert isinstance(obj.type, str)
         if self.current_class.type == 'class':
             declaration = self.write_member_declaration(obj)
         elif self.current_class.type == 'enum':
@@ -156,13 +156,13 @@ class Writer(WriterBase):
 
         args = list()
         for arg in method.args:
-            assert (isinstance(arg[1], Object))
+            assert isinstance(arg[1], Object)
             args.append(self.write_named_object(arg[1], arg[0], True, False))
             if arg[1].initial_value is not None:
                 args[-1] += '=' + self.convert_initial_value(arg[1])
         args = ', '.join(args)
 
-        assert (isinstance(method.return_type, Object))
+        assert isinstance(method.return_type, Object)
         return_type = self.write_named_object(method.return_type, '', False, True)
 
         virtual = 'virtual ' if method.is_virtual or method.is_abstract or self.current_class.is_virtual else ''
@@ -212,7 +212,7 @@ class Writer(WriterBase):
 
         args = list()
         for arg in method.args:
-            assert (isinstance(arg[1], Object))
+            assert isinstance(arg[1], Object)
             args.append(self.write_named_object(arg[1], arg[0], True, False))
         args = ', '.join(args)
 
@@ -252,7 +252,7 @@ class Writer(WriterBase):
                              initial_value=self.convert_initial_value(obj))
 
     def write_member_static_enum(self, cls, obj):
-        assert (self is not None)
+        assert self is not None
         string = 'const int {owner}::{name};'
         return string.format(owner=cls.name, name=obj.name)
 
@@ -277,19 +277,19 @@ class Writer(WriterBase):
     def write_named_object(obj, name, try_to_use_const_ref, use_intrusive):
 
         def can_use_const_ref(object_):
-            assert (isinstance(object_, Object))
+            assert isinstance(object_, Object)
             return object_.type in ['string', 'list', 'map']
 
         string_non_pointer = '{static}{const}{type}{templates}{pointer}{ref}{name}'
         string_pointer = '{static}{const}intrusive_ptr<{type}{templates}>{ref}{name}'
         templates = []
         for arg in obj.template_args:
-            assert (isinstance(arg, Object))
+            assert isinstance(arg, Object)
             templates.append(Writer.write_named_object(arg, '', False, True))
             if arg.callable_args is not None:
                 callable_args = []
-                for callable in arg.callable_args:
-                    callable_args.append(Writer.write_named_object(callable, '', True, False))
+                for callable_arg in arg.callable_args:
+                    callable_args.append(Writer.write_named_object(callable_arg, '', True, False))
                 callable_args = '({})'.format(', '.join(callable_args))
                 templates[-1] += callable_args
 
@@ -324,7 +324,7 @@ class Writer(WriterBase):
 
     @staticmethod
     def convert_type(type_of_object):
-        assert (isinstance(type_of_object, str))
+        assert isinstance(type_of_object, str)
         types = {
             'list': 'std::vector',
             'map': 'std::map',
@@ -464,7 +464,7 @@ class Writer(WriterBase):
         }
         result = []
         for typename in includes:
-            assert (isinstance(typename, str))
+            assert isinstance(typename, str)
             if typename in types:
                 result.append('#include %s' % types[typename])
                 continue
