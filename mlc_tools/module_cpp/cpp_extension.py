@@ -510,12 +510,8 @@ namespace @{namespace}
     inline intrusive_ptr<Type> make_intrusive(TArgs&& ... _Args)
     {
         intrusive_ptr<Type> holder;
-        Type* ptr = new Type(std::forward<TArgs>(_Args)...);
-        if(ptr)
-        {
-            holder.reset(ptr);
-            ptr->release();
-        }
+        holder.reset(new Type(std::forward<TArgs>(_Args)...));
+        holder->release();
         return holder;
     }
 

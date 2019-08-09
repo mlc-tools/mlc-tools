@@ -105,6 +105,8 @@ class Class(Object):
                 func.is_virtual or \
                 func.is_abstract or \
                 self.has_function_in_subclasses(func)
+            if 'operator' in func.name:
+                func.is_virtual = False
             func.is_virtual = func.is_virtual or \
                 self.has_function_in_superclasses(func)
 
@@ -126,7 +128,7 @@ class Class(Object):
                 equal = equal and func.name == method.name
                 # TODO: compare arguments
                 # equal = equal and func.args == function.args
-                equal = equal and func.return_type.type == method.return_type.type
+                equal = equal and func.return_type.type == method.return_type.type and 'operator' not in func.name
                 if equal:
                     func.is_virtual = True
                     return True
@@ -141,7 +143,7 @@ class Class(Object):
                 equal = True
                 equal = equal and func.name == method.name
                 # equal = equal and func.args == function.args
-                equal = equal and func.return_type.type == method.return_type.type
+                equal = equal and func.return_type.type == method.return_type.type and 'operator' not in func.name
                 if equal:
                     func.is_virtual = True
                     return True

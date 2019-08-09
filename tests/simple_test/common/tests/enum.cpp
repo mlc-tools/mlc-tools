@@ -43,9 +43,6 @@ bool test_compare()
 	mg::TestEnum foo;
 
 	bool result = foo.value1 != foo.value2;
-	result = result && foo.value1 == foo.value1;
-	result = result && foo.value2 == foo.value2;
-
 	if (!result)
 		std::cout << "Test compare enum fields failed." << std::endl;
 	return result;
