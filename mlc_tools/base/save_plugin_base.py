@@ -62,7 +62,7 @@ class SavePluginBase(object):
         if result:
             self.streams.append(stream)
             msg = ' Create: {}' if not exist else ' Overwriting: {}'
-            Log.debug(msg.format(local_path))
+            Log.message(msg.format(local_path))
 
     def __sort_files(self):
         def sort_func(data):

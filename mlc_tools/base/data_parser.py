@@ -1,10 +1,12 @@
 import xml.etree.ElementTree as ElementTree
 import xml.dom.minidom
 import json
+import os
 from ..utils import fileutils
 from ..utils.error import Error
 from ..base.generator_data_storage_base import get_class_name_from_data_name
 from ..base.generator_data_storage_base import get_data_list_name, get_data_name
+from ..utils.error import Log
 
 
 class DataParser(object):
@@ -31,7 +33,13 @@ class DataParser(object):
             buffer_ = self._flush_xml()
         elif self.format == 'json':
             buffer_ = self._flush_json()
-        fileutils.write(out_data_directory + filename, buffer_)
+
+        full_path = out_data_directory + filename
+        exist = os.path.isfile(full_path)
+        result, _ = fileutils.write(full_path, buffer_)
+        if result:
+            msg = ' Create: {}' if not exist else ' Overwriting: {}'
+            Log.message(msg.format(filename))
 
     def _parse_directory(self, directory):
         files = fileutils.get_files_list(directory)
