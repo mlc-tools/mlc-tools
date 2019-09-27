@@ -12,7 +12,7 @@ class Translator(TranslatorBase):
     def translate_function(self, cls, method, model):
         if not method.translated:
             body = '\n'.join(method.operations)
-            body = self.translate_function_body(body)
+            body = self.translate_function_body(cls, body, model, method.args)
             method.body = body
         else:
             if method.operations:
@@ -20,13 +20,10 @@ class Translator(TranslatorBase):
             else:
                 method.body = ''
 
-    def translate_function_body(self, func):
+    def translate_function_body(self, cls, func, model, args):
         if not func:
             func = ''
-        func = self.replace_by_regex(func)
-        # func = Translator.convert_braces_to_tabs(func)
-        # func = Translator.remove_double_eol(func)
-        # func = Translator.add_imports(cls, func, model)
+        func = self.replace_by_regex(func, model, args)
         return func
 
     def convert_to_enum(self, cls):
@@ -187,11 +184,11 @@ class Translator(TranslatorBase):
 
         return values
 
-    def replace_by_regex(self, body):
+    def replace_by_regex(self, func, model, args):
         for reg in RegexPatternCpp.FUNCTION:
-            body = self.replace(body, reg)
+            func = self.replace(func, reg)
         for reg in RegexPatternCpp.REPLACES:
-            body = body.replace(reg[0], reg[1])
+            func = func.replace(reg[0], reg[1])
         for reg in RegexPatternCpp.convert_c17_to_c14:
-            body = self.replace(body, reg)
-        return body
+            func = self.replace(func, reg)
+        return func

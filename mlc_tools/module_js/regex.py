@@ -59,7 +59,6 @@ class RegexPatternJs(object):
         # (re.compile(r'assert\(.+\);'), r'', ['assert']),
         (re.compile(r'make_intrusive<(\w+)>\(\s*\)'), r'new \1()', ['make_intrusive']),
         # (re.compile(r'dynamic_pointer_cast_intrusive<\w+>\((.+?)\)'), r'\1', ['dynamic_pointer_cast_intrusive']),
-        # (re.compile(r'new\s*(\w+)\s*\(\s*\)'), r'new \1()', ['']),
         # (re.compile(r'(.+?)\->push_back\((.+)\);'), r'array_push(\1, \2);', ['push_back']),
         (re.compile(r'let (\w+) = new return\(\);'), r'return \1;', ['new return']),
         (re.compile(r'std::vector<.+?>\s+(\w+)'), r'let \1 = []', ['std::vector']),

@@ -29,12 +29,15 @@ class Writer(WriterBase):
         extend = ''
         if cls.superclasses:
             extend = ' extends ' + cls.superclasses[0].name
+        constructor_args, constructor_body = self.get_constructor_data(cls)
         out = PATTERN_FILE.format(name=name,
                                   extend=extend,
                                   members_list=members_list.strip(),
                                   static_list=static_list.strip(),
                                   functions=functions.strip(),
-                                  superclass_construct='super()' if cls.superclasses else '')
+                                  superclass_construct='super()' if cls.superclasses else '',
+                                  constructor_args=constructor_args,
+                                  constructor_body=constructor_body)
         return [('%s.js' % cls.name, self.prepare_file(out))]
 
     def write_object(self, obj):
@@ -72,30 +75,9 @@ class Writer(WriterBase):
         return member, static
 
     def prepare_file(self, text):
-        text = WriterBase.prepare_file(self, text)
+        text = self.prepare_file_codestype_php(text)
         text = text.replace('nullptr', 'null')
         text = text.replace('NULL', 'null')
-
-        tabs = 0
-        lines = text.split('\n')
-        text = list()
-
-        def get_tabs(count):
-            return '\t' * count
-
-        for line in lines:
-            line = line.strip()
-
-            if line and line[0] == '}':
-                tabs -= 1
-            line = get_tabs(tabs) + line
-            if line.strip() and line.strip()[0] == '{':
-                tabs += 1
-            text.append(line)
-        text = '\n'.join(text)
-        for i in range(10):
-            tabs = '\n' + '\t' * i + '{'
-            text = text.replace(tabs, ' {')
         return text
 
     def get_method_arg_pattern(self, obj):
@@ -114,11 +96,12 @@ class Writer(WriterBase):
 PATTERN_FILE = '''
 class {name} {extend}
 {{
-    constructor()
+    constructor({constructor_args})
     {{
         {superclass_construct}
         //members:
         {members_list}
+        {constructor_body}
 }}
     //functions
     {functions}

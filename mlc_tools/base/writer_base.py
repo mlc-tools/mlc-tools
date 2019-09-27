@@ -34,16 +34,21 @@ class WriterBase(object):
                 if member.name == '_value' and member.initial_value is not None:
                     member.initial_value = cls.members[0].initial_value
 
+    def get_constructor_data(self, cls):
+        constructor_args = self.get_required_args_to_function(cls.constructor)
+        constructor_body = ''
+        if cls.constructor is not None:
+            constructor_args = self.create_function_args_string(cls.constructor)
+            constructor_body = cls.constructor.body
+        if constructor_args is None:
+            constructor_args = ''
+        return constructor_args, constructor_body
+
     # Function methods
     def write_function(self, method):
-        args = []
-        if self.get_required_args_to_function(method) is not None:
-            args.append(self.get_required_args_to_function(method))
-        for name, arg in method.args:
-            pattern = self.get_method_arg_pattern(arg)
-            args.append(pattern.format(name, self.serializer.convert_initialize_value(arg.initial_value)))
-        args = ', '.join(args)
-
+        if method.name == 'constructor':
+            return ''
+        args = self.create_function_args_string(method)
         text = self.get_method_pattern(method).format(name=method.name,
                                                       args=args,
                                                       body=method.body,
@@ -52,6 +57,16 @@ class WriterBase(object):
         if method.is_static:
             text = self.add_static_modifier_to_method(text)
         return text
+
+    def create_function_args_string(self, method):
+        args = []
+        if self.get_required_args_to_function(method) is not None:
+            args.append(self.get_required_args_to_function(method))
+        for name, arg in method.args:
+            pattern = self.get_method_arg_pattern(arg)
+            args.append(pattern.format(name, self.serializer.convert_initialize_value(arg.initial_value)))
+        args = ', '.join(args)
+        return args
 
     def get_method_arg_pattern(self, obj):
         return '${}={}' if obj.initial_value is not None else '${}'
@@ -97,4 +112,28 @@ class WriterBase(object):
         else:
             text = remove_marker(text, 'both')
 
+        return text
+
+    def prepare_file_codestype_php(self, text):
+        text = WriterBase.prepare_file(self, text)
+        tabs = 0
+        lines = text.split('\n')
+        text = list()
+
+        def get_tabs(count):
+            return '\t' * count
+
+        for line in lines:
+            line = line.strip()
+
+            if line and line[0] == '}':
+                tabs -= 1
+            line = get_tabs(tabs) + line
+            if line.strip() and line.strip()[0] == '{':
+                tabs += 1
+            text.append(line)
+        text = '\n'.join(text)
+        for i in range(10):
+            tabs = '\n' + '\t' * i + '{'
+            text = text.replace(tabs, ' {')
         return text

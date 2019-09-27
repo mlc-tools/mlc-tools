@@ -476,11 +476,3 @@ class TestStaticPointer<SerializedObject>:tests
 {
     CommandBase*:static command
 }
-
-
-
-
-
-
-
-

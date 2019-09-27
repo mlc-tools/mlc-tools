@@ -49,13 +49,16 @@ class Writer(WriterBase):
         if not init_superclass and not initialize_list:
             init_superclass = '        pass'
 
+        constructor_args, constructor_body = self.get_constructor_data(cls)
         out = PATTERN_FILE.format(name=name,
                                   initialize_list=initialize_list,
                                   functions=functions,
                                   imports=imports,
                                   init_superclass=init_superclass,
                                   static_list=static_list,
-                                  slots=slots)
+                                  slots=slots,
+                                  constructor_args=constructor_args,
+                                  constructor_body=constructor_body)
         return [
             ('%s.py' % cls.name, self.prepare_file(out))
         ]
@@ -131,7 +134,7 @@ class Writer(WriterBase):
         return PATTERN_METHOD
 
     def get_required_args_to_function(self, method):
-        if not method.is_static:
+        if not method or not method.is_static:
             return 'self'
         return None
 
@@ -146,9 +149,10 @@ import json
 class {name}:
 {static_list}
     {slots}
-    def __init__(self):
+    def __init__({constructor_args}):
 {init_superclass}
 {initialize_list}
+{constructor_body}
     def __hash__(self):
         return id(self)
 {functions}'''

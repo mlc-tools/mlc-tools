@@ -270,6 +270,7 @@ namespace mg
     Test::Test()
     : int_value(42)
     {
+
     }
 
     Test::~Test()

@@ -63,6 +63,8 @@ class Writer(WriterBase):
 
         access = AccessSpecifier.public
         for method in cls.functions:
+            if method.name == 'constructor':
+                continue
             hpp = self.methods_cache[method][0]
             if access != method.access:
                 functions += AccessSpecifier.to_string(method.access) + ':\n'
@@ -90,6 +92,11 @@ class Writer(WriterBase):
         includes_s = self.build_includes(cls, includes)
         forward_declarations_s = self.build_forward_declarations(forward_declarations)
         forward_declarations_out_s = self.build_forward_declarations(forward_declarations_out)
+
+        constructor_args = ''
+        if cls.constructor is not None:
+            constructor_args = self.create_function_hpp_args_string(cls.constructor)
+
         header = HEADER.format(namespace=namespace,
                                class_name=class_name,
                                destructor=destructor,
@@ -98,7 +105,8 @@ class Writer(WriterBase):
                                forward_declarations_out=forward_declarations_out_s,
                                functions=functions,
                                members=members,
-                               superclass=superclass)
+                               superclass=superclass,
+                               constructor_args=constructor_args)
         return header, includes, forward_declarations, forward_declarations_out
 
     def write_cpp(self, cls, includes, forw_declarations, forw_declarations_out):
@@ -106,6 +114,8 @@ class Writer(WriterBase):
         class_name = cls.name
         functions = ''
         for method in cls.functions:
+            if method.name == 'constructor':
+                continue
             cpp = self.methods_cache[method][1]
             functions += cpp
         static_initializations = ''
@@ -141,6 +151,12 @@ class Writer(WriterBase):
 
         includes = self.get_includes_for_source(cls, functions, includes, forw_declarations, forw_declarations_out)
 
+        constructor_args = ''
+        constructor_body = ''
+        if cls.constructor is not None:
+            constructor_args = self.create_function_cpp_args_string(cls.constructor)
+            constructor_body = cls.constructor.body
+
         return SOURCE.format(namespace=namespace,
                              path_to_root=Writer.get_path_to_root(cls),
                              class_name=class_name,
@@ -149,11 +165,11 @@ class Writer(WriterBase):
                              functions=functions,
                              static_initializations=static_initializations,
                              initializations=initializations,
-                             registration=registration)
+                             registration=registration,
+                             constructor_args=constructor_args,
+                             constructor_body=constructor_body)
 
-    def write_function_hpp(self, method):
-        string = '{virtual}{static}{friend}{type} {name}({args}){const}{override}{abstract}'
-
+    def create_function_hpp_args_string(self, method):
         args = list()
         for arg in method.args:
             assert isinstance(arg[1], Object)
@@ -161,10 +177,13 @@ class Writer(WriterBase):
             if arg[1].initial_value is not None:
                 args[-1] += '=' + self.convert_initial_value(arg[1])
         args = ', '.join(args)
+        return args
 
+    def write_function_hpp(self, method):
+        string = '{virtual}{static}{friend}{type} {name}({args}){const}{override}{abstract}'
         assert isinstance(method.return_type, Object)
         return_type = self.write_named_object(method.return_type, '', False, True)
-
+        args = self.create_function_hpp_args_string(method)
         virtual = 'virtual ' if method.is_virtual or method.is_abstract or self.current_class.is_virtual else ''
 
         body = ''
@@ -193,6 +212,14 @@ class Writer(WriterBase):
                              args=args,
                              body=body)
 
+    def create_function_cpp_args_string(self, method):
+        args = list()
+        for arg in method.args:
+            assert isinstance(arg[1], Object)
+            args.append(self.write_named_object(arg[1], arg[0], True, False))
+        args = ', '.join(args)
+        return args
+
     def write_function_cpp(self, method):
         if method.is_external or method.is_abstract:
             return ''
@@ -209,12 +236,7 @@ class Writer(WriterBase):
         
         '''
         return_type = self.write_named_object(method.return_type, '', False, True)
-
-        args = list()
-        for arg in method.args:
-            assert isinstance(arg[1], Object)
-            args.append(self.write_named_object(arg[1], arg[0], True, False))
-        args = ', '.join(args)
+        args = self.create_function_cpp_args_string(method)
 
         body = method.body
 
@@ -536,7 +558,7 @@ namespace {namespace}
     class {class_name}{superclass}
     {{
     public:
-        {class_name}();
+        {class_name}({constructor_args});
         {destructor}
 {functions}
 {members}
@@ -556,8 +578,9 @@ namespace {namespace}
 {{
     {static_initializations}
     {registration}
-    {class_name}::{class_name}()
+    {class_name}::{class_name}({constructor_args})
     {initializations}{{
+    {constructor_body}
     }}
     
     {destructor}
