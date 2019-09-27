@@ -9,6 +9,7 @@ class Class(Object):
         Object.__init__(self)
         self.superclasses = []
         self.subclasses = []
+        self.constructor = None
         self.members = []
         self.functions = []
         self.is_abstract = False

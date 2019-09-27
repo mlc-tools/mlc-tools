@@ -30,6 +30,8 @@ class Parser(object):
                 text = self._create_enum_class(text)
             elif Parser._is_function(text):
                 text = self._create_function(text)
+            elif Parser._is_constructor(text):
+                text = self._create_constructor(text)
             else:
                 text = self._create_member(text)
             text = text.strip()
@@ -82,6 +84,14 @@ class Parser(object):
             Error.exit(Error.DUBLICATE_CLASS, cls.name)
         for inner_cls in cls.inner_classes:
             self.model.add_class(inner_cls)
+
+        counter = 0
+        for method in cls.functions:
+            if method.name == 'constructor':
+                cls.constructor = method
+                if counter > 0:
+                    Error.exit(Error.CLASS_HAVE_MORE_THAN_ONE_CONSTRUCTOR, cls.name)
+
         self.model.add_class(cls)
         return text
 
@@ -131,6 +141,18 @@ class Parser(object):
         if self.model.is_side(method.side):
             method.parse_body(body)
             self.model.functions.append(method)
+        return text
+
+    def _create_constructor(self, text):
+        body, header, text = Parser.parse_body(text)
+        skip, header = self.check_skip(header)
+        if skip:
+            return text
+        constructor = Function()
+        self.parse_function_header(constructor, 'function void ' + header)
+        if self.model.is_side(constructor.side):
+            constructor.parse_body(body)
+            self.model.functions.append(constructor)
         return text
 
     @staticmethod
@@ -242,6 +264,10 @@ class Parser(object):
     @staticmethod
     def _is_function(line):
         return line.find('function') == 0
+
+    @staticmethod
+    def _is_constructor(line):
+        return line.find('constructor') == 0
 
     @staticmethod
     def _is_enum(line):

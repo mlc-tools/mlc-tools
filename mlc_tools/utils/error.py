@@ -58,6 +58,7 @@ class Error(object):
     INTERNAL_ERROR = inspect.currentframe().f_lineno
     SYNTAX_WARNING = inspect.currentframe().f_lineno
     UNKNOWN_DATA_TYPE = inspect.currentframe().f_lineno
+    CLASS_HAVE_MORE_THAN_ONE_CONSTRUCTOR = inspect.currentframe().f_lineno
 
     texts = {
         UNKNOWN_SERIALISED_TYPE: '[{}] unknown serialized serialized format. Base type - [{}]',
@@ -75,6 +76,8 @@ class Error(object):
         INTERNAL_ERROR: 'Internal error',
         SYNTAX_WARNING: 'Syntax warning: Found symbol ";" in member declaration: [{}]',
         UNKNOWN_DATA_TYPE: 'Unknown data type [{}]->[{}]. please check configuration. File: [{}]',
+        CLASS_HAVE_MORE_THAN_ONE_CONSTRUCTOR: 'A class [{}] can have one constructor',
+
     }
 
     @staticmethod

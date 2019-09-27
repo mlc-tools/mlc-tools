@@ -43,12 +43,15 @@ class Writer(WriterBase):
         if 'DataStorage' in functions:
             imports += include_patter.format('DataStorage')
 
+        constructor_args, constructor_body = self.get_constructor_data(cls)
         out = PATTERN_FILE.format(name=name,
                                   extend=extend,
                                   declarations=declaration_list,
                                   initialize_list=initialization_list,
                                   functions=functions,
-                                  imports=imports)
+                                  imports=imports,
+                                  constructor_args=constructor_args,
+                                  constructor_body=constructor_body)
         return [
             ('%s.php' % cls.name, self.prepare_file(out))
         ]
@@ -91,31 +94,9 @@ class Writer(WriterBase):
         return out_declaration, out_init
 
     def prepare_file(self, text):
-        text = WriterBase.prepare_file(self, text)
-
+        text = self.prepare_file_codestype_php(text)
         text = text.replace('::TYPE', '::$TYPE')
         text = text.replace('nullptr', 'null')
-
-        tabs = 0
-        lines = text.split('\n')
-        text = list()
-
-        def get_tabs(count):
-            return '\t' * count
-
-        for line in lines:
-            line = line.strip()
-
-            if line and line[0] == '}':
-                tabs -= 1
-            line = get_tabs(tabs) + line
-            if line.strip() and line.strip()[0] == '{':
-                tabs += 1
-            text.append(line)
-        text = '\n'.join(text)
-        for i in range(10):
-            tabs = '\n' + '\t' * i + '{'
-            text = text.replace(tabs, ' {')
         text = text.replace('foreach(', 'foreach (')
         text = text.replace('for(', 'for (')
         text = text.replace('if(', 'if (')
@@ -144,9 +125,10 @@ class {name} {extend}
     //members:
     {declarations}
     
-    public function __construct()
+    public function __construct({constructor_args})
     {{
         {initialize_list}
+        {constructor_body}
     }}
     
     //functions

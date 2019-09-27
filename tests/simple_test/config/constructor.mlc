@@ -1,0 +1,40 @@
+class ConstructableClass<SerializedObject>
+{
+    int a = -1
+    constructor()
+    {
+        this->a = 1;
+    }
+}
+
+class ConstructableClassWithParameters<SerializedObject>
+{
+    int a = -1
+    int b = -1
+    constructor(int a=0, int b=0)
+    {
+        this->a = a;
+        this->b = b;
+    }
+}
+
+class TestConstructableClass<ITestConstructableClass>:tests
+{
+    function void test_constructor()
+    {
+        auto cls = new ConstructableClass();
+        this->assertTrue(cls->a == 1);
+    }
+    function void test_constructor_with_args()
+    {
+        auto cls = new ConstructableClassWithParameters();
+        this->assertTrue(cls->a == 0);
+        this->assertTrue(cls->b == 0);
+    }
+    function void test_constructor_with_args_2()
+    {
+        auto cls = new ConstructableClassWithParameters(1, 2);
+        this->assertTrue(cls->a == 1);
+        this->assertTrue(cls->b == 2);
+    }
+}

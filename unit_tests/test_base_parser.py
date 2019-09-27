@@ -203,6 +203,48 @@ class TestParseClass(unittest.TestCase):
         self.assertEqual(foo.type, 'class')
         self.assertEqual(len(foo.members), 1)
 
+    def test_3(self):
+        text = '''
+        class RewardsListHelper<SerializedObject>
+        {
+            constructor()
+            {
+            }
+        }
+        '''
+        parser = Parser(Model())
+        parser.parse_text(text)
+        foo = parser.model.classes[0]
+        self.assertEqual(foo.name, 'RewardsListHelper')
+        self.assertEqual(foo.type, 'class')
+        self.assertIsNotNone(foo.constructor)
+        self.assertEqual(foo.constructor.args, [])
+
+    def test_4(self):
+        text = '''
+        class RewardsListHelper<SerializedObject>
+        {
+            constructor(int a=0, float b=1)
+            {
+            }
+        }
+        '''
+        parser = Parser(Model())
+        parser.parse_text(text)
+        foo = parser.model.classes[0]
+        self.assertEqual(foo.name, 'RewardsListHelper')
+        self.assertEqual(foo.type, 'class')
+        self.assertIsNotNone(foo.constructor)
+        self.assertEqual(len(foo.constructor.args), 2)
+        self.assertTrue(isinstance(foo.constructor.args[0][1], Object))
+        self.assertTrue(isinstance(foo.constructor.args[1][1], Object))
+        self.assertEqual(foo.constructor.args[0][1].type, 'int')
+        self.assertEqual(foo.constructor.args[1][1].type, 'float')
+        self.assertEqual(foo.constructor.args[0][0], 'a')
+        self.assertEqual(foo.constructor.args[1][0], 'b')
+        self.assertEqual(foo.constructor.args[0][1].initial_value, '0')
+        self.assertEqual(foo.constructor.args[1][1].initial_value, '1')
+
 
 class TestParseFunctionArgs(unittest.TestCase):
 

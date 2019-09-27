@@ -66,7 +66,7 @@ class RegexPatternPython(object):
         (re.compile(r'!(\w+)'), r'not \1'),
         (re.compile(r'!\('), r'not ('),
         (re.compile(r'make_intrusive<(\w+)>\(\)'), r'\1()', ['make_intrusive']),
-        (re.compile(r'new\s*(\w+)\s*\(\s*\)'), r'\1()', ['new']),
+        (re.compile(r'new\s*(\w+)\s*\((.*?)\)'), r'\1(\2)', ['new']),
         (re.compile(r'assert\(.+\);'), r'', ['assert ']),
         (re.compile(r'(\b[-0-9]+)\.f\b'), r'\1.0'),
         (re.compile(r'(\b[-0-9]+)\.([-0-9]*)f\b'), r'\1.\2'),
