@@ -61,6 +61,7 @@ class Error(object):
     CLASS_HAVE_MORE_THAN_ONE_CONSTRUCTOR = inspect.currentframe().f_lineno
     PARSE_ERROR = inspect.currentframe().f_lineno
     TESTS_FAILED = inspect.currentframe().f_lineno
+    CIRCULAR_REFERENCE = inspect.currentframe().f_lineno
 
     texts = {
         UNKNOWN_SERIALISED_TYPE: '[{}] unknown serialized serialized format. Base type - [{}]',
@@ -81,7 +82,7 @@ class Error(object):
         CLASS_HAVE_MORE_THAN_ONE_CONSTRUCTOR: 'A class [{}] can have one constructor',
         PARSE_ERROR: 'Parsing error',
         TESTS_FAILED: 'Tests failed',
-
+        CIRCULAR_REFERENCE: 'Circular reference: [{}]'
     }
 
     @staticmethod

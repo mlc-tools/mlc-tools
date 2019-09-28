@@ -4,6 +4,8 @@ import collections
 import os
 import sys
 import subprocess
+
+from .base.circular_reference import CircularReference
 from .utils.error import Log, Error
 from .utils import fileutils
 from .base import Parser
@@ -103,6 +105,8 @@ class Mlc(object):
         Validator().validate(self.model)
 
         self.run_user_generator()
+
+        CircularReference(self.model).find()
 
         language.get_translator().translate(self.model)
         language.get_serializer().generate_methods(self.model)
