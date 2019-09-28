@@ -18,6 +18,7 @@ class Function(object):
         self.is_template = False
         self.is_virtual = False
         self.is_friend = False
+        self.is_generate = False
         self.side = 'both'
         self.access = AccessSpecifier.public
         self.body = ''
@@ -66,6 +67,7 @@ class Function(object):
         self.is_static = self.is_static or Modifiers.static in string
         self.is_const = self.is_const or Modifiers.const in string
         self.is_virtual = self.is_virtual or Modifiers.virtual in string
+        self.is_generate = self.is_virtual or Modifiers.generate in string
 
         string = AccessSpecifier.find_access(self, string)
 
@@ -76,4 +78,5 @@ class Function(object):
         string = string.replace(Modifiers.const, '')
         string = string.replace(Modifiers.abstract, '')
         string = string.replace(Modifiers.virtual, '')
+        string = string.replace(Modifiers.generate, '')
         return string

@@ -1,6 +1,7 @@
 import re
 from .object import Object
 from .modifiers import Modifiers
+from ..utils.error import Error
 
 
 class Class(Object):
@@ -178,3 +179,19 @@ class Class(Object):
         string = string.replace(Modifiers.inline, '')
         string = string.replace(Modifiers.virtual, '')
         return string
+
+    def generate_constructor(self):
+        counter = 0
+        for method in self.functions:
+            if method.name == 'constructor':
+                self.constructor = method
+                if counter > 0:
+                    Error.exit(Error.CLASS_HAVE_MORE_THAN_ONE_CONSTRUCTOR, self.name)
+
+        if self.constructor and self.constructor.is_generate:
+            for member in self.members:
+                arg = Object()
+                arg.type = member.type
+                arg.set_default_initial_value()
+                self.constructor.args.append([member.name, arg])
+                self.constructor.operations.append('this->{0} = {0};'.format(member.name))

@@ -15,16 +15,17 @@ class Modifiers(object):
     runtime = ':runtime'
     key = ':key'
     link = ':link'
-    storage = ":storage"
-    private = ":private"
-    protected = ":protected"
-    public = ":public"
-    numeric = ":numeric"
-    test = ":test"
-    inline = ":inline"
-    virtual = ":virtual"
-    pointer = ":pointer"
-    ref = ":ref"
+    storage = ':storage'
+    private = ':private'
+    protected = ':protected'
+    public = ':public'
+    numeric = ':numeric'
+    test = ':test'
+    inline = ':inline'
+    virtual = ':virtual'
+    pointer = ':pointer'
+    ref = ':ref'
+    generate = ':generate'
 
     client = ':client'
     server = ':server'

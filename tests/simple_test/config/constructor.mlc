@@ -18,6 +18,13 @@ class ConstructableClassWithParameters<SerializedObject>
     }
 }
 
+class ConstructableClassAuto<SerializedObject>
+{
+    int a = -1
+    int b = -1
+    constructor():generate
+}
+
 class TestConstructableClass<ITestConstructableClass>:tests
 {
     function void test_constructor()
@@ -34,6 +41,12 @@ class TestConstructableClass<ITestConstructableClass>:tests
     function void test_constructor_with_args_2()
     {
         auto cls = new ConstructableClassWithParameters(1, 2);
+        this->assertTrue(cls->a == 1);
+        this->assertTrue(cls->b == 2);
+    }
+    function void test_constructor_auto()
+    {
+        auto cls = new ConstructableClassAuto(1, 2);
         this->assertTrue(cls->a == 1);
         this->assertTrue(cls->b == 2);
     }

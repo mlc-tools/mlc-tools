@@ -85,13 +85,7 @@ class Parser(object):
         for inner_cls in cls.inner_classes:
             self.model.add_class(inner_cls)
 
-        counter = 0
-        for method in cls.functions:
-            if method.name == 'constructor':
-                cls.constructor = method
-                if counter > 0:
-                    Error.exit(Error.CLASS_HAVE_MORE_THAN_ONE_CONSTRUCTOR, cls.name)
-
+        cls.generate_constructor()
         self.model.add_class(cls)
         return text
 

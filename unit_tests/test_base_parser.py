@@ -5,7 +5,6 @@ import sys
 import inspect
 
 sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe()))) + '/..'))
-from mlc_tools.core.object import *
 from mlc_tools.core.function import *
 from mlc_tools.base.parser import Parser
 from mlc_tools.base.model import Model
@@ -244,6 +243,35 @@ class TestParseClass(unittest.TestCase):
         self.assertEqual(foo.constructor.args[1][0], 'b')
         self.assertEqual(foo.constructor.args[0][1].initial_value, '0')
         self.assertEqual(foo.constructor.args[1][1].initial_value, '1')
+
+    def test_5(self):
+        text = '''
+        class RewardsListHelper<SerializedObject>
+        {
+            int a
+            float b
+            
+            constructor():generate
+        }
+        '''
+        parser = Parser(Model())
+        parser.parse_text(text)
+        foo = parser.model.classes[0]
+        self.assertEqual(foo.name, 'RewardsListHelper')
+        self.assertEqual(foo.type, 'class')
+        self.assertIsNotNone(foo.constructor)
+        self.assertEqual(foo.constructor.name, 'constructor')
+        self.assertEqual(foo.constructor.return_type.type, 'void')
+
+        self.assertEqual(len(foo.constructor.args), 2)
+        self.assertTrue(isinstance(foo.constructor.args[0][1], Object))
+        self.assertTrue(isinstance(foo.constructor.args[1][1], Object))
+        self.assertEqual(foo.constructor.args[0][1].type, 'int')
+        self.assertEqual(foo.constructor.args[1][1].type, 'float')
+        self.assertEqual(foo.constructor.args[0][0], 'a')
+        self.assertEqual(foo.constructor.args[1][0], 'b')
+        self.assertEqual(foo.constructor.args[0][1].initial_value, '0')
+        self.assertEqual(foo.constructor.args[1][1].initial_value, '0.0')
 
 
 class TestParseFunctionArgs(unittest.TestCase):
