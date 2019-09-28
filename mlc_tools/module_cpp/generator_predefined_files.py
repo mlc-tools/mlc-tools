@@ -1,4 +1,4 @@
-from .cpp_extension import FILES_DICT
+from .cpp_extension import FILES_DICT, FACTORY_REGISTRATION
 from ..base.writer_base import WriterBase
 from ..base.model import SerializeFormat
 
@@ -27,6 +27,9 @@ class GeneratorPredefinedFiles(object):
             content = content.replace('@{namespace_upper}', self.get_namespace().upper())
             content = writer.prepare_file(content)
             filename = filename.replace('@{namespace}', self.get_namespace())
+            if 'Factory' in filename:
+                registration = FACTORY_REGISTRATION if model.auto_registration else ''
+                content = content.replace('@{registration}', registration)
             model.add_file(None, filename, content)
 
     def generate_config_files(self, model):

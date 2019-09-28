@@ -21,6 +21,7 @@
 #include "AllTests.h"
 #include "tests/Logger.h"
 #include "tests/RunAllTests.h"
+#include "Registrar.h"
 
 extern mg::intrusive_ptr<mg::CommandBase> createCommand(const std::string& payload);
 std::string root = "../../";
@@ -56,9 +57,9 @@ int main(int argc, char ** args)
     {
         root = args[1];
     }
+    mg::register_classes();
 
 	auto result = true;
-
 	initialize_data_storage();
 
 	Logger logger;

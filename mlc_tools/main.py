@@ -48,6 +48,7 @@ def main():
     add('-php_validate')
     add('-test_script')
     add('-test_script_args')
+    add('-auto_registration')
 
     mlc = Mlc(**args)
     mlc.generate()

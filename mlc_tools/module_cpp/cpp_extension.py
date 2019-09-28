@@ -530,17 +530,7 @@ FACTORY_HPP = '''#ifndef __@{namespace}_Factory_h__
 #include "jsoncpp/json.h"
 #include <sstream>
 #include "pugixml/pugixml.hpp"
-
-#define REGISTRATION_OBJECT(TType)                                      \\
-class registration__##TType                                             \\
-{                                                                       \\
-public:                                                                 \\
-    registration__##TType()                                             \\
-    {                                                                   \\
-        Factory::shared().registrationCommand<TType>( TType::TYPE );    \\
-    }                                                                   \\
-} ___registration___##TType;
-
+@{registration}
 namespace @{namespace}
 {
     
@@ -756,7 +746,17 @@ namespace @{namespace}
 
 #endif // __@{namespace}_Factory_h__
 '''
-
+FACTORY_REGISTRATION = '''
+#define REGISTRATION_OBJECT(TType)                                      \\
+class registration__##TType                                             \\
+{                                                                       \\
+public:                                                                 \\
+    registration__##TType()                                             \\
+    {                                                                   \\
+        Factory::shared().registrationCommand<TType>(TType::TYPE);      \\
+    }                                                                   \\
+} ___registration___##TType;
+'''
 
 FILES_DICT = [
     ['@{namespace}_extensions.h', FUNCTIONS_HPP],

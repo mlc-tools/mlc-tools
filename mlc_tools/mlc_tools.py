@@ -45,6 +45,7 @@ class Mlc(object):
         self.model.out_directory = fileutils.normalize_path(self.model.out_directory)
         self.model.out_data_directory = fileutils.normalize_path(self.model.out_data_directory)
         self.model.join_to_one_file = kwargs.get('join_to_one_file', self.model.join_to_one_file)
+        self.model.auto_registration = kwargs.get('auto_registration', self.model.auto_registration)
         if 'add_config' in kwargs:
             directory = fileutils.normalize_path(kwargs.get('add_config'))
             self.model.additional_config_directories.append(directory)
@@ -105,6 +106,8 @@ class Mlc(object):
         Validator().validate(self.model)
 
         self.run_user_generator()
+        if language.registrar:
+            language.registrar.generate(self.model)
 
         CircularReference(self.model).find()
 

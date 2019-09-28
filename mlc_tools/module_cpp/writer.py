@@ -133,8 +133,7 @@ class Writer(WriterBase):
         }}
         '''.format(name=cls.name)
 
-        registration = 'REGISTRATION_OBJECT({0});\n'.format(cls.name)
-        has_get_type = False
+        registration = 'REGISTRATION_OBJECT({0});\n'.format(cls.name) if self.model.auto_registration else ''
         is_abstract = cls.is_abstract
         if not is_abstract:
             for method in cls.functions:
@@ -143,10 +142,7 @@ class Writer(WriterBase):
                     break
         if is_abstract:
             registration = ''
-        for method in cls.functions:
-            if method.name == 'get_type':
-                has_get_type = True
-        if not has_get_type:
+        if registration and not cls.has_method_with_name('get_type'):
             registration = ''
 
         includes = self.get_includes_for_source(cls, functions, includes, forw_declarations, forw_declarations_out)

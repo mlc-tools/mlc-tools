@@ -29,6 +29,18 @@ class Class(Object):
         self.inner_classes = []
         self._linked = False
 
+    def has_method_with_name(self, name):
+        for method in self.functions:
+            if method.name == name:
+                return True
+        return False
+
+    def has_abstract_method(self):
+        for method in self.functions:
+            if method.is_abstract:
+                return True
+        return False
+
     def parse(self, line):
         from ..utils.common import smart_split
         line = line.strip()

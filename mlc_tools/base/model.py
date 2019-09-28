@@ -46,6 +46,7 @@ class Model(object):
         self.additional_data_directories = []
         self.serialize_protocol = []
         self.join_to_one_file = False
+        self.auto_registration = True
 
         self.simple_types = ["int", "float", "bool", "string"]
 

@@ -1,0 +1,4 @@
+class AbstractClass<SerializedObject>
+{
+    function void foo():abstract
+}

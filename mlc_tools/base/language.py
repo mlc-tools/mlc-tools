@@ -14,6 +14,13 @@ class Language(object):
         self.writer.model = model
         self.writer.serializer = self.serializer
 
+        try:
+            self.registrar = locate('mlc_tools.%s.registrar' % module_name).Registrar()
+        except AttributeError:
+            self.registrar = None
+        except TypeError:
+            self.registrar = None
+
     def get_generator(self):
         return self.generator
 
