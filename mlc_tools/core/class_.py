@@ -127,8 +127,6 @@ class Class(Object):
             for func in subclass.functions:
                 equal = True
                 equal = equal and func.name == method.name
-                # TODO: compare arguments
-                # equal = equal and func.args == function.args
                 equal = equal and func.return_type.type == method.return_type.type and 'operator' not in func.name
                 if equal:
                     func.is_virtual = True

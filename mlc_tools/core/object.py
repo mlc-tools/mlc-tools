@@ -1,6 +1,6 @@
-import sys
 from enum import Enum
 from .modifiers import Modifiers
+from ..utils.error import Error
 
 
 class AccessSpecifier(Enum):
@@ -55,8 +55,7 @@ class Object(object):
         try:
             right = self.type.rindex('>', left) if left != -1 else -1
         except ValueError:
-            # TODO: remove exception
-            sys.exit(1)
+            Error.exit(Error.PARSE_ERROR)
         if left > -1 and right > -1:
             args = self.type[left + 1:right].split(',')
             self.type = self.type[0:left]
@@ -116,8 +115,6 @@ class Object(object):
         return string
 
     def set_default_initial_value(self):
-        # TODO: move to Translator
-        # convert initial value
         if self.initial_value is None:
             if self.type == 'int':
                 self.initial_value = "0"

@@ -1,4 +1,3 @@
-from ..base import Parser
 from ..base.generator_data_storage_base import GeneratorDataStorageBase
 from ..base.generator_data_storage_base import get_data_list_name, get_data_name
 from ..core.object import Object, Objects
@@ -10,18 +9,12 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
     def __init__(self):
         GeneratorDataStorageBase.__init__(self)
 
-    def generate(self, model):
-        GeneratorDataStorageBase.generate(self, model)
-        model.add_class(self)
+    def is_need_create_static_instance(self):
+        return False
 
-    def create_shared_method(self):
-        method = Function()
-        method.name = 'shared'
-        method.return_type = Parser.create_object('{}&:const'.format(self.name))
-        method.is_static = True
-        method.operations.append('static {} instance;'.format(self.name))
-        method.operations.append('return instance;')
-        self.functions.append(method)
+    def get_shared_method_body(self):
+        return '''static DataStorage instance;
+                  return instance;'''
 
     def create_getters(self, classes):
         method = Function()
@@ -49,31 +42,15 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
                 implementations += impl.format(name=name, type=class_.name)
         getter.specific_implementations = implementations
 
-    def add_initialize_function_json(self):
-        method = Function()
-        method.name = 'initialize_json'
-        method.return_type = Objects.VOID
-        method.is_const = True
-        method.args.append(['content', Objects.STRING])
-        method.translated = True
+    def get_initialize_function_json_body(self):
+        return '''Json::Value json;
+        Json::Reader reader;
+        reader.parse(content, json);
+        const_cast<DataStorage*>(this)->deserialize_json(json);
+        const_cast<DataStorage*>(this)->_loaded = true;'''
 
-        method.operations.append('Json::Value json;')
-        method.operations.append('Json::Reader reader;')
-        method.operations.append('reader.parse(content, json);')
-        method.operations.append('const_cast<{}*>(this)->deserialize_json(json);'.format(self.name))
-        method.operations.append('const_cast<{}*>(this)->_loaded = true;'.format(self.name))
-        self.functions.append(method)
-
-    def add_initialize_function_xml(self):
-        method = Function()
-        method.name = 'initialize_xml'
-        method.return_type = Objects.VOID
-        method.is_const = True
-        method.args.append(['content', Objects.STRING])
-        method.translated = True
-
-        method.operations.append('pugi::xml_document doc;')
-        method.operations.append('doc.load(content.c_str());')
-        method.operations.append('const_cast<{}*>(this)->deserialize_xml(doc.root().first_child());'.format(self.name))
-        method.operations.append('const_cast<{}*>(this)->_loaded = doc.root() != nullptr;'.format(self.name))
-        self.functions.append(method)
+    def get_initialize_function_xml_body(self):
+        return '''pugi::xml_document doc;
+        doc.load(content.c_str());
+        const_cast<DataStorage*>(this)->deserialize_xml(doc.root().first_child());
+        const_cast<DataStorage*>(this)->_loaded = doc.root() != nullptr;'''

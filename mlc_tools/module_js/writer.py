@@ -54,7 +54,7 @@ class Writer(WriterBase):
             elif obj.type == "uint":
                 value = "0"
             elif obj.type == "bool":
-                value = "False"
+                value = "false"
             elif obj.type == "list":
                 value = "[]"
             elif obj.type == "map":

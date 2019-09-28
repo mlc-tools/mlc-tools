@@ -4,7 +4,7 @@ import collections
 import os
 import sys
 import subprocess
-from .utils.error import Log
+from .utils.error import Log, Error
 from .utils import fileutils
 from .base import Parser
 from .base import Linker
@@ -132,8 +132,7 @@ class Mlc(object):
             Log.message('Run test (%s):' % command)
 
             if subprocess.call([python, self.model.test_script, self.model.test_script_args]):
-                print('\nTODO: exit - 1. tests not passed')
-                sys.exit(1)
+                Error.exit(Error.TESTS_FAILED)
         if not os.path.isfile(self.model.test_script):
             Log.error('Test script (%s) not founded' % self.model.test_script)
             sys.exit(1)

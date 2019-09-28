@@ -9,10 +9,6 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
     def __init__(self):
         GeneratorDataStorageBase.__init__(self)
 
-    def generate(self, model):
-        GeneratorDataStorageBase.generate(self, model)
-        model.add_class(self)
-
     def create_shared_method(self):
         GeneratorDataStorageBase.create_shared_method(self)
 

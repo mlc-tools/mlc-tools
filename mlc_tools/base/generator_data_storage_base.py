@@ -65,8 +65,6 @@ def get_data_list_name(name):
     return name
 
 
-# TODO: Use one interface to generate GeneratorDataStorageBase
-# TODO: Dont add manual serialize methods
 class GeneratorDataStorageBase(Class):
 
     def __init__(self):
@@ -104,25 +102,50 @@ class GeneratorDataStorageBase(Class):
         if model.serialize_formats & SerializeFormat.json:
             self.add_initialize_function_json()
         self.create_getters(model.classes)
+        model.add_class(self)
 
     def add_initialize_function_xml(self):
-        pass
+        method = Function()
+        method.name = 'initialize_xml'
+        method.return_type = Objects.VOID
+        method.is_const = True
+        method.args.append(['content', Objects.STRING])
+        method.translated = True
+        method.operations.append(self.get_initialize_function_xml_body())
+        self.functions.append(method)
 
     def add_initialize_function_json(self):
+        method = Function()
+        method.name = 'initialize_json'
+        method.return_type = Objects.VOID
+        method.is_const = True
+        method.args.append(['content', Objects.STRING])
+        method.translated = True
+        method.operations.append(self.get_initialize_function_json_body())
+        self.functions.append(method)
+
+    def get_initialize_function_json_body(self):
         pass
 
+    def get_initialize_function_xml_body(self):
+        pass
+
+    def is_need_create_static_instance(self):
+        return True
+
     def create_shared_method(self):
-        obj = Object()
-        obj.type = self.name
-        obj.name = '__instance'
-        obj.is_static = True
-        obj.is_pointer = True
-        obj.access = AccessSpecifier.private
-        self.members.append(obj)
+        if self.is_need_create_static_instance():
+            obj = Object()
+            obj.type = self.name
+            obj.name = '__instance'
+            obj.is_static = True
+            obj.is_pointer = True
+            obj.access = AccessSpecifier.private
+            self.members.append(obj)
 
         method = Function()
         method.name = 'shared'
-        method.return_type = Parser.create_object(self.name)
+        method.return_type = Parser.create_object('{}&:const'.format(self.name))
         method.is_static = True
         method.translated = True
         method.operations.extend(self.get_shared_method_body().split('\n'))
@@ -132,4 +155,17 @@ class GeneratorDataStorageBase(Class):
         assert False and 'Override me'
 
     def create_getters(self, classes):
-        pass
+        for class_ in classes:
+            if class_.is_storage and class_.side in [self.model.side, 'both']:
+                map_name = get_data_list_name(get_data_name(class_.name))
+                method = Function()
+                method.name = 'get' + class_.name
+                method.args.append(['name', Objects.VOID])
+
+                body = self.get_pattern_getter().format(map=map_name, type=class_.name)
+                method.operations.append(body)
+                method.translated = True
+                self.functions.append(method)
+
+    def get_pattern_getter(self):
+        return ''
