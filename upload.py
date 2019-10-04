@@ -5,7 +5,7 @@ import sys
 def main():
     print(sys.argv)
     job_number = sys.argv[2]
-    if not job_number.endswith('8'):
+    if not job_number.endswith('10'):
         print('skip')
         sys.exit(0)
 
