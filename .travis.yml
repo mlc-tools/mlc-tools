@@ -24,9 +24,10 @@ install:
   # C++14
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get install -qq g++-5; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 90; fi
-  - pip install enum --user
-  - sudo pip install twine
-  - sudo -H pip install six --upgrade
+  - python3 -m pip install enum --user
+  - sudo -H python3 -m pip install six --upgrade
+  - python3 -m pip install --user --upgrade setuptools wheel
+  - python3 -m pip install --user --upgrade twine
 
 matrix:
   exclude:
@@ -148,7 +149,7 @@ script:
 
 deploy:
   provider: script
-  script: python3 upload.py $TRAVIS_BUILD_NUMBER $TRAVIS_JOB_NUMBER
+  script: python3 upload.py $TRAVIS_BUILD_NUMBER setuptools
   skip_existing: true
   on:
     branch: master
