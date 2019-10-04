@@ -45,14 +45,14 @@ script:
   # unit tests
   - pushd .
   - cd unit_tests
-  - python -m unittest discover
+  - python3 -m unittest discover
   - popd
 
   # simple test:
 
   - pushd .
-  - python -m mlc_tools.main -i tests/simple_test/config -o tests/simple_test/generated_cpp/xml -f xml -l cpp -side server -data tests/simple_test/data_xml -data_out tests/simple_test/assets -generate_tests yes -add_config tests/simple_test/config_additional -add_data tests/simple_test/data_additional -auto_registration no
-  - python -m mlc_tools.main -i tests/simple_test/config -o tests/simple_test/generated_cpp/json -f json -l cpp -side client -data tests/simple_test/data_json -data_out tests/simple_test/assets -generate_tests yes -add_config tests/simple_test/config_additional -add_data tests/simple_test/data_additional -auto_registration no
+  - python3 -m mlc_tools.main -i tests/simple_test/config -o tests/simple_test/generated_cpp/xml -f xml -l cpp -side server -data tests/simple_test/data_xml -data_out tests/simple_test/assets -generate_tests yes -add_config tests/simple_test/config_additional -add_data tests/simple_test/data_additional -auto_registration no
+  - python3 -m mlc_tools.main -i tests/simple_test/config -o tests/simple_test/generated_cpp/json -f json -l cpp -side client -data tests/simple_test/data_json -data_out tests/simple_test/assets -generate_tests yes -add_config tests/simple_test/config_additional -add_data tests/simple_test/data_additional -auto_registration no
 
   - cd tests/simple_test
 
@@ -74,8 +74,8 @@ script:
   # test functions:
 
   - pushd .
-  - python -m mlc_tools.main -i tests/test_functions/config -o tests/test_functions/generated_cpp/xml -f xml -l cpp -generate_tests yes
-  - python -m mlc_tools.main -i tests/test_functions/config -o tests/test_functions/generated_cpp/json -f json -l cpp -generate_tests yes
+  - python3 -m mlc_tools.main -i tests/test_functions/config -o tests/test_functions/generated_cpp/xml -f xml -l cpp -generate_tests yes
+  - python3 -m mlc_tools.main -i tests/test_functions/config -o tests/test_functions/generated_cpp/json -f json -l cpp -generate_tests yes
 
   - cd tests/test_functions
 
@@ -97,8 +97,8 @@ script:
   # test virtual methods:
 
   - pushd .
-  - python -m mlc_tools.main -i tests/test_virtual_methods -o tests/test_virtual_methods/generated_cpp/xml -f xml -l cpp -generate_tests yes
-  - python -m mlc_tools.main -i tests/test_virtual_methods -o tests/test_virtual_methods/generated_cpp/json -f json -l cpp -generate_tests yes
+  - python3 -m mlc_tools.main -i tests/test_virtual_methods -o tests/test_virtual_methods/generated_cpp/xml -f xml -l cpp -generate_tests yes
+  - python3 -m mlc_tools.main -i tests/test_virtual_methods -o tests/test_virtual_methods/generated_cpp/json -f json -l cpp -generate_tests yes
 
   - cd tests/test_virtual_methods
 
@@ -120,8 +120,8 @@ script:
   # test unit tests generator:
 
   - pushd .
-  - python -m mlc_tools.main -i tests/unit_tests_generator -o tests/unit_tests_generator/generated_cpp/xml -f xml -l cpp -generate_tests yes
-  - python -m mlc_tools.main -i tests/unit_tests_generator -o tests/unit_tests_generator/generated_cpp/json -f json -l cpp -generate_tests yes
+  - python3 -m mlc_tools.main -i tests/unit_tests_generator -o tests/unit_tests_generator/generated_cpp/xml -f xml -l cpp -generate_tests yes
+  - python3 -m mlc_tools.main -i tests/unit_tests_generator -o tests/unit_tests_generator/generated_cpp/json -f json -l cpp -generate_tests yes
 
   - cd tests/unit_tests_generator
 
@@ -143,12 +143,12 @@ script:
   # test serialize:
   - pushd .
   - cd tests/test_serialize
-  - python run.py
+  - python3 run.py
   - popd
 
 deploy:
   provider: script
-  script: python upload.py $TRAVIS_BUILD_NUMBER $TRAVIS_JOB_NUMBER
+  script: python3 upload.py $TRAVIS_BUILD_NUMBER $TRAVIS_JOB_NUMBER
   skip_existing: true
   on:
     branch: master
