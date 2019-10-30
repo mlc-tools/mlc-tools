@@ -1,0 +1,32 @@
+name: C/C++ CI
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: pwd
+      run: pwd
+
+    - name: ls
+      run: ls -l
+
+    - name: generate
+      run: python3 -m mlc_tools.main -i tests/simple_test/config -o tests/simple_test/generated_cpp/json -f json -l cpp -side client -data tests/simple_test/data_json -data_out tests/simple_test/assets -generate_tests yes -add_config tests/simple_test/config_additional -add_data tests/simple_test/data_additional -auto_registration no
+
+    - name: mkdir build dir
+      run: mkdir tests/simple_test/build_json
+
+    - name: cmake
+      run: pwd; ls -l tests/simple_test; cd tests/simple_test/build_json; cmake .. -DCMAKE_BUILD_TYPE=Release -DBUILD_XML=OFF -DBUILD_JSON=ON -DBUILD_SIDE=CLIENT
+
+    - name: cmake build
+      run: cd tests/simple_test/build_json; cmake --build .
+
+    - name: run test
+      run: cd tests/simple_test/build_json; ./test_mlc_json ../
