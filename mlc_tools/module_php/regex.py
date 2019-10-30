@@ -51,7 +51,7 @@ class RegexPatternPhp(object):
         (re.compile(r'([-0-9])->([-0-9])f\b'), r'\1.\2', ['']),
         (re.compile(r'assert\(.+\);'), r'', ['assert']),
         (re.compile(r'make_intrusive<(\w+)>\(\s*\)'), r'new \1()', ['make_intrusive']),
-        (re.compile(r'dynamic_pointer_cast_intrusive<\w+>\((.+?)\)'), r'\1', ['dynamic_pointer_cast_intrusive']),
+        (re.compile(r'dynamic_pointer_cast_intrusive<.+>\((.+?)\)'), r'\1', ['dynamic_pointer_cast_intrusive']),
         (re.compile(r'(.+?)\->push_back\((.+)\);'), r'array_push(\1, \2);', ['push_back']),
         (re.compile(r'(\w+)\s+(\w+);'), r'$\2 = new \1();'),
         (re.compile(r'\$(\w+) = new return\(\);'), r'return \1;', ['new return']),

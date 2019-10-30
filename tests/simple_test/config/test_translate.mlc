@@ -242,4 +242,20 @@ class TestTranslates<ITestTranslates>
             i += 1;
         }
     }
+    function void test_translate_dynamic_pointer_cast_intrusive()
+    {
+        auto request = new RequestBar();
+
+        auto request_base = request;
+        this->assertTrue(request_base != nullptr);
+        this->assertEqual(request_base->get_type(), RequestBar::TYPE);
+
+        auto request_bar = dynamic_pointer_cast_intrusive<RequestBar>(request_base);
+        this->assertTrue(request_bar != nullptr);
+        this->assertEqual(request_bar->get_type(), RequestBar::TYPE);
+
+        auto request_bar2 = dynamic_pointer_cast_intrusive<RequestBar, Request>(request_base);
+        this->assertTrue(request_bar2 != nullptr);
+        this->assertEqual(request_bar2->get_type(), RequestBar::TYPE);
+    }
 }

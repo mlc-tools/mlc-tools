@@ -75,7 +75,7 @@ class RegexPatternPython(object):
         (re.compile(r'random_int\((.+)?,\s*(.+)?\)'), r'random.randint(\1, \2 - 1)', ['random_int']),
         (re.compile(r'\bthis\b'), r'self', ['this']),
         (re.compile(r', std::placeholders::_\d'), r'', ['std::placeholders']),
-        (re.compile(r'dynamic_pointer_cast_intrusive<\w+>\((.+?)\)'), r'\1', ['dynamic_pointer_cast_intrusive']),
+        (re.compile(r'dynamic_pointer_cast_intrusive<.+>\((.+?)\)'), r'\1', ['dynamic_pointer_cast_intrusive']),
         (re.compile(r'([\w\.]+?)\s*!=\s*False'), r'(\1)', ['False']),
         (re.compile(r'([\w\.]+?)\s*==\s*False'), r'not (\1)', ['False']),
         (re.compile(r'\bstrTo<(\w+)>\((.+?)\)'), r'\1(\2)', ['strTo']),
