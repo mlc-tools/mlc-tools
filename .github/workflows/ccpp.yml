@@ -110,7 +110,7 @@ jobs:
 
 
     - name: Set build version
-      run: cd tools; python change_version.py
+      run: cd tools; python3 change_version.py
     - name: Build and publish
       env:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
