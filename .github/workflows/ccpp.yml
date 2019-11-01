@@ -113,12 +113,10 @@ jobs:
     #     cd tests/test_serialize
     #     python run.py
 
-
+  publish:
     - name: Set build version
       run: cd tools; python change_version.py
     - name: Build and publish
-      with: 
-        platform: ubuntu-latest
       env:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
