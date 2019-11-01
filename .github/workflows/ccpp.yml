@@ -28,95 +28,97 @@ jobs:
         cd unit_tests
         python -m unittest discover
 
-    - name: simple test
-      run: |
-        python -m mlc_tools.main -i tests/simple_test/config -o tests/simple_test/generated_cpp/xml -f xml -l cpp -side server -data tests/simple_test/data_xml -data_out tests/simple_test/assets -generate_tests yes -add_config tests/simple_test/config_additional -add_data tests/simple_test/data_additional -auto_registration no
-        python -m mlc_tools.main -i tests/simple_test/config -o tests/simple_test/generated_cpp/json -f json -l cpp -side client -data tests/simple_test/data_json -data_out tests/simple_test/assets -generate_tests yes -add_config tests/simple_test/config_additional -add_data tests/simple_test/data_additional -auto_registration no
+    # - name: simple test
+    #   run: |
+    #     python -m mlc_tools.main -i tests/simple_test/config -o tests/simple_test/generated_cpp/xml -f xml -l cpp -side server -data tests/simple_test/data_xml -data_out tests/simple_test/assets -generate_tests yes -add_config tests/simple_test/config_additional -add_data tests/simple_test/data_additional -auto_registration no
+    #     python -m mlc_tools.main -i tests/simple_test/config -o tests/simple_test/generated_cpp/json -f json -l cpp -side client -data tests/simple_test/data_json -data_out tests/simple_test/assets -generate_tests yes -add_config tests/simple_test/config_additional -add_data tests/simple_test/data_additional -auto_registration no
 
-        cd tests/simple_test
+    #     cd tests/simple_test
 
-        mkdir build_xml
-        cd build_xml
-        cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DBUILD_XML=ON -DBUILD_JSON=OFF -DBUILD_SIDE=SERVER
-        cmake --build .
-        ./test_mlc_xml ../
-        cd ..
+    #     mkdir build_xml
+    #     cd build_xml
+    #     cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DBUILD_XML=ON -DBUILD_JSON=OFF -DBUILD_SIDE=SERVER
+    #     cmake --build .
+    #     ./test_mlc_xml ../
+    #     cd ..
 
-        mkdir build_json
-        cd build_json
-        cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DBUILD_XML=OFF -DBUILD_JSON=ON -DBUILD_SIDE=CLIENT
-        cmake --build .
-        ./test_mlc_json ../
+    #     mkdir build_json
+    #     cd build_json
+    #     cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DBUILD_XML=OFF -DBUILD_JSON=ON -DBUILD_SIDE=CLIENT
+    #     cmake --build .
+    #     ./test_mlc_json ../
 
-    - name: test functions
-      run: |
-        python -m mlc_tools.main -i tests/test_functions/config -o tests/test_functions/generated_cpp/xml -f xml -l cpp -generate_tests yes
-        python -m mlc_tools.main -i tests/test_functions/config -o tests/test_functions/generated_cpp/json -f json -l cpp -generate_tests yes
+    # - name: test functions
+    #   run: |
+    #     python -m mlc_tools.main -i tests/test_functions/config -o tests/test_functions/generated_cpp/xml -f xml -l cpp -generate_tests yes
+    #     python -m mlc_tools.main -i tests/test_functions/config -o tests/test_functions/generated_cpp/json -f json -l cpp -generate_tests yes
 
-        cd tests/test_functions
+    #     cd tests/test_functions
 
-        mkdir build_xml
-        cd build_xml
-        cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DBUILD_XML=ON -DBUILD_JSON=OFF
-        cmake --build .
-        ./test_mlc_xml ../
-        cd ..
+    #     mkdir build_xml
+    #     cd build_xml
+    #     cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DBUILD_XML=ON -DBUILD_JSON=OFF
+    #     cmake --build .
+    #     ./test_mlc_xml ../
+    #     cd ..
 
-        mkdir build_json
-        cd build_json
-        cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DBUILD_XML=OFF -DBUILD_JSON=ON
-        cmake --build .
-        ./test_mlc_json ../
+    #     mkdir build_json
+    #     cd build_json
+    #     cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DBUILD_XML=OFF -DBUILD_JSON=ON
+    #     cmake --build .
+    #     ./test_mlc_json ../
 
-    - name: test virtual methods
-      run: |
-        python -m mlc_tools.main -i tests/test_virtual_methods -o tests/test_virtual_methods/generated_cpp/xml -f xml -l cpp -generate_tests yes
-        python -m mlc_tools.main -i tests/test_virtual_methods -o tests/test_virtual_methods/generated_cpp/json -f json -l cpp -generate_tests yes
+    # - name: test virtual methods
+    #   run: |
+    #     python -m mlc_tools.main -i tests/test_virtual_methods -o tests/test_virtual_methods/generated_cpp/xml -f xml -l cpp -generate_tests yes
+    #     python -m mlc_tools.main -i tests/test_virtual_methods -o tests/test_virtual_methods/generated_cpp/json -f json -l cpp -generate_tests yes
 
-        cd tests/test_virtual_methods
+    #     cd tests/test_virtual_methods
 
-        mkdir build_xml
-        cd build_xml
-        cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DBUILD_XML=ON -DBUILD_JSON=OFF
-        cmake --build .
-        ./test_mlc_xml ../
-        cd ..
+    #     mkdir build_xml
+    #     cd build_xml
+    #     cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DBUILD_XML=ON -DBUILD_JSON=OFF
+    #     cmake --build .
+    #     ./test_mlc_xml ../
+    #     cd ..
 
-        mkdir build_json
-        cd build_json
-        cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DBUILD_XML=OFF -DBUILD_JSON=ON
-        cmake --build .
-        ./test_mlc_json ../
+    #     mkdir build_json
+    #     cd build_json
+    #     cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DBUILD_XML=OFF -DBUILD_JSON=ON
+    #     cmake --build .
+    #     ./test_mlc_json ../
 
-    - name: test unit tests generator
-      run: |
-        python -m mlc_tools.main -i tests/unit_tests_generator -o tests/unit_tests_generator/generated_cpp/xml -f xml -l cpp -generate_tests yes
-        python -m mlc_tools.main -i tests/unit_tests_generator -o tests/unit_tests_generator/generated_cpp/json -f json -l cpp -generate_tests yes
+    # - name: test unit tests generator
+    #   run: |
+    #     python -m mlc_tools.main -i tests/unit_tests_generator -o tests/unit_tests_generator/generated_cpp/xml -f xml -l cpp -generate_tests yes
+    #     python -m mlc_tools.main -i tests/unit_tests_generator -o tests/unit_tests_generator/generated_cpp/json -f json -l cpp -generate_tests yes
 
-        cd tests/unit_tests_generator
+    #     cd tests/unit_tests_generator
 
-        mkdir build_xml
-        cd build_xml
-        cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DBUILD_XML=ON -DBUILD_JSON=OFF
-        cmake --build .
-        ./test_mlc_xml ../
-        cd ..
+    #     mkdir build_xml
+    #     cd build_xml
+    #     cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DBUILD_XML=ON -DBUILD_JSON=OFF
+    #     cmake --build .
+    #     ./test_mlc_xml ../
+    #     cd ..
 
-        mkdir build_json
-        cd build_json
-        cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DBUILD_XML=OFF -DBUILD_JSON=ON
-        cmake --build .
-        ./test_mlc_json ../
+    #     mkdir build_json
+    #     cd build_json
+    #     cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DBUILD_XML=OFF -DBUILD_JSON=ON
+    #     cmake --build .
+    #     ./test_mlc_json ../
 
-    - name: test serialize
-      run: |
-        cd tests/test_serialize
-        python run.py
+    # - name: test serialize
+    #   run: |
+    #     cd tests/test_serialize
+    #     python run.py
 
 
     - name: Set build version
       run: cd tools; python change_version.py
     - name: Build and publish
+      with: 
+        platform: ubuntu-latest
       env:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
         TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
