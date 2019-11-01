@@ -13,6 +13,11 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
+    - name: Install dependencies
+      run: |
+        python3 -m pip install --upgrade pip
+        pip3 install setuptools wheel twine
+
     - name: unit test
       run: |
         cd unit_tests
@@ -102,3 +107,14 @@ jobs:
       run: |
         cd tests/test_serialize
         python3 run.py
+
+
+    - name: Set build version
+      run: cd tools; python change_version.py
+    - name: Build and publish
+      env:
+        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+      run: |
+        python setup.py sdist bdist_wheel
+        twine upload dist/*
