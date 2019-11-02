@@ -6,4 +6,4 @@ if err:
     exit(1)
 version = int(out.decode('utf-8'))
 print(version)
-open('../mlc_tools/version.py', 'w').write(f'__version__="0.3.{version}"')
+open('../mlc_tools/version.py', 'w').write(f'__version__="0.4.{version}"')
