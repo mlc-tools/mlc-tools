@@ -3,35 +3,25 @@ name: C/C++ CI
 on: [push]
 
 jobs:
-  tests:
+  build:
 
     strategy:
       matrix:
-        platform: [ubuntu-latest, macos-latest, windows-latest]
+        platform: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.platform }}
     
     steps:
     - uses: actions/checkout@v1
 
-    - name: Set up Python
-      uses: actions/setup-python@v1
-      with:
-        python-version: '3.x'
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install setuptools wheel twine
-
     - name: unit test
       run: |
         cd unit_tests
-        python -m unittest discover
+        python3 -m unittest discover
 
     - name: simple test
       run: |
-        python -m mlc_tools.main -i tests/simple_test/config -o tests/simple_test/generated_cpp/xml -f xml -l cpp -side server -data tests/simple_test/data_xml -data_out tests/simple_test/assets -generate_tests yes -add_config tests/simple_test/config_additional -add_data tests/simple_test/data_additional -auto_registration no
-        python -m mlc_tools.main -i tests/simple_test/config -o tests/simple_test/generated_cpp/json -f json -l cpp -side client -data tests/simple_test/data_json -data_out tests/simple_test/assets -generate_tests yes -add_config tests/simple_test/config_additional -add_data tests/simple_test/data_additional -auto_registration no
+        python3 -m mlc_tools.main -i tests/simple_test/config -o tests/simple_test/generated_cpp/xml -f xml -l cpp -side server -data tests/simple_test/data_xml -data_out tests/simple_test/assets -generate_tests yes -add_config tests/simple_test/config_additional -add_data tests/simple_test/data_additional -auto_registration no
+        python3 -m mlc_tools.main -i tests/simple_test/config -o tests/simple_test/generated_cpp/json -f json -l cpp -side client -data tests/simple_test/data_json -data_out tests/simple_test/assets -generate_tests yes -add_config tests/simple_test/config_additional -add_data tests/simple_test/data_additional -auto_registration no
 
         cd tests/simple_test
 
@@ -50,8 +40,8 @@ jobs:
 
     - name: test functions
       run: |
-        python -m mlc_tools.main -i tests/test_functions/config -o tests/test_functions/generated_cpp/xml -f xml -l cpp -generate_tests yes
-        python -m mlc_tools.main -i tests/test_functions/config -o tests/test_functions/generated_cpp/json -f json -l cpp -generate_tests yes
+        python3 -m mlc_tools.main -i tests/test_functions/config -o tests/test_functions/generated_cpp/xml -f xml -l cpp -generate_tests yes
+        python3 -m mlc_tools.main -i tests/test_functions/config -o tests/test_functions/generated_cpp/json -f json -l cpp -generate_tests yes
 
         cd tests/test_functions
 
@@ -70,8 +60,8 @@ jobs:
 
     - name: test virtual methods
       run: |
-        python -m mlc_tools.main -i tests/test_virtual_methods -o tests/test_virtual_methods/generated_cpp/xml -f xml -l cpp -generate_tests yes
-        python -m mlc_tools.main -i tests/test_virtual_methods -o tests/test_virtual_methods/generated_cpp/json -f json -l cpp -generate_tests yes
+        python3 -m mlc_tools.main -i tests/test_virtual_methods -o tests/test_virtual_methods/generated_cpp/xml -f xml -l cpp -generate_tests yes
+        python3 -m mlc_tools.main -i tests/test_virtual_methods -o tests/test_virtual_methods/generated_cpp/json -f json -l cpp -generate_tests yes
 
         cd tests/test_virtual_methods
 
@@ -90,8 +80,8 @@ jobs:
 
     - name: test unit tests generator
       run: |
-        python -m mlc_tools.main -i tests/unit_tests_generator -o tests/unit_tests_generator/generated_cpp/xml -f xml -l cpp -generate_tests yes
-        python -m mlc_tools.main -i tests/unit_tests_generator -o tests/unit_tests_generator/generated_cpp/json -f json -l cpp -generate_tests yes
+        python3 -m mlc_tools.main -i tests/unit_tests_generator -o tests/unit_tests_generator/generated_cpp/xml -f xml -l cpp -generate_tests yes
+        python3 -m mlc_tools.main -i tests/unit_tests_generator -o tests/unit_tests_generator/generated_cpp/json -f json -l cpp -generate_tests yes
 
         cd tests/unit_tests_generator
 
@@ -111,27 +101,4 @@ jobs:
     - name: test serialize
       run: |
         cd tests/test_serialize
-        python run.py
-
-  deploy:
-    needs: tests
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v1
-    - name: Set up Python
-      uses: actions/setup-python@v1
-      with:
-        python-version: '3.x'
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install setuptools wheel twine
-    - name: Set build version
-      run: cd tools; python change_version.py
-    - name: Build and publish
-      env:
-        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-      run: |
-        python setup.py sdist bdist_wheel
-        twine upload dist/*
+        python3 run.py
