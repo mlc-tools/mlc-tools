@@ -21,21 +21,21 @@ class Log(object):
     @staticmethod
     def debug(msg):
         if not Log.disable_logs:
-            print(Color.light_grey + msg + Color.end) if Log.use_colors else msg
+            print(Color.light_grey + msg + Color.end if Log.use_colors else msg)
 
     @staticmethod
     def error(msg):
-        print(Color.red + msg + Color.end) if Log.use_colors else msg
+        print(Color.red + msg + Color.end if Log.use_colors else msg)
 
     @staticmethod
     def warning(msg):
         if not Log.disable_logs:
-            print(Color.orange + msg + Color.end) if Log.use_colors else msg
+            print(Color.orange + msg + Color.end if Log.use_colors else msg)
 
     @staticmethod
     def message(msg):
         if not Log.disable_logs:
-            print(Color.green + msg + Color.end) if Log.use_colors else msg
+            print(Color.green + msg + Color.end if Log.use_colors else msg)
 
 
 class Error(object):
