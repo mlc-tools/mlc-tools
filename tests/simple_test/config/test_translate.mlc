@@ -258,4 +258,13 @@ class TestTranslates<ITestTranslates>
         this->assertTrue(request_bar2 != nullptr);
         this->assertEqual(request_bar2->get_type(), RequestBar::TYPE);
     }
+    function void test_min_max()
+    {
+        this->assertEqual(std::min(1, 2), 1);
+        this->assertEqual(std::max(1, 2), 2);
+        this->assertEqual(std::min<int>(1, 2), 1);
+        this->assertEqual(std::max<int>(1, 2), 2);
+        this->assertEqual(std::min<float>(1, 2), 1.f);
+        this->assertEqual(std::max<float>(1, 2), 2.f);
+    }
 }
