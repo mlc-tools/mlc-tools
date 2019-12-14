@@ -42,3 +42,51 @@ class TestFunctionTemplates<ITestFunctionTemplates>:test
         f.use_other_class(0);
     }
 }
+
+
+class TemplateMethod<SerializedObject>
+{
+    map<string, BaseClass*> members
+
+    function<T> T* get(string name)
+    {
+        for(auto&& [member_name, member] : this->members)
+        {
+            if(member_name == name)
+            {
+                return dynamic_pointer_cast_intrusive<T>(member);
+            }
+        }
+        return nullptr;
+    }
+}
+
+class BaseClass<SerializedObject>
+{
+}
+class FooClassFromBase<BaseClass>
+{
+}
+class BarClassFromBase<BaseClass>
+{
+}
+class TestTemplateMethod<ITestTemplateMethod>:tests
+{
+    function void test_get()
+    {
+        auto test = new TemplateMethod();
+        test->members["base"] = new BaseClass();
+        test->members["foo"] = new FooClassFromBase();
+        test->members["bar"] = new BarClassFromBase();
+
+        this->assertNotNull(test->get<BaseClass>("base"), "test->get<BaseClass>'base'");
+        this->assertNotNull(test->get<BaseClass>("foo"), "test->get<BaseClass>'foo'");
+        this->assertNotNull(test->get<BaseClass>("bar"), "test->get<BaseClass>'bar'");
+        this->assertNotNull(test->get<FooClassFromBase>("foo"), "test->get<FooClassFromBase>'foo'");
+        this->assertNotNull(test->get<BarClassFromBase>("bar"), "test->get<BarClassFromBase>'bar'");
+        this->assertNull(test->get<FooClassFromBase>("base"), "test->get<FooClassFromBase>'base'");
+        this->assertNull(test->get<FooClassFromBase>("bar"), "test->get<FooClassFromBase>'bar'");
+        this->assertNull(test->get<BarClassFromBase>("base"), "test->get<BarClassFromBase>'base'");
+        this->assertNull(test->get<BarClassFromBase>("foo"), "test->get<BarClassFromBase>'foo'");
+    }
+}

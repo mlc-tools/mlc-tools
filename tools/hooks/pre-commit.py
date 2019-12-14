@@ -12,7 +12,7 @@ def has_python_version(number):
 
 
 def run_mlc_build():
-    if 0 != os.system('python  {}/tests/mlc_build.py'.format(root)):
+    if 0 != os.system('python {}/tests/mlc_build.py'.format(root)):
         sys.exit(1)
 
     if has_python_version(3):

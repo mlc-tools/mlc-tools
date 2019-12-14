@@ -12,7 +12,7 @@ class Translator(TranslatorBase):
     def translate_function(self, cls, method, model):
         if not method.translated:
             body = '\n'.join(method.operations)
-            body = self.translate_function_body(cls, body, model, method.args)
+            body = self.translate_function_body(cls, method, body, model, method.args)
             method.body = body
         else:
             if method.operations:
@@ -20,11 +20,11 @@ class Translator(TranslatorBase):
             else:
                 method.body = ''
 
-    def translate_function_body(self, cls, func, model, args):
-        if not func:
-            func = ''
-        func = self.replace_by_regex(func, model, args)
-        return func
+    def translate_function_body(self, cls, func, body, model, args):
+        if not body:
+            body = ''
+        body = self.replace_by_regex(func, body, model, args)
+        return body
 
     def convert_to_enum(self, cls):
         cast = 'int'
@@ -184,11 +184,11 @@ class Translator(TranslatorBase):
 
         return values
 
-    def replace_by_regex(self, func, model, args):
+    def replace_by_regex(self, func, body, model, args):
         for reg in RegexPatternCpp.FUNCTION:
-            func = self.replace(func, reg)
+            body = self.replace(body, reg)
         for reg in RegexPatternCpp.REPLACES:
-            func = func.replace(reg[0], reg[1])
+            body = body.replace(reg[0], reg[1])
         for reg in RegexPatternCpp.convert_c17_to_c14:
-            func = self.replace(func, reg)
-        return func
+            body = self.replace(body, reg)
+        return body

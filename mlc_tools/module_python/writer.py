@@ -138,6 +138,9 @@ class Writer(WriterBase):
             return 'self'
         return None
 
+    def get_nullptr_string(self):
+        return 'None'
+
     def add_static_modifier_to_method(self, text):
         return '    @staticmethod' + text
 

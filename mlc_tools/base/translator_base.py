@@ -19,16 +19,16 @@ class TranslatorBase(object):
     def translate_function(self, cls, method, model):
         if not method.translated:
             body = '\n'.join(method.operations)
-            body = self.translate_function_body(cls, body, model, method.args)
+            body = self.translate_function_body(cls, method, body, model, method.args)
             method.body = body
         elif method.operations:
             method.body = '\n'.join(method.operations)
 
-    def translate_function_body(self, cls, func, model, args):
-        func = self.replace_by_regex(func, model, args)
+    def translate_function_body(self, cls, func, body, model, args):
+        func = self.replace_by_regex(func, body, model, args)
         return func
 
-    def replace_by_regex(self, func, model, args):
+    def replace_by_regex(self, func, body, model, args):
         pass
 
     def convert_to_enum(self, cls):

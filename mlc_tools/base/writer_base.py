@@ -1,6 +1,6 @@
 import re
 from .model import SerializeFormat
-from ..core.object import AccessSpecifier
+from ..core.object import AccessSpecifier, Object
 
 
 # pylint: disable=no-self-use
@@ -65,6 +65,14 @@ class WriterBase(object):
         for name, arg in method.args:
             pattern = self.get_method_arg_pattern(arg)
             args.append(pattern.format(name, self.serializer.convert_initialize_value(arg.initial_value)))
+
+        for template_type in method.template_types:
+            obj = Object()
+            obj.name = template_type
+            obj.initial_value = self.get_nullptr_string()
+            pattern = self.get_method_arg_pattern(obj)
+            args.append(pattern.format(template_type, self.get_nullptr_string()))
+
         args = ', '.join(args)
         return args
 
@@ -76,6 +84,9 @@ class WriterBase(object):
 
     def get_required_args_to_function(self, method):
         return None
+
+    def get_nullptr_string(self):
+        return 'null'
 
     def add_static_modifier_to_method(self, text):
         return 'static ' + text

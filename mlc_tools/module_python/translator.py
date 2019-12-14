@@ -11,7 +11,7 @@ class Translator(TranslatorBase):
     def translate_function(self, cls, method, model):
         if not method.translated:
             body = '\n'.join(method.operations)
-            body = self.translate_function_body(cls, body, model, method.args)
+            body = self.translate_function_body(cls, method, body, model, method.args)
             method.body = body
         else:
             if method.operations:
@@ -19,14 +19,14 @@ class Translator(TranslatorBase):
             else:
                 method.body = 'pass'
 
-    def translate_function_body(self, cls, func, model, args):
-        if not func:
-            func = 'pass'
-        func = self.replace_by_regex(func, model, args)
-        func = Translator.convert_braces_to_tabs(func)
-        func = Translator.remove_double_eol(func)
-        func = Translator.add_imports(cls, func, model)
-        return func
+    def translate_function_body(self, cls, method, body, model, args):
+        if not body:
+            body = 'pass'
+        body = self.replace_by_regex(method, body, model, args)
+        body = Translator.convert_braces_to_tabs(body)
+        body = Translator.remove_double_eol(body)
+        body = Translator.add_imports(cls, body, model)
+        return body
 
     @staticmethod
     def add_imports(cls_owner, func, model):
@@ -91,14 +91,14 @@ class Translator(TranslatorBase):
         func = '\n'.join(lines)
         return func
 
-    def replace_by_regex(self, func, model, args):
-        if not func:
-            return func
+    def replace_by_regex(self, func, body, model, args):
+        if not body:
+            return body
         for reg in RegexPatternPython.FUNCTION:
-            func = self.replace(func, reg)
+            body = self.replace(body, reg)
         for reg in RegexPatternPython.REPLACES:
-            func = func.replace(reg[0], reg[1])
-        return func
+            body = body.replace(reg[0], reg[1])
+        return body
 
     @staticmethod
     def get_tabs(count):
