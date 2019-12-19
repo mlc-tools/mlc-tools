@@ -105,7 +105,7 @@ class Writer(WriterBase):
         return text
 
     def get_method_arg_pattern(self, obj):
-        return '${}={}' if obj.initial_value is not None else '${}'
+        return '{type} ${name}={value}' if obj.initial_value is not None else '{type} ${name}'
 
     def get_method_pattern(self, method):
         return PATTERN_METHOD

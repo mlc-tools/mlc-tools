@@ -1,11 +1,13 @@
 <?php
+declare(strict_types=1);
+
 require_once 'generated_php/RunAllTests.php';
 require_once 'generated_php/Logger.php';
 require_once 'generated_php/TestDataBase.php';
 require_once 'lib/php/DataBase.php';
 
 class LoggerImpl extends Logger {
-	function message($message) {
+	function message(string $message) {
 		echo ("$message\n);
 	}
 };

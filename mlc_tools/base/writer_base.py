@@ -64,20 +64,39 @@ class WriterBase(object):
             args.append(self.get_required_args_to_function(method))
         for name, arg in method.args:
             pattern = self.get_method_arg_pattern(arg)
-            args.append(pattern.format(name, self.serializer.convert_initialize_value(arg.initial_value)))
+            typename = self.get_argument_typename(arg)
+            args.append(pattern.format(name=name,
+                                       type=typename,
+                                       value=self.serializer.convert_initialize_value(arg.initial_value)))
 
         for template_type in method.template_types:
             obj = Object()
             obj.name = template_type
             obj.initial_value = self.get_nullptr_string()
             pattern = self.get_method_arg_pattern(obj)
-            args.append(pattern.format(template_type, self.get_nullptr_string()))
+            args.append(pattern.format(name=template_type, type='', value=self.get_nullptr_string()))
 
         args = ', '.join(args)
         return args
 
+    # arg: Object
+    def get_argument_typename(self, arg):
+        typename = arg.type
+        std_types = {
+            'string': 'string',
+            'int': 'int',
+            'float': 'float',
+            'bool': 'bool',
+            'void': '',
+        }
+        if typename in std_types:
+            return std_types[typename]
+        if self.model.has_class(typename):
+            return typename
+        return ''
+
     def get_method_arg_pattern(self, obj):
-        return '${}={}' if obj.initial_value is not None else '${}'
+        return '${name}={value}' if obj.initial_value is not None else '${name}'
 
     def get_method_pattern(self, method):
         return '{name}({args})\n{body}'

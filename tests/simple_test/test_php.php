@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 if((@include 'generated_php/mg.php') === false) {
     require_once 'generated_php/DataStorage.php';
@@ -19,7 +20,7 @@ DataStorage::$PATH_TO_DATA = $file;
 DataStorage::shared()->loadAllDataUnits();
 
 class LoggerImpl extends Logger {
-	function message($message) {
+	function message(string $message) {
 		echo ($message."\n");
 	}
 };

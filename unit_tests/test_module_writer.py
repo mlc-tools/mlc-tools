@@ -138,7 +138,7 @@ return result;
     def test_php(self):
         model = create_test_model()
         result = save_function('php', model)
-        self.assertEqual(result, 'public function foo($a0, $a1)\n{\n    $result = $this->int_value;\n$result += $a0;\nreturn $result;\n\n}\n')
+        self.assertEqual(result, 'public function foo(int $a0, string $a1)\n{\n    $result = $this->int_value;\n$result += $a0;\nreturn $result;\n\n}\n')
 
 
 class TestCppWriterBuildIncludesWithGroups(unittest.TestCase):
