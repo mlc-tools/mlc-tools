@@ -18,7 +18,7 @@ import xml.etree.ElementTree as ET
         return file_name == '__init__.py'
 
     def _remove_includes(self, file_content):
-        file_content = file_content.replace('# -*- coding: utf-8 -*-', '')
-        file_content = re.sub(r'from.+import.+', '', file_content)
-        file_content = re.sub(r'import.+', '', file_content)
+        file_content = re.sub(r'\n\s*from.+import.+', '', file_content)
+        file_content = re.sub(r'\n\s*import.+', '', file_content)
+        file_content = file_content.replace('# -*- coding: utf-8 -*-\n', '')
         return file_content

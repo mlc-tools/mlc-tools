@@ -118,8 +118,8 @@ class Serializer(SerializerBase):
         value_serialize = self.build_serialize_operation_('value', value_type, None, SERIALIZATION, value.template_args,
                                                           value.is_pointer, '', value.is_link, serialize_format)
         return pattern.format(field=obj_name,
-                              key_serialize=key_serialize,
-                              value_serialize=value_serialize)
+                              key_serialize=key_serialize.strip(),
+                              value_serialize=value_serialize.strip()) + '\n\n'
 
     def build_map_deserialization(self, obj_name, obj_template_args, serialize_format):
         key = obj_template_args[0]
@@ -148,10 +148,10 @@ class Serializer(SerializerBase):
         if value.is_pointer:
             value_init = 'intrusive_ptr<{}>'.format(value_type)
         return pattern.format(field=obj_name,
-                              key_serialize=key_serialize,
-                              value_serialize=value_serialize,
+                              key_serialize=key_serialize.strip(),
+                              value_serialize=value_serialize.strip(),
                               key=key_str,
-                              value_type=value_init)
+                              value_type=value_init) + '\n\n'
 
     @staticmethod
     def convert_type(type_):
