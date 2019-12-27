@@ -28,6 +28,8 @@ class DataParser(object):
 
     def flush(self, out_data_directory):
         buffer_ = ''
+        if self.format is None:
+            self.format = 'xml'
         filename = 'data.' + self.format
         if self.format == 'xml':
             buffer_ = self._flush_xml()

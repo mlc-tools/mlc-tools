@@ -1,0 +1,22 @@
+project:
+  mlc_app
+
+binary_type:
+  app
+  # lib
+  # sources
+
+serialize_format:
+  xml
+  # json
+
+lang:
+  cpp
+src_directory:
+  src
+data_directory:
+  data
+build_directory:
+  build/cpp
+generate_sources_directory:
+  build/gen/cpp

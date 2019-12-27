@@ -116,6 +116,17 @@ def test_virtual_methods():
     return 0
 
 
+def test_console():
+    if sys.version_info[0] == 2:
+        return
+    python = 'python3'
+    command = 'cd {1}/tests/test_console_compile; {0} run.py'.format(python, get_root())
+    result = os.system(command)
+    if 0 != result:
+        sys.exit(1)
+    return 0
+
+
 if __name__ == '__main__':
     if len(sys.argv) == 1:
         simple_test()
@@ -123,6 +134,7 @@ if __name__ == '__main__':
         test_functions()
         unit_tests_generator()
         test_virtual_methods()
+        test_console()
     else:
         exec(sys.argv[1])
 

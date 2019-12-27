@@ -12,6 +12,13 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
+      with:
+        submodules: true
+
+    - name: Install dependencies
+      run: |
+        pip install setuptools wheel twine
+        pip install PyYaml
 
     - name: unit test
       run: |
