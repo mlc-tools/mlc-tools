@@ -3,7 +3,15 @@ import yaml
 from mlc_tools.utils.fileutils import normalize_path
 
 
-class ProjectConfig:
+class Feature(object):
+    GENERATE_TESTS = 'tests'
+    INTRUSIVE_PTR = 'intrusive_ptr'
+    FACTORY = 'factory'
+    PHP_VALIDATE = 'php_validate'
+    AUTO_REGISTRATION = 'auto_registration'
+
+
+class ProjectConfig(object):
     def __init__(self):
         self.has_config = False
         self.root = None
@@ -19,6 +27,7 @@ class ProjectConfig:
         self.lang = None
         self.serialize_format = None
         self.set_defaults('')
+        self.features = {}
 
     def set_defaults(self, root, arguments=None):
         self.root = root
@@ -33,6 +42,7 @@ class ProjectConfig:
         self.third_party_release = 'master'
         self.lang = 'cpp'
         self.serialize_format = 'xml'
+        self.features = {}
 
     def parse(self, root, arguments):
         self.set_defaults(root, arguments)
@@ -64,6 +74,13 @@ class ProjectConfig:
                 self.build_directory = normalize_path(self.build_directory)
             if 'generate_sources_directory' in dictionary:
                 self.generate_sources_directory = normalize_path(self.root + dictionary.get('generate_sources_directory'))
+
+            if 'features' in dictionary:
+                features = dictionary['features']
+                features = [x.strip() for x in features.split(' ')]
+                for feature in features:
+                    self.features[feature] = True
+
 
         except KeyError as error:
             print('Project data has not key')

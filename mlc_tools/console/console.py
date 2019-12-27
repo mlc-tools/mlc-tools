@@ -3,7 +3,7 @@ import sys
 import shutil
 from mlc_tools import Mlc
 from mlc_tools.console.arguments import Arguments, ArgumentsError
-from mlc_tools.console.config import ProjectConfig
+from mlc_tools.console.config import ProjectConfig, Feature
 from mlc_tools.utils.fileutils import normalize_path, write
 from mlc_tools.console.files import *
 from mlc_tools.utils.subprocess_wrapper import SubprocessWrapper
@@ -118,13 +118,13 @@ class Console(object):
                              data_directory=self.config.data_directory,
                              out_directory=self.config.generate_sources_directory,
                              out_data_directory=self.config.build_directory + 'data',
-                             generate_intrusive=True,
-                             generate_factory=True,
-                             generate_tests=False,
+                             generate_intrusive=self.config.features.get(Feature.INTRUSIVE_PTR, True),
+                             generate_factory=self.config.features.get(Feature.FACTORY, True),
+                             generate_tests=self.config.features.get(Feature.GENERATE_TESTS, False),
                              language=self.config.lang,
-                             php_validate=False,
+                             php_validate=self.config.features.get(Feature.PHP_VALIDATE, True),
                              join_to_one_file=True,
-                             auto_registration=False,
+                             auto_registration=self.config.features.get(Feature.AUTO_REGISTRATION, False),
                              formats=self.config.serialize_format)
 
         self.generator.generate()

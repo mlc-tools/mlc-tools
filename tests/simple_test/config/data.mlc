@@ -5,7 +5,7 @@ enum UnitType
     support
 }
 
-class data/DataUnit<SerializedObject>:storage
+class data/DataUnit:storage
 {
 	string name
 	UnitType unit_type
@@ -126,7 +126,7 @@ class data/DataUnit<SerializedObject>:storage
     }
 
 }
-class data/VisualUnit<SerializedObject>
+class data/VisualUnit
 {
 	string name
 	string icon

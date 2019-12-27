@@ -10,6 +10,12 @@ serialize_format:
   xml
   # json
 
+features:
+  tests
+  intrusive_ptr
+  factory
+  php_validate
+
 lang:
   cpp
 src_directory:

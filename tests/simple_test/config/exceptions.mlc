@@ -1,4 +1,4 @@
-class ExceptionTest<SerializedObject>
+class ExceptionTest
 {
     function bool test():static
     {

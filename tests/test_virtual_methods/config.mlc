@@ -1,24 +1,4 @@
-class SerializedObject:serialized:inline
-{
-	int:runtime _reference_counter = 1
-	function int retain():cpp
-	{
-		this->_reference_counter += 1;
-		return this->_reference_counter;
-	}
-	function int release():cpp
-	{
-		this->_reference_counter -= 1;
-		auto c = this->_reference_counter;
-		if( c == 0)
-		{
-			delete this;
-		}
-		return c;
-	}
-}
-
-class Base<SerializedObject>
+class Base
 {
     function string virtual_method()
     {

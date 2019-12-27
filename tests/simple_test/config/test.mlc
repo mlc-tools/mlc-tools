@@ -1,24 +1,4 @@
-class SerializedObject:serialized:inline
-{
-	int:runtime:cpp _reference_counter = 1
-	function int retain():cpp
-	{
-		this->_reference_counter += 1;
-		return this->_reference_counter;
-	}
-	function int release():cpp
-	{
-		this->_reference_counter -= 1;
-		auto c = this->_reference_counter;
-		if( c == 0)
-		{
-			delete this;
-		}
-		return c;
-	}
-}
-
-class AllTests<SerializedObject>
+class AllTests
 {
     function bool run(Logger* logger):static
     {
@@ -33,18 +13,18 @@ class AllTests<SerializedObject>
     }
 }
 
-class core/CommandBase<SerializedObject>
+class core/CommandBase
 {
 	int:key user_id = 0
 	int current_time = 0
 }
 
-class AllTypesChildren<SerializedObject>
+class AllTypesChildren
 {
 	int value
 }
 
-class AllTypes<SerializedObject>
+class AllTypes
 {
 	//simple
 	int int_value0 = 0
@@ -137,7 +117,7 @@ class AllTypes<SerializedObject>
     }
 }
 
-class Request<SerializedObject>:visitor
+class Request:visitor
 {
 }
 class RequestFoo<Request>
@@ -211,7 +191,7 @@ class TestRequestAcceptor<ITestRequestAcceptor>
     }
 }
 
-class Response<SerializedObject>:visitor
+class Response:visitor
 {
 }
 
@@ -236,7 +216,7 @@ class TestToFor<TestEnum>
 	int some_count
 }
 
-class FunctionTest<SerializedObject>
+class FunctionTest
 {
     bool initialized = false
     DataUnit*:link data_unit
@@ -408,12 +388,12 @@ class FunctionTest<SerializedObject>
 	}
 }
 
-class TestUser1<SerializedObject>
+class TestUser1
 {
     bool result = true
 }
 
-class TestFactory<SerializedObject>
+class TestFactory
 {
     function bool tests(Logger* logger):static
     {
@@ -448,7 +428,7 @@ class TestFactory<SerializedObject>
     }
 }
 
-class DataComplexMap<SerializedObject>:storage
+class DataComplexMap:storage
 {
     string name
     map<int, list<float>> complex_map
@@ -475,7 +455,7 @@ class TestDataComplexMap<ITestDataComplexMap>:tests
     }
 }
 
-class TestStaticPointer<SerializedObject>:tests
+class TestStaticPointer:tests
 {
     CommandBase*:static command
 }

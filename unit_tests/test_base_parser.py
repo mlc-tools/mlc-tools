@@ -190,7 +190,7 @@ class TestParseClass(unittest.TestCase):
 
     def test_2(self):
         text = '''
-        class RewardsListHelper<SerializedObject>
+        class RewardsListHelper
         {
             list<DataReward*> rewards
         }
@@ -204,7 +204,7 @@ class TestParseClass(unittest.TestCase):
 
     def test_3(self):
         text = '''
-        class RewardsListHelper<SerializedObject>
+        class RewardsListHelper
         {
             constructor()
             {
@@ -221,7 +221,7 @@ class TestParseClass(unittest.TestCase):
 
     def test_4(self):
         text = '''
-        class RewardsListHelper<SerializedObject>
+        class RewardsListHelper
         {
             constructor(int a=0, float b=1)
             {
@@ -246,7 +246,7 @@ class TestParseClass(unittest.TestCase):
 
     def test_5(self):
         text = '''
-        class RewardsListHelper<SerializedObject>
+        class RewardsListHelper
         {
             int a
             float b

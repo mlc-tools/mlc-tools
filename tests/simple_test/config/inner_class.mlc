@@ -1,6 +1,6 @@
-class inner/OuterClass<SerializedObject>
+class inner/OuterClass
 {
-    class InnerClass<SerializedObject>
+    class InnerClass
     {
         function bool func()
         {

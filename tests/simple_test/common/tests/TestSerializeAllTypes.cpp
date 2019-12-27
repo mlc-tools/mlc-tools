@@ -1,15 +1,11 @@
 #include "TestSerializeAllTypes.h"
 #include "AllTypes.h"
-#include "SerializedObject.h"
 #include <stdlib.h>
 #include <iostream>
 #include <cmath>
 #include "mg_extensions.h"
 #include "mg_Factory.h"
 #include "tests/Logger.h"
-
-extern std::string getSerializedString(const mg::SerializedObject* object);
-extern void deserialize(mg::SerializedObject* object, const std::string& payload);
 
 std::string rand_str()
 {

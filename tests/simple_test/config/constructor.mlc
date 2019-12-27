@@ -1,4 +1,4 @@
-class ConstructableClass<SerializedObject>
+class ConstructableClass
 {
     int a = -1
     constructor()
@@ -7,7 +7,7 @@ class ConstructableClass<SerializedObject>
     }
 }
 
-class ConstructableClassWithParameters<SerializedObject>
+class ConstructableClassWithParameters
 {
     int a = -1
     int b = -1
@@ -18,7 +18,7 @@ class ConstructableClassWithParameters<SerializedObject>
     }
 }
 
-class ConstructableClassAuto<SerializedObject>
+class ConstructableClassAuto
 {
     int a = -1
     int b = -1

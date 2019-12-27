@@ -1,3 +1,4 @@
+from mlc_tools.module_cpp.generator_ref_counter import GeneratorRefCounter
 from ..base.generator import GeneratorBase
 from .generator_data_storage import GeneratorDataStorage
 from ..base.generator_visitor import GeneratorVisitor
@@ -18,3 +19,4 @@ class Generator(GeneratorBase):
         GeneratorPredefinedFiles().generate(model)
         GeneratorOperatorEquals().generate(model)
         GeneratorObserver().generate(model)
+        GeneratorRefCounter().generate(model)

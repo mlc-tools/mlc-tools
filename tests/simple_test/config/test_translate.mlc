@@ -1,11 +1,11 @@
-class Translates<SerializedObject>
+class Translates
 {
     function void dummy_function()
     {
 
     }
 }
-class Point<SerializedObject>
+class Point
 {
     int x
     int y
