@@ -10,7 +10,7 @@ class GeneratorRefCounter(object):
     def generate(self, model):
         self.model = model
         for cls in model.classes:
-            if not cls.superclasses and cls.type != 'enum':
+            if not cls.superclasses and cls.type != 'enum' and not cls.is_abstract:
                 self._add(cls)
 
     def _add(self, cls):
