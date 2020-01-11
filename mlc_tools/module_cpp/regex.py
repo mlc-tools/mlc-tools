@@ -21,7 +21,7 @@ class RegexPatternCpp(object):
         (re.compile(r'\bmap<([<:>\w\s\*&]+),\s*([<:>\w\s\*&]+)>\s*(\w+)'), r'std::map<\1, \2> \3', ['map<']),
         (re.compile(r'std::strcat\((.+?),\s*(.+?)\)'), r'(std::string(\1) + std::string(\2))', ['std::strcat']),
         (re.compile(r'std::std::'), r'std::', ['std::std']),
-
+        (re.compile(r'([\w\->\.]+)\s*=\s*([\w\->\.]+)\s*\?\?\s*([\w\->\.]+)'), r'\1 = (\2 != nullptr) ? \2 : (\3)', ['??']),
         # Exception with try/catch block (one catch)
         (re.compile(r'try\n\s*{([\s\S.]+?)}\n\s*catch\(((\w+)\s*(\w*))\)\n\s+{([\s\S.]+?)}'),
          r'try\n{\1}\ncatch(const std::exception& \4)\n{\5}', ['try', 'catch']),

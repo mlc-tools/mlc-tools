@@ -52,6 +52,8 @@ class RegexPatternPython(object):
         (re.compile(r'std::string\s+(\w+)'), r'\1', ['std::string']),
         (re.compile(r'\blist<.+>\s+(\w+)'), r'\1 = list()', ['list<']),
         (re.compile(r'\bmap<([<:>\w\s\*&]+),\s*([<:>\w\s\*&]+)>\s*(\w+)'), r'\3 = dict()', ['map<']),
+        (re.compile(r'[\w\*]+ ([\w\->\.]+)\s*=\s*([\w\->\.]+)\s*\?\?\s*([\w\->\.]+)'),
+         r'\1 = (\2) if (\2 is not None) else (\3)', ['??']),
         (re.compile(r'\bauto\&* (\w+)'), r'\1', ['auto']),
         (re.compile(r'\bstring (\w+)'), r'\1', ['string']),
         (re.compile(r'\bint (\w+)'), r'\1', ['int']),

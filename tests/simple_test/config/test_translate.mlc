@@ -268,3 +268,36 @@ class TestTranslates<ITestTranslates>
         this->assertEqual(std::max<float>(1, 2), 2.f);
     }
 }
+
+class NullishOperator<SerializedObject>
+{
+    Point* point_a;
+    Point* point_b;
+
+    function void dummy_function()
+    {
+
+    }
+}
+
+class TestNullishOperator<ITestNullishOperator>
+{
+    function void test_dummy_function()
+    {
+    }
+
+    function void test_nullish_coalescing_operator()
+    {
+        auto test = new NullishOperator();
+        test->point_a = nullptr;
+        test->point_b = new Point();
+        test->point_b->x = 10;
+        test->point_b->y = 20;
+
+        Point* point_c = test->point_a ?? test->point_b;
+
+        this->assertNotNull(point_c);
+        this->assertEqual(point_c->x, 10);
+        this->assertEqual(point_c->y, 20);
+    }
+}

@@ -17,6 +17,8 @@ class RegexPatternJs(object):
          r'for (let \1 in \3)\n{\nlet \2 = \3[\1];\n ', ['for']),
         (re.compile(r'for\s*\(\s*\w+\s*(\w+)=(\w+);\s*\w+<([\.\->\w]+?);\s*\+\+\w+\s*\)'),
          r'for(let \1 = \2; \1 < \3; \1++)', ['for']),
+        (re.compile(r'[\w\*]+ ([\w\->\.]+)\s*=\s*([\w\->\.]+)\s*\?\?\s*([\w\->\.]+)'),
+         r'let \1 = ((\2) !== null && (\2) !== undefined) ? (\2) : (\3)', ['??']),
         (re.compile(r'(\w+)\s+(\w+);'), r'let \2 = new \1();'),
         (re.compile(r'\w+\* (\w+)\s*=\s*new (.+);'), r'let \1 = new \2;', ['new']),
         (re.compile(r'std::let (\w+) = new string\(\)'), r'let \1 = ""', ['std::let']),

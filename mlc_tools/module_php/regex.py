@@ -14,6 +14,7 @@ class RegexPatternPhp(object):
         (re.compile(r'for\s*\(\w+&&\s*\[(\w+),\s*(\w+)\]\s*:\s*(.+)\)'), r'foreach ($\3 as $\1 => $\2)', ['for']),
         (re.compile(r'for\s*\(\s*\w+\s*(\w+)=(\w+);\s*\w+<([\.\->\w]+?);\s*\+\+\w+\s*\)'),
          r'for($\1 = \2; \1<\3; \1++)', ['for']),
+        (re.compile(r'[\w\*]+ ([\w\->\.]+)\s*=\s*([\w\->\.]+)\s*\?\?\s*([\w\->\.]+)'), r'$\1 = (\2) ?? (\3)', ['??']),
         (re.compile(r'\bauto (\w+)'), r'$\1', ['auto']),
         (re.compile(r'\bauto& (\w+)'), r'$\1', ['auto']),
         (re.compile(r'\bvoid (\w+)'), r'$\1', ['void']),
