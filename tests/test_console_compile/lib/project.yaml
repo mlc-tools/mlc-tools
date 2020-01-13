@@ -1,0 +1,5 @@
+project:
+  test_app
+
+binary_type:
+  lib

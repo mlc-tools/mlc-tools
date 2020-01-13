@@ -21,7 +21,12 @@ if(WITH_DATA)
     add_definitions(-DWITH_DATA=1)
 endif(WITH_DATA)
 
-add_executable(${PROJECT_NAME} ${SRC} ${ROOT}/__main.cpp)
+'''
+
+CMAKE_APP = '''add_executable(${PROJECT_NAME} ${SRC} ${ROOT}/__main.cpp)
+target_link_libraries(${PROJECT_NAME})'''
+
+CMAKE_LIB = '''add_library(${PROJECT_NAME} STATIC ${SRC})
 target_link_libraries(${PROJECT_NAME})'''
 
 MAIN_CPP = '''#include "Main.h"
@@ -58,6 +63,9 @@ int main(int argc, char ** args)
 PROJECT_YAML = '''
 project:
   {name}
+  
+binary_type:
+  {binary_type}
 '''
 
 HELLO_WORLD_MLC = '''class Main

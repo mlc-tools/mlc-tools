@@ -17,6 +17,7 @@ class ProjectConfig(object):
         self.root = None
         self.arguments = None
         self.name = None
+        self.binary_type = 'app'
         self.serialize_format = None
         self.src_directory = None
         self.data_directory = None
@@ -63,6 +64,7 @@ class ProjectConfig(object):
         try:
             self.name = dictionary.get('project')
             self.serialize_format = dictionary.get('serialize_format', self.serialize_format)
+            self.binary_type = dictionary.get('binary_type', self.binary_type)
             self.lang = dictionary.get('lang', self.lang)
             if 'src_directory' in dictionary:
                 self.src_directory = normalize_path(self.root + dictionary.get('src_directory'))
@@ -81,20 +83,20 @@ class ProjectConfig(object):
                 for feature in features:
                     self.features[feature] = True
 
-
         except KeyError as error:
             print('Project data has not key')
             print(error)
             raise RuntimeError('Cannot parse project data')
         self._validate_values('serialize_format')
         self._validate_values('lang')
+        self._validate_values('binary_type')
 
     def _validate_values(self, name):
         values = {
             'serialize_format': ['xml', 'json'],
             'lang': ['cpp', 'py', 'php', 'js'],
+            'binary_type': ['app', 'lib', ''],
         }
         value = self.__getattribute__(name)
         if name in values and value not in values[name]:
-            raise RuntimeError(f'Incorrect value of field:\n  {name}: {value}.\n  Can be one of {values[name]}')
-
+            raise RuntimeError(f'Incorrect value of field:\n  {name}: {value}\n  Can be one of {values[name]}')

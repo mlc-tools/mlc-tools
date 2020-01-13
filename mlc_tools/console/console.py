@@ -95,10 +95,11 @@ class Console(object):
 
         self._init_project_config(project_dir)
         Console._init_create_hello_world(project_dir)
-        self.help()
+        print('Init successful')
 
     def _init_project_config(self, project_dir):
-        content = PROJECT_YAML.format(name=self.arguments.project_name)
+        binary_type = 'app' if self.arguments.bin else 'lib'
+        content = PROJECT_YAML.format(name=self.arguments.project_name, binary_type=binary_type)
         write(project_dir + 'project.yaml', content)
 
     @staticmethod
@@ -153,6 +154,11 @@ class Console(object):
 
     def _create_cmake(self):
         content = CMAKE
+        if self.config.binary_type == 'app':
+            content += CMAKE_APP
+        elif self.config.binary_type == 'lib':
+            content += CMAKE_LIB
+
         content = content.replace('@{project_name}', self.config.name)
         content = content.replace('@{gen_dir}', self.config.generate_sources_directory)
         write(self.config.build_directory + 'CMakeLists.txt', content)
@@ -175,6 +181,8 @@ class Console(object):
             raise RuntimeError('Error on make')
 
     def _run(self):
+        if not os.path.isfile(f'{self.config.build_directory}/{self.config.name}'):
+            raise RuntimeError('Error on run: executable file not found')
         process = SubprocessWrapper(f'./{self.config.name}', self.config.build_directory, require_log=True)
         process.call()
         if process.code != 0:

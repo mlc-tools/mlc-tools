@@ -14,6 +14,8 @@ class Arguments:
         self.mode = 'debug'
         self.config = 'project.yaml'
         self.verbose = False
+        self.bin = True
+        self.lib = False
 
     def parse(self):
         args = sys.argv[1:]
@@ -23,6 +25,13 @@ class Arguments:
         self.set_option('mode')
         self.set_option('config')
         self.set_flag('verbose')
+        self.set_flag('bin')
+        self.set_flag('lib')
+        if self.bin == self.lib:
+            if self.bin and self.lib:
+                raise ArgumentsError('Cannot define binary type')
+            else:
+                self.bin = True
 
     def print_usage(self):
         print('Usage')
@@ -40,6 +49,8 @@ class Arguments:
         options.append(self.build_option('mode', '<values> :-: Build mode. Default is debug'))
         options.append(self.build_option('config',
                                          ' <path-to-yaml-file>:-: Path to specific config file. Default is project.yaml'))
+        options.append(self.build_flag('bin', ':-: Create a package with a binary target. This is the default behavior'))
+        options.append(self.build_flag('lib', ':-: Create a package with a library target'))
         options.append(self.build_flag('verbose', ':-: Show logs on build'))
 
         spaces = 0
@@ -59,7 +70,8 @@ class Arguments:
         description = description.replace('<values>', f' <{values}>')
         return f'  --{option}{description}'
 
-    def build_flag(self, option, description):
+    @staticmethod
+    def build_flag(option, description):
         return f'  --{option}{description}'
 
     def set_command(self, command):

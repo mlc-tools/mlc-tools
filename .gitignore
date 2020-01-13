@@ -23,6 +23,7 @@ tests/*/generated*
 tests/*/build*
 
 tests/test_console_compile/test_app/
+tests/test_console_compile/test_lib/
 tests/test_console_compile/app/build/
 tests/test_console_compile/app/gen/
 
