@@ -32,6 +32,7 @@ def run_tests(generator, root, withdata=False, cpp=True, python=True, php=True, 
                            out_directory=out_directory,
                            formats=serialized_format,
                            join_to_one_file=join_to_one_file,
+                           generate_ref_counter=True
                            )
         if withdata:
             generator.generate_data(data_directory=root + 'data_%s/' % serialized_format,

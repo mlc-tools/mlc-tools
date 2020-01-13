@@ -94,6 +94,7 @@ class TestWriteClass(unittest.TestCase):
 
     def test_cpp(self):
         model = create_test_model()
+        model.generate_ref_counter = True
         save('cpp', model)
 
         self.assertTrue('Test.h' in model.out_dict)

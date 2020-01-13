@@ -8,12 +8,15 @@ class GeneratorRefCounter(object):
         pass
 
     def generate(self, model):
-        self.model = model
+        if not model.generate_ref_counter:
+            return
+
         for cls in model.classes:
             if not cls.superclasses and cls.type != 'enum' and not cls.is_abstract:
                 self._add(cls)
 
-    def _add(self, cls):
+    @staticmethod
+    def _add(cls):
         retain = Function()
         retain.name = 'retain'
         retain.return_type = Objects.VOID

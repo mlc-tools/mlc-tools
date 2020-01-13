@@ -49,6 +49,9 @@ def main():
     add('-test_script')
     add('-test_script_args')
     add('-auto_registration')
+    add('-generate_ref_counter')
+
+    print(args)
 
     mlc = Mlc(**args)
     mlc.generate()

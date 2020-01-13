@@ -27,8 +27,8 @@ jobs:
 
     - name: simple test
       run: |
-        python3 -m mlc_tools.main -i tests/simple_test/config -o tests/simple_test/generated_cpp/xml -f xml -l cpp -side server -data tests/simple_test/data_xml -data_out tests/simple_test/assets -generate_tests yes -add_config tests/simple_test/config_additional -add_data tests/simple_test/data_additional -auto_registration no
-        python3 -m mlc_tools.main -i tests/simple_test/config -o tests/simple_test/generated_cpp/json -f json -l cpp -side client -data tests/simple_test/data_json -data_out tests/simple_test/assets -generate_tests yes -add_config tests/simple_test/config_additional -add_data tests/simple_test/data_additional -auto_registration no
+        python3 -m mlc_tools.main -i tests/simple_test/config -o tests/simple_test/generated_cpp/xml -f xml -l cpp -side server -data tests/simple_test/data_xml -data_out tests/simple_test/assets -generate_tests yes -add_config tests/simple_test/config_additional -add_data tests/simple_test/data_additional -auto_registration no -generate_ref_counter yes
+        python3 -m mlc_tools.main -i tests/simple_test/config -o tests/simple_test/generated_cpp/json -f json -l cpp -side client -data tests/simple_test/data_json -data_out tests/simple_test/assets -generate_tests yes -add_config tests/simple_test/config_additional -add_data tests/simple_test/data_additional -auto_registration no -generate_ref_counter yes
 
         cd tests/simple_test
 
@@ -47,8 +47,8 @@ jobs:
 
     - name: test functions
       run: |
-        python3 -m mlc_tools.main -i tests/test_functions/config -o tests/test_functions/generated_cpp/xml -f xml -l cpp -generate_tests yes
-        python3 -m mlc_tools.main -i tests/test_functions/config -o tests/test_functions/generated_cpp/json -f json -l cpp -generate_tests yes
+        python3 -m mlc_tools.main -i tests/test_functions/config -o tests/test_functions/generated_cpp/xml -f xml -l cpp -generate_tests yes -generate_ref_counter yes
+        python3 -m mlc_tools.main -i tests/test_functions/config -o tests/test_functions/generated_cpp/json -f json -l cpp -generate_tests yes -generate_ref_counter yes
 
         cd tests/test_functions
 
@@ -67,8 +67,8 @@ jobs:
 
     - name: test virtual methods
       run: |
-        python3 -m mlc_tools.main -i tests/test_virtual_methods -o tests/test_virtual_methods/generated_cpp/xml -f xml -l cpp -generate_tests yes
-        python3 -m mlc_tools.main -i tests/test_virtual_methods -o tests/test_virtual_methods/generated_cpp/json -f json -l cpp -generate_tests yes
+        python3 -m mlc_tools.main -i tests/test_virtual_methods -o tests/test_virtual_methods/generated_cpp/xml -f xml -l cpp -generate_tests yes -generate_ref_counter yes
+        python3 -m mlc_tools.main -i tests/test_virtual_methods -o tests/test_virtual_methods/generated_cpp/json -f json -l cpp -generate_tests yes -generate_ref_counter yes
 
         cd tests/test_virtual_methods
 
@@ -87,8 +87,8 @@ jobs:
 
     - name: test unit tests generator
       run: |
-        python3 -m mlc_tools.main -i tests/unit_tests_generator -o tests/unit_tests_generator/generated_cpp/xml -f xml -l cpp -generate_tests yes
-        python3 -m mlc_tools.main -i tests/unit_tests_generator -o tests/unit_tests_generator/generated_cpp/json -f json -l cpp -generate_tests yes
+        python3 -m mlc_tools.main -i tests/unit_tests_generator -o tests/unit_tests_generator/generated_cpp/xml -f xml -l cpp -generate_tests yes -generate_ref_counter yes
+        python3 -m mlc_tools.main -i tests/unit_tests_generator -o tests/unit_tests_generator/generated_cpp/json -f json -l cpp -generate_tests yes -generate_ref_counter yes
 
         cd tests/unit_tests_generator
 

@@ -47,6 +47,7 @@ class Model(object):
         self.serialize_protocol = []
         self.join_to_one_file = False
         self.auto_registration = True
+        self.generate_ref_counter = False
 
         self.simple_types = ["int", "float", "bool", "string"]
 
