@@ -133,7 +133,7 @@ class Parser(object):
         method = Function()
         self.parse_function_header(method, header)
         if self.model.is_side(method.side):
-            method.parse_body(body)
+            method.parse_method_body(body)
             self.model.functions.append(method)
         return text
 
@@ -145,7 +145,7 @@ class Parser(object):
         constructor = Function()
         self.parse_function_header(constructor, 'function void ' + header)
         if self.model.is_side(constructor.side):
-            constructor.parse_body(body)
+            constructor.parse_method_body(body)
             self.model.functions.append(constructor)
         return text
 
@@ -270,25 +270,26 @@ class Parser(object):
     @staticmethod
     def parse_body(text):
         text = text.strip()
-        body = ""
-        if text.find("\n") != -1:
+        body = ''
+        if text.find('\n') != -1:
             header = text[0:text.find("\n")]
         else:
             header = text
         if header.find(':external') == -1 and header.find(':abstract') == -1:
-            text = text[text.find("{"):]
+            text = text[text.find('{'):]
             counter = 0
             index = 0
             for char in text:
                 index += 1
-                if counter == 0 and char == '{':
+                if not counter and char is '{':
                     counter += 1
                     continue
-                if char == '{':
+
+                if char is '{':
                     counter += 1
-                if char == '}':
+                if char is '}':
                     counter -= 1
-                if counter == 0:
+                if not counter:
                     text = text[index:]
                     break
                 body += char

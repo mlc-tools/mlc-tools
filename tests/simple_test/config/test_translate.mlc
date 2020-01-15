@@ -271,8 +271,8 @@ class TestTranslates<ITestTranslates>
 
 class NullishOperator<SerializedObject>
 {
-    Point* point_a;
-    Point* point_b;
+    Point* point_a
+    Point* point_b
 
     function void dummy_function()
     {

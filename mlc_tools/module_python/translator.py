@@ -32,23 +32,29 @@ class Translator(TranslatorBase):
     def add_imports(cls_owner, func, model):
         if not func:
             return func
-        if 'DataStorage' in func:
-            func = Translator.get_tabs(2) + 'from .DataStorage import DataStorage\n' + func
+        imports = []
         if RegexPatternPython.FACTORY.search(func):
-            func = Translator.get_tabs(2) + 'from .Factory import Factory\n' + func
+            imports.append('from .Factory import Factory')
         for cls in model.classes:
             if cls.name in func:
+                need = cls.name is not cls_owner.name
+                if not need:
+                    continue
+                pattern = None
                 if cls.name not in RegexPatternPython.regs_class_names:
-                    RegexPatternPython.regs_class_names[cls.name] = re.compile(r'\b{}\b'.format(cls.name))
-                pattern = RegexPatternPython.regs_class_names[cls.name]
-                need = cls.name != cls_owner.name
+                    pattern = re.compile(r'\b{}\b'.format(cls.name))
+                    RegexPatternPython.regs_class_names[cls.name] = pattern
+                pattern = pattern or RegexPatternPython.regs_class_names[cls.name]
                 need = need and pattern.search(func) is not None
                 if need:
-                    func = Translator.get_tabs(2) + 'from .{0} import {0}\n'.format(cls.name) + func
+                    imports.append(f'from .{cls.name} import {cls.name}')
         if 'math.' in func:
-            func = Translator.get_tabs(2) + 'import math\n' + func
+            imports.append(f'import math')
         if 'random.' in func:
-            func = Translator.get_tabs(2) + 'import random\n' + func
+            imports.append(f'import random')
+        if imports:
+            imports = Translator.get_tabs(2) + f'\n{Translator.get_tabs(2)}'.join(imports)
+            func = f'{imports}\n{func}'
         return func
 
     @staticmethod

@@ -28,34 +28,35 @@ class Function(object):
     def get_return_type(self):
         return self.return_type
 
-    def parse_body(self, body):
-        counters = {}
-        dividers = ['{}', '()']
-        operations = []
-        operation = ''
+    def parse_method_body(self, body):
+        operation_start_pos = 0
+        curly_braces = 0
+        square_brackets = 0
 
-        def counters_sum():
-            result = 0
-            for counter in counters:
-                result += counters[counter]
-            return result
+        for pos, char in enumerate(body):
+            if char is '{':
+                curly_braces += 1
+            elif char is '}':
+                curly_braces -= 1
+            elif char is '[':
+                square_brackets += 1
+            elif char is ']':
+                square_brackets -= 1
 
-        for char in body:
-            for div in dividers:
-                if char in div:
-                    if div not in counters:
-                        counters[div] = 0
-                    counters[div] += 1 if char == div[0] else -1
-            if counters_sum() < 0:
+            if curly_braces < 0 or square_brackets < 0:
+                # TODO: Use Log.error
                 print('error parsing function "{}" body'.format(self.name))
                 sys.exit(-1)
-            operation += char
-            if counters_sum() == 0 and char in ';}':
-                operations.append(operation.strip())
-                operation = ''
+            if not curly_braces and not square_brackets and char in ';}':
+                operation = body[operation_start_pos:pos+1].strip()
+                if operation:
+                    self.operations.append(operation)
+                operation_start_pos = pos + 1
                 continue
-        operations.append(operation.strip())
-        self.operations = [o for o in operations if o]
+
+        operation = body[operation_start_pos:].strip()
+        if operation:
+            self.operations.append(operation)
 
     def find_modifiers(self, string):
         if Modifiers.server in string:

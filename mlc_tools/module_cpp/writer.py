@@ -39,12 +39,12 @@ class Writer(WriterBase):
         static_initialization = ''
 
         assert isinstance(obj.type, str)
-        if self.current_class.type == 'class':
+        if self.current_class.type is 'class':
             declaration = self.write_member_declaration(obj)
-        elif self.current_class.type == 'enum':
+        elif self.current_class.type is 'enum':
             declaration = self.write_member_enum_declaration(obj)
 
-        if self.current_class.type == 'enum' and obj.name != 'value':
+        if self.current_class.type is 'enum' and obj.name != 'value':
             static_initialization = self.write_member_static_enum(self.current_class, obj)
         elif obj.is_static:
             static_initialization = self.write_member_static_init(self.current_class, obj)
@@ -63,7 +63,7 @@ class Writer(WriterBase):
 
         access = AccessSpecifier.public
         for method in cls.functions:
-            if method.name == 'constructor':
+            if method.name is 'constructor':
                 continue
             hpp = self.methods_cache[method][0]
             if access != method.access:
@@ -85,7 +85,7 @@ class Writer(WriterBase):
         virtual = 'virtual '
         if not cls.is_virtual and not cls.superclasses and not cls.subclasses:
             virtual = ''
-        destructor = '{virtual}~{name}();'.format(virtual=virtual, name=cls.name)
+        destructor = f'{virtual}~{cls.name}();'
 
         superclass = '' if not cls.superclasses else ' : public %s' % cls.superclasses[0].name
 
@@ -114,7 +114,7 @@ class Writer(WriterBase):
         class_name = cls.name
         functions = ''
         for method in cls.functions:
-            if method.name == 'constructor':
+            if method.name is 'constructor':
                 continue
             cpp = self.methods_cache[method][1]
             functions += cpp
@@ -128,12 +128,12 @@ class Writer(WriterBase):
             if static_initialization:
                 static_initializations += static_initialization + '\n'
 
-        destructor = '''{name}::~{name}()
+        destructor = f'''{cls.name}::~{cls.name}()
         {{
         }}
-        '''.format(name=cls.name)
+        '''
 
-        registration = 'REGISTRATION_OBJECT({0});\n'.format(cls.name) if self.model.auto_registration else ''
+        registration = f'REGISTRATION_OBJECT({cls.name});\n' if self.model.auto_registration else ''
         is_abstract = cls.is_abstract
         if not is_abstract:
             for method in cls.functions:
@@ -247,11 +247,9 @@ class Writer(WriterBase):
         return self.write_named_object(obj, obj.name, False, True) + ';'
 
     def write_member_enum_declaration(self, obj):
-        if obj.name == 'value':
+        if obj.name is 'value':
             return self.write_member_declaration(obj)
-        return 'static constexpr {type} {name} = {value};'.format(type=obj.type,
-                                                                  name=obj.name,
-                                                                  value=obj.initial_value)
+        return f'static constexpr {obj.type} {obj.name} = {obj.initial_value};'
 
     def write_member_static_init(self, cls, obj, use_intrusive=True):
         string_pointer = '{const}intrusive_ptr<{type}> {owner}::{name}({initial_value});'
@@ -271,25 +269,23 @@ class Writer(WriterBase):
 
     def write_member_static_enum(self, cls, obj):
         assert self is not None
-        string = 'const int {owner}::{name};'
-        return string.format(owner=cls.name, name=obj.name)
+        return f'const int {cls.name}::{obj.name};'
 
     def convert_initial_value(self, object_):
-        if object_.is_pointer and (object_.initial_value == '0' or object_.initial_value is None):
+        if object_.is_pointer and (object_.initial_value is '0' or object_.initial_value is None):
             return 'nullptr'
         type_class = self.model.get_class(object_.type) if self.model.has_class(object_.type) else None
-        if type_class is not None and type_class.type == 'enum' and object_.initial_value is None:
+        if type_class is not None and type_class.type is 'enum' and object_.initial_value is None:
             assert type_class.members
-            return '{}::{}'.format(type_class.name, type_class.members[0].name)
+            return f'{type_class.name}::{type_class.members[0].name}'
 
         if object_.initial_value is None:
             return ''
         return object_.initial_value
 
     def write_member_initialization(self, obj):
-        string = '{name}({initial_value})'
         initial_value = self.convert_initial_value(obj)
-        return string.format(name=obj.name, initial_value=initial_value)
+        return f'{obj.name}({initial_value})'
 
     @staticmethod
     def write_named_object(obj, name, try_to_use_const_ref, use_intrusive):
@@ -365,17 +361,18 @@ class Writer(WriterBase):
         for line in lines:
             line = line.strip()
 
-            if line and line[0] == '}':
-                tabs -= 1
             backward = False
-            if 'public:' in line or 'protected:' in line or 'private:' in line:
+            if line and line[0] is '}':
+                tabs -= 1
+            elif 'public:' in line or 'protected:' in line or 'private:' in line:
                 backward = True
                 tabs -= 1
+            line_strip = line
             if line:
                 line = get_tabs(tabs) + line
             if backward:
                 tabs += 1
-            if line.strip() and line.strip()[0] == '{':
+            if line_strip and line_strip[0] is '{':
                 tabs += 1
             text.append(line)
         text = '\n'.join(text)
@@ -447,25 +444,20 @@ class Writer(WriterBase):
         return self.build_includes(cls, includes)
 
     def get_includes_for_method(self, cls, functions_text, hpp_includes):
-        includes = set()
+        includes = list()
 
-        def add(set_, obj):
-            set_.add(self.convert_type(obj.type))
-            for arg in obj.template_args:
-                add(includes, arg)
-
-        if 'DataStorage::shared' in functions_text:
-            includes.add('DataStorage')
         for type_ in self.model.classes:
             name = type_.name
             if name not in hpp_includes and name in functions_text:
+                pattern = None
                 if name not in RegexPatternCpp.regs_class_names:
-                    RegexPatternCpp.regs_class_names[name] = re.compile(r'\b{}\b'.format(name))
-                pattern = RegexPatternCpp.regs_class_names[name]
-                need = cls.name == name
+                    pattern = re.compile(r'\b{}\b'.format(name))
+                    RegexPatternCpp.regs_class_names[name] = pattern
+                pattern = pattern or RegexPatternCpp.regs_class_names[name]
+                need = cls.name is name
                 need = need or pattern.search(functions_text) is not None
                 if need:
-                    includes.add(name)
+                    includes.append(name)
         return includes
 
     def build_includes(self, cls, includes):

@@ -63,7 +63,8 @@ class TranslatorBase(object):
         cls.members.append(value)
         return values
 
-    def replace(self, text, pattern):
+    @staticmethod
+    def replace(text, pattern):
         skip = len(pattern) > 2
         filters = pattern[2] if len(pattern) > 2 else []
         for filter_ in filters:
@@ -72,7 +73,8 @@ class TranslatorBase(object):
             text = pattern[0].sub(pattern[1], text)
         return text
 
-    def save_strings(self, func):
+    @staticmethod
+    def save_strings(func):
         strings = []
         string_pattern = '@{__string_%d__}'
         while '"' in func:
@@ -89,7 +91,8 @@ class TranslatorBase(object):
                 right += 1
         return func, strings
 
-    def restore_strings(self, func, strings):
+    @staticmethod
+    def restore_strings(func, strings):
         string_pattern = '@{__string_%d__}'
         for i, string in enumerate(strings):
             func = func.replace(string_pattern % i, string)
