@@ -148,9 +148,15 @@ class Console(object):
                 ))
 
     def _create_main(self):
-        content = MAIN_CPP
-        content = content.replace('@{format}', self.config.serialize_format)
-        write(self.config.build_directory + '__main.cpp', content)
+        if self.config.binary_type == 'app':
+            content = MAIN_CPP_EXE
+            content = content.replace('@{format}', self.config.serialize_format)
+            write(self.config.build_directory + 'main.cpp', content)
+        else:
+            cpp = MAIN_CPP_LIB.replace('@{format}', self.config.serialize_format)
+            hpp = MAIN_HPP_LIB
+            write(self.config.build_directory + 'mg.cpp', cpp)
+            write(self.config.build_directory + 'mg.hpp', hpp)
 
     def _create_cmake(self):
         content = CMAKE

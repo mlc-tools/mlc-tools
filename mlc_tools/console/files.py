@@ -23,13 +23,13 @@ endif(WITH_DATA)
 
 '''
 
-CMAKE_APP = '''add_executable(${PROJECT_NAME} ${SRC} ${ROOT}/__main.cpp)
+CMAKE_APP = '''add_executable(${PROJECT_NAME} ${SRC} ${ROOT}/main.cpp)
 target_link_libraries(${PROJECT_NAME})'''
 
-CMAKE_LIB = '''add_library(${PROJECT_NAME} STATIC ${SRC})
+CMAKE_LIB = '''add_library(${PROJECT_NAME} STATIC ${SRC} ${ROOT}/mg.cpp)
 target_link_libraries(${PROJECT_NAME})'''
 
-MAIN_CPP = '''#include "Main.h"
+MAIN_CPP_EXE = '''#include "Main.h"
 #include "Registrar.h"
 
 #ifdef WITH_DATA
@@ -54,10 +54,43 @@ int main(int argc, char ** args)
     std::string data((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
     mg::DataStorage::shared().initialize_@{format}(data);
 #endif
-    
+
     mg::Main::main();
     return 0;
 }
+'''
+MAIN_CPP_LIB = '''#include "Registrar.h"
+
+#ifdef WITH_DATA
+#   include "DataStorage.h"
+#   include <string>
+#   include <fstream>
+#   include <iostream>
+#endif
+
+void initialize(int argc, char ** args)
+{
+    mg::register_classes();
+
+#ifdef WITH_DATA
+    std::string path = "data/data.@{format}";
+    std::fstream stream(path, std::fstream::in);
+    if(!stream.is_open())
+    {
+        std::cout << "Cannot open file: " << path << std::endl;
+        exit(-1);
+    }
+    std::string data((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
+    mg::DataStorage::shared().initialize_@{format}(data);
+#endif
+}
+'''
+MAIN_HPP_LIB = '''#ifndef __mg_initialize_h__
+#define __mg_initialize_h__
+
+void initialize(int argc, char ** args);
+
+#endif
 '''
 
 PROJECT_YAML = '''
