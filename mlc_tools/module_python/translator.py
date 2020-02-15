@@ -47,14 +47,14 @@ class Translator(TranslatorBase):
                 pattern = pattern or RegexPatternPython.regs_class_names[cls.name]
                 need = need and pattern.search(func) is not None
                 if need:
-                    imports.append(f'from .{cls.name} import {cls.name}')
+                    imports.append('from .{0} import {0}'.format(cls.name))
         if 'math.' in func:
-            imports.append(f'import math')
+            imports.append('import math')
         if 'random.' in func:
-            imports.append(f'import random')
+            imports.append('import random')
         if imports:
-            imports = Translator.get_tabs(2) + f'\n{Translator.get_tabs(2)}'.join(imports)
-            func = f'{imports}\n{func}'
+            imports = Translator.get_tabs(2) + '\n{}'.format(Translator.get_tabs(2)).join(imports)
+            func = '{}\n{}'.format(imports, func)
         return func
 
     @staticmethod

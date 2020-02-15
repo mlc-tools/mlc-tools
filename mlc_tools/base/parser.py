@@ -20,7 +20,6 @@ class Parser(object):
 
     def parse_text(self, text):
         text = self.remove_comments(text)
-        text = text.strip()
         while text:
             if Parser._is_class(text):
                 text = self._create_class(text, False)
@@ -39,28 +38,29 @@ class Parser(object):
     @staticmethod
     def remove_comments(text):
         left = text.find('/*')
-        while left != -1:
-            right = text.find('*/')
-            if right != -1:
+        while left > -1:
+            right = text.find('*/', left)
+            if right > -1:
                 text = text[:left] + text[right + 2:]
             left = text.find('/*')
         lines = text.split('\n')
         for i, line in enumerate(lines):
             if '//' in line:
                 lines[i] = line[0:line.find('//')]
-        text = '\n'.join(lines)
+        text = '\n'.join(lines).strip()
         return text
 
     def check_skip(self, line):
         corresponds = True
         first_match = True
         for lang in ['cpp', 'py', 'php', 'js']:
-            if ':' + lang in line:
+            modifier = ':' + lang
+            if modifier in line:
                 if first_match:
                     first_match = False
                     corresponds = False
                 corresponds = corresponds or self.model.is_lang(lang)
-                line = line.replace(':' + lang, '')
+                line = line.replace(modifier, '')
         return not corresponds, line
 
     def _create_class(self, text, is_abstract):
@@ -108,12 +108,12 @@ class Parser(object):
         return text
 
     def _create_member(self, text):
-        lines = text.split("\n")
+        lines = text.split('\n')
         line = lines[0]
         if len(lines) > 1:
-            text = text[text.find("\n") + 1:]
+            text = text[text.find('\n') + 1:]
         else:
-            text = ""
+            text = ''
 
         skip, line = self.check_skip(line)
         if skip:
@@ -143,7 +143,7 @@ class Parser(object):
         if skip:
             return text
         constructor = Function()
-        self.parse_function_header(constructor, 'function void ' + header)
+        self.parse_function_header(constructor, 'function void {}'.format(header))
         if self.model.is_side(constructor.side):
             constructor.parse_method_body(body)
             self.model.functions.append(constructor)
@@ -168,8 +168,8 @@ class Parser(object):
 
         # parse initialize value
         expression = ''
-        if '=' in line:
-            k = line.find('=')
+        k = line.find('=')
+        if k > -1:
             expression = line[k + 1:].strip()
             line = line[0:k].strip()
         if expression:
@@ -198,22 +198,27 @@ class Parser(object):
             args.append(arg)
         obj.template_args = args
 
+    FUNC_0 = re.compile(r'function<([\w, ]+?)>')
+    FUNC_1 = re.compile(r'function<[\w, ]+?>')
+    FUNC_2 = re.compile(r'{.*}')
+
     def parse_function_header(self, method, line):
         line = line.strip()
 
-        templates = re.findall(r'function<([\w, ]+?)>', line)
+        templates = Parser.FUNC_0.findall(line)
         if templates:
-            line = re.sub(r'function<[\w, ]+?>', '', line)
+            line = Parser.FUNC_1.sub('', line)
             method.template_types = smart_split(templates[0], ',')
             method.template_types = [x.strip() for x in method.template_types]
         else:
-            line = line[len('function'):].strip()
+            len_function = 8  # len('function')
+            line = line[len_function:].strip()
 
         has_callable, method.args, line = self.parse_function_args(line)
         assert has_callable
 
         line = line.replace(';', '')
-        line = re.sub(r'{.*}', '', line)
+        line = Parser.FUNC_2.sub('', line)
         k = line.rfind(' ')
 
         name_s = line[k:].strip()
@@ -223,7 +228,6 @@ class Parser(object):
         return_s = line[:k].strip()
         method.return_type = Object()
         self.parse_object(method.return_type, return_s)
-
         return method
 
     def parse_function_args(self, line):
@@ -233,18 +237,19 @@ class Parser(object):
         if left == -1 or last == -1 or last < left:
             return False, result, line
 
-        args_s = line[line.find('(') + 1:line.rfind(')')]
+        args_s = line[left + 1:last]
         args = smart_split(args_s, ',')
 
         for arg in args:
             arg = arg.strip()
-            assert not arg.startswith('const ')
+            if arg.startswith('const '):
+                Error.exit(Error.ERROR_CONST_MODIFIER, arg)
 
             obj = Object()
             self.parse_object(obj, arg)
             result.append([obj.name, obj])
 
-        line = line[:line.find('(')] + line[line.rfind(')') + 1:]
+        line = line[:left] + line[last + 1:]
         return True, result, line
 
     @staticmethod
@@ -271,18 +276,21 @@ class Parser(object):
     def parse_body(text):
         text = text.strip()
         body = ''
-        if text.find('\n') != -1:
-            header = text[0:text.find("\n")]
+        k = text.find('\n')
+        if k > -1:
+            header = text[0:k]
         else:
             header = text
         if header.find(':external') == -1 and header.find(':abstract') == -1:
             text = text[text.find('{'):]
             counter = 0
-            index = 0
+            left = 0
+            last = 0
             for char in text:
-                index += 1
+                last += 1
                 if not counter and char is '{':
                     counter += 1
+                    left = last
                     continue
 
                 if char is '{':
@@ -290,9 +298,9 @@ class Parser(object):
                 if char is '}':
                     counter -= 1
                 if not counter:
-                    text = text[index:]
+                    body = text[left:last-1]
+                    text = text[last:]
                     break
-                body += char
         else:
             text = text[len(header):].strip()
         return body, header, text

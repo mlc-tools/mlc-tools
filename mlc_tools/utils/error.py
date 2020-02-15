@@ -62,6 +62,7 @@ class Error(object):
     PARSE_ERROR = inspect.currentframe().f_lineno
     TESTS_FAILED = inspect.currentframe().f_lineno
     CIRCULAR_REFERENCE = inspect.currentframe().f_lineno
+    ERROR_CONST_MODIFIER = inspect.currentframe().f_lineno
 
     texts = {
         UNKNOWN_SERIALISED_TYPE: '[{}] unknown serialized serialized format. Base type - [{}]',
@@ -82,7 +83,8 @@ class Error(object):
         CLASS_HAVE_MORE_THAN_ONE_CONSTRUCTOR: 'A class [{}] can have one constructor',
         PARSE_ERROR: 'Parsing error',
         TESTS_FAILED: 'Tests failed',
-        CIRCULAR_REFERENCE: 'Circular reference: [{}]'
+        CIRCULAR_REFERENCE: 'Circular reference: [{}]',
+        ERROR_CONST_MODIFIER: 'Const modifier should be declare as [Type:const]: {}',
     }
 
     @staticmethod

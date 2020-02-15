@@ -85,7 +85,7 @@ class Writer(WriterBase):
         virtual = 'virtual '
         if not cls.is_virtual and not cls.superclasses and not cls.subclasses:
             virtual = ''
-        destructor = f'{virtual}~{cls.name}();'
+        destructor = '{virtual}~{name}();'.format(virtual=virtual, name=cls.name)
 
         superclass = '' if not cls.superclasses else ' : public %s' % cls.superclasses[0].name
 
@@ -128,12 +128,12 @@ class Writer(WriterBase):
             if static_initialization:
                 static_initializations += static_initialization + '\n'
 
-        destructor = f'''{cls.name}::~{cls.name}()
+        destructor = '''{name}::~{name}()
         {{
         }}
-        '''
+        '''.format(name=cls.name)
 
-        registration = f'REGISTRATION_OBJECT({cls.name});\n' if self.model.auto_registration else ''
+        registration = 'REGISTRATION_OBJECT({});\n'.format(cls.name) if self.model.auto_registration else ''
         is_abstract = cls.is_abstract
         if not is_abstract:
             for method in cls.functions:
@@ -249,7 +249,9 @@ class Writer(WriterBase):
     def write_member_enum_declaration(self, obj):
         if obj.name is 'value':
             return self.write_member_declaration(obj)
-        return f'static constexpr {obj.type} {obj.name} = {obj.initial_value};'
+        return 'static constexpr {type} {name} = {value};'.format(type=obj.type,
+                                                                  name=obj.name,
+                                                                  value=obj.initial_value)
 
     def write_member_static_init(self, cls, obj, use_intrusive=True):
         string_pointer = '{const}intrusive_ptr<{type}> {owner}::{name}({initial_value});'
@@ -269,7 +271,7 @@ class Writer(WriterBase):
 
     def write_member_static_enum(self, cls, obj):
         assert self is not None
-        return f'const int {cls.name}::{obj.name};'
+        return 'const int {}::{};'.format(cls.name, obj.name)
 
     def convert_initial_value(self, object_):
         if object_.is_pointer and (object_.initial_value is '0' or object_.initial_value is None):
@@ -277,7 +279,7 @@ class Writer(WriterBase):
         type_class = self.model.get_class(object_.type) if self.model.has_class(object_.type) else None
         if type_class is not None and type_class.type is 'enum' and object_.initial_value is None:
             assert type_class.members
-            return f'{type_class.name}::{type_class.members[0].name}'
+            return '{}::{}'.format(type_class.name, type_class.members[0].name)
 
         if object_.initial_value is None:
             return ''
@@ -285,7 +287,7 @@ class Writer(WriterBase):
 
     def write_member_initialization(self, obj):
         initial_value = self.convert_initial_value(obj)
-        return f'{obj.name}({initial_value})'
+        return '{}({})'.format(obj.name, initial_value)
 
     @staticmethod
     def write_named_object(obj, name, try_to_use_const_ref, use_intrusive):
