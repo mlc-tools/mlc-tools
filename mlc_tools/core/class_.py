@@ -41,6 +41,14 @@ class Class(Object):
                 return True
         return False
 
+    def has_virtual_table(self):
+        result = False
+        result = result or self.is_virtual
+        result = result or self.superclasses
+        result = result or self.subclasses
+        result = result or self.has_abstract_method()
+        return result
+
     def parse(self, line):
         from ..utils.common import smart_split
         line = line.strip()

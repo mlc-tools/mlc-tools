@@ -82,9 +82,7 @@ class Writer(WriterBase):
             declaration, _, _ = self.objects_cache[member.name]
             members += declaration + '\n'
 
-        virtual = 'virtual '
-        if not cls.is_virtual and not cls.superclasses and not cls.subclasses:
-            virtual = ''
+        virtual = 'virtual ' if cls.has_virtual_table() else ''
         destructor = '{virtual}~{name}();'.format(virtual=virtual, name=cls.name)
 
         superclass = '' if not cls.superclasses else ' : public %s' % cls.superclasses[0].name
