@@ -1,7 +1,8 @@
 #include "intrusive_ptr.h"
 #include "AllTypesChildren.h"
 #include "../third/pugixml/pugixml.hpp"
-#include "Serializer.h"
+#include "serialize/SerializerXml.h"
+#include "serialize/SerializerJson.h"
 
 namespace mg
 {
@@ -52,14 +53,22 @@ namespace mg
         return AllTypesChildren::TYPE;
     }
 
-    void AllTypesChildren::serialize(Serializer& xml) const
+    void AllTypesChildren::serialize(SerializerXml& xml) const
     {
         xml.serialize(value, "value", 0);
     }
 
-    void AllTypesChildren::deserialize(Deserializer& xml)
+    void AllTypesChildren::deserialize(DeserializerXml& xml)
     {
         xml.deserialize(value, "value", 0);
+    }
+    void AllTypesChildren::serialize(SerializerJson& json) const
+    {
+        json.serialize(value, "value", 0);
+    }
+    void AllTypesChildren::deserialize(DeserializerJson& json)
+    {
+//        json.deserialize(value, "value", 0);
     }
 
     bool AllTypesChildren::operator<(const AllTypesChildren &rhs) const{

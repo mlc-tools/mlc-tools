@@ -4,8 +4,10 @@
 #include "intrusive_ptr.h"
 #include <string>
 
-class Serializer;
-class Deserializer;
+class SerializerXml;
+class DeserializerXml;
+class SerializerJson;
+class DeserializerJson;
 
 namespace mg
 {
@@ -18,8 +20,10 @@ namespace mg
         void retain();
         int release();
         virtual std::string get_type() const;
-        virtual void serialize(Serializer& xml) const;
-        virtual void deserialize(Deserializer& xml);
+        virtual void serialize(SerializerXml& xml) const;
+        virtual void deserialize(DeserializerXml& xml);
+        virtual void serialize(SerializerJson& json) const;
+        virtual void deserialize(DeserializerJson& json);
         bool operator < (const FooObject& rhs) const;
 
         int _reference_counter;
@@ -31,7 +35,11 @@ namespace mg
     {
     public:
         virtual std::string get_type() const override { return "BarObject"; }
-        virtual void serialize(Serializer& xml) const override;
+        virtual void serialize(SerializerXml& xml) const override;
+        virtual void deserialize(DeserializerXml& xml) override;
+        virtual void serialize(SerializerJson& json) const override;
+        virtual void deserialize(DeserializerJson& json) override;
+        bool operator < (const BarObject& rhs) const;
 
         FooObject foo;
         intrusive_ptr<FooObject> foo_ptr = nullptr;

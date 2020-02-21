@@ -9,8 +9,10 @@ namespace pugi
 {
     class xml_node;
 }
-class Serializer;
-class Deserializer;
+class SerializerXml;
+class DeserializerXml;
+class SerializerJson;
+class DeserializerJson;
 
 namespace mg
 {
@@ -25,8 +27,10 @@ namespace mg
         void retain();
         int release();
         std::string get_type() const;
-        void serialize(Serializer& xml) const;
-        void deserialize(Deserializer& xml);
+        void serialize(SerializerXml& xml) const;
+        void deserialize(DeserializerXml& xml);
+        void serialize(SerializerJson& json) const;
+        void deserialize(DeserializerJson& json);
         bool operator < (const AllTypesChildren& rhs) const;
 
         int value;

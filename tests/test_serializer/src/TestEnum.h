@@ -9,7 +9,10 @@ namespace pugi
 {
     class xml_node;
 }
-class Serializer;
+class SerializerXml;
+class DeserializerXml;
+class SerializerJson;
+class DeserializerJson;
 
 namespace mg
 {
@@ -33,8 +36,10 @@ namespace mg
         operator int() const;
         operator std::string() const;
         std::string str() const;
-        virtual void serialize(Serializer& xml) const;
-        virtual void deserialize_xml(const pugi::xml_node& xml);
+        virtual void serialize(SerializerXml& xml) const;
+        virtual void deserialize(DeserializerXml& xml);
+        void serialize(SerializerJson& json) const;
+        void deserialize(DeserializerJson& json);
 
         static constexpr int value1 = 0;
         static constexpr int value2 = 1;

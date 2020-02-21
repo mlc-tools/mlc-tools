@@ -1,7 +1,8 @@
 #include "intrusive_ptr.h"
 #include "TestEnum.h"
 #include "../third/pugixml/pugixml.hpp"
-#include "Serializer.h"
+#include "serialize/SerializerXml.h"
+#include "serialize/SerializerJson.h"
 
 namespace mg
 {
@@ -126,15 +127,23 @@ namespace mg
         return std::string();
     }
 
-    void TestEnum::serialize(Serializer& xml) const
+    void TestEnum::serialize(SerializerXml& xml) const
     {
         xml.serialize(str(), "value", std::string(""));
     }
 
-    void TestEnum::deserialize_xml(const pugi::xml_node& xml)
+    void TestEnum::deserialize(DeserializerXml& xml)
     {
-        value = xml.attribute("value").as_int(value1);
+//        xml.deserialize(str(), "value", std::string(""));
 
+    }
+    void TestEnum::serialize(SerializerJson& json) const
+    {
+        json.serialize(str(), "value", std::string(""));
+    }
+    void TestEnum::deserialize(DeserializerJson& json)
+    {
+//        json.deserialize(str(), "value", std::string(""));
     }
 
 } //namespace mg

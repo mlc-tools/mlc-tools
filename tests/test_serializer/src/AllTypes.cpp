@@ -4,7 +4,8 @@
 #include "TestEnum.h"
 #include "../third/pugixml/pugixml.hpp"
 #include <string>
-#include "Serializer.h"
+#include "serialize/SerializerXml.h"
+#include "serialize/SerializerJson.h"
 
 namespace mg
 {
@@ -155,7 +156,7 @@ namespace mg
         return AllTypes::TYPE;
     }
 
-    void AllTypes::serialize(Serializer& serializer) const
+    void AllTypes::serialize(SerializerXml& serializer) const
     {
         serializer.serialize(int_value0, "int_value0", 0);
         serializer.serialize(int_value1, "int_value1", 0);
@@ -186,7 +187,7 @@ namespace mg
         serializer.serialize(enum_map, "enum_map");
         serializer.serialize(object_object_ptr_map, "object_object_ptr_map");
     }
-    void AllTypes::deserialize(Deserializer& serializer){
+    void AllTypes::deserialize(DeserializerXml& serializer){
         serializer.deserialize(int_value0, "int_value0", 0);
         serializer.deserialize(int_value1, "int_value1", 0);
         serializer.deserialize(float_value0, "float_value0", 0.f);
@@ -215,6 +216,68 @@ namespace mg
         serializer.deserialize(object_object_ptr_map, "object_object_ptr_map");
 //        serializer.deserialize(enum_list, "enum_list");
 //        serializer.deserialize(enum_map, "enum_map");
+    }
+    void AllTypes::serialize(SerializerJson& json) const
+    {
+        json.serialize(int_value0, "int_value0", 0);
+        json.serialize(int_value1, "int_value1", 0);
+        json.serialize(float_value0, "float_value0", 0.f);
+        json.serialize(float_value1, "float_value1", 0.f);
+        json.serialize(bool_value0, "bool_value0", true);
+        json.serialize(bool_value1, "bool_value1", false);
+        json.serialize(str_value0, "str_value0", std::string(""));
+        json.serialize(str_value1, "str_value1", std::string(""));
+        json.serialize(int_list, "int_list");
+        json.serialize(float_list, "float_list");
+        json.serialize(bool_list, "bool_list");
+        json.serialize(string_list, "string_list");
+        json.serialize(int_string_map, "int_string_map");
+        json.serialize(float_string_map, "float_string_map");
+        json.serialize(bool_string_map, "bool_string_map");
+        json.serialize(string_string_map, "string_string_map");
+        json.serialize(string_int_map, "string_int_map");
+        json.serialize(string_float_map, "string_float_map");
+        json.serialize(string_bool_map, "string_bool_map");
+        json.serialize(object, "object");
+        json.serialize(object_ptr, "object_ptr");
+        json.serialize(object_list, "object_list");
+        json.serialize(object_ptr_list, "object_ptr_list");
+        json.serialize(object_map, "object_map");
+        json.serialize(object_ptr_map, "object_ptr_map");
+        json.serialize(enum_list, "enum_list");
+        json.serialize(enum_map, "enum_map");
+        json.serialize(object_object_ptr_map, "object_object_ptr_map");
+    }
+    void AllTypes::deserialize(DeserializerJson& json)
+    {
+//        json.deserialize(int_value0, "int_value0", 0);
+//        json.deserialize(int_value1, "int_value1", 0);
+//        json.deserialize(float_value0, "float_value0", 0.f);
+//        json.deserialize(float_value1, "float_value1", 0.f);
+//        json.deserialize(bool_value0, "bool_value0", true);
+//        json.deserialize(bool_value1, "bool_value1", false);
+//        json.deserialize(str_value0, "str_value0", std::string(""));
+//        json.deserialize(str_value1, "str_value1", std::string(""));
+//        json.deserialize(int_list, "int_list");
+//        json.deserialize(float_list, "float_list");
+//        json.deserialize(bool_list, "bool_list");
+//        json.deserialize(string_list, "string_list");
+//        json.deserialize(int_string_map, "int_string_map");
+//        json.deserialize(float_string_map, "float_string_map");
+//        json.deserialize(bool_string_map, "bool_string_map");
+//        json.deserialize(string_string_map, "string_string_map");
+//        json.deserialize(string_int_map, "string_int_map");
+//        json.deserialize(string_float_map, "string_float_map");
+//        json.deserialize(string_bool_map, "string_bool_map");
+//        json.deserialize(object, "object");
+//        json.deserialize(object_ptr, "object_ptr");
+//        json.deserialize(object_list, "object_list");
+//        json.deserialize(object_ptr_list, "object_ptr_list");
+//        json.deserialize(object_map, "object_map");
+//        json.deserialize(object_ptr_map, "object_ptr_map");
+//        json.deserialize(enum_list, "enum_list");
+//        json.deserialize(enum_map, "enum_map");
+//        json.deserialize(object_object_ptr_map, "object_object_ptr_map");    
     }
 
 } //namespace mg
