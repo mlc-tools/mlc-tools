@@ -25,4 +25,4 @@ add_executable(Serializer
         third/jsoncpp/json_reader.cpp
         third/jsoncpp/json_value.cpp
         third/jsoncpp/json_writer.cpp
-        )
+        src/xml.h)

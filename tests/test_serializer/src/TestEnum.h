@@ -2,13 +2,8 @@
 #define __mg_TestEnum_h__
 
 #include "intrusive_ptr.h"
-#include "../third/pugixml/pugixml.hpp"
 #include <string>
 
-namespace pugi
-{
-    class xml_node;
-}
 class SerializerXml;
 class DeserializerXml;
 class SerializerJson;

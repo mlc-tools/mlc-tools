@@ -8,12 +8,13 @@
 #include <string>
 #include <map>
 #include <vector>
-#include "../intrusive_ptr.h"
 #include "Pimpl.hpp"
+#include "../intrusive_ptr.h"
 #include "SerializerCommon.h"
 
 namespace Json{
     class Value;
+    class ValueIterator;
 }
 
 class SerializerJson {
@@ -39,7 +40,7 @@ public:
     void add_array_item(const bool& value);
     void add_array_item(const float& value);
     void add_array_item(const std::string& value);
-    
+
     template <class T>
     typename std::enable_if<is_attribute<T>::value, void>::type
     serialize(const T& value, const std::string& key, const T& default_value) {
@@ -93,11 +94,6 @@ public:
             item.add_attribute(std::string("type"), value->get_type(), default_value::value<std::string>());
             value->serialize(item);
         }
-//        SerializerJson child = key.empty() ? *this : add_array(key);
-//        for(const mg::intrusive_ptr<T>& value : values){
-//            SerializerJson item = child.add_child(value->get_type());
-//            value->serialize(item);
-//        }
     }
 
     template <class T>
@@ -110,11 +106,6 @@ public:
             SerializerJson item = child.add_array_item();
             item.serialize(value, "");
         }
-//        SerializerJson child = key.empty() ? *this : add_array(key);
-//        for(const T& value : values){
-//            SerializerJson item = child.add_child("item");
-//            item.serialize(value, "");
-//        }
     }
 
     // Map<simple, simple>
@@ -232,9 +223,225 @@ public:
     }
 
 private:
-//    Pimpl<Json::Value, 40> _json;
     Json::Value& _json;
 };
 
+class DeserializerJson
+{
+    class iterator{
+    public:
+        explicit iterator(Json::ValueIterator iterator);
+        bool operator != (const iterator& rhs) const;
+        iterator& operator ++ ();
+        iterator operator ++ (int) noexcept = delete;
+        DeserializerJson operator *();
+    private:
+        Pimpl<Json::ValueIterator, 16> _iterator;
+    };
+public:
+    explicit DeserializerJson(Json::Value& json);
+    DeserializerJson(const DeserializerJson& rhs);
+    DeserializerJson(DeserializerJson&& rhs) noexcept;
+    ~DeserializerJson();
+
+    DeserializerJson get_child(const std::string& name);
+    int get_attribute(const std::string& key, int default_value=0);
+    bool get_attribute(const std::string& key, bool default_value=false);
+    float get_attribute(const std::string& key, float default_value=0.f);
+    std::string get_attribute(const std::string& key, const std::string& default_value);
+    void get_array_item(int& value);
+    void get_array_item(bool& value);
+    void get_array_item(float& value);
+    void get_array_item(std::string& value);
+
+    iterator begin();
+    iterator end();
+
+    template <class T>
+    typename std::enable_if<is_attribute<T>::value, void>::type
+    deserialize(T& value, const std::string& key, const T& default_value) {
+        value = get_attribute(key, default_value);
+    }
+
+    template <class T>
+    typename std::enable_if<!is_attribute<T>::value, void>::type
+    deserialize(const T*& value, const std::string& key) {
+//        value = mg::DataStorage::shared().get<T>(get_attribute(key, default_value::value<std::string>()));
+    }
+
+    template<class T>
+    typename std::enable_if<!is_attribute<T>::value, void>::type
+    deserialize(mg::intrusive_ptr<T>& value, const std::string& key){
+        DeserializerJson child = key.empty() ? *this : get_child(key);
+        std::string type = child.get_attribute(std::string("type"), default_value::value<std::string>());
+//        value = mg::Factory::build<T>(child.get_attribute("type", std::string()));
+        value = mg::make_intrusive<T>();
+        value->deserialize(child);
+    }
+
+    template<class T>
+    typename std::enable_if<!is_attribute<T>::value, void>::type
+    deserialize(T& value, const std::string& key){
+        DeserializerJson child = key.empty() ? *this : get_child(key);
+//        child.deserialize(value, default_value::value<std::string>());
+        value.deserialize(child);
+    }
+
+    template <class T>
+    typename std::enable_if<is_attribute<T>::value, void>::type
+    deserialize(std::vector<T>& values, const std::string& key) {
+        DeserializerJson child = key.empty() ? *this : get_child(key);
+        for(DeserializerJson item : child){
+            T value;
+            item.get_array_item(value);
+            values.push_back(value);
+        }
+    }
+
+    template <class T>
+    typename std::enable_if<!is_attribute<T>::value, void>::type
+    deserialize(std::vector<mg::intrusive_ptr<T>>& values, const std::string& key) {
+        DeserializerJson child = key.empty() ? *this : get_child(key);
+        for(DeserializerJson item : child){
+            auto type = item.get_attribute(std::string("type"), default_value::value<std::string>());
+//            auto value = mg::Factory::build<T>(child.get_attribute("type", std::string()));
+            auto value = mg::make_intrusive<T>();
+            value->deserialize(item);
+            values.push_back(value);
+        }
+    }
+
+    template <class T>
+    typename std::enable_if<!is_attribute<T>::value, void>::type
+    deserialize(std::vector<T>& values, const std::string& key) {
+        DeserializerJson child = key.empty() ? *this : get_child(key);
+        for(DeserializerJson item : child){
+            T value;
+            item.deserialize(value, "");
+            values.push_back(value);
+        }
+    }
+
+    // Map<simple, simple>
+    template <class Key, class Value>
+    typename std::enable_if<is_attribute<Key>::value && is_attribute<Value>::value, void>::type
+    deserialize(std::map<Key, Value>& values, const std::string& key) {
+        DeserializerJson child = key.empty() ? *this : get_child(key);
+        for(DeserializerJson item : child){
+            Key key_object;
+            Value value;
+            key_object = item.get_attribute("key", default_value::value<Key>());
+            value = item.get_attribute("value", default_value::value<Value>());
+            values[key_object] = value;
+        }
+    }
+
+    // Map<simple, object>
+    template <class Key, class Value>
+    typename std::enable_if<is_attribute<Key>::value && !is_attribute<Value>::value, void>::type
+    deserialize(std::map<Key, Value>& values, const std::string& key) {
+        DeserializerJson child = key.empty() ? *this : get_child(key);
+        for(DeserializerJson item : child){
+            DeserializerJson value_json = item.get_child("value");
+            Key key_object;
+            Value value;
+            key_object = item.get_attribute("key", default_value::value<Key>());
+            value.deserialize(value_json);
+            values[key_object] = value;
+        }
+    }
+
+    // Map<object, simple>
+    template <class Key, class Value>
+    typename std::enable_if<!is_attribute<Key>::value && is_attribute<Value>::value, void>::type
+    deserialize(std::map<Key, Value>& values, const std::string& key) {
+        DeserializerJson child = key.empty() ? *this : get_child(key);
+        for(DeserializerJson item : child){
+            Key key_object;
+            Value value = get_attribute("value", default_value::value<Value>());
+            key_object.deserialize(item);
+            values[key_object] = value;
+        }
+    }
+
+    // Map<object, object>
+    template <class Key, class Value>
+    typename std::enable_if<!is_attribute<Key>::value && !is_attribute<Value>::value, void>::type
+    deserialize(std::map<Key, Value>& values, const std::string& key) {
+        DeserializerJson child = key.empty() ? *this : get_child(key);
+        for(DeserializerJson item : child){
+            DeserializerJson key_json = item.get_child("key");
+            Key key_object;
+            key_object.deserialize(key_json);
+
+            DeserializerJson value_json = item.get_child("value");
+            Value value;
+            value.deserialize(value_json);
+
+            values[key_object] = value;
+        }
+    }
+
+    // Map<simple, pointer object>
+    template <class Key, class Value>
+    typename std::enable_if<is_attribute<Key>::value && !is_attribute<Value>::value, void>::type
+    deserialize(std::map<Key, mg::intrusive_ptr<Value>>& values, const std::string& key) {
+        DeserializerJson child = key.empty() ? *this : get_child(key);
+        for(DeserializerJson item : child){
+            Key key_object;
+            key_object = item.get_attribute("key", default_value::value<Key>());
+
+            DeserializerJson value_json = item.get_child("value");
+//            auto value = mg::Factory::build<T>(value_json.get_attribute("type", std::string()));
+            auto value = mg::make_intrusive<Value>();
+            value->deserialize(value_json);
+
+            values[key_object] = value;
+        }
+    }
+
+    // Map<object, pointer object>
+    template <class Key, class Value>
+    typename std::enable_if<!is_attribute<Key>::value && !is_attribute<Value>::value, void>::type
+    deserialize(std::map<Key, mg::intrusive_ptr<Value>>& values, const std::string& key) {
+        DeserializerJson child = key.empty() ? *this : get_child(key);
+        for(DeserializerJson item : child){
+            DeserializerJson key_json = item.get_child("key");
+            Key key_object;
+            key_object.deserialize(key_json);
+
+            DeserializerJson value_json = item.get_child("value");
+//            auto value = mg::Factory::build<T>(value_json.get_attribute("type", std::string()));
+            auto value = mg::make_intrusive<Value>();
+            value->deserialize(value_json);
+
+            values[key_object] = value;
+        }
+    }
+
+    // Map<pointer object, pointer object>
+    template <class Key, class Value>
+    typename std::enable_if<!is_attribute<Key>::value && !is_attribute<Value>::value, void>::type
+    deserialize(std::map<mg::intrusive_ptr<Key>, mg::intrusive_ptr<Value>>& values, const std::string& key) {
+        DeserializerJson child = key.empty() ? *this : get_child(key);
+        for(DeserializerJson item : child){
+            DeserializerJson key_json = item.get_child("key");
+//            auto value = mg::Factory::build<T>(value_json.get_attribute("type", std::string()));
+            auto key_object = mg::make_intrusive<Value>();
+            key_object->deserialize(key_json);
+
+            DeserializerJson value_json = item.get_child("value");
+//            auto value = mg::Factory::build<T>(value_json.get_attribute("type", std::string()));
+            auto value = mg::make_intrusive<Value>();
+            value->deserialize(value_json);
+
+            values[key_object] = value;
+        }
+    }
+
+private:
+    Json::Value& _json;
+
+};
 
 #endif //SERIALIZER_SERIALIZERJSON_H

@@ -50,8 +50,8 @@ namespace mg
     }
     void FooObject::deserialize(DeserializerJson& json)
     {
-//        json.deserialize(value, "value", 0);
-//        json.deserialize(name, "name", std::string(""));
+        json.deserialize(value, "value", 0);
+        json.deserialize(name, "name", std::string(""));
     }
 
     bool FooObject::operator<(const FooObject &rhs) const{
@@ -77,7 +77,9 @@ namespace mg
     }
     void BarObject::deserialize(DeserializerJson& json)
     {
-        
+        FooObject::deserialize(json);
+        json.deserialize(foo, "foo");
+        json.deserialize(foo_ptr, "foo_ptr");
     }
     
     bool BarObject::operator<(const BarObject &rhs) const{

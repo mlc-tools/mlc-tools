@@ -3,6 +3,7 @@
 #include "../third/pugixml/pugixml.hpp"
 #include "serialize/SerializerXml.h"
 #include "serialize/SerializerJson.h"
+#include "mg_extensions.h"
 
 namespace mg
 {
@@ -68,7 +69,7 @@ namespace mg
     }
     void AllTypesChildren::deserialize(DeserializerJson& json)
     {
-//        json.deserialize(value, "value", 0);
+        json.deserialize(value, "value", 0);
     }
 
     bool AllTypesChildren::operator<(const AllTypesChildren &rhs) const{

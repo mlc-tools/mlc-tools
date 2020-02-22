@@ -1,227 +1,20 @@
 #include <iostream>
 #include "src/serialize/SerializerXml.h"
 #include "src/serialize/SerializerJson.h"
-#include "third/pugixml/pugixml.hpp"
 #include "src/FooObject.h"
 #include "src/intrusive_ptr.h"
 #include "src/AllTypes.h"
 #include "src/AllTypesChildren.h"
-#include "src/TestEnum.h"
+//#include "src/TestEnum.h"
 #include <vector>
 #include <map>
 #include "third/jsoncpp/json.h"
+#include "third/pugixml/pugixml.hpp"
 #include "src/mg_extensions.h"
-#include "third/jsoncpp/json.h"
 
 std::string getAllTypesSourcesXML() {
-    return "<AllTypes int_value0=\"1234\" int_value1=\"6346363\" float_value0=\"100.000000\" float_value1=\"1000.000000\" str_value0=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" str_value1=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\">\n"
-           " <int_list>\n"
-           "  <item />\n"
-           "  <item value=\"13\" />\n"
-           "  <item value=\"26\" />\n"
-           "  <item value=\"39\" />\n"
-           "  <item value=\"52\" />\n"
-           "  <item value=\"65\" />\n"
-           "  <item value=\"78\" />\n"
-           "  <item value=\"91\" />\n"
-           "  <item value=\"104\" />\n"
-           "  <item value=\"117\" />\n"
-           " </int_list>\n"
-           " <float_list>\n"
-           "  <item />\n"
-           "  <item value=\"7.500000\" />\n"
-           "  <item value=\"15.000000\" />\n"
-           "  <item value=\"22.500000\" />\n"
-           "  <item value=\"30.000000\" />\n"
-           "  <item value=\"37.500000\" />\n"
-           "  <item value=\"45.000000\" />\n"
-           "  <item value=\"52.500000\" />\n"
-           "  <item value=\"60.000000\" />\n"
-           "  <item value=\"67.500000\" />\n"
-           " </float_list>\n"
-           " <bool_list>\n"
-           "  <item />\n"
-           "  <item value=\"true\" />\n"
-           "  <item />\n"
-           "  <item value=\"true\" />\n"
-           "  <item />\n"
-           "  <item value=\"true\" />\n"
-           "  <item />\n"
-           "  <item value=\"true\" />\n"
-           "  <item />\n"
-           "  <item value=\"true\" />\n"
-           " </bool_list>\n"
-           " <string_list>\n"
-           "  <item value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <item value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <item value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <item value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <item value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <item value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <item value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <item value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <item value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <item value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           " </string_list>\n"
-           " <int_string_map>\n"
-           "  <pair value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <pair key=\"1\" value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <pair key=\"2\" value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <pair key=\"3\" value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <pair key=\"4\" value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <pair key=\"5\" value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <pair key=\"6\" value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <pair key=\"7\" value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <pair key=\"8\" value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <pair key=\"9\" value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           " </int_string_map>\n"
-           " <float_string_map>\n"
-           "  <pair value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <pair key=\"1.000000\" value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <pair key=\"2.000000\" value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <pair key=\"3.000000\" value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <pair key=\"4.000000\" value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <pair key=\"5.000000\" value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <pair key=\"6.000000\" value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <pair key=\"7.000000\" value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <pair key=\"8.000000\" value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <pair key=\"9.000000\" value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           " </float_string_map>\n"
-           " <bool_string_map>\n"
-           "  <pair value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <pair key=\"true\" value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           " </bool_string_map>\n"
-           " <string_string_map>\n"
-           "  <pair key=\"0\" value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <pair key=\"1\" value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <pair key=\"2\" value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <pair key=\"3\" value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <pair key=\"4\" value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <pair key=\"5\" value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <pair key=\"6\" value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <pair key=\"7\" value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <pair key=\"8\" value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           "  <pair key=\"9\" value=\"1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}\" />\n"
-           " </string_string_map>\n"
-           " <string_int_map>\n"
-           "  <pair key=\"0\" />\n"
-           "  <pair key=\"1\" value=\"1\" />\n"
-           "  <pair key=\"2\" value=\"2\" />\n"
-           "  <pair key=\"3\" value=\"3\" />\n"
-           "  <pair key=\"4\" value=\"4\" />\n"
-           "  <pair key=\"5\" value=\"5\" />\n"
-           "  <pair key=\"6\" value=\"6\" />\n"
-           "  <pair key=\"7\" value=\"7\" />\n"
-           "  <pair key=\"8\" value=\"8\" />\n"
-           "  <pair key=\"9\" value=\"9\" />\n"
-           " </string_int_map>\n"
-           " <string_float_map>\n"
-           "  <pair key=\"0\" />\n"
-           "  <pair key=\"1\" value=\"1.000000\" />\n"
-           "  <pair key=\"2\" value=\"2.000000\" />\n"
-           "  <pair key=\"3\" value=\"3.000000\" />\n"
-           "  <pair key=\"4\" value=\"4.000000\" />\n"
-           "  <pair key=\"5\" value=\"5.000000\" />\n"
-           "  <pair key=\"6\" value=\"6.000000\" />\n"
-           "  <pair key=\"7\" value=\"7.000000\" />\n"
-           "  <pair key=\"8\" value=\"8.000000\" />\n"
-           "  <pair key=\"9\" value=\"9.000000\" />\n"
-           " </string_float_map>\n"
-           " <string_bool_map>\n"
-           "  <pair key=\"0\" />\n"
-           "  <pair key=\"1\" value=\"true\" />\n"
-           " </string_bool_map>\n"
-           " <object value=\"487998\" />\n"
-           " <object_ptr type=\"AllTypesChildren\" value=\"243525235\" />\n"
-           " <object_list>\n"
-           "  <item value=\"132123123\" />\n"
-           "  <item value=\"132123123\" />\n"
-           "  <item value=\"132123123\" />\n"
-           "  <item value=\"132123123\" />\n"
-           "  <item value=\"132123123\" />\n"
-           "  <item value=\"132123123\" />\n"
-           "  <item value=\"132123123\" />\n"
-           "  <item value=\"132123123\" />\n"
-           "  <item value=\"132123123\" />\n"
-           "  <item value=\"132123123\" />\n"
-           " </object_list>\n"
-           " <object_ptr_list>\n"
-           "  <AllTypesChildren value=\"234234\" />\n"
-           "  <AllTypesChildren value=\"234234\" />\n"
-           "  <AllTypesChildren value=\"234234\" />\n"
-           "  <AllTypesChildren value=\"234234\" />\n"
-           "  <AllTypesChildren value=\"234234\" />\n"
-           "  <AllTypesChildren value=\"234234\" />\n"
-           "  <AllTypesChildren value=\"234234\" />\n"
-           "  <AllTypesChildren value=\"234234\" />\n"
-           "  <AllTypesChildren value=\"234234\" />\n"
-           "  <AllTypesChildren value=\"234234\" />\n"
-           " </object_ptr_list>\n"
-           " <object_map>\n"
-           "  <pair key=\"0\">\n"
-           "   <value value=\"547987\" />\n"
-           "  </pair>\n"
-           "  <pair key=\"1\">\n"
-           "   <value value=\"547987\" />\n"
-           "  </pair>\n"
-           "  <pair key=\"2\">\n"
-           "   <value value=\"547987\" />\n"
-           "  </pair>\n"
-           "  <pair key=\"3\">\n"
-           "   <value value=\"547987\" />\n"
-           "  </pair>\n"
-           "  <pair key=\"4\">\n"
-           "   <value value=\"547987\" />\n"
-           "  </pair>\n"
-           "  <pair key=\"5\">\n"
-           "   <value value=\"547987\" />\n"
-           "  </pair>\n"
-           "  <pair key=\"6\">\n"
-           "   <value value=\"547987\" />\n"
-           "  </pair>\n"
-           "  <pair key=\"7\">\n"
-           "   <value value=\"547987\" />\n"
-           "  </pair>\n"
-           "  <pair key=\"8\">\n"
-           "   <value value=\"547987\" />\n"
-           "  </pair>\n"
-           "  <pair key=\"9\">\n"
-           "   <value value=\"547987\" />\n"
-           "  </pair>\n"
-           " </object_map>\n"
-           " <object_ptr_map>\n"
-           "  <pair key=\"0\">\n"
-           "   <value type=\"AllTypesChildren\" value=\"6879\" />\n"
-           "  </pair>\n"
-           "  <pair key=\"1\">\n"
-           "   <value type=\"AllTypesChildren\" value=\"6879\" />\n"
-           "  </pair>\n"
-           "  <pair key=\"2\">\n"
-           "   <value type=\"AllTypesChildren\" value=\"6879\" />\n"
-           "  </pair>\n"
-           "  <pair key=\"3\">\n"
-           "   <value type=\"AllTypesChildren\" value=\"6879\" />\n"
-           "  </pair>\n"
-           "  <pair key=\"4\">\n"
-           "   <value type=\"AllTypesChildren\" value=\"6879\" />\n"
-           "  </pair>\n"
-           "  <pair key=\"5\">\n"
-           "   <value type=\"AllTypesChildren\" value=\"6879\" />\n"
-           "  </pair>\n"
-           "  <pair key=\"6\">\n"
-           "   <value type=\"AllTypesChildren\" value=\"6879\" />\n"
-           "  </pair>\n"
-           "  <pair key=\"7\">\n"
-           "   <value type=\"AllTypesChildren\" value=\"6879\" />\n"
-           "  </pair>\n"
-           "  <pair key=\"8\">\n"
-           "   <value type=\"AllTypesChildren\" value=\"6879\" />\n"
-           "  </pair>\n"
-           "  <pair key=\"9\">\n"
-           "   <value type=\"AllTypesChildren\" value=\"6879\" />\n"
-           "  </pair>\n"
-           " </object_ptr_map>\n"
-           "</AllTypes>\n";
+    return
+#include "src/xml.h"
 }
 
 std::string getAllTypesSourcesJSON() {
@@ -387,11 +180,11 @@ void test_all_types_equals_with_old_format_json() {
     SerializerJson::log(jsonSource);
     
     
-//    DeserializerJson deserializer(node);
-//    mg::AllTypes objB;
-//    objB.deserialize(deserializer);
+    DeserializerJson deserializer(json);
+    mg::AllTypes objB;
+    objB.deserialize(deserializer);
     
-//    compare_objects(objA, objB);
+    compare_objects(objA, objB);
 }
 
 int test_xml() {
@@ -591,7 +384,7 @@ int test_json() {
     bool bool_type = true;
     float float_type = 25.f;
     std::string string_type = "gdhsih";
-    std::vector<int> v_int = {1, 2, 3};
+    std::vector<int> v_int = {0, 1, 2, 3};
     std::vector<bool> v_bool = {true, false};
     std::vector<float> v_float = {1.f, 2.f, 5.f};
     std::vector<std::string> v_string = {std::string("123"), std::string("234")};
@@ -694,59 +487,59 @@ int test_json() {
     d_list_list_bool.clear();
     d_list_foo_foo.clear();
     
-//    DeserializerJson deserializer(json);
-//    deserializer.deserialize(int_type, "int_type", 0);
-//    deserializer.deserialize(bool_type, "bool_type", false);
-//    deserializer.deserialize(float_type, "float_type", 0.f);
-//    deserializer.deserialize(string_type, "string_type", std::string(""));
-//    deserializer.deserialize(foo, "foo");
-//    deserializer.deserialize(foo_ptr, "foo_ptr");
-//    deserializer.deserialize(bar, "bar");
-//    deserializer.deserialize(bar2, "bar2");
-//    deserializer.deserialize(d_v_int, "v_int");
-//    deserializer.deserialize(d_v_bool, "v_bool");
-//    deserializer.deserialize(d_v_float, "v_float");
-//    deserializer.deserialize(d_v_string, "v_string");
-//    deserializer.deserialize(d_map_i_i, "map_i_i");
-//    deserializer.deserialize(d_map_b_b, "map_b_b");
-//    deserializer.deserialize(d_map_f_f, "map_f_f");
-//    deserializer.deserialize(d_map_s_s, "map_s_s");
-//    deserializer.deserialize(d_map_t6, "map_t6");
-//    deserializer.deserialize(d_map_t7, "map_t7");
-//    deserializer.deserialize(d_map_t8, "map_t8");
-//    deserializer.deserialize(d_map_t9, "map_t9");
-//    deserializer.deserialize(d_map_t10, "map_t10");
-//    deserializer.deserialize(d_map_t11, "map_t11");
-//    deserializer.deserialize(d_map_t12, "map_t12");
-//    deserializer.deserialize(d_map_t13, "map_t13");
-//    deserializer.deserialize(d_map_t14, "map_t14");
-//    deserializer.deserialize(d_map_t15, "map_t15");
-//    deserializer.deserialize(d_map_t16, "map_t16");
-//    deserializer.deserialize(d_list_list_bool, "list_list_bool");
-//    deserializer.deserialize(d_list_foo_foo, "list_foo_foo");
-//    deserializer.deserialize(data, std::string("data"));
+    DeserializerJson deserializer(json);
+    deserializer.deserialize(int_type, "int_type", 0);
+    deserializer.deserialize(bool_type, "bool_type", false);
+    deserializer.deserialize(float_type, "float_type", 0.f);
+    deserializer.deserialize(string_type, "string_type", std::string(""));
+    deserializer.deserialize(foo, "foo");
+    deserializer.deserialize(foo_ptr, "foo_ptr");
+    deserializer.deserialize(bar, "bar");
+    deserializer.deserialize(bar2, "bar2");
+    deserializer.deserialize(d_v_int, "v_int");
+    deserializer.deserialize(d_v_bool, "v_bool");
+    deserializer.deserialize(d_v_float, "v_float");
+    deserializer.deserialize(d_v_string, "v_string");
+    deserializer.deserialize(d_map_i_i, "map_i_i");
+    deserializer.deserialize(d_map_b_b, "map_b_b");
+    deserializer.deserialize(d_map_f_f, "map_f_f");
+    deserializer.deserialize(d_map_s_s, "map_s_s");
+    deserializer.deserialize(d_map_t6, "map_t6");
+    deserializer.deserialize(d_map_t7, "map_t7");
+    deserializer.deserialize(d_map_t8, "map_t8");
+    deserializer.deserialize(d_map_t9, "map_t9");
+    deserializer.deserialize(d_map_t10, "map_t10");
+    deserializer.deserialize(d_map_t11, "map_t11");
+    deserializer.deserialize(d_map_t12, "map_t12");
+    deserializer.deserialize(d_map_t13, "map_t13");
+    deserializer.deserialize(d_map_t14, "map_t14");
+    deserializer.deserialize(d_map_t15, "map_t15");
+    deserializer.deserialize(d_map_t16, "map_t16");
+    deserializer.deserialize(d_list_list_bool, "list_list_bool");
+    deserializer.deserialize(d_list_foo_foo, "list_foo_foo");
+    deserializer.deserialize(data, std::string("data"));
     
-//    assert (v_int == d_v_int);
-//    assert (v_bool == d_v_bool);
-//    assert (v_float == d_v_float);
-//    assert (v_string == d_v_string);
-//    assert (map_i_i == d_map_i_i);
-//    assert (map_b_b == d_map_b_b);
-//    assert (map_f_f == d_map_f_f);
-//    assert (map_s_s == d_map_s_s);
-//    assert (map_t6.size() == d_map_t6.size());
-//    assert (map_t7.size() == d_map_t7.size());
-//    assert (map_t8.size() == d_map_t8.size());
-//    assert (map_t9.size() == d_map_t9.size());
-//    assert (map_t10.size() == d_map_t10.size());
-//    assert (map_t11.size() == d_map_t11.size());
-//    assert (map_t12.size() == d_map_t12.size());
-//    assert (map_t13.size() == d_map_t13.size());
-//    assert (map_t14.size() == d_map_t14.size());
-//    assert (map_t15.size() == d_map_t15.size());
-//    assert (map_t16.size() == d_map_t16.size());
-//    assert (list_list_bool == d_list_list_bool);
-//    assert (list_foo_foo.size() == d_list_foo_foo.size());
+    assert (v_int == d_v_int);
+    assert (v_bool == d_v_bool);
+    assert (v_float == d_v_float);
+    assert (v_string == d_v_string);
+    assert (map_i_i == d_map_i_i);
+    assert (map_b_b == d_map_b_b);
+    assert (map_f_f == d_map_f_f);
+    assert (map_s_s == d_map_s_s);
+    assert (map_t6.size() == d_map_t6.size());
+    assert (map_t7.size() == d_map_t7.size());
+    assert (map_t8.size() == d_map_t8.size());
+    assert (map_t9.size() == d_map_t9.size());
+    assert (map_t10.size() == d_map_t10.size());
+    assert (map_t11.size() == d_map_t11.size());
+    assert (map_t12.size() == d_map_t12.size());
+    assert (map_t13.size() == d_map_t13.size());
+    assert (map_t14.size() == d_map_t14.size());
+    assert (map_t15.size() == d_map_t15.size());
+    assert (map_t16.size() == d_map_t16.size());
+    assert (list_list_bool == d_list_list_bool);
+    assert (list_foo_foo.size() == d_list_foo_foo.size());
     
     return 0;
 }
@@ -754,10 +547,11 @@ int test_json() {
 int main() {
 //    std::cout << " xml: " << sizeof(pugi::xml_node) << "\n";
 //    std::cout << "json: " << sizeof(Json::Value) << "\n";
-//    test_all_types_equals_with_old_format_xml();
+//    std::cout << "iter: " << sizeof(Json::ValueIterator) << "\n";
+    test_all_types_equals_with_old_format_xml();
     test_all_types_equals_with_old_format_json();
-//    test_xml();
-//    test_json();
+    test_xml();
+    test_json();
 
     return 0;
 }

@@ -20,13 +20,6 @@ SerializerJson::~SerializerJson() = default;
 
 SerializerJson::SerializerJson(SerializerJson&& rhs) noexcept = default;
 
-//SerializerJson& SerializerJson::operator=(const SerializerJson& rhs){
-//    if(this == &rhs)
-//        return *this;
-//    *_json = *rhs._json;
-//    return *this;
-//}
-
 void SerializerJson::log(const Json::Value& json)
 {
     std::cout << "JSON:\n" << SerializerJson::toStr(json) << std::endl;
@@ -78,50 +71,65 @@ void SerializerJson::add_array_item(const std::string& value){
 }
 
 
-//DeSerializerJson::DeSerializerJson(pugi::xml_json node)
-//{
-//    _json = node;
-//}
-//DeSerializerJson::DeSerializerJson(const DeSerializerJson& rhs) = default;
-//DeSerializerJson::DeSerializerJson(DeSerializerJson&& rhs) noexcept: _json(std::move(rhs._json)) {
-//}
-//DeSerializerJson::~DeSerializerJson() = default;
-//DeSerializerJson& DeSerializerJson::operator=(const DeSerializerJson& rhs){
-//    if(this == &rhs){
-//        return *this;
-//    }
-//    *_json = *rhs._json;
-//    return *this;
-//}
-//DeSerializerJson DeSerializerJson::get_child(const std::string& name){
-//    return DeSerializerJson(_json->child(name.c_str()));
-//}
-//int DeSerializerJson::get_attribute(const std::string& key, int default_value){
-//    return _json->attribute(key.c_str()).as_int(default_value);
-//}
-//bool DeSerializerJson::get_attribute(const std::string& key, bool default_value){
-//    return _json->attribute(key.c_str()).as_bool(default_value);
-//}
-//float DeSerializerJson::get_attribute(const std::string& key, float default_value){
-//    return _json->attribute(key.c_str()).as_float(default_value);
-//}
-//std::string DeSerializerJson::get_attribute(const std::string& key, const std::string& default_value){
-//    return _json->attribute(key.c_str()).as_string(default_value.c_str());
-//}
-//
-//DeSerializerJson DeSerializerJson::begin(){
-//    return DeSerializerJson(*_json ? *_json->begin() : pugi::xml_json());
-//}
-//DeSerializerJson DeSerializerJson::end(){
-//    return DeSerializerJson(pugi::xml_json());
-//}
-//bool DeSerializerJson::operator != (const DeSerializerJson& rhs) const{
-//    return *_json != *rhs._json;
-//}
-//DeSerializerJson& DeSerializerJson::operator ++ (){
-//    _json = _json->next_sibling();
-//    return *this;
-//}
-//DeSerializerJson DeSerializerJson::operator *(){
-//    return *this;
-//}
+DeserializerJson::DeserializerJson(Json::Value& json)
+:_json(json)
+{
+    
+}
+DeserializerJson::DeserializerJson(const DeserializerJson& rhs)
+:_json(rhs._json)
+{
+    
+}
+DeserializerJson::DeserializerJson(DeserializerJson&& rhs) noexcept = default;
+DeserializerJson::~DeserializerJson() = default;
+DeserializerJson DeserializerJson::get_child(const std::string& name){
+    return DeserializerJson(_json[name]);
+}
+int DeserializerJson::get_attribute(const std::string& key, int default_value){
+    return _json.isMember(key) ? _json[key].asInt() : default_value;
+}
+bool DeserializerJson::get_attribute(const std::string& key, bool default_value){
+    return _json.isMember(key) ? _json[key].asBool() : default_value;
+}
+float DeserializerJson::get_attribute(const std::string& key, float default_value){
+    return _json.isMember(key) ? _json[key].asFloat() : default_value;
+}
+std::string DeserializerJson::get_attribute(const std::string& key, const std::string& default_value){
+    return _json.isMember(key) ? _json[key].asString() : default_value;
+}
+void DeserializerJson::get_array_item(int& value){
+    value = _json.asInt();
+}
+void DeserializerJson::get_array_item(bool& value){
+    value = _json.asBool();
+}
+void DeserializerJson::get_array_item(float& value){
+    value = _json.asFloat();
+}
+void DeserializerJson::get_array_item(std::string& value){
+    value = _json.asString();
+}
+
+DeserializerJson::iterator DeserializerJson::begin(){
+    return DeserializerJson::iterator(_json.begin());
+}
+
+DeserializerJson::iterator DeserializerJson::end(){
+    return DeserializerJson::iterator(_json.end());
+}
+
+DeserializerJson::iterator::iterator(Json::ValueIterator iterator)
+: _iterator(){
+    _iterator = iterator;
+}
+bool DeserializerJson::iterator::operator != (const iterator& rhs) const{
+    return *_iterator != *rhs._iterator;
+}
+DeserializerJson::iterator& DeserializerJson::iterator::operator ++ (){
+    ++*_iterator;
+    return *this;
+}
+DeserializerJson DeserializerJson::iterator::operator *(){
+    return DeserializerJson(**_iterator);
+}

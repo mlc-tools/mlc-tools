@@ -2,17 +2,11 @@
 #define __mg_AllTypes_h__
 
 #include "intrusive_ptr.h"
-#include "../third/pugixml/pugixml.hpp"
 #include "AllTypesChildren.h"
 #include "TestEnum.h"
 #include <map>
 #include <string>
 #include <vector>
-
-namespace pugi
-{
-    class xml_node;
-}
 
 class SerializerXml;
 class DeserializerXml;
