@@ -215,8 +215,8 @@ namespace mg
         serializer.deserialize(object_map, "object_map");
         serializer.deserialize(object_ptr_map, "object_ptr_map");
         serializer.deserialize(object_object_ptr_map, "object_object_ptr_map");
-//        serializer.deserialize(enum_list, "enum_list");
-//        serializer.deserialize(enum_map, "enum_map");
+        serializer.deserialize(enum_list, "enum_list");
+        serializer.deserialize(enum_map, "enum_map");
     }
     void AllTypes::serialize(SerializerJson& json) const
     {

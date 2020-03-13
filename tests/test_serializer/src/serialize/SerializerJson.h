@@ -2,8 +2,8 @@
 // Created by Vladimir Tolmachev on 2020-02-21.
 //
 
-#ifndef SERIALIZER_SERIALIZERJSON_H
-#define SERIALIZER_SERIALIZERJSON_H
+#ifndef __mg_SERIALIZERJSON_H__
+#define __mg_SERIALIZERJSON_H__
 
 #include <string>
 #include <map>
@@ -108,7 +108,6 @@ public:
         }
     }
 
-    // Map<simple, simple>
     template <class Key, class Value>
     typename std::enable_if<is_attribute<Key>::value && is_attribute<Value>::value, void>::type
     serialize(const std::map<Key, Value>& values, const std::string& key) {
@@ -122,7 +121,6 @@ public:
         }
     }
 
-    // Map<simple, object>
     template <class Key, class Value>
     typename std::enable_if<is_attribute<Key>::value && !is_attribute<Value>::value, void>::type
     serialize(const std::map<Key, Value>& values, const std::string& key) {
@@ -133,11 +131,10 @@ public:
             SerializerJson item = child.add_array_item();
             SerializerJson value = item.add_child("value");
             item.add_attribute("key", pair.first, default_value::value<Key>());
-            pair.second.serialize(value);
+            value.serialize(pair.second, "");
         }
     }
 
-    // Map<object, simple>
     template <class Key, class Value>
     typename std::enable_if<!is_attribute<Key>::value && is_attribute<Value>::value, void>::type
     serialize(const std::map<Key, Value>& values, const std::string& key) {
@@ -151,7 +148,6 @@ public:
         }
     }
 
-    // Map<object, object>
     template <class Key, class Value>
     typename std::enable_if<!is_attribute<Key>::value && !is_attribute<Value>::value, void>::type
     serialize(const std::map<Key, Value>& values, const std::string& key) {
@@ -167,7 +163,6 @@ public:
         }
     }
 
-    // Map<simple, pointer object>
     template <class Key, class Value>
     typename std::enable_if<is_attribute<Key>::value && !is_attribute<Value>::value, void>::type
     serialize(const std::map<Key, mg::intrusive_ptr<Value>>& values, const std::string& key) {
@@ -185,7 +180,6 @@ public:
         }
     }
 
-    // Map<object, pointer object>
     template <class Key, class Value>
     typename std::enable_if<!is_attribute<Key>::value && !is_attribute<Value>::value, void>::type
     serialize(const std::map<Key, mg::intrusive_ptr<Value>>& values, const std::string& key) {
@@ -204,7 +198,6 @@ public:
         }
     }
 
-    // Map<pointer object, pointer object>
     template <class Key, class Value>
     typename std::enable_if<!is_attribute<Key>::value && !is_attribute<Value>::value, void>::type
     serialize(const std::map<mg::intrusive_ptr<Key>, mg::intrusive_ptr<Value>>& values, const std::string& key) {
@@ -322,7 +315,6 @@ public:
         }
     }
 
-    // Map<simple, simple>
     template <class Key, class Value>
     typename std::enable_if<is_attribute<Key>::value && is_attribute<Value>::value, void>::type
     deserialize(std::map<Key, Value>& values, const std::string& key) {
@@ -336,7 +328,6 @@ public:
         }
     }
 
-    // Map<simple, object>
     template <class Key, class Value>
     typename std::enable_if<is_attribute<Key>::value && !is_attribute<Value>::value, void>::type
     deserialize(std::map<Key, Value>& values, const std::string& key) {
@@ -346,12 +337,11 @@ public:
             Key key_object;
             Value value;
             key_object = item.get_attribute("key", default_value::value<Key>());
-            value.deserialize(value_json);
+            value_json.deserialize(value, "");
             values[key_object] = value;
         }
     }
 
-    // Map<object, simple>
     template <class Key, class Value>
     typename std::enable_if<!is_attribute<Key>::value && is_attribute<Value>::value, void>::type
     deserialize(std::map<Key, Value>& values, const std::string& key) {
@@ -364,7 +354,6 @@ public:
         }
     }
 
-    // Map<object, object>
     template <class Key, class Value>
     typename std::enable_if<!is_attribute<Key>::value && !is_attribute<Value>::value, void>::type
     deserialize(std::map<Key, Value>& values, const std::string& key) {
@@ -382,7 +371,6 @@ public:
         }
     }
 
-    // Map<simple, pointer object>
     template <class Key, class Value>
     typename std::enable_if<is_attribute<Key>::value && !is_attribute<Value>::value, void>::type
     deserialize(std::map<Key, mg::intrusive_ptr<Value>>& values, const std::string& key) {
@@ -400,7 +388,6 @@ public:
         }
     }
 
-    // Map<object, pointer object>
     template <class Key, class Value>
     typename std::enable_if<!is_attribute<Key>::value && !is_attribute<Value>::value, void>::type
     deserialize(std::map<Key, mg::intrusive_ptr<Value>>& values, const std::string& key) {
@@ -419,7 +406,6 @@ public:
         }
     }
 
-    // Map<pointer object, pointer object>
     template <class Key, class Value>
     typename std::enable_if<!is_attribute<Key>::value && !is_attribute<Value>::value, void>::type
     deserialize(std::map<mg::intrusive_ptr<Key>, mg::intrusive_ptr<Value>>& values, const std::string& key) {
@@ -444,4 +430,4 @@ private:
 
 };
 
-#endif //SERIALIZER_SERIALIZERJSON_H
+#endif //__mg_SERIALIZERJSON_H__

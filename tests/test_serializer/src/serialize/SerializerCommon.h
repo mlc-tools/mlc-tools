@@ -2,10 +2,11 @@
 // Created by Vladimir Tolmachev on 2020-02-21.
 //
 
-#ifndef SERIALIZER_SERIALIZERCOMMON_H
-#define SERIALIZER_SERIALIZERCOMMON_H
+#ifndef __mg_SERIALIZERCOMMON_H__
+#define __mg_SERIALIZERCOMMON_H__
 
 #include <type_traits>
+#include "../TestEnum.h"
 
 template <class T>
 struct is_attribute {
@@ -13,6 +14,22 @@ struct is_attribute {
                                   std::is_same<bool, T>::value ||
                                   std::is_same<float, T>::value ||
                                   std::is_same<std::string, T>::value;
+    constexpr bool operator()() {
+        return value;
+    }
+};
+
+template <class T>
+struct is_enum {
+    constexpr static bool value = std::is_base_of<mg::BaseEnum, T>::value;
+    constexpr bool operator()() {
+        return value;
+    }
+};
+
+template <class T>
+struct is_object {
+    constexpr static bool value = !is_attribute<T>::value && !is_enum<T>::value;
     constexpr bool operator()() {
         return value;
     }

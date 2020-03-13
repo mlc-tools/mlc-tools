@@ -428,12 +428,12 @@ class TestFactory<SerializedObject>
 
         auto command = new RequestBar();
 #if SERIALIZE_FORMAT == JSON
-        auto string = Factory::serialize_command_to_json<RequestBar>(command);
-        auto command2 = Factory::create_command_from_json<Request>(string);
+        auto string = serialize_command_to_json<RequestBar>(command);
+        auto command2 = create_command_from_json<Request>(string);
 #endif
 #if SERIALIZE_FORMAT == XML
-        auto string = Factory::serialize_command_to_xml<RequestBar>(command);
-        auto command2 = Factory::create_command_from_xml<Request>(string);
+        auto string = serialize_command_to_xml<RequestBar>(command);
+        auto command2 = create_command_from_xml<Request>(string);
 #endif
         result = (command2 != nullptr) && result;
         if(result)

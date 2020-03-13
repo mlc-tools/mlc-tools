@@ -541,6 +541,10 @@ HEADER = '''#ifndef __{namespace}_{class_name}_h__
 {forward_declarations_out}
 namespace {namespace}
 {{
+    class SerializerXml;
+    class DeserializerXml;
+    class SerializerJson;
+    class DeserializerJson;
 {forward_declarations}
 
     class {class_name}{superclass}
@@ -561,6 +565,8 @@ SOURCE = '''
 #include "{path_to_root}{namespace}_Factory.h"
 {includes}
 #include "{path_to_root}{namespace}_extensions.h"
+#include "{path_to_root}SerializerJson.h"
+#include "{path_to_root}SerializerXml.h"
 
 namespace {namespace}
 {{

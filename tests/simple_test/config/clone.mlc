@@ -23,7 +23,7 @@ class clone/TestCloneObject<ITestCloneObject>:test
         auto object_a = new CloneObject();
         object_a->t = 1;
 
-        auto object_b = Factory::clone_object(object_a);
+        auto object_b = clone_object(object_a);
         this->assertEqual(object_a->t, object_b->t);
     }
     function void test_clone2()
@@ -33,7 +33,7 @@ class clone/TestCloneObject<ITestCloneObject>:test
         object_a->ptr = new CloneObject();
         object_a->ptr->t = 10;
 
-        auto object_b = Factory::clone_object(object_a);
+        auto object_b = clone_object(object_a);
         this->assertEqual(object_a->t, object_b->t);
         this->assertEqual(object_a->ptr->t, object_b->ptr->t);
     }

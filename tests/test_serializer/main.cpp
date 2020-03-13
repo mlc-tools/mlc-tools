@@ -11,6 +11,7 @@
 #include "third/jsoncpp/json.h"
 #include "third/pugixml/pugixml.hpp"
 #include "src/mg_extensions.h"
+#include "src/serialize/SerializerCommon.h"
 
 std::string getAllTypesSourcesXML() {
     return
@@ -95,10 +96,10 @@ mg::AllTypes build_object(){
     }
     
     //TODO: map<Enum, ...>
-    //    objA.enum_list.push_back(mg::TestEnum::value1);
-    //    objA.enum_list.push_back(mg::TestEnum::value2);
-    //    objA.enum_map[mg::TestEnum::value1] = 1;
-    //    objA.enum_map[mg::TestEnum::value2] = 2;
+//    objA.enum_list.push_back(mg::TestEnum::value1);
+//    objA.enum_list.push_back(mg::TestEnum::value2);
+//    objA.enum_map[mg::TestEnum::value1] = 1;
+//    objA.enum_map[mg::TestEnum::value2] = 2;
     return objA;
 }
 
@@ -128,6 +129,8 @@ void compare_objects(const mg::AllTypes& objA, const mg::AllTypes& objB){
     result = result && objA.object_list == objB.object_list;
     result = result && objA.object_map == objB.object_map;
     result = result && objA.object_ptr_list.size() == objB.object_ptr_list.size();
+    result = result && objA.enum_list == objB.enum_list;
+//    result = result && objA.enum_map == objB.enum_map;
     
     for(size_t i=0; i<objA.object_ptr_list.size(); ++i)
         result = result && *objA.object_ptr_list[i] == *objB.object_ptr_list[i];
@@ -150,6 +153,8 @@ void test_all_types_equals_with_old_format_xml() {
     pugi::xml_node node = doc.root().append_child("AllTypes");
     SerializerXml serializer(node);
     objA.serialize(serializer);
+
+//    SerializerXml::log(doc);
     
     if(SerializerXml::toStr(doc) != getAllTypesSourcesXML()) {
         std::cout << "XML:\n" << getAllTypesSourcesXML() << "END\n";
@@ -178,8 +183,7 @@ void test_all_types_equals_with_old_format_json() {
     
     SerializerJson::log(json);
     SerializerJson::log(jsonSource);
-    
-    
+
     DeserializerJson deserializer(json);
     mg::AllTypes objB;
     objB.deserialize(deserializer);
@@ -227,6 +231,7 @@ int test_xml() {
     std::map<mg::FooObject, int> map_t14 = {std::make_pair(foo, 123)};
     std::map<int, mg::intrusive_ptr<mg::FooObject>> map_t15 = {std::make_pair(1, mg::make_intrusive<mg::FooObject>())};
     std::map<std::string, mg::intrusive_ptr<mg::FooObject>> map_t16 = {std::make_pair("dsfg", nullptr)};
+    std::map<int, std::vector<int>> map_t17 = {std::make_pair<int, std::vector<int>>(1, {2, 3})};
     
     pugi::xml_document doc;
     pugi::xml_node node = doc.root().append_child("root");
@@ -259,6 +264,7 @@ int test_xml() {
     serializer.serialize(map_t14, "map_t14");
     serializer.serialize(map_t15, "map_t15");
     serializer.serialize(map_t16, "map_t16");
+    serializer.serialize(map_t17, "map_t17");
     serializer.serialize(list_list_bool, "list_list_bool");
     serializer.serialize(list_foo_foo, "list_foo_foo");
     serializer.serialize(data, std::string("data"));
@@ -283,6 +289,7 @@ int test_xml() {
     auto d_map_t14 = map_t14;
     auto d_map_t15 = map_t15;
     auto d_map_t16 = map_t16;
+    auto d_map_t17 = map_t17;
     auto d_list_list_bool = list_list_bool;
     auto d_list_foo_foo = list_foo_foo;
     
@@ -305,6 +312,7 @@ int test_xml() {
     d_map_t14.clear();
     d_map_t15.clear();
     d_map_t16.clear();
+    d_map_t17.clear();
     d_list_list_bool.clear();
     d_list_foo_foo.clear();
     
@@ -336,6 +344,7 @@ int test_xml() {
     deserializer.deserialize(d_map_t14, "map_t14");
     deserializer.deserialize(d_map_t15, "map_t15");
     deserializer.deserialize(d_map_t16, "map_t16");
+    deserializer.deserialize(d_map_t17, "map_t17");
     deserializer.deserialize(d_list_list_bool, "list_list_bool");
     deserializer.deserialize(d_list_foo_foo, "list_foo_foo");
     deserializer.deserialize(data, std::string("data"));
@@ -359,6 +368,7 @@ int test_xml() {
     assert (map_t14.size() == d_map_t14.size());
     assert (map_t15.size() == d_map_t15.size());
     assert (map_t16.size() == d_map_t16.size());
+    assert (map_t17 == d_map_t17);
     assert (list_list_bool == d_list_list_bool);
     assert (list_foo_foo.size() == d_list_foo_foo.size());
     
@@ -406,6 +416,7 @@ int test_json() {
     std::map<mg::FooObject, int> map_t14 = {std::make_pair(foo, 123)};
     std::map<int, mg::intrusive_ptr<mg::FooObject>> map_t15 = {std::make_pair(1, mg::make_intrusive<mg::FooObject>())};
     std::map<std::string, mg::intrusive_ptr<mg::FooObject>> map_t16 = {std::make_pair("dsfg", nullptr)};
+    std::map<int, std::vector<int>> map_t17 = {std::make_pair<int, std::vector<int>>(1, {2, 3})};
     
     Json::Value json;
     
@@ -437,6 +448,7 @@ int test_json() {
     serializer.serialize(map_t14, "map_t14");
     serializer.serialize(map_t15, "map_t15");
     serializer.serialize(map_t16, "map_t16");
+    serializer.serialize(map_t17, "map_t17");
     serializer.serialize(list_list_bool, "list_list_bool");
     serializer.serialize(list_foo_foo, "list_foo_foo");
     serializer.serialize(list_foo_ptr, "list_foo_ptr");
@@ -462,6 +474,7 @@ int test_json() {
     auto d_map_t14 = map_t14;
     auto d_map_t15 = map_t15;
     auto d_map_t16 = map_t16;
+    auto d_map_t17 = map_t17;
     auto d_list_list_bool = list_list_bool;
     auto d_list_foo_foo = list_foo_foo;
     
@@ -484,6 +497,7 @@ int test_json() {
     d_map_t14.clear();
     d_map_t15.clear();
     d_map_t16.clear();
+    d_map_t17.clear();
     d_list_list_bool.clear();
     d_list_foo_foo.clear();
     
@@ -515,6 +529,7 @@ int test_json() {
     deserializer.deserialize(d_map_t14, "map_t14");
     deserializer.deserialize(d_map_t15, "map_t15");
     deserializer.deserialize(d_map_t16, "map_t16");
+    deserializer.deserialize(d_map_t17, "map_t17");
     deserializer.deserialize(d_list_list_bool, "list_list_bool");
     deserializer.deserialize(d_list_foo_foo, "list_foo_foo");
     deserializer.deserialize(data, std::string("data"));
@@ -538,6 +553,7 @@ int test_json() {
     assert (map_t14.size() == d_map_t14.size());
     assert (map_t15.size() == d_map_t15.size());
     assert (map_t16.size() == d_map_t16.size());
+    assert (map_t17 == d_map_t17);
     assert (list_list_bool == d_list_list_bool);
     assert (list_foo_foo.size() == d_list_foo_foo.size());
     
@@ -545,13 +561,14 @@ int test_json() {
 }
 
 int main() {
+    static_assert(is_enum<mg::TestEnum>::value);
 //    std::cout << " xml: " << sizeof(pugi::xml_node) << "\n";
 //    std::cout << "json: " << sizeof(Json::Value) << "\n";
 //    std::cout << "iter: " << sizeof(Json::ValueIterator) << "\n";
     test_all_types_equals_with_old_format_xml();
     test_all_types_equals_with_old_format_json();
-    test_xml();
-    test_json();
+//    test_xml();
+//    test_json();
 
     return 0;
 }

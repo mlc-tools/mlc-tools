@@ -23,33 +23,41 @@ class Serializer(SerializerBase):
         return '{}::{}({});\n'
 
     def get_serialization_function_args(self, serialize_type, serialize_format):
-        def get_json(const):
+        def get_json():
             obj = Object()
-            obj.type = 'Json::Value'
+            obj.type = 'SerializerJson' if serialize_type == SERIALIZATION else 'DeserializerJson'
             obj.is_ref = True
-            obj.is_const = const
             return obj
 
-        def get_xml(const):
+        def get_xml():
             obj = Object()
-            obj.type = 'pugi::xml_node'
-            obj.is_ref = const
-            obj.is_const = const
+            obj.type = 'SerializerXml' if serialize_type == SERIALIZATION else 'DeserializerXml'
+            obj.is_ref = True
             return obj
 
         if serialize_format == 'json' and serialize_type == SERIALIZATION:
-            return ['json', get_json(False)]
+            return ['serializer', get_json()]
         if serialize_format == 'json' and serialize_type == DESERIALIZATION:
-            return ['json', get_json(True)]
+            return ['deserializer', get_json()]
         if serialize_format == 'xml' and serialize_type == SERIALIZATION:
-            return ['xml', get_xml(False)]
+            return ['serializer', get_xml()]
         if serialize_format == 'xml' and serialize_type == DESERIALIZATION:
-            return ['xml', get_xml(True)]
+            return ['deserializer', get_xml()]
 
-    def build_serialize_operation(self, obj, serialization_type, serialize_format):
-        return self.build_serialize_operation_(obj.name, obj.type, obj.initial_value,
-                                               serialization_type, obj.template_args, obj.is_pointer,
-                                               '', obj.is_link, serialize_format)
+    def build_serialize_operation(self, obj: Object, serialization_type, serialize_format):
+        # return self.build_serialize_operation_(obj.name, obj.type, obj.initial_value,
+        #                                        serialization_type, obj.template_args, obj.is_pointer,
+        #                                        '', obj.is_link, serialize_format)
+        result = ''
+        if serialization_type == SERIALIZATION and obj.type in self.model.simple_types and obj.initial_value:
+            result = 'serializer.serialize({name}, "{name}", {type}({value}));\n'
+        elif serialization_type == SERIALIZATION:
+            result = 'serializer.serialize({name}, "{name}");\n'
+        elif serialization_type == DESERIALIZATION and obj.type in self.model.simple_types and obj.initial_value:
+            result = 'deserializer.deserialize({name}, "{name}", {type}({value}));\n'
+        elif serialization_type == DESERIALIZATION:
+            result = 'deserializer.deserialize({name}, "{name}");\n'
+        return result.format(name=obj.name, value=obj.initial_value, type=self.convert_type(obj.type))
 
     def build_serialize_operation_(self, obj_name, obj_type, obj_value, serialization_type, obj_template_args,
                                    obj_is_pointer, owner, is_link, serialize_format):

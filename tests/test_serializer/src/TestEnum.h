@@ -11,8 +11,12 @@ class DeserializerJson;
 
 namespace mg
 {
+    class BaseEnum{
+    public:
+        virtual ~BaseEnum() = default;
+    };
 
-    class TestEnum
+    class TestEnum : public BaseEnum
     {
     public:
         TestEnum();

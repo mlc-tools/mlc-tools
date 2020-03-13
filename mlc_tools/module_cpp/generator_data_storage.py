@@ -46,11 +46,14 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
         return '''Json::Value json;
         Json::Reader reader;
         reader.parse(content, json);
-        const_cast<DataStorage*>(this)->deserialize_json(json);
+        DeserializerJson deserializer(json);
+        const_cast<DataStorage*>(this)->deserialize_json(deserializer);
         const_cast<DataStorage*>(this)->_loaded = true;'''
 
     def get_initialize_function_xml_body(self):
         return '''pugi::xml_document doc;
         doc.load(content.c_str());
-        const_cast<DataStorage*>(this)->deserialize_xml(doc.root().first_child());
+        pugi::xml_node node = doc.root().first_child();
+        DeserializerXml deserializer(node);
+        const_cast<DataStorage*>(this)->deserialize_xml(deserializer);
         const_cast<DataStorage*>(this)->_loaded = doc.root() != nullptr;'''

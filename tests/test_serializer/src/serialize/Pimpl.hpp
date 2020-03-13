@@ -6,13 +6,10 @@
 //  Copyright © 2020 Vladimir Tolmachev. All rights reserved.
 //
 
-#ifndef fast_pimpl_hpp
-#define fast_pimpl_hpp
+#ifndef __mg_Pimpl_h__
+#define __mg_Pimpl_h__
 
-#include <stdio.h>
 #include <array>
-#include <vector>
-#include <iostream>
 
 template <class T, size_t size>
 class Pimpl
@@ -77,4 +74,4 @@ private:
     std::array<unsigned char, size> _data;
 };
 
-#endif /* fast_pimpl_hpp */
+#endif /* __mg_Pimpl_h__ */

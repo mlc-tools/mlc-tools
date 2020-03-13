@@ -85,13 +85,12 @@ bool test_all_types(mg::Logger* logger)
 	}
 
 #if SERIALIZE_FORMAT == JSON
-    auto str = mg::Factory::serialize_command_to_json<mg::AllTypes>(&objA);
-	auto objB = mg::Factory::create_command_from_json<mg::AllTypes>(str);
-//    str = mg::Factory::serialize_command_to_xml<mg::AllTypes>(objB);
+    auto str = mg::serialize_command_to_json<mg::AllTypes>(&objA);
+	auto objB = mg::create_command_from_json<mg::AllTypes>(str);
 #endif
 #if SERIALIZE_FORMAT == XML
-    auto str = mg::Factory::serialize_command_to_xml<mg::AllTypes>(&objA);
-	auto objB = mg::Factory::create_command_from_xml<mg::AllTypes>(str);
+    auto str = mg::serialize_command_to_xml<mg::AllTypes>(&objA);
+	auto objB = mg::create_command_from_xml<mg::AllTypes>(str);
 #endif
 
 	auto result = true;
