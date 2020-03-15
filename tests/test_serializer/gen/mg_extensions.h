@@ -7,11 +7,14 @@
 #include <cmath>
 #include <string>
 #include <algorithm>
+#include "config.h"
 #include <assert.h>
-#include <cstdarg>
 
-#include "../third/pugixml/pugixml.hpp"
-#include "../third/jsoncpp/json.h"
+#include "pugixml/pugixml.hpp"
+#include "jsoncpp/json.h"
+#include "mg_Factory.h"
+#include "SerializerXml.h"
+#include "SerializerJson.h"
 
 namespace mg
 {
@@ -122,20 +125,92 @@ namespace mg
     }
 
     //JSON
-//    template <class T> void set(Json::Value& json, T value);
-//    template <class T> T get(const Json::Value& json);
-//
-//    template <class T> void set(Json::Value& json, const std::string& key, T value)
-//    {
-//        set<T>(json[key], value);
-//    }
-//    template <class T> T get(const Json::Value& json, const std::string& key)
-//    {
-//        get<T>(json[key]);
-//    }
-    
-//    std::string format(const char *fmt, ...);
+    template <class T> void set(Json::Value& json, T value);
+    template <class T> T get(const Json::Value& json);
 
+    template <class T> void set(Json::Value& json, const std::string& key, T value)
+    {
+        set<T>(json[key], value);
+    }
+    template <class T> T get(const Json::Value& json, const std::string& key)
+    {
+        get<T>(json[key]);
+    }
+    
+    
+    
+    
+    
+    
+    template <class TType>
+    static std::string serialize_command_to_xml(intrusive_ptr<TType> command)
+    {
+        pugi::xml_document doc;
+        auto root = doc.append_child(command->get_type().c_str());
+        SerializerXml serializer(root);
+        command->serialize_xml(serializer);
+        
+        std::stringstream stream;
+        pugi::xml_writer_stream writer(stream);
+#ifdef NDEBUG
+        doc.save(writer,
+                 "",
+                 pugi::format_no_declaration | pugi::format_raw,
+                 pugi::xml_encoding::encoding_utf8);
+#else
+        doc.save(writer,
+                 PUGIXML_TEXT(" "),
+                 pugi::format_no_declaration | pugi::format_indent,
+                 pugi::xml_encoding::encoding_utf8);
+#endif
+        return stream.str();
+    }
+    
+    template <class TType>
+    static intrusive_ptr<TType> create_command_from_xml(const std::string& payload)
+    {
+        pugi::xml_document doc;
+        doc.load(payload.c_str());
+        auto root = doc.root().first_child();
+        auto command = Factory::shared().build<TType>(root.name());
+        DeserializerXml deserializer(root);
+        command->deserialize_xml(deserializer);
+        return command;
+    }
+    
+    template <class TType>
+    static std::string serialize_command_to_json(intrusive_ptr<TType> command)
+    {
+        Json::Value json;
+        command->serialize_json(json[command->get_type()]);
+        
+        Json::StreamWriterBuilder wbuilder;
+        wbuilder["indentation"] = "";
+        return Json::writeString(wbuilder, json);
+    }
+    
+    template <class TType>
+    static intrusive_ptr<TType> create_command_from_json(const std::string& payload)
+    {
+        Json::Value json;
+        Json::Reader reader;
+        reader.parse(payload, json);
+        
+        auto type = json.getMemberNames()[0];
+        auto command = Factory::shared().build<TType>(type);
+        if (command != nullptr)
+        command->deserialize_json(json[type]);
+        return command;
+    }
+    
+    template <class TType>
+    static intrusive_ptr<TType> clone_object(intrusive_ptr<TType> object)
+    {
+        auto payload = serialize_command_to_json<TType>(object);
+        auto clone = create_command_from_json<TType>(payload);
+        return clone;
+    }
+    
 }
 
 #endif

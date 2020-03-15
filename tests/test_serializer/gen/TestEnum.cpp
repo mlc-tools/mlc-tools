@@ -1,12 +1,12 @@
 #include "intrusive_ptr.h"
+#include "mg_Factory.h"
 #include "TestEnum.h"
-#include "../third/pugixml/pugixml.hpp"
-#include "serialize/SerializerXml.h"
-#include "serialize/SerializerJson.h"
+#include "mg_extensions.h"
+#include "SerializerJson.h"
+#include "SerializerXml.h"
 
 namespace mg
 {
-
     TestEnum::TestEnum()
     {
 
@@ -87,6 +87,11 @@ namespace mg
     bool TestEnum::operator <(const TestEnum& rhs) const
     {
         return value < rhs.value;
+    }
+
+    TestEnum::operator int() const
+    {
+        return value;
     }
 
     TestEnum::operator std::string() const

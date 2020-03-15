@@ -8,9 +8,11 @@
 #include <string>
 #include <map>
 #include <vector>
-#include "../intrusive_ptr.h"
-#include "Pimpl.hpp"
+#include "intrusive_ptr.h"
+#include "Pimpl.h"
 #include "SerializerCommon.h"
+#include "DataStorage.h"
+#include "mg_Factory.h"
 
 namespace pugi
 {
@@ -18,6 +20,8 @@ namespace pugi
     class xml_document;
 }
 
+namespace mg
+{
 class SerializerXml
 {
 public:
@@ -26,9 +30,6 @@ public:
     SerializerXml(SerializerXml&& rhs) noexcept;
     ~SerializerXml();
     SerializerXml& operator=(const SerializerXml& rhs);
-
-    static void log(const pugi::xml_document& document);
-    static std::string toStr(const pugi::xml_document& document);
 
     SerializerXml add_child(const std::string& name);
 
@@ -67,7 +68,7 @@ public:
         {
             SerializerXml child = key.empty() ? *this : add_child(key);
             child.add_attribute("type", value->get_type(), "");
-            value->serialize(child);
+            value->serialize_xml(child);
         }
     }
 
@@ -75,7 +76,7 @@ public:
     typename std::enable_if<is_object<T>::value, void>::type serialize(const T& value, const std::string& key)
     {
         SerializerXml child = key.empty() ? *this : add_child(key);
-        value.serialize(child);
+        value.serialize_xml(child);
     }
 
     template <class T>
@@ -102,7 +103,7 @@ public:
         for (const mg::intrusive_ptr<T>& value : values)
         {
             SerializerXml item = child.add_child(value->get_type());
-            value->serialize(item);
+            value->serialize_xml(item);
         }
     }
 
@@ -178,8 +179,8 @@ public:
             SerializerXml item = child.add_child("pair");
             SerializerXml pair_key = item.add_child("key");
             SerializerXml value = item.add_child("value");
-            pair.first.serialize(pair_key);
-            pair.second.serialize(value);
+            pair.first.serialize_xml(pair_key);
+            pair.second.serialize_xml(value);
         }
     }
 
@@ -198,7 +199,7 @@ public:
             {
                 SerializerXml value = item.add_child("value");
                 value.add_attribute("type", pair.second->get_type(), default_value::value<std::string>());
-                pair.second->serialize(value);
+                pair.second->serialize_xml(value);
             }
         }
     }
@@ -214,12 +215,12 @@ public:
         {
             SerializerXml item = child.add_child("pair");
             SerializerXml pair_key = item.add_child("key");
-            pair.first.serialize(pair_key);
+            pair.first.serialize_xml(pair_key);
             if (pair.second)
             {
                 SerializerXml value = item.add_child("value");
                 value.add_attribute("type", pair.second->get_type(), default_value::value<std::string>());
-                pair.second->serialize(value);
+                pair.second->serialize_xml(value);
             }
         }
     }
@@ -237,9 +238,15 @@ public:
             SerializerXml pair_key = item.add_child("key");
             SerializerXml value = item.add_child("value");
             if (pair.first)
-                pair.first->serialize(pair_key);
+            {
+                pair_key.add_attribute("type", pair.first->get_type(), default_value::value<std::string>());
+                pair.first->serialize_xml(pair_key);
+            }
             if (pair.second)
-                pair.second->serialize(value);
+            {
+                value.add_attribute("type", pair.second->get_type(), default_value::value<std::string>());
+                pair.second->serialize_xml(value);
+            }
         }
     }
 
@@ -288,7 +295,7 @@ public:
     template <class T>
     typename std::enable_if<!is_attribute<T>::value, void>::type deserialize(const T *&value, const std::string& key)
     {
-//        value = mg::DataStorage::shared().get<T>(get_attribute(key, default_value::value<std::string>()));
+        value = mg::DataStorage::shared().get<T>(get_attribute(key, default_value::value<std::string>()));
     }
 
     template <class T>
@@ -296,9 +303,8 @@ public:
     deserialize(mg::intrusive_ptr<T>& value, const std::string& key)
     {
         DeserializerXml child = key.empty() ? *this : get_child(key);
-//        value = mg::Factory::build<T>(child.get_attribute("type", std::string()));
-        value = mg::make_intrusive<T>();
-        value->deserialize(child);
+        value = Factory::shared().build<T>(child.get_attribute("type", std::string()));
+        value->deserialize_xml(child);
     }
 
     template <class T>
@@ -306,7 +312,7 @@ public:
     deserialize(T& value, const std::string& key)
     {
         DeserializerXml child = key.empty() ? *this : get_child(key);
-        value.deserialize(child);
+        value.deserialize_xml(child);
     }
 
     template <class T>
@@ -330,7 +336,7 @@ public:
         for (auto item : child)
         {
             mg::intrusive_ptr<T> object = mg::make_intrusive<T>();
-            object->deserialize(item);
+            object->deserialize_xml(item);
             values.push_back(object);
         }
     }
@@ -411,8 +417,8 @@ public:
             DeserializerXml value = pair.get_child("value");
             Key key_object;
             Value value_object;
-            key_object.deserialize(pair_key);
-            value_object.deserialize(value);
+            key_object.deserialize_xml(pair_key);
+            value_object.deserialize_xml(value);
             values[key_object] = value_object;
         }
     }
@@ -425,10 +431,12 @@ public:
         for (auto item : child)
         {
             Key map_key = item.get_attribute("key", default_value::value<Key>());
-//            mg::intrusive_ptr<Value> object = mg::Factory::build<Value>(pair.get_attribute("type", std::string()));
-            mg::intrusive_ptr<Value> object = mg::make_intrusive<Value>();
             DeserializerXml value = item.get_child("value");
-            object->deserialize(value);
+            mg::intrusive_ptr<Value> object = Factory::shared().build<Value>(value.get_attribute("type", std::string()));
+            if(object)
+            {
+                object->deserialize_xml(value);
+            }
             values[map_key] = object;
         }
     }
@@ -443,10 +451,12 @@ public:
             DeserializerXml pair_key = pair.get_child("key");
             DeserializerXml pair_value = pair.get_child("value");
             Key key_object;
-            key_object.deserialize(pair_key);
-//            mg::intrusive_ptr<Value> object = mg::Factory::build<Value>(pair.get_attribute("type", std::string()));
-            mg::intrusive_ptr<Value> value_object = mg::make_intrusive<Value>();
-            value_object->deserialize(pair_value);
+            key_object.deserialize_xml(pair_key);
+            mg::intrusive_ptr<Value> value_object = Factory::shared().build<Value>(pair_value.get_attribute("type", std::string()));
+            if(value_object)
+            {
+                value_object->deserialize_xml(pair_value);
+            }
             values[key_object] = value_object;
         }
     }
@@ -460,12 +470,16 @@ public:
         {
             DeserializerXml pair_key = pair.get_child("key");
             DeserializerXml pair_value = pair.get_child("value");
-//            mg::intrusive_ptr<Value> key_object = mg::Factory::build<Value>(pair_key.get_attribute("type", std::string()));
-            mg::intrusive_ptr<Key> key_object = mg::make_intrusive<Key>();
-            key_object->deserialize(pair_key);
-//            mg::intrusive_ptr<Value> value_object = mg::Factory::build<Value>(pair_value.get_attribute("type", std::string()));
-            mg::intrusive_ptr<Value> value_object = mg::make_intrusive<Value>();
-            value_object->deserialize(pair_value);
+            mg::intrusive_ptr<Value> key_object = Factory::shared().build<Key>(pair_key.get_attribute("type", std::string()));
+            if(key_object)
+            {
+                key_object->deserialize_xml(pair_key);
+            }
+            mg::intrusive_ptr<Value> value_object = Factory::shared().build<Value>(pair_value.get_attribute("type", std::string()));
+            if(value_object)
+            {
+                value_object->deserialize_xml(pair_value);
+            }
             values[key_object] = value_object;
         }
     }
@@ -475,5 +489,5 @@ private:
 
 };
 
-
+}
 #endif //__mg_SERIALIZERXML_H__

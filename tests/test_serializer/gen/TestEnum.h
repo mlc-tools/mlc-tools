@@ -2,25 +2,16 @@
 #define __mg_TestEnum_h__
 
 #include "intrusive_ptr.h"
+#include "pugixml/pugixml.hpp"
 #include <string>
-
-class SerializerXml;
-class DeserializerXml;
-class SerializerJson;
-class DeserializerJson;
+#include "BaseEnum.h"
 
 namespace mg
 {
-    class BaseEnum
-    {
-    public:
-        constexpr BaseEnum(int value_ = 0): value(value_) {}
-        constexpr BaseEnum(const BaseEnum& rhs): value(rhs.value) {}
-        constexpr operator int() const { return value; }
-        virtual std::string str() const {assert(0 && "Override me"); return std::string(); }
-    protected:
-        int value;
-    };
+    class SerializerXml;
+    class DeserializerXml;
+    class SerializerJson;
+    class DeserializerJson;
 
     class TestEnum : public BaseEnum
     {
@@ -38,11 +29,13 @@ namespace mg
         bool operator ==(const std::string& rhs) const;
         friend bool operator ==(const std::string& lhs, const TestEnum& rhs);
         bool operator <(const TestEnum& rhs) const;
+        operator int() const;
         operator std::string() const;
         virtual std::string str() const;
 
         static constexpr BaseEnum value1 = 0;
         static constexpr BaseEnum value2 = 1;
+
     };
 } //namespace mg
 

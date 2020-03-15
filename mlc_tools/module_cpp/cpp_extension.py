@@ -776,9 +776,10 @@ SERIALIZER_XML_HPP = '''#ifndef __mg_SERIALIZERXML_H__
 #include "Pimpl.h"
 #include "SerializerCommon.h"
 #include "DataStorage.h"
-#include "@{namespace}_Factory.h"
+#include "mg_Factory.h"
 
-namespace pugi {
+namespace pugi 
+{
     class xml_node;
     class xml_document;
 }

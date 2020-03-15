@@ -1,17 +1,19 @@
 #include <iostream>
-#include "src/serialize/SerializerXml.h"
-#include "src/serialize/SerializerJson.h"
-#include "src/FooObject.h"
-#include "src/intrusive_ptr.h"
-#include "src/AllTypes.h"
-#include "src/AllTypesChildren.h"
-//#include "src/TestEnum.h"
 #include <vector>
 #include <map>
 #include "third/jsoncpp/json.h"
 #include "third/pugixml/pugixml.hpp"
-#include "src/mg_extensions.h"
+#include "src/serialize/SerializerXml.h"
+#include "src/serialize/SerializerJson.h"
 #include "src/serialize/SerializerCommon.h"
+#include "src/FooObject.h"
+#include "intrusive_ptr.h"
+#include "AllTypes.h"
+#include "AllTypesChildren.h"
+#include "TestEnum.h"
+#include "mg_extensions.h"
+
+using namespace mg;
 
 std::string getAllTypesSourcesXML() {
     return
@@ -26,6 +28,32 @@ std::string getAllTypesSourcesJSON() {
 std::string rand_str()
 {
     return "1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}";
+}
+
+std::string toStr(const pugi::xml_document &document)
+{
+    std::stringstream stream;
+    pugi::xml_writer_stream writer(stream);
+    document.save(writer, " ", pugi::format_no_declaration | pugi::format_indent, pugi::xml_encoding::encoding_auto);
+
+    return stream.str();
+}
+
+void log(const pugi::xml_document &document)
+{
+    std::cout << "XML:\n" << toStr(document) << std::endl;
+}
+
+std::string toStr(const Json::Value &json)
+{
+    Json::StreamWriterBuilder wbuilder;
+    wbuilder["indentation"] = " ";
+    return Json::writeString(wbuilder, json);
+}
+
+void log(const Json::Value &json)
+{
+    std::cout << "JSON:\n" << toStr(json) << std::endl;
 }
 
 mg::AllTypes build_object(){
@@ -151,20 +179,20 @@ void test_all_types_equals_with_old_format_xml() {
     pugi::xml_document doc;
     pugi::xml_node node = doc.root().append_child("AllTypes");
     SerializerXml serializer(node);
-    objA.serialize(serializer);
+    objA.serialize_xml(serializer);
 
 //    SerializerXml::log(doc);
     
-    if(SerializerXml::toStr(doc) != getAllTypesSourcesXML()) {
+    if(toStr(doc) != getAllTypesSourcesXML()) {
         std::cout << "XML:\n" << getAllTypesSourcesXML() << "END\n";
-        std::cout << "XML:\n" << SerializerXml::toStr(doc) << "END\n";
-        assert(SerializerXml::toStr(doc) == getAllTypesSourcesXML());
+        std::cout << "XML:\n" << toStr(doc) << "END\n";
+        assert(toStr(doc) == getAllTypesSourcesXML());
         exit(1);
     }
     
     DeserializerXml deserializer(node);
     mg::AllTypes objB;
-    objB.deserialize(deserializer);
+    objB.deserialize_xml(deserializer);
     
     compare_objects(objA, objB);
 }
@@ -174,18 +202,18 @@ void test_all_types_equals_with_old_format_json() {
     
     Json::Value json;
     SerializerJson serializer(json);
-    objA.serialize(serializer);
+    objA.serialize_json(serializer);
     
     Json::Value jsonSource;
     Json::Reader reader;
     reader.parse(getAllTypesSourcesJSON(), jsonSource);
     
-    SerializerJson::log(json);
-    SerializerJson::log(jsonSource);
+//    SerializerJson::log(json);
+//    SerializerJson::log(jsonSource);
 
     DeserializerJson deserializer(json);
     mg::AllTypes objB;
-    objB.deserialize(deserializer);
+    objB.deserialize_json(deserializer);
     
     compare_objects(objA, objB);
 }
@@ -269,7 +297,7 @@ int test_xml() {
     serializer.serialize(list_list_bool, "list_list_bool");
     serializer.serialize(list_foo_foo, "list_foo_foo");
     serializer.serialize(data, std::string("data"));
-    SerializerXml::log(doc);
+    log(doc);
 
     mg::TestEnum d_enum_value;
     auto d_v_int = v_int;
@@ -459,7 +487,7 @@ int test_json() {
     serializer.serialize(list_foo_foo, "list_foo_foo");
     serializer.serialize(list_foo_ptr, "list_foo_ptr");
     serializer.serialize(data, std::string("data"));
-    SerializerJson::log(json);
+    log(json);
     
     auto d_v_int = v_int;
     auto d_v_bool = v_bool;
@@ -580,12 +608,29 @@ void test_switch_enum()
             assert(0);
             break;
     }
+    mg::TestEnum enum_value2 = mg::TestEnum::value2;
+    switch(enum_value2)
+    {
+        case mg::TestEnum::value1:
+            assert(0);
+            break;
+        case mg::TestEnum::value2:
+            break;
+    }
 }
 
 
 int main() {
     static_assert(is_enum<mg::TestEnum>::value);
     static_assert(!is_attribute<mg::TestEnum>::value);
+
+    Factory::shared().registrationCommand<AllTypesChildren>(AllTypesChildren::TYPE);
+    Factory::shared().registrationCommand<AllTypes>(AllTypes::TYPE);
+    Factory::shared().registrationCommand<DataUnit>(DataUnit::TYPE);
+    Factory::shared().registrationCommand<VisualUnit>(VisualUnit::TYPE);
+    Factory::shared().registrationCommand<DataStorage>(DataStorage::TYPE);
+    Factory::shared().registrationCommand<FooObject>("FooObject");
+    Factory::shared().registrationCommand<BarObject>("BarObject");
 
 //    std::cout << " xml: " << sizeof(pugi::xml_node) << "\n";
 //    std::cout << "json: " << sizeof(Json::Value) << "\n";

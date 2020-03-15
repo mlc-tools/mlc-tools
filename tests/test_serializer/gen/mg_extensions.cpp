@@ -1,7 +1,6 @@
 
 #include <cstdlib>
 #include <sstream>
-#include <vector>
 #include "mg_extensions.h"
 
 namespace mg
@@ -183,55 +182,29 @@ namespace mg
     template <> std::string get(const pugi::xml_attribute& xml) { return xml.as_string(); }
 
     //JSON
-//    template <> void set( Json::Value& json, int8_t value ) { json = value; }
-//    template <> void set( Json::Value& json, int16_t value ) { json = value; }
-//    template <> void set( Json::Value& json, int32_t value ) { json = value; }
-//    template <> void set( Json::Value& json, int64_t value ) { json = value; }
-//    template <> void set( Json::Value& json, uint8_t value ) { json = value; }
-//    template <> void set( Json::Value& json, uint16_t value ) { json = value; }
-//    template <> void set( Json::Value& json, uint32_t value ) { json = value; }
-//    template <> void set( Json::Value& json, uint64_t value ) { json = value; }
-//    template <> void set( Json::Value& json, bool value ) { json = value; }
-//    template <> void set( Json::Value& json, float value ) { json = value; }
-//    template <> void set( Json::Value& json, std::string value ) { json = value; }
-//
-//    template <> int8_t get( const Json::Value& json ) { return json.asInt(); }
-//    template <> int16_t get( const Json::Value& json ) { return json.asInt(); }
-//    template <> int32_t get( const Json::Value& json ) { return json.asInt(); }
-//    template <> int64_t get( const Json::Value& json ) { return json.asInt64(); }
-//    template <> uint8_t get( const Json::Value& json ) { return json.asUInt(); }
-//    template <> uint16_t get( const Json::Value& json ) { return json.asUInt(); }
-//    template <> uint32_t get( const Json::Value& json ) { return json.asUInt(); }
-//    template <> uint64_t get( const Json::Value& json ) { return json.asUInt64(); }
-//    template <> bool get( const Json::Value& json ) { return json.asBool(); }
-//    template <> float get( const Json::Value& json ) { return json.asFloat(); }
-//    template <> std::string get( const Json::Value& json ) { return json.asString(); }
+    template <> void set( Json::Value& json, int8_t value ) { json = value; }
+    template <> void set( Json::Value& json, int16_t value ) { json = value; }
+    template <> void set( Json::Value& json, int32_t value ) { json = value; }
+    template <> void set( Json::Value& json, int64_t value ) { json = value; }
+    template <> void set( Json::Value& json, uint8_t value ) { json = value; }
+    template <> void set( Json::Value& json, uint16_t value ) { json = value; }
+    template <> void set( Json::Value& json, uint32_t value ) { json = value; }
+    template <> void set( Json::Value& json, uint64_t value ) { json = value; }
+    template <> void set( Json::Value& json, bool value ) { json = value; }
+    template <> void set( Json::Value& json, float value ) { json = value; }
+    template <> void set( Json::Value& json, std::string value ) { json = value; }
 
-    std::string format(const char *fmt, ...)
-    {
-        va_list args;
-        va_start(args, fmt);
-        std::vector<char> v(1024);
-        while (true)
-        {
-            va_list args2;
-            va_copy(args2, args);
-            int res = vsnprintf(v.data(), v.size(), fmt, args2);
-            if ((res >= 0) && (res < static_cast<int>(v.size())))
-            {
-                va_end(args);
-                va_end(args2);
-                return std::string(v.data());
-            }
-            size_t size;
-            if (res < 0)
-                size = v.size() * 2;
-            else
-                size = static_cast<size_t>(res) + 1;
-            v.clear();
-            v.resize(size);
-            va_end(args2);
-        }
-    }
+    template <> int8_t get( const Json::Value& json ) { return json.asInt(); }
+    template <> int16_t get( const Json::Value& json ) { return json.asInt(); }
+    template <> int32_t get( const Json::Value& json ) { return json.asInt(); }
+    template <> int64_t get( const Json::Value& json ) { return json.asInt64(); }
+    template <> uint8_t get( const Json::Value& json ) { return json.asUInt(); }
+    template <> uint16_t get( const Json::Value& json ) { return json.asUInt(); }
+    template <> uint32_t get( const Json::Value& json ) { return json.asUInt(); }
+    template <> uint64_t get( const Json::Value& json ) { return json.asUInt64(); }
+    template <> bool get( const Json::Value& json ) { return json.asBool(); }
+    template <> float get( const Json::Value& json ) { return json.asFloat(); }
+    template <> std::string get( const Json::Value& json ) { return json.asString(); }
+
 }
 

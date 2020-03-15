@@ -8,6 +8,8 @@
 #include <sstream>
 
 
+namespace mg
+{
 SerializerXml::SerializerXml(pugi::xml_node node) : _node()
 {
     _node = node;
@@ -31,20 +33,6 @@ SerializerXml &SerializerXml::operator=(const SerializerXml &rhs)
     }
     *_node = *rhs._node;
     return *this;
-}
-
-void SerializerXml::log(const pugi::xml_document &document)
-{
-    std::cout << "XML:\n" << SerializerXml::toStr(document) << std::endl;
-}
-
-std::string SerializerXml::toStr(const pugi::xml_document &document)
-{
-    std::stringstream stream;
-    pugi::xml_writer_stream writer(stream);
-    document.save(writer, " ", pugi::format_no_declaration | pugi::format_indent, pugi::xml_encoding::encoding_auto);
-
-    return stream.str();
 }
 
 SerializerXml SerializerXml::add_child(const std::string &name)
@@ -157,4 +145,5 @@ DeserializerXml &DeserializerXml::operator++()
 DeserializerXml DeserializerXml::operator*()
 {
     return *this;
+}
 }

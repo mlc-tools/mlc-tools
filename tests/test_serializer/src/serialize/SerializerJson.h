@@ -8,9 +8,11 @@
 #include <string>
 #include <map>
 #include <vector>
-#include "Pimpl.hpp"
-#include "../intrusive_ptr.h"
+#include "Pimpl.h"
+#include "intrusive_ptr.h"
 #include "SerializerCommon.h"
+#include "DataStorage.h"
+#include "mg_Factory.h"
 
 namespace Json
 {
@@ -18,6 +20,8 @@ namespace Json
     class ValueIterator;
 }
 
+namespace mg
+{
 class SerializerJson
 {
 
@@ -27,9 +31,6 @@ public:
     SerializerJson(SerializerJson &&rhs) noexcept;
     ~SerializerJson();
     SerializerJson &operator=(const SerializerJson &rhs) = delete;
-
-    static void log(const Json::Value &json);
-    static std::string toStr(const Json::Value &json);
 
     SerializerJson add_child(const std::string &name);
     SerializerJson add_array(const std::string &name);
@@ -76,7 +77,7 @@ public:
         {
             SerializerJson child = key.empty() ? *this : add_child(key);
             child.add_attribute("type", value->get_type(), "");
-            value->serialize(child);
+            value->serialize_json(child);
         }
     }
 
@@ -85,7 +86,7 @@ public:
     serialize(const T &value, const std::string &key)
     {
         SerializerJson child = key.empty() ? *this : add_child(key);
-        value.serialize(child);
+        value.serialize_json(child);
     }
 
     template<class T>
@@ -112,7 +113,7 @@ public:
         {
             SerializerJson item = child.add_array_item();
             item.add_attribute(std::string("type"), value->get_type(), default_value::value<std::string>());
-            value->serialize(item);
+            value->serialize_json(item);
         }
     }
 
@@ -187,7 +188,7 @@ public:
         {
             SerializerJson item = child.add_array_item();
             item.add_attribute("value", pair.second, default_value::value<Value>());
-            pair.first.serialize(item);
+            pair.first.serialize_json(item);
         }
     }
 
@@ -203,8 +204,8 @@ public:
             SerializerJson item = child.add_array_item();
             SerializerJson pair_key = item.add_child("key");
             SerializerJson value = item.add_child("value");
-            pair.first.serialize(pair_key);
-            pair.second.serialize(value);
+            pair.first.serialize_json(pair_key);
+            pair.second.serialize_json(value);
         }
     }
 
@@ -223,7 +224,7 @@ public:
             {
                 SerializerJson value = item.add_child("value");
                 value.add_attribute("type", pair.second->get_type(), default_value::value<std::string>());
-                pair.second->serialize(value);
+                pair.second->serialize_json(value);
             }
         }
     }
@@ -239,12 +240,12 @@ public:
         {
             SerializerJson item = child.add_array_item();
             SerializerJson pair_key = item.add_child("key");
-            pair.first.serialize(pair_key);
+            pair.first.serialize_json(pair_key);
             if (pair.second)
             {
                 SerializerJson value = item.add_child("value");
                 value.add_attribute("type", pair.second->get_type(), default_value::value<std::string>());
-                pair.second->serialize(value);
+                pair.second->serialize_json(value);
             }
         }
     }
@@ -262,9 +263,15 @@ public:
             SerializerJson pair_key = item.add_child("key");
             SerializerJson value = item.add_child("value");
             if (pair.first)
-                pair.first->serialize(pair_key);
+            {
+                pair_key.add_attribute("type", pair.first->get_type(), default_value::value<std::string>());
+                pair.first->serialize_json(pair_key);
+            }
             if (pair.second)
-                pair.second->serialize(value);
+            {
+                value.add_attribute("type", pair.second->get_type(), default_value::value<std::string>());
+                pair.second->serialize_json(value);
+            }
         }
     }
 
@@ -322,7 +329,7 @@ public:
     template<class T>
     typename std::enable_if<!is_attribute<T>::value, void>::type deserialize(const T *&value, const std::string &key)
     {
-//        value = mg::DataStorage::shared().get<T>(get_attribute(key, default_value::value<std::string>()));
+        value = mg::DataStorage::shared().get<T>(get_attribute(key, default_value::value<std::string>()));
     }
 
     template<class T>
@@ -331,9 +338,11 @@ public:
     {
         DeserializerJson child = key.empty() ? *this : get_child(key);
         std::string type = child.get_attribute(std::string("type"), default_value::value<std::string>());
-//        value = mg::Factory::build<T>(child.get_attribute("type", std::string()));
-        value = mg::make_intrusive<T>();
-        value->deserialize(child);
+        value = Factory::shared().build<T>(child.get_attribute("type", std::string()));
+        if(value)
+        {
+            value->deserialize_json(child);
+        }
     }
 
     template<class T>
@@ -341,8 +350,7 @@ public:
     deserialize(T &value, const std::string &key)
     {
         DeserializerJson child = key.empty() ? *this : get_child(key);
-//        child.deserialize(value, default_value::value<std::string>());
-        value.deserialize(child);
+        value.deserialize_json(child);
     }
 
     template<class T>
@@ -379,9 +387,11 @@ public:
         for (DeserializerJson item : child)
         {
             auto type = item.get_attribute(std::string("type"), default_value::value<std::string>());
-//            auto value = mg::Factory::build<T>(child.get_attribute("type", std::string()));
-            auto value = mg::make_intrusive<T>();
-            value->deserialize(item);
+            auto value = Factory::shared().build<T>(item.get_attribute("type", std::string()));
+            if(value)
+            {
+                value->deserialize_json(item);
+            }
             values.push_back(value);
         }
     }
@@ -474,7 +484,7 @@ public:
         {
             Key key_object;
             Value value = get_attribute("value", default_value::value<Value>());
-            key_object.deserialize(item);
+            key_object.deserialize_json(item);
             values[key_object] = value;
         }
     }
@@ -488,11 +498,11 @@ public:
         {
             DeserializerJson key_json = item.get_child("key");
             Key key_object;
-            key_object.deserialize(key_json);
+            key_object.deserialize_json(key_json);
 
             DeserializerJson value_json = item.get_child("value");
             Value value;
-            value.deserialize(value_json);
+            value.deserialize_json(value_json);
 
             values[key_object] = value;
         }
@@ -509,10 +519,11 @@ public:
             key_object = item.get_attribute("key", default_value::value<Key>());
 
             DeserializerJson value_json = item.get_child("value");
-//            auto value = mg::Factory::build<T>(value_json.get_attribute("type", std::string()));
-            auto value = mg::make_intrusive<Value>();
-            value->deserialize(value_json);
-
+            auto value = Factory::shared().build<Value>(value_json.get_attribute("type", std::string()));
+            if(value)
+            {
+                value->deserialize_json(value_json);
+            }
             values[key_object] = value;
         }
     }
@@ -526,13 +537,14 @@ public:
         {
             DeserializerJson key_json = item.get_child("key");
             Key key_object;
-            key_object.deserialize(key_json);
+            key_object.deserialize_json(key_json);
 
             DeserializerJson value_json = item.get_child("value");
-//            auto value = mg::Factory::build<T>(value_json.get_attribute("type", std::string()));
-            auto value = mg::make_intrusive<Value>();
-            value->deserialize(value_json);
-
+            auto value = Factory::shared().build<Value>(value_json.get_attribute("type", std::string()));
+            if(value)
+            {
+                value->deserialize_json(value_json);
+            }
             values[key_object] = value;
         }
     }
@@ -545,14 +557,15 @@ public:
         for (DeserializerJson item : child)
         {
             DeserializerJson key_json = item.get_child("key");
-//            auto value = mg::Factory::build<T>(value_json.get_attribute("type", std::string()));
-            auto key_object = mg::make_intrusive<Value>();
-            key_object->deserialize(key_json);
+            auto key_object = Factory::shared().build<Key>(key_json.get_attribute("type", std::string()));
+            key_object->deserialize_json(key_json);
 
             DeserializerJson value_json = item.get_child("value");
-//            auto value = mg::Factory::build<T>(value_json.get_attribute("type", std::string()));
-            auto value = mg::make_intrusive<Value>();
-            value->deserialize(value_json);
+            auto value = Factory::shared().build<Value>(value_json.get_attribute("type", std::string()));
+            if(value)
+            {
+                value->deserialize_json(value_json);
+            }
 
             values[key_object] = value;
         }
@@ -562,5 +575,5 @@ private:
     Json::Value &_json;
 
 };
-
+}
 #endif //__mg_SERIALIZERJSON_H__

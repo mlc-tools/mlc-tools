@@ -1,9 +1,9 @@
 #include "intrusive_ptr.h"
+#include "mg_Factory.h"
 #include "AllTypesChildren.h"
-#include "../third/pugixml/pugixml.hpp"
-#include "serialize/SerializerXml.h"
-#include "serialize/SerializerJson.h"
 #include "mg_extensions.h"
+#include "SerializerJson.h"
+#include "SerializerXml.h"
 
 namespace mg
 {
@@ -22,9 +22,6 @@ namespace mg
 
     bool AllTypesChildren::operator ==(const AllTypesChildren& rhs) const
     {
-        if(this == &rhs){
-            return true;
-        }
         bool result = true;
         result = result && this->value == rhs.value;
         return result;
@@ -35,18 +32,21 @@ namespace mg
         return !(*this == rhs);
     }
 
-    void AllTypesChildren::retain()
+    int AllTypesChildren::retain()
     {
         this->_reference_counter += 1;
+        return this->_reference_counter;
     }
 
     int AllTypesChildren::release()
     {
         this->_reference_counter -= 1;
-        auto counter = this->_reference_counter;
-        if(counter == 0)
-        delete this;
-        return counter;
+        auto c = this->_reference_counter;
+        if( c == 0)
+        {
+            delete this;
+        }
+        return c;
     }
 
     std::string AllTypesChildren::get_type() const
@@ -54,26 +54,28 @@ namespace mg
         return AllTypesChildren::TYPE;
     }
 
-    void AllTypesChildren::serialize(SerializerXml& xml) const
+    void AllTypesChildren::serialize_xml(SerializerXml& serializer) const
     {
-        xml.serialize(value, "value", 0);
+        serializer.serialize(value, "value", int(0));
+
     }
 
-    void AllTypesChildren::deserialize(DeserializerXml& xml)
+    void AllTypesChildren::deserialize_xml(DeserializerXml& deserializer)
     {
-        xml.deserialize(value, "value", 0);
-    }
-    void AllTypesChildren::serialize(SerializerJson& json) const
-    {
-        json.serialize(value, "value", 0);
-    }
-    void AllTypesChildren::deserialize(DeserializerJson& json)
-    {
-        json.deserialize(value, "value", 0);
+        deserializer.deserialize(value, "value", int(0));
+
     }
 
-    bool AllTypesChildren::operator<(const AllTypesChildren &rhs) const{
-        return this < &rhs;
+    void AllTypesChildren::serialize_json(SerializerJson& serializer) const
+    {
+        serializer.serialize(value, "value", int(0));
+
+    }
+
+    void AllTypesChildren::deserialize_json(DeserializerJson& deserializer)
+    {
+        deserializer.deserialize(value, "value", int(0));
+
     }
 
 } //namespace mg

@@ -2,15 +2,15 @@
 #define __mg_AllTypesChildren_h__
 
 #include "intrusive_ptr.h"
+#include "pugixml/pugixml.hpp"
 #include <string>
-
-class SerializerXml;
-class DeserializerXml;
-class SerializerJson;
-class DeserializerJson;
 
 namespace mg
 {
+    class SerializerXml;
+    class DeserializerXml;
+    class SerializerJson;
+    class DeserializerJson;
 
     class AllTypesChildren
     {
@@ -19,19 +19,16 @@ namespace mg
         ~AllTypesChildren();
         bool operator ==(const AllTypesChildren& rhs) const;
         bool operator !=(const AllTypesChildren& rhs) const;
-        void retain();
+        int retain();
         int release();
         std::string get_type() const;
-        void serialize(SerializerXml& xml) const;
-        void deserialize(DeserializerXml& xml);
-        void serialize(SerializerJson& json) const;
-        void deserialize(DeserializerJson& json);
-        bool operator < (const AllTypesChildren& rhs) const;
+        void serialize_xml(SerializerXml& serializer) const;
+        void deserialize_xml(DeserializerXml& deserializer);
+        void serialize_json(SerializerJson& serializer) const;
+        void deserialize_json(DeserializerJson& deserializer);
 
         int value;
-    private:
         int _reference_counter;
-    public:
         static const std::string TYPE;
 
     };

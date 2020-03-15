@@ -4,13 +4,12 @@
 #include "intrusive_ptr.h"
 #include <string>
 
-class SerializerXml;
-class DeserializerXml;
-class SerializerJson;
-class DeserializerJson;
-
 namespace mg
 {
+    class SerializerXml;
+    class DeserializerXml;
+    class SerializerJson;
+    class DeserializerJson;
 
     class FooObject
     {
@@ -20,10 +19,10 @@ namespace mg
         void retain();
         int release();
         virtual std::string get_type() const;
-        virtual void serialize(SerializerXml& xml) const;
-        virtual void deserialize(DeserializerXml& xml);
-        virtual void serialize(SerializerJson& json) const;
-        virtual void deserialize(DeserializerJson& json);
+        virtual void serialize_xml(SerializerXml& xml) const;
+        virtual void deserialize_xml(DeserializerXml& xml);
+        virtual void serialize_json(SerializerJson& json) const;
+        virtual void deserialize_json(DeserializerJson& json);
         bool operator < (const FooObject& rhs) const;
 
         int _reference_counter;
@@ -35,10 +34,10 @@ namespace mg
     {
     public:
         virtual std::string get_type() const override { return "BarObject"; }
-        virtual void serialize(SerializerXml& xml) const override;
-        virtual void deserialize(DeserializerXml& xml) override;
-        virtual void serialize(SerializerJson& json) const override;
-        virtual void deserialize(DeserializerJson& json) override;
+        virtual void serialize_xml(SerializerXml& xml) const override;
+        virtual void deserialize_xml(DeserializerXml& xml) override;
+        virtual void serialize_json(SerializerJson& json) const override;
+        virtual void deserialize_json(DeserializerJson& json) override;
         bool operator < (const BarObject& rhs) const;
 
         FooObject foo;

@@ -2,18 +2,19 @@
 #define __mg_AllTypes_h__
 
 #include "intrusive_ptr.h"
+#include "pugixml/pugixml.hpp"
 #include "AllTypesChildren.h"
 #include "TestEnum.h"
 #include <map>
 #include <string>
 #include <vector>
 
-class SerializerXml;
-class DeserializerXml;
-class SerializerJson;
-class DeserializerJson;
 namespace mg
 {
+    class SerializerXml;
+    class DeserializerXml;
+    class SerializerJson;
+    class DeserializerJson;
     class AllTypesChildren;
     class Logger;
     class TestEnum;
@@ -24,16 +25,15 @@ namespace mg
         AllTypes();
         ~AllTypes();
         void initialize();
-        static bool tests(Logger* logger);
         bool operator ==(const AllTypes& rhs) const;
         bool operator !=(const AllTypes& rhs) const;
-        void retain();
+        int retain();
         int release();
         std::string get_type() const;
-        void serialize(SerializerXml& xml) const;
-        void deserialize(DeserializerXml& xml);
-        void serialize(SerializerJson& json) const;
-        void deserialize(DeserializerJson& json);
+        void serialize_xml(SerializerXml& serializer) const;
+        void deserialize_xml(DeserializerXml& deserializer);
+        void serialize_json(SerializerJson& serializer) const;
+        void deserialize_json(DeserializerJson& deserializer);
 
         int int_value0;
         int int_value1;
@@ -60,12 +60,9 @@ namespace mg
         std::vector<intrusive_ptr<AllTypesChildren>> object_ptr_list;
         std::map<std::string, AllTypesChildren> object_map;
         std::map<std::string, intrusive_ptr<AllTypesChildren>> object_ptr_map;
-        std::map<AllTypesChildren, intrusive_ptr<AllTypesChildren>> object_object_ptr_map;
         std::vector<TestEnum> enum_list;
         std::map<TestEnum, int> enum_map;
-    private:
         int _reference_counter;
-    public:
         static const std::string TYPE;
 
     };

@@ -6,8 +6,10 @@
 #define __mg_SERIALIZERCOMMON_H__
 
 #include <type_traits>
-#include "../TestEnum.h"
+#include "BaseEnum.h"
 
+namespace mg
+{
 template<class T>
 struct is_attribute
 {
@@ -60,5 +62,6 @@ struct default_value
     static typename std::enable_if<std::is_same<std::string, T>::value, std::string>::type
     value() { return std::string(); }
 };
+}
 
 #endif //SERIALIZER_SERIALIZERCOMMON_H

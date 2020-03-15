@@ -33,22 +33,22 @@ namespace mg
         return "FooObject";
     }
 
-    void FooObject::serialize(SerializerXml& serializer) const
+    void FooObject::serialize_xml(SerializerXml& serializer) const
     {
         serializer.serialize(value, "value", 0);
         serializer.serialize(name, "name", std::string(""));
     }
-    void FooObject::deserialize(DeserializerXml& xml)
+    void FooObject::deserialize_xml(DeserializerXml& xml)
     {
         xml.deserialize(value, "value", 0);
         xml.deserialize(name, "name", std::string(""));
     }
-    void FooObject::serialize(SerializerJson& json) const
+    void FooObject::serialize_json(SerializerJson& json) const
     {
         json.serialize(value, "value", 0);
         json.serialize(name, "name", std::string(""));
     }
-    void FooObject::deserialize(DeserializerJson& json)
+    void FooObject::deserialize_json(DeserializerJson& json)
     {
         json.deserialize(value, "value", 0);
         json.deserialize(name, "name", std::string(""));
@@ -58,26 +58,28 @@ namespace mg
         return this < &rhs;
     }
     
-    void BarObject::serialize(SerializerXml& serializer) const
+    void BarObject::serialize_xml(SerializerXml& serializer) const
     {
-        FooObject::serialize(serializer);
+        FooObject::serialize_xml(serializer);
         serializer.serialize(foo, "foo");
         serializer.serialize(foo_ptr, "foo_ptr");
     }
 
-    void BarObject::deserialize(DeserializerXml& deserializer)
+    void BarObject::deserialize_xml(DeserializerXml& deserializer)
     {
-        FooObject::deserialize(deserializer);
+        FooObject::deserialize_xml(deserializer);
         deserializer.deserialize(foo, "foo");
         deserializer.deserialize(foo_ptr, "foo_ptr");
     }
-    void BarObject::serialize(SerializerJson& json) const
+    void BarObject::serialize_json(SerializerJson& serializer) const
     {
-        
+        FooObject::serialize_json(serializer);
+        serializer.serialize(foo, "foo");
+        serializer.serialize(foo_ptr, "foo_ptr");
     }
-    void BarObject::deserialize(DeserializerJson& json)
+    void BarObject::deserialize_json(DeserializerJson& json)
     {
-        FooObject::deserialize(json);
+        FooObject::deserialize_json(json);
         json.deserialize(foo, "foo");
         json.deserialize(foo_ptr, "foo_ptr");
     }

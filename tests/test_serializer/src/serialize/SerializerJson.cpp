@@ -5,9 +5,10 @@
 #include "SerializerJson.h"
 #include "../../third/jsoncpp/json.h"
 #include <iostream>
-#include <sstream>
 
 
+namespace mg
+{
 SerializerJson::SerializerJson(Json::Value &json) : _json(json)
 {
 }
@@ -19,17 +20,6 @@ SerializerJson::~SerializerJson() = default;
 
 SerializerJson::SerializerJson(SerializerJson &&rhs) noexcept = default;
 
-void SerializerJson::log(const Json::Value &json)
-{
-    std::cout << "JSON:\n" << SerializerJson::toStr(json) << std::endl;
-}
-
-std::string SerializerJson::toStr(const Json::Value &json)
-{
-    Json::StreamWriterBuilder wbuilder;
-    wbuilder["indentation"] = " ";
-    return Json::writeString(wbuilder, json);
-}
 
 SerializerJson SerializerJson::add_child(const std::string &name)
 {
@@ -192,4 +182,5 @@ DeserializerJson::iterator &DeserializerJson::iterator::operator++()
 DeserializerJson DeserializerJson::iterator::operator*()
 {
     return DeserializerJson(**_iterator);
+}
 }
