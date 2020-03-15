@@ -12,7 +12,8 @@
 #include "Pimpl.hpp"
 #include "SerializerCommon.h"
 
-namespace pugi {
+namespace pugi
+{
     class xml_node;
     class xml_document;
 }
@@ -27,9 +28,10 @@ public:
     SerializerXml& operator=(const SerializerXml& rhs);
 
     static void log(const pugi::xml_document& document);
-    static std::string toStr(const pugi::xml_document &document);
+    static std::string toStr(const pugi::xml_document& document);
 
     SerializerXml add_child(const std::string& name);
+
     void add_attribute(const std::string& key, const int& value, int default_value=0);
     void add_attribute(const std::string& key, const bool& value, bool default_value=false);
     void add_attribute(const std::string& key, const float& value, float default_value=0.f);
@@ -37,48 +39,54 @@ public:
 
     template <class T>
     typename std::enable_if<is_attribute<T>::value, void>::type
-    serialize(const T& value, const std::string& key, const T& default_value) {
+    serialize(const T& value, const std::string& key, const T& default_value)
+    {
         add_attribute(key, value, default_value);
     }
 
     template <class T>
-    typename std::enable_if<is_enum<T>::value, void>::type
-    serialize(const T& value, const std::string& key) {
+    typename std::enable_if<is_enum<T>::value, void>::type serialize(const T& value, const std::string& key)
+    {
         add_attribute(key.empty() ? std::string("value") : key, value.str(), default_value::value<std::string>());
     }
 
     template <class T>
-    typename std::enable_if<!is_attribute<T>::value, void>::type
-    serialize(const T* value, const std::string& key) {
-        if(value) {
+    typename std::enable_if<!is_attribute<T>::value, void>::type serialize(const T *value, const std::string& key)
+    {
+        if (value)
+        {
             add_attribute(key, value->name, default_value::value<std::string>());
         }
     }
 
-    template<class T>
+    template <class T>
     typename std::enable_if<!is_attribute<T>::value && !is_enum<T>::value, void>::type
-    serialize(const mg::intrusive_ptr<T>& value, const std::string& key){
-        if(value) {
+    serialize(const mg::intrusive_ptr<T>& value, const std::string& key)
+    {
+        if (value)
+        {
             SerializerXml child = key.empty() ? *this : add_child(key);
             child.add_attribute("type", value->get_type(), "");
             value->serialize(child);
         }
     }
 
-    template<class T>
-    typename std::enable_if<is_object<T>::value, void>::type
-    serialize(const T& value, const std::string& key){
+    template <class T>
+    typename std::enable_if<is_object<T>::value, void>::type serialize(const T& value, const std::string& key)
+    {
         SerializerXml child = key.empty() ? *this : add_child(key);
         value.serialize(child);
     }
 
     template <class T>
     typename std::enable_if<is_attribute<T>::value, void>::type
-    serialize(const std::vector<T>& values, const std::string& key) {
-        if(values.empty())
+    serialize(const std::vector<T>& values, const std::string& key)
+    {
+        if (values.empty())
             return;
         SerializerXml child = key.empty() ? *this : add_child(key);
-        for(const T& value : values){
+        for (const T& value : values)
+        {
             SerializerXml item = child.add_child("item");
             item.serialize(value, "value", default_value::value<T>());
         }
@@ -86,11 +94,13 @@ public:
 
     template <class T>
     typename std::enable_if<!is_attribute<T>::value, void>::type
-    serialize(const std::vector<mg::intrusive_ptr<T>>& values, const std::string& key) {
-        if(values.empty())
+    serialize(const std::vector<mg::intrusive_ptr<T>>& values, const std::string& key)
+    {
+        if (values.empty())
             return;
         SerializerXml child = key.empty() ? *this : add_child(key);
-        for(const mg::intrusive_ptr<T>& value : values){
+        for (const mg::intrusive_ptr<T>& value : values)
+        {
             SerializerXml item = child.add_child(value->get_type());
             value->serialize(item);
         }
@@ -98,11 +108,13 @@ public:
 
     template <class T>
     typename std::enable_if<!is_attribute<T>::value, void>::type
-    serialize(const std::vector<T>& values, const std::string& key) {
-        if(values.empty())
+    serialize(const std::vector<T>& values, const std::string& key)
+    {
+        if (values.empty())
             return;
         SerializerXml child = key.empty() ? *this : add_child(key);
-        for(const T& value : values){
+        for (const T& value : values)
+        {
             SerializerXml item = child.add_child("item");
             item.serialize(value, "");
         }
@@ -110,11 +122,13 @@ public:
 
     template <class Key, class Value>
     typename std::enable_if<is_attribute<Key>::value && is_attribute<Value>::value, void>::type
-    serialize(const std::map<Key, Value>& values, const std::string& key) {
-        if(values.empty())
+    serialize(const std::map<Key, Value>& values, const std::string& key)
+    {
+        if (values.empty())
             return;
         SerializerXml child = key.empty() ? *this : add_child(key);
-        for(auto& pair : values){
+        for (auto& pair : values)
+        {
             SerializerXml item = child.add_child("pair");
             item.add_attribute("key", pair.first, default_value::value<Key>());
             item.add_attribute("value", pair.second, default_value::value<Value>());
@@ -123,11 +137,13 @@ public:
 
     template <class Key, class Value>
     typename std::enable_if<is_attribute<Key>::value && !is_attribute<Value>::value, void>::type
-    serialize(const std::map<Key, Value>& values, const std::string& key) {
-        if(values.empty())
+    serialize(const std::map<Key, Value>& values, const std::string& key)
+    {
+        if (values.empty())
             return;
         SerializerXml child = key.empty() ? *this : add_child(key);
-        for(auto& pair : values){
+        for (auto& pair : values)
+        {
             SerializerXml item = child.add_child("pair");
             SerializerXml value = item.add_child("value");
             item.add_attribute("key", pair.first, default_value::value<Key>());
@@ -137,11 +153,13 @@ public:
 
     template <class Key, class Value>
     typename std::enable_if<!is_attribute<Key>::value && is_attribute<Value>::value, void>::type
-    serialize(const std::map<Key, Value>& values, const std::string& key) {
-        if(values.empty())
+    serialize(const std::map<Key, Value>& values, const std::string& key)
+    {
+        if (values.empty())
             return;
         SerializerXml child = key.empty() ? *this : add_child(key);
-        for(auto& pair : values){
+        for (auto& pair : values)
+        {
             SerializerXml item = child.add_child("pair");
             item.serialize(pair.first, "key");
             item.add_attribute("value", pair.second, default_value::value<Value>());
@@ -150,11 +168,13 @@ public:
 
     template <class Key, class Value>
     typename std::enable_if<!is_attribute<Key>::value && !is_attribute<Value>::value, void>::type
-    serialize(const std::map<Key, Value>& values, const std::string& key) {
-        if(values.empty())
+    serialize(const std::map<Key, Value>& values, const std::string& key)
+    {
+        if (values.empty())
             return;
         SerializerXml child = key.empty() ? *this : add_child(key);
-        for(auto& pair : values){
+        for (auto& pair : values)
+        {
             SerializerXml item = child.add_child("pair");
             SerializerXml pair_key = item.add_child("key");
             SerializerXml value = item.add_child("value");
@@ -165,14 +185,17 @@ public:
 
     template <class Key, class Value>
     typename std::enable_if<is_attribute<Key>::value && !is_attribute<Value>::value, void>::type
-    serialize(const std::map<Key, mg::intrusive_ptr<Value>>& values, const std::string& key) {
-        if(values.empty())
+    serialize(const std::map<Key, mg::intrusive_ptr<Value>>& values, const std::string& key)
+    {
+        if (values.empty())
             return;
         SerializerXml child = key.empty() ? *this : add_child(key);
-        for(auto& pair : values){
+        for (auto& pair : values)
+        {
             SerializerXml item = child.add_child("pair");
             item.add_attribute("key", pair.first, default_value::value<Key>());
-            if(pair.second) {
+            if (pair.second)
+            {
                 SerializerXml value = item.add_child("value");
                 value.add_attribute("type", pair.second->get_type(), default_value::value<std::string>());
                 pair.second->serialize(value);
@@ -182,15 +205,18 @@ public:
 
     template <class Key, class Value>
     typename std::enable_if<!is_attribute<Key>::value && !is_attribute<Value>::value, void>::type
-    serialize(const std::map<Key, mg::intrusive_ptr<Value>>& values, const std::string& key) {
-        if(values.empty())
+    serialize(const std::map<Key, mg::intrusive_ptr<Value>>& values, const std::string& key)
+    {
+        if (values.empty())
             return;
         SerializerXml child = key.empty() ? *this : add_child(key);
-        for(auto& pair : values){
+        for (auto& pair : values)
+        {
             SerializerXml item = child.add_child("pair");
             SerializerXml pair_key = item.add_child("key");
             pair.first.serialize(pair_key);
-            if(pair.second) {
+            if (pair.second)
+            {
                 SerializerXml value = item.add_child("value");
                 value.add_attribute("type", pair.second->get_type(), default_value::value<std::string>());
                 pair.second->serialize(value);
@@ -200,20 +226,23 @@ public:
 
     template <class Key, class Value>
     typename std::enable_if<!is_attribute<Key>::value && !is_attribute<Value>::value, void>::type
-    serialize(const std::map<mg::intrusive_ptr<Key>, mg::intrusive_ptr<Value>>& values, const std::string& key) {
-        if(values.empty())
+    serialize(const std::map<mg::intrusive_ptr<Key>, mg::intrusive_ptr<Value>>& values, const std::string& key)
+    {
+        if (values.empty())
             return;
         SerializerXml child = key.empty() ? *this : add_child(key);
-        for(auto& pair : values){
+        for (auto& pair : values)
+        {
             SerializerXml item = child.add_child("pair");
             SerializerXml pair_key = item.add_child("key");
             SerializerXml value = item.add_child("value");
-            if(pair.first)
+            if (pair.first)
                 pair.first->serialize(pair_key);
-            if(pair.second)
+            if (pair.second)
                 pair.second->serialize(value);
         }
     }
+
 private:
     Pimpl<pugi::xml_node, 8> _node;
 
@@ -229,6 +258,7 @@ public:
     DeserializerXml& operator=(const DeserializerXml& rhs);
 
     DeserializerXml get_child(const std::string& name);
+
     int get_attribute(const std::string& key, int default_value=0);
     bool get_attribute(const std::string& key, bool default_value=false);
     float get_attribute(const std::string& key, float default_value=0.f);
@@ -236,50 +266,56 @@ public:
 
     DeserializerXml begin();
     DeserializerXml end();
-    bool operator != (const DeserializerXml& rhs) const;
-    DeserializerXml& operator ++ ();
-    DeserializerXml operator ++ (int) noexcept = delete;
-    DeserializerXml operator *();
+
+    bool operator!=(const DeserializerXml& rhs) const;
+    DeserializerXml& operator++();
+    DeserializerXml operator++(int) noexcept = delete;
+    DeserializerXml operator*();
 
     template <class T>
     typename std::enable_if<is_attribute<T>::value, void>::type
-    deserialize(T& value, const std::string& key, const T& default_value) {
+    deserialize(T& value, const std::string& key, const T& default_value)
+    {
         value = get_attribute(key, default_value);
     }
 
     template <class T>
-    typename std::enable_if<is_enum<T>::value, void>::type
-    deserialize(T& value, const std::string& key) {
+    typename std::enable_if<is_enum<T>::value, void>::type deserialize(T& value, const std::string& key)
+    {
         value = get_attribute(!key.empty() ? key : "value", default_value::value<std::string>());
     }
 
     template <class T>
-    typename std::enable_if<!is_attribute<T>::value, void>::type
-    deserialize(const T*& value, const std::string& key) {
+    typename std::enable_if<!is_attribute<T>::value, void>::type deserialize(const T *&value, const std::string& key)
+    {
 //        value = mg::DataStorage::shared().get<T>(get_attribute(key, default_value::value<std::string>()));
     }
 
-    template<class T>
+    template <class T>
     typename std::enable_if<!is_attribute<T>::value, void>::type
-    deserialize(mg::intrusive_ptr<T>& value, const std::string& key){
+    deserialize(mg::intrusive_ptr<T>& value, const std::string& key)
+    {
         DeserializerXml child = key.empty() ? *this : get_child(key);
 //        value = mg::Factory::build<T>(child.get_attribute("type", std::string()));
         value = mg::make_intrusive<T>();
         value->deserialize(child);
     }
 
-    template<class T>
+    template <class T>
     typename std::enable_if<!is_attribute<T>::value && !is_enum<T>::value, void>::type
-    deserialize(T& value, const std::string& key){
+    deserialize(T& value, const std::string& key)
+    {
         DeserializerXml child = key.empty() ? *this : get_child(key);
         value.deserialize(child);
     }
 
     template <class T>
     typename std::enable_if<is_attribute<T>::value, void>::type
-    deserialize(std::vector<T>& values, const std::string& key) {
+    deserialize(std::vector<T>& values, const std::string& key)
+    {
         DeserializerXml child = key.empty() ? *this : get_child(key);
-        for(auto item : child){
+        for (auto item : child)
+        {
             T value;
             item.deserialize(value, "value", default_value::value<T>());
             values.push_back(value);
@@ -288,9 +324,11 @@ public:
 
     template <class T>
     typename std::enable_if<!is_attribute<T>::value, void>::type
-    deserialize(std::vector<mg::intrusive_ptr<T>>& values, const std::string& key) {
+    deserialize(std::vector<mg::intrusive_ptr<T>>& values, const std::string& key)
+    {
         DeserializerXml child = key.empty() ? *this : get_child(key);
-        for(auto item : child){
+        for (auto item : child)
+        {
             mg::intrusive_ptr<T> object = mg::make_intrusive<T>();
             object->deserialize(item);
             values.push_back(object);
@@ -299,9 +337,11 @@ public:
 
     template <class T>
     typename std::enable_if<!is_attribute<T>::value, void>::type
-    deserialize(std::vector<T>& values, const std::string& key) {
+    deserialize(std::vector<T>& values, const std::string& key)
+    {
         DeserializerXml child = key.empty() ? *this : get_child(key);
-        for(auto item : child){
+        for (auto item : child)
+        {
             T value;
             item.deserialize(value, default_value::value<std::string>());
             values.push_back(value);
@@ -310,19 +350,23 @@ public:
 
     template <class Key, class Value>
     typename std::enable_if<is_attribute<Key>::value && is_attribute<Value>::value, void>::type
-    deserialize(std::map<Key, Value>& values, const std::string& key) {
+    deserialize(std::map<Key, Value>& values, const std::string& key)
+    {
         DeserializerXml child = key.empty() ? *this : get_child(key);
-        for(DeserializerXml item : child){
-            values[item.get_attribute("key", default_value::value<Key>())] =
-                    item.get_attribute("value", default_value::value<Value>());
+        for (DeserializerXml item : child)
+        {
+            values[item.get_attribute("key", default_value::value<Key>())] = item.get_attribute("value",
+                                                                                                default_value::value<Value>());
         }
     }
 
     template <class Key, class Value>
     typename std::enable_if<is_attribute<Key>::value && !is_attribute<Value>::value, void>::type
-    deserialize(std::map<Key, Value>& values, const std::string& key) {
+    deserialize(std::map<Key, Value>& values, const std::string& key)
+    {
         DeserializerXml child = key.empty() ? *this : get_child(key);
-        for(DeserializerXml item : child){
+        for (DeserializerXml item : child)
+        {
             DeserializerXml value = item.get_child("value");
             Value object;
             value.deserialize(object, "");
@@ -332,9 +376,11 @@ public:
 
     template <class Key, class Value>
     typename std::enable_if<is_enum<Key>::value && is_attribute<Value>::value, void>::type
-    deserialize(std::map<Key, Value>& values, const std::string& key) {
+    deserialize(std::map<Key, Value>& values, const std::string& key)
+    {
         DeserializerXml child = key.empty() ? *this : get_child(key);
-        for(DeserializerXml item : child){
+        for (DeserializerXml item : child)
+        {
             Key object;
             item.deserialize(object, "key");
             values[object] = item.get_attribute("value", default_value::value<Value>());
@@ -343,9 +389,11 @@ public:
 
     template <class Key, class Value>
     typename std::enable_if<!is_attribute<Key>::value && !is_enum<Key>::value && is_attribute<Value>::value, void>::type
-    deserialize(std::map<Key, Value>& values, const std::string& key) {
+    deserialize(std::map<Key, Value>& values, const std::string& key)
+    {
         DeserializerXml child = key.empty() ? *this : get_child(key);
-        for(DeserializerXml item : child){
+        for (DeserializerXml item : child)
+        {
             Key object;
             item.deserialize(object, "");
             values[object] = item.get_attribute("value", default_value::value<Value>());
@@ -354,9 +402,11 @@ public:
 
     template <class Key, class Value>
     typename std::enable_if<!is_attribute<Key>::value && !is_attribute<Value>::value, void>::type
-    deserialize(std::map<Key, Value>& values, const std::string& key) {
+    deserialize(std::map<Key, Value>& values, const std::string& key)
+    {
         DeserializerXml child = key.empty() ? *this : get_child(key);
-        for(auto pair : child){
+        for (auto pair : child)
+        {
             DeserializerXml pair_key = pair.get_child("key");
             DeserializerXml value = pair.get_child("value");
             Key key_object;
@@ -369,9 +419,11 @@ public:
 
     template <class Key, class Value>
     typename std::enable_if<is_attribute<Key>::value && !is_attribute<Value>::value, void>::type
-    deserialize(std::map<Key, mg::intrusive_ptr<Value>>& values, const std::string& key) {
+    deserialize(std::map<Key, mg::intrusive_ptr<Value>>& values, const std::string& key)
+    {
         DeserializerXml child = key.empty() ? *this : get_child(key);
-        for(auto item : child){
+        for (auto item : child)
+        {
             Key map_key = item.get_attribute("key", default_value::value<Key>());
 //            mg::intrusive_ptr<Value> object = mg::Factory::build<Value>(pair.get_attribute("type", std::string()));
             mg::intrusive_ptr<Value> object = mg::make_intrusive<Value>();
@@ -383,9 +435,11 @@ public:
 
     template <class Key, class Value>
     typename std::enable_if<!is_attribute<Key>::value && !is_attribute<Value>::value, void>::type
-    deserialize(std::map<Key, mg::intrusive_ptr<Value>>& values, const std::string& key) {
+    deserialize(std::map<Key, mg::intrusive_ptr<Value>>& values, const std::string& key)
+    {
         DeserializerXml child = key.empty() ? *this : get_child(key);
-        for(DeserializerXml pair : child){
+        for (DeserializerXml pair : child)
+        {
             DeserializerXml pair_key = pair.get_child("key");
             DeserializerXml pair_value = pair.get_child("value");
             Key key_object;
@@ -399,9 +453,11 @@ public:
 
     template <class Key, class Value>
     typename std::enable_if<!is_attribute<Key>::value && !is_attribute<Value>::value, void>::type
-    deserialize(std::map<mg::intrusive_ptr<Key>, mg::intrusive_ptr<Value>>& values, const std::string& key) {
+    deserialize(std::map<mg::intrusive_ptr<Key>, mg::intrusive_ptr<Value>>& values, const std::string& key)
+    {
         DeserializerXml child = key.empty() ? *this : get_child(key);
-        for(DeserializerXml pair : child){
+        for (DeserializerXml pair : child)
+        {
             DeserializerXml pair_key = pair.get_child("key");
             DeserializerXml pair_value = pair.get_child("value");
 //            mg::intrusive_ptr<Value> key_object = mg::Factory::build<Value>(pair_key.get_attribute("type", std::string()));
