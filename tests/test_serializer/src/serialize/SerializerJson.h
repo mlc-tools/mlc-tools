@@ -278,6 +278,12 @@ public:
     }
 
     template <class T>
+    typename std::enable_if<is_enum<T>::value, void>::type
+    deserialize(T& value, const std::string& key) {
+        value = get_attribute(!key.empty() ? key : "value", default_value::value<std::string>());
+    }
+
+    template <class T>
     typename std::enable_if<!is_attribute<T>::value, void>::type
     deserialize(const T*& value, const std::string& key) {
 //        value = mg::DataStorage::shared().get<T>(get_attribute(key, default_value::value<std::string>()));
@@ -294,7 +300,7 @@ public:
     }
 
     template<class T>
-    typename std::enable_if<!is_attribute<T>::value, void>::type
+    typename std::enable_if<!is_attribute<T>::value && !is_enum<T>::value, void>::type
     deserialize(T& value, const std::string& key){
         DeserializerJson child = key.empty() ? *this : get_child(key);
 //        child.deserialize(value, default_value::value<std::string>());

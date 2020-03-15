@@ -115,23 +115,4 @@ namespace mg
         return std::string();
     }
 
-    void TestEnum::serialize(SerializerXml& xml) const
-    {
-        xml.serialize(str(), "value", std::string(""));
-    }
-
-    void TestEnum::deserialize(DeserializerXml& xml)
-    {
-//        xml.deserialize(str(), "value", std::string(""));
-
-    }
-    void TestEnum::serialize(SerializerJson& json) const
-    {
-        json.serialize(str(), "value", std::string(""));
-    }
-    void TestEnum::deserialize(DeserializerJson& json)
-    {
-//        json.deserialize(str(), "value", std::string(""));
-    }
-
 } //namespace mg

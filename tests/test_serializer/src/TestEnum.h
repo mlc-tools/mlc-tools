@@ -40,10 +40,6 @@ namespace mg
         bool operator <(const TestEnum& rhs) const;
         operator std::string() const;
         virtual std::string str() const;
-        void serialize(SerializerXml& xml) const;
-        void deserialize(DeserializerXml& xml);
-        void serialize(SerializerJson& json) const;
-        void deserialize(DeserializerJson& json);
 
         static constexpr BaseEnum value1 = 0;
         static constexpr BaseEnum value2 = 1;

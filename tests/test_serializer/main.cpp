@@ -209,6 +209,7 @@ int test_xml() {
     bool bool_type = true;
     float float_type = 25.f;
     std::string string_type = "gdhsih";
+    mg::TestEnum enum_value = mg::TestEnum::value1;
     std::vector<int> v_int = {1, 2, 3};
     std::vector<bool> v_bool = {true, false};
     std::vector<float> v_float = {1.f, 2.f, 5.f};
@@ -240,6 +241,7 @@ int test_xml() {
     serializer.serialize(bool_type, "bool_type", false);
     serializer.serialize(float_type, "float_type", 0.f);
     serializer.serialize(string_type, "string_type", std::string(""));
+    serializer.serialize(enum_value, "enum_value");
     serializer.serialize(foo, "foo");
     serializer.serialize(foo_ptr, "foo_ptr");
     serializer.serialize(bar, "bar");
@@ -268,7 +270,8 @@ int test_xml() {
     serializer.serialize(list_foo_foo, "list_foo_foo");
     serializer.serialize(data, std::string("data"));
     SerializerXml::log(doc);
-    
+
+    mg::TestEnum d_enum_value;
     auto d_v_int = v_int;
     auto d_v_bool = v_bool;
     auto d_v_float = v_float;
@@ -320,6 +323,7 @@ int test_xml() {
     deserializer.deserialize(bool_type, "bool_type", false);
     deserializer.deserialize(float_type, "float_type", 0.f);
     deserializer.deserialize(string_type, "string_type", std::string(""));
+    deserializer.deserialize(d_enum_value, "enum_value");
     deserializer.deserialize(foo, "foo");
     deserializer.deserialize(foo_ptr, "foo_ptr");
     deserializer.deserialize(bar, "bar");
@@ -347,7 +351,8 @@ int test_xml() {
     deserializer.deserialize(d_list_list_bool, "list_list_bool");
     deserializer.deserialize(d_list_foo_foo, "list_foo_foo");
     deserializer.deserialize(data, std::string("data"));
-    
+
+    assert(enum_value == d_enum_value);
     assert (v_int == d_v_int);
     assert (v_bool == d_v_bool);
     assert (v_float == d_v_float);
@@ -393,6 +398,7 @@ int test_json() {
     bool bool_type = true;
     float float_type = 25.f;
     std::string string_type = "gdhsih";
+    mg::TestEnum enum_value = mg::TestEnum::value1;
     std::vector<int> v_int = {0, 1, 2, 3};
     std::vector<bool> v_bool = {true, false};
     std::vector<float> v_float = {1.f, 2.f, 5.f};
@@ -424,6 +430,7 @@ int test_json() {
     serializer.serialize(bool_type, "bool_type", false);
     serializer.serialize(float_type, "float_type", 0.f);
     serializer.serialize(string_type, "string_type", std::string(""));
+    serializer.serialize(enum_value, "enum_value");
     serializer.serialize(foo, "foo");
     serializer.serialize(foo_ptr, "foo_ptr");
     serializer.serialize(bar, "bar");
@@ -476,7 +483,8 @@ int test_json() {
     auto d_map_t17 = map_t17;
     auto d_list_list_bool = list_list_bool;
     auto d_list_foo_foo = list_foo_foo;
-    
+
+    mg::TestEnum d_enum_value;
     d_v_int.clear();
     d_v_bool.clear();
     d_v_float.clear();
@@ -505,6 +513,7 @@ int test_json() {
     deserializer.deserialize(bool_type, "bool_type", false);
     deserializer.deserialize(float_type, "float_type", 0.f);
     deserializer.deserialize(string_type, "string_type", std::string(""));
+    deserializer.deserialize(d_enum_value, "enum_value");
     deserializer.deserialize(foo, "foo");
     deserializer.deserialize(foo_ptr, "foo_ptr");
     deserializer.deserialize(bar, "bar");
@@ -532,7 +541,8 @@ int test_json() {
     deserializer.deserialize(d_list_list_bool, "list_list_bool");
     deserializer.deserialize(d_list_foo_foo, "list_foo_foo");
     deserializer.deserialize(data, std::string("data"));
-    
+
+    assert(enum_value == d_enum_value);
     assert (v_int == d_v_int);
     assert (v_bool == d_v_bool);
     assert (v_float == d_v_float);
