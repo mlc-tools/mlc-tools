@@ -56,7 +56,7 @@ public:
     }
 
     template<class T>
-    typename std::enable_if<!is_attribute<T>::value, void>::type
+    typename std::enable_if<!is_attribute<T>::value && !is_enum<T>::value, void>::type
     serialize(const mg::intrusive_ptr<T>& value, const std::string& key){
         if(value) {
             SerializerXml child = key.empty() ? *this : add_child(key);
@@ -214,9 +214,6 @@ public:
                 pair.second->serialize(value);
         }
     }
-
-    // Enums:
-
 private:
     Pimpl<pugi::xml_node, 8> _node;
 
@@ -251,6 +248,12 @@ public:
     }
 
     template <class T>
+    typename std::enable_if<is_enum<T>::value, void>::type
+    deserialize(T& value, const std::string& key) {
+        value = get_attribute(!key.empty() ? key : "value", default_value::value<std::string>());
+    }
+
+    template <class T>
     typename std::enable_if<!is_attribute<T>::value, void>::type
     deserialize(const T*& value, const std::string& key) {
 //        value = mg::DataStorage::shared().get<T>(get_attribute(key, default_value::value<std::string>()));
@@ -266,7 +269,7 @@ public:
     }
 
     template<class T>
-    typename std::enable_if<!is_attribute<T>::value, void>::type
+    typename std::enable_if<!is_attribute<T>::value && !is_enum<T>::value, void>::type
     deserialize(T& value, const std::string& key){
         DeserializerXml child = key.empty() ? *this : get_child(key);
         value.deserialize(child);
@@ -288,8 +291,6 @@ public:
     deserialize(std::vector<mg::intrusive_ptr<T>>& values, const std::string& key) {
         DeserializerXml child = key.empty() ? *this : get_child(key);
         for(auto item : child){
-//            auto type = item.get_attribute("type", "");
-//            mg::intrusive_ptr<T> object = mg::Factory::build<T>(child.get_attribute("type", std::string()));
             mg::intrusive_ptr<T> object = mg::make_intrusive<T>();
             object->deserialize(item);
             values.push_back(object);
@@ -330,7 +331,18 @@ public:
     }
 
     template <class Key, class Value>
-    typename std::enable_if<!is_attribute<Key>::value && is_attribute<Value>::value, void>::type
+    typename std::enable_if<is_enum<Key>::value && is_attribute<Value>::value, void>::type
+    deserialize(std::map<Key, Value>& values, const std::string& key) {
+        DeserializerXml child = key.empty() ? *this : get_child(key);
+        for(DeserializerXml item : child){
+            Key object;
+            item.deserialize(object, "key");
+            values[object] = item.get_attribute("value", default_value::value<Value>());
+        }
+    }
+
+    template <class Key, class Value>
+    typename std::enable_if<!is_attribute<Key>::value && !is_enum<Key>::value && is_attribute<Value>::value, void>::type
     deserialize(std::map<Key, Value>& values, const std::string& key) {
         DeserializerXml child = key.empty() ? *this : get_child(key);
         for(DeserializerXml item : child){

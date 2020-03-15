@@ -6,17 +6,10 @@
 
 namespace mg
 {
-    const int TestEnum::value1;
-    const int TestEnum::value2;
 
     TestEnum::TestEnum()
-    : value(value1)
     {
 
-    }
-
-    TestEnum::~TestEnum()
-    {
     }
 
     TestEnum::TestEnum(int _value)
@@ -94,11 +87,6 @@ namespace mg
     bool TestEnum::operator <(const TestEnum& rhs) const
     {
         return value < rhs.value;
-    }
-
-    TestEnum::operator int() const
-    {
-        return value;
     }
 
     TestEnum::operator std::string() const

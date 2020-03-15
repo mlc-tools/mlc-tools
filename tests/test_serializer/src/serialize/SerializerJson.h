@@ -40,11 +40,18 @@ public:
     void add_array_item(const bool& value);
     void add_array_item(const float& value);
     void add_array_item(const std::string& value);
+    void add_array_item(const mg::BaseEnum& value);
 
     template <class T>
     typename std::enable_if<is_attribute<T>::value, void>::type
     serialize(const T& value, const std::string& key, const T& default_value) {
         add_attribute(key, value, default_value);
+    }
+
+    template <class T>
+    typename std::enable_if<is_enum<T>::value, void>::type
+    serialize(const T& value, const std::string& key) {
+        add_attribute(key.empty() ? std::string("value") : key, value.str(), default_value::value<std::string>());
     }
 
     template <class T>
@@ -66,14 +73,14 @@ public:
     }
 
     template<class T>
-    typename std::enable_if<!is_attribute<T>::value, void>::type
+    typename std::enable_if<!is_attribute<T>::value && !is_enum<T>::value, void>::type
     serialize(const T& value, const std::string& key){
         SerializerJson child = key.empty() ? *this : add_child(key);
         value.serialize(child);
     }
 
     template <class T>
-    typename std::enable_if<is_attribute<T>::value, void>::type
+    typename std::enable_if<is_attribute<T>::value || is_enum<T>::value, void>::type
     serialize(const std::vector<T>& values, const std::string& key) {
         if(values.empty())
             return;
@@ -97,7 +104,7 @@ public:
     }
 
     template <class T>
-    typename std::enable_if<!is_attribute<T>::value, void>::type
+    typename std::enable_if<!is_attribute<T>::value && !is_enum<T>::value, void>::type
     serialize(const std::vector<T>& values, const std::string& key) {
         if(values.empty())
             return;
@@ -136,7 +143,20 @@ public:
     }
 
     template <class Key, class Value>
-    typename std::enable_if<!is_attribute<Key>::value && is_attribute<Value>::value, void>::type
+    typename std::enable_if<is_enum<Key>::value && is_attribute<Value>::value, void>::type
+    serialize(const std::map<Key, Value>& values, const std::string& key) {
+        if(values.empty())
+            return;
+        SerializerJson child = key.empty() ? *this : add_child(key);
+        for(auto& pair : values){
+            SerializerJson item = child.add_array_item();
+            item.add_attribute("value", pair.second, default_value::value<Value>());
+            item.serialize(pair.first, "key");
+        }
+    }
+
+    template <class Key, class Value>
+    typename std::enable_if<!is_attribute<Key>::value && !is_enum<Key>::value && is_attribute<Value>::value, void>::type
     serialize(const std::map<Key, Value>& values, const std::string& key) {
         if(values.empty())
             return;
@@ -246,6 +266,7 @@ public:
     void get_array_item(bool& value);
     void get_array_item(float& value);
     void get_array_item(std::string& value);
+//    void get_array_item(mg::BaseEnum& value);
 
     iterator begin();
     iterator end();
@@ -292,6 +313,18 @@ public:
     }
 
     template <class T>
+    typename std::enable_if<is_enum<T>::value, void>::type
+    deserialize(std::vector<T>& values, const std::string& key) {
+        DeserializerJson child = key.empty() ? *this : get_child(key);
+        for(DeserializerJson item : child){
+            std::string value_string;
+            item.get_array_item(value_string);
+            T value(value_string);
+            values.push_back(value);
+        }
+    }
+
+    template <class T>
     typename std::enable_if<!is_attribute<T>::value, void>::type
     deserialize(std::vector<mg::intrusive_ptr<T>>& values, const std::string& key) {
         DeserializerJson child = key.empty() ? *this : get_child(key);
@@ -305,7 +338,7 @@ public:
     }
 
     template <class T>
-    typename std::enable_if<!is_attribute<T>::value, void>::type
+    typename std::enable_if<!is_attribute<T>::value && !is_enum<T>::value, void>::type
     deserialize(std::vector<T>& values, const std::string& key) {
         DeserializerJson child = key.empty() ? *this : get_child(key);
         for(DeserializerJson item : child){
@@ -321,8 +354,24 @@ public:
         DeserializerJson child = key.empty() ? *this : get_child(key);
         for(DeserializerJson item : child){
             Key key_object;
-            Value value;
             key_object = item.get_attribute("key", default_value::value<Key>());
+            Value value;
+            value = item.get_attribute("value", default_value::value<Value>());
+            values[key_object] = value;
+        }
+    }
+
+    template <class Key, class Value>
+    typename std::enable_if<is_enum<Key>::value && is_attribute<Value>::value, void>::type
+    deserialize(std::map<Key, Value>& values, const std::string& key) {
+        DeserializerJson child = key.empty() ? *this : get_child(key);
+        for(DeserializerJson item : child){
+            DeserializerJson key_json = item.get_child("key");
+            std::string value_string;
+            key_json.get_array_item(value_string);
+            Key key_object(value_string);
+            DeserializerJson value_json = item.get_child("value");
+            Value value;
             value = item.get_attribute("value", default_value::value<Value>());
             values[key_object] = value;
         }
@@ -343,7 +392,22 @@ public:
     }
 
     template <class Key, class Value>
-    typename std::enable_if<!is_attribute<Key>::value && is_attribute<Value>::value, void>::type
+    typename std::enable_if<!is_attribute<Key>::value && is_enum<Key>::value && !is_attribute<Value>::value, void>::type
+    deserialize(std::map<Key, Value>& values, const std::string& key) {
+        DeserializerJson child = key.empty() ? *this : get_child(key);
+        for(DeserializerJson item : child){
+            std::string value_string;
+            item.get_array_item(value_string);
+            Key key_object(value_string);
+            DeserializerJson value_json = item.get_child("value");
+            Value value;
+            value_json.deserialize(value, "");
+            values[key_object] = value;
+        }
+    }
+
+    template <class Key, class Value>
+    typename std::enable_if<!is_attribute<Key>::value && !is_enum<Key>::value && is_attribute<Value>::value, void>::type
     deserialize(std::map<Key, Value>& values, const std::string& key) {
         DeserializerJson child = key.empty() ? *this : get_child(key);
         for(DeserializerJson item : child){

@@ -95,11 +95,10 @@ mg::AllTypes build_object(){
         objA.object_ptr_map[mg::toStr(i)] = object_ptr;
     }
     
-    //TODO: map<Enum, ...>
-//    objA.enum_list.push_back(mg::TestEnum::value1);
-//    objA.enum_list.push_back(mg::TestEnum::value2);
-//    objA.enum_map[mg::TestEnum::value1] = 1;
-//    objA.enum_map[mg::TestEnum::value2] = 2;
+    objA.enum_list.push_back(mg::TestEnum::value1);
+    objA.enum_list.push_back(mg::TestEnum::value2);
+    objA.enum_map[mg::TestEnum::value1] = 1;
+    objA.enum_map[mg::TestEnum::value2] = 2;
     return objA;
 }
 
@@ -130,7 +129,7 @@ void compare_objects(const mg::AllTypes& objA, const mg::AllTypes& objB){
     result = result && objA.object_map == objB.object_map;
     result = result && objA.object_ptr_list.size() == objB.object_ptr_list.size();
     result = result && objA.enum_list == objB.enum_list;
-//    result = result && objA.enum_map == objB.enum_map;
+    result = result && objA.enum_map == objB.enum_map;
     
     for(size_t i=0; i<objA.object_ptr_list.size(); ++i)
         result = result && *objA.object_ptr_list[i] == *objB.object_ptr_list[i];
@@ -560,15 +559,32 @@ int test_json() {
     return 0;
 }
 
+void test_switch_enum()
+{
+    mg::TestEnum enum_value = mg::TestEnum::value1;
+    switch(enum_value)
+    {
+        case mg::TestEnum::value1:
+            break;
+        case mg::TestEnum::value2:
+            assert(0);
+            break;
+    }
+}
+
+
 int main() {
     static_assert(is_enum<mg::TestEnum>::value);
+    static_assert(!is_attribute<mg::TestEnum>::value);
+
 //    std::cout << " xml: " << sizeof(pugi::xml_node) << "\n";
 //    std::cout << "json: " << sizeof(Json::Value) << "\n";
 //    std::cout << "iter: " << sizeof(Json::ValueIterator) << "\n";
     test_all_types_equals_with_old_format_xml();
     test_all_types_equals_with_old_format_json();
-//    test_xml();
-//    test_json();
+    test_xml();
+    test_json();
+    test_switch_enum();
 
     return 0;
 }

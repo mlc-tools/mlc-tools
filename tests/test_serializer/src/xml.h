@@ -205,4 +205,12 @@
 "   <value type=\"AllTypesChildren\" value=\"6879\" />\n"
 "  </pair>\n"
 " </object_ptr_map>\n"
+" <enum_list>\n"
+"  <item value=\"value1\" />\n"
+"  <item value=\"value2\" />\n"
+" </enum_list>\n"
+" <enum_map>\n"
+"  <pair key=\"value1\" value=\"1\" />\n"
+"  <pair key=\"value2\" value=\"2\" />\n"
+" </enum_map>\n"
 "</AllTypes>\n";

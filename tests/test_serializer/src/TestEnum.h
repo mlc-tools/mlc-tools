@@ -11,16 +11,22 @@ class DeserializerJson;
 
 namespace mg
 {
-    class BaseEnum{
+    class BaseEnum
+    {
     public:
-        virtual ~BaseEnum() = default;
+        constexpr BaseEnum(int value_ = 0): value(value_) {}
+        constexpr BaseEnum(const BaseEnum& rhs): value(rhs.value) {}
+        constexpr operator int() const { return value; }
+        virtual std::string str() const {assert(0 && "Override me"); return std::string(); }
+    protected:
+        int value;
     };
 
     class TestEnum : public BaseEnum
     {
     public:
         TestEnum();
-        virtual ~TestEnum();
+        TestEnum(const BaseEnum& rhs):BaseEnum(rhs){}
         TestEnum(int _value);
         TestEnum(const TestEnum& rhs);
         TestEnum(const std::string& _value);
@@ -32,19 +38,15 @@ namespace mg
         bool operator ==(const std::string& rhs) const;
         friend bool operator ==(const std::string& lhs, const TestEnum& rhs);
         bool operator <(const TestEnum& rhs) const;
-        operator int() const;
         operator std::string() const;
-        std::string str() const;
-        virtual void serialize(SerializerXml& xml) const;
-        virtual void deserialize(DeserializerXml& xml);
+        virtual std::string str() const;
+        void serialize(SerializerXml& xml) const;
+        void deserialize(DeserializerXml& xml);
         void serialize(SerializerJson& json) const;
         void deserialize(DeserializerJson& json);
 
-        static constexpr int value1 = 0;
-        static constexpr int value2 = 1;
-    private:
-        int value;
-
+        static constexpr BaseEnum value1 = 0;
+        static constexpr BaseEnum value2 = 1;
     };
 } //namespace mg
 
