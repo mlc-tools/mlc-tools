@@ -23,6 +23,8 @@ class SerializerBase(object):
                 model.parser.load_default_serialize_protocol(self.get_protocol(string_format))
                 self.serialize_protocol = model.serialize_protocol
                 for cls in model.classes:
+                    if cls.type == 'enum':
+                        continue
                     self.current_class = cls
                     self.create_serialization_function(cls, SERIALIZATION, string_format)
                     self.create_serialization_function(cls, DESERIALIZATION, string_format)
@@ -40,7 +42,7 @@ class SerializerBase(object):
 
         method.args.append(self.get_serialization_function_args(serialize_type, serialize_format))
         body = ''
-        if cls.superclasses:
+        if cls.superclasses and cls.type != 'enum' and cls.superclasses[0].type != 'enum':
             parent_call = self.get_parent_serialize_format()
             body += parent_call.format(cls.superclasses[0].name, method.name, method.args[0][0])
         for obj in cls.members:

@@ -44,8 +44,8 @@ class Writer(WriterBase):
         elif self.current_class.type == 'enum':
             declaration = self.write_member_enum_declaration(obj)
 
-        if self.current_class.type == 'enum' and obj.name != 'value':
-            static_initialization = self.write_member_static_enum(self.current_class, obj)
+        if self.current_class.type == 'enum':
+            pass
         elif obj.is_static:
             static_initialization = self.write_member_static_init(self.current_class, obj)
         else:
@@ -60,6 +60,9 @@ class Writer(WriterBase):
         class_name = cls.name
         includes, forward_declarations, forward_declarations_out = self.get_includes_for_header(cls)
         functions = ''
+        if cls.type == 'enum':
+            functions += '{name}(const BaseEnum& rhs):BaseEnum(rhs){{}}'.format(name=class_name)
+            functions += '\nconst {name}& operator =(const BaseEnum& rhs) {{ this->value = rhs.operator int(); return *this; }}'.format(name=class_name)
 
         access = AccessSpecifier.public
         for method in cls.functions:
@@ -83,7 +86,7 @@ class Writer(WriterBase):
             members += declaration + '\n'
 
         virtual = 'virtual ' if cls.has_virtual_table() else ''
-        destructor = '{virtual}~{name}();'.format(virtual=virtual, name=cls.name)
+        destructor = '{virtual}~{name}();'.format(virtual=virtual, name=cls.name) if cls.type != 'enum' else ''
 
         superclass = '' if not cls.superclasses else ' : public %s' % cls.superclasses[0].name
 
@@ -129,7 +132,7 @@ class Writer(WriterBase):
         destructor = '''{name}::~{name}()
         {{
         }}
-        '''.format(name=cls.name)
+        '''.format(name=cls.name) if cls.type != 'enum' else ''
 
         registration = 'REGISTRATION_OBJECT({});\n'.format(cls.name) if self.model.auto_registration else ''
         is_abstract = cls.is_abstract
@@ -247,9 +250,8 @@ class Writer(WriterBase):
     def write_member_enum_declaration(self, obj):
         if obj.name == 'value':
             return self.write_member_declaration(obj)
-        return 'static constexpr {type} {name} = {value};'.format(type=obj.type,
-                                                                  name=obj.name,
-                                                                  value=obj.initial_value)
+        return 'static constexpr BaseEnum {name} = {value};'.format(name=obj.name,
+                                                                    value=obj.initial_value)
 
     def write_member_static_init(self, cls, obj, use_intrusive=True):
         string_pointer = '{const}intrusive_ptr<{type}> {owner}::{name}({initial_value});'

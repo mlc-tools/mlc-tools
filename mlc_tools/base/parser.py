@@ -99,6 +99,7 @@ class Parser(object):
         cls = Class()
         cls.type = 'enum'
         cls.parse(header)
+        cls.superclasses.append('BaseEnum')
         if not self.model.is_side(cls.side):
             return text
         parser = Parser(self.model.empty_copy())

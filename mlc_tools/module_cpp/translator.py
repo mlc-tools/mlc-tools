@@ -62,6 +62,13 @@ class Translator(TranslatorBase):
             const_ref.is_ref = True
             return const_ref
 
+        def create_const_ref_base():
+            const_ref = Object()
+            const_ref.type = 'BaseEnum'
+            const_ref.is_const = True
+            const_ref.is_ref = True
+            return const_ref
+
         def add_constructor_with_parameter():
             method = add_method(Object(), cls.name, False)
             method.args.append(['_value', Objects.INT])
@@ -111,6 +118,10 @@ class Translator(TranslatorBase):
             method.args.append(['rhs', create_const_ref()])
             method.operations.append('return value == rhs.value;')
 
+            method = add_method(Objects.BOOL, 'operator ==', True)
+            method.args.append(['rhs', create_const_ref_base()])
+            method.operations.append('return value == rhs.operator int();')
+
         def add_operator_equals_with_int():
             method = add_method(Objects.BOOL, 'operator ==', True)
             method.args.append(['rhs', Objects.INT])
@@ -149,6 +160,7 @@ class Translator(TranslatorBase):
 
         def add_method_str():
             method = add_method(Objects.STRING, 'str', True)
+            method.is_virtual = True
             for index, obj in enumerate(cls.members):
                 if obj.name != 'value' and index <= len(values):
                     method.operations.append('''if(value == {0})
@@ -156,14 +168,6 @@ class Translator(TranslatorBase):
                                     return "{0}";
                                 }}'''.format(obj.name))
             method.operations.append('return std::string();')
-
-        def add_member_value():
-            value = Object()
-            value.initial_value = cls.members[0].name
-            value.name = 'value'
-            value.type = cast
-            value.access = AccessSpecifier.private
-            cls.members.append(value)
 
         translate_members()
         add_constructor_with_parameter()
@@ -180,7 +184,6 @@ class Translator(TranslatorBase):
         add_cast_to_int()
         add_operator_cast_string()
         add_method_str()
-        add_member_value()
 
         return values
 

@@ -19,6 +19,7 @@ namespace mg
         ~AllTypesChildren();
         bool operator ==(const AllTypesChildren& rhs) const;
         bool operator !=(const AllTypesChildren& rhs) const;
+        bool operator < (const AllTypesChildren& rhs) const {return this < &rhs;}
         int retain();
         int release();
         std::string get_type() const;

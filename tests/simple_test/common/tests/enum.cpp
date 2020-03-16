@@ -21,8 +21,8 @@ bool test_switch()
 		result = false;
 	}
 
-	value = mg::TestEnum::value2;
-	switch (value)
+	mg::TestEnum value2 = mg::TestEnum::value2;
+	switch (value2)
 	{
 	case mg::TestEnum::value1:
 		result = false;

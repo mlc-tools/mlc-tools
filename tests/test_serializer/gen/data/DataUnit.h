@@ -22,6 +22,7 @@ namespace mg
         DataUnit();
         ~DataUnit();
         bool operator ==(const DataUnit& rhs) const;
+        bool operator < (const DataUnit& rhs) const;
         bool operator !=(const DataUnit& rhs) const;
         int retain();
         int release();

@@ -14,7 +14,7 @@ class Generator(GeneratorBase):
     def generate(self, model):
         GeneratorBase.generate(self, model)
         GeneratorDataStorage().generate(model)
-        GeneratorVisitor().generate(model, True)
         GeneratorPredefinedFiles().generate(model)
+        GeneratorVisitor().generate(model, True)
         GeneratorOperatorEquals().generate(model)
         GeneratorObserver().generate(model)

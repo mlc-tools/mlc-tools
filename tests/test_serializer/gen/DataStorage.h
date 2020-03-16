@@ -35,7 +35,7 @@ namespace mg
 
         std::map<std::string, DataUnit> units;
         std::map<std::string, FooObject> foo_objects;
-    private:
+    public:
         bool _loaded;
     public:
         static const std::string TYPE;

@@ -1,6 +1,7 @@
 from .cpp_extension import FILES_DICT, FACTORY_REGISTRATION
 from ..base.writer_base import WriterBase
 from ..base.model import SerializeFormat
+from ..core.class_ import Class
 
 
 class GeneratorPredefinedFiles(object):
@@ -16,6 +17,7 @@ class GeneratorPredefinedFiles(object):
         writer = WriterBase('')
         writer.model = model
         self.generate_config_files(model)
+        self.generate_base_enum_class(model)
         for pair in FILES_DICT:
             filename = pair[0]
             if 'intrusive_ptr' in filename and not model.generate_intrusive:
@@ -41,3 +43,11 @@ class GeneratorPredefinedFiles(object):
             configs.append('#define SUPPORT_{}_PROTOCOL {}'.format(format_string.upper(), support))
 
         model.add_file(None, 'config.h', pattern.format(self.get_namespace(), '\n'.join(configs)))
+
+    def generate_base_enum_class(self, model):
+        base_enum = Class()
+        base_enum.name = 'BaseEnum'
+        base_enum.type = 'class'
+        base_enum.auto_generated = False
+
+        model.add_class(base_enum)

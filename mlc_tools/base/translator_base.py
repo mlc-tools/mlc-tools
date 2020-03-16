@@ -55,12 +55,6 @@ class TranslatorBase(object):
                 member.initial_value = 'None'
 
             shift += 1
-        value = Object()
-        value.initial_value = '{}::{}'.format(cls.name, cls.members[0].name)
-        value.name = '_value'
-        value.type = cast
-        value.access = AccessSpecifier.private
-        cls.members.append(value)
         return values
 
     @staticmethod

@@ -41,6 +41,11 @@ namespace mg
         return !(*this == rhs);
     }
 
+    bool DataUnit::operator < (const DataUnit& rhs) const
+    {
+        return this->name < rhs.name;
+    }
+
     int DataUnit::retain()
     {
         this->_reference_counter += 1;

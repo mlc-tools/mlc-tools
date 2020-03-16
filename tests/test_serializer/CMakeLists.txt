@@ -14,6 +14,7 @@ include_directories(
 
 add_executable(Serializer
         main.cpp
+        tests.h
         src/serialize/SerializerXml.cpp
         src/serialize/SerializerXml.h
         src/serialize/SerializerJson.cpp

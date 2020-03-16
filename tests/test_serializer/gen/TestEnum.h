@@ -22,6 +22,7 @@ namespace mg
         TestEnum(const TestEnum& rhs);
         TestEnum(const std::string& _value);
         const TestEnum& operator =(const TestEnum& rhs);
+        const TestEnum& operator =(const BaseEnum& rhs) { this->value = rhs.operator int(); return *this; }
         const TestEnum& operator =(int rhs);
         const TestEnum& operator =(const std::string& _value);
         bool operator ==(const TestEnum& rhs) const;

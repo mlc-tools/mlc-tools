@@ -12,6 +12,7 @@
 #include "AllTypesChildren.h"
 #include "TestEnum.h"
 #include "mg_extensions.h"
+#include "tests.h"
 
 using namespace mg;
 
@@ -30,31 +31,6 @@ std::string rand_str()
     return "1231asfsdgsrhy4t5243dasfkhgpuhq34gphw9FH072HG}";
 }
 
-std::string toStr(const pugi::xml_document &document)
-{
-    std::stringstream stream;
-    pugi::xml_writer_stream writer(stream);
-    document.save(writer, " ", pugi::format_no_declaration | pugi::format_indent, pugi::xml_encoding::encoding_auto);
-
-    return stream.str();
-}
-
-void log(const pugi::xml_document &document)
-{
-    std::cout << "XML:\n" << toStr(document) << std::endl;
-}
-
-std::string toStr(const Json::Value &json)
-{
-    Json::StreamWriterBuilder wbuilder;
-    wbuilder["indentation"] = " ";
-    return Json::writeString(wbuilder, json);
-}
-
-void log(const Json::Value &json)
-{
-    std::cout << "JSON:\n" << toStr(json) << std::endl;
-}
 
 mg::AllTypes build_object(){
     mg::AllTypes objA;
@@ -231,8 +207,10 @@ int test_xml() {
     mg::BarObject bar2;
     bar2.foo_ptr = &bar;
     foo.name = "data_name";
-    const mg::FooObject* data = &foo;
-    
+
+    const_cast<mg::DataStorage&>(DataStorage::shared()).foo_objects["data_name"].name = "data_name";
+    const mg::FooObject* data = DataStorage::shared().get<FooObject>("data_name");
+
     int int_type = 123;
     bool bool_type = true;
     float float_type = 25.f;
@@ -260,7 +238,17 @@ int test_xml() {
     std::map<int, mg::intrusive_ptr<mg::FooObject>> map_t15 = {std::make_pair(1, mg::make_intrusive<mg::FooObject>())};
     std::map<std::string, mg::intrusive_ptr<mg::FooObject>> map_t16 = {std::make_pair("dsfg", nullptr)};
     std::map<int, std::vector<int>> map_t17 = {std::make_pair<int, std::vector<int>>(1, {2, 3})};
-    
+    std::vector<const mg::DataUnit*> units = {mg::DataStorage::shared().get<mg::DataUnit>("unit1")};
+    std::map<const mg::DataUnit*, int> map_units_1 = {
+            std::make_pair(mg::DataStorage::shared().get<mg::DataUnit>("unit1"), 1),
+    };
+    std::map<int, const mg::DataUnit*> map_units_2 = {
+            std::make_pair(1, mg::DataStorage::shared().get<mg::DataUnit>("unit1")),
+    };
+    std::map<const mg::DataUnit*, const mg::DataUnit*> map_units_3 = {
+            std::make_pair(mg::DataStorage::shared().get<mg::DataUnit>("unit1"), mg::DataStorage::shared().get<mg::DataUnit>("unit1")),
+    };
+
     pugi::xml_document doc;
     pugi::xml_node node = doc.root().append_child("root");
     
@@ -297,6 +285,10 @@ int test_xml() {
     serializer.serialize(list_list_bool, "list_list_bool");
     serializer.serialize(list_foo_foo, "list_foo_foo");
     serializer.serialize(data, std::string("data"));
+    serializer.serialize(units, std::string("units"));
+    serializer.serialize(map_units_1, std::string("map_units_1"));
+    serializer.serialize(map_units_2, std::string("map_units_2"));
+    serializer.serialize(map_units_3, std::string("map_units_3"));
     log(doc);
 
     mg::TestEnum d_enum_value;
@@ -322,6 +314,10 @@ int test_xml() {
     auto d_map_t17 = map_t17;
     auto d_list_list_bool = list_list_bool;
     auto d_list_foo_foo = list_foo_foo;
+    auto d_units = units;
+    auto d_map_units_1 = map_units_1;
+    auto d_map_units_2 = map_units_2;
+    auto d_map_units_3 = map_units_3;
     
     d_v_int.clear();
     d_v_bool.clear();
@@ -345,6 +341,10 @@ int test_xml() {
     d_map_t17.clear();
     d_list_list_bool.clear();
     d_list_foo_foo.clear();
+    d_units.clear();
+    d_map_units_1.clear();
+    d_map_units_2.clear();
+    d_map_units_3.clear();
     
     DeserializerXml deserializer(node);
     deserializer.deserialize(int_type, "int_type", 0);
@@ -379,6 +379,10 @@ int test_xml() {
     deserializer.deserialize(d_list_list_bool, "list_list_bool");
     deserializer.deserialize(d_list_foo_foo, "list_foo_foo");
     deserializer.deserialize(data, std::string("data"));
+    deserializer.deserialize(d_units, std::string("units"));
+    deserializer.deserialize(d_map_units_1, std::string("map_units_1"));
+    deserializer.deserialize(d_map_units_2, std::string("map_units_2"));
+    deserializer.deserialize(d_map_units_3, std::string("map_units_3"));
 
     assert(enum_value == d_enum_value);
     assert (v_int == d_v_int);
@@ -403,7 +407,11 @@ int test_xml() {
     assert (map_t17 == d_map_t17);
     assert (list_list_bool == d_list_list_bool);
     assert (list_foo_foo.size() == d_list_foo_foo.size());
-    
+    assert (d_units == units);
+    assert (d_map_units_1 == map_units_1);
+    assert (d_map_units_2 == map_units_2);
+    assert (d_map_units_3 == map_units_3);
+
     return 0;
 }
 
@@ -419,9 +427,10 @@ int test_json() {
     
     mg::BarObject bar2;
     bar2.foo_ptr = &bar;
-    foo.name = "data_name";
-    const mg::FooObject* data = &foo;
-    
+
+    const_cast<mg::DataStorage&>(DataStorage::shared()).foo_objects["data_name"].name = "data_name";
+    const FooObject* data = DataStorage::shared().get<FooObject>("data_name");
+
     int int_type = 123;
     bool bool_type = true;
     float float_type = 25.f;
@@ -450,7 +459,18 @@ int test_json() {
     std::map<int, mg::intrusive_ptr<mg::FooObject>> map_t15 = {std::make_pair(1, mg::make_intrusive<mg::FooObject>())};
     std::map<std::string, mg::intrusive_ptr<mg::FooObject>> map_t16 = {std::make_pair("dsfg", nullptr)};
     std::map<int, std::vector<int>> map_t17 = {std::make_pair<int, std::vector<int>>(1, {2, 3})};
-    
+    std::vector<const mg::DataUnit*> units = {mg::DataStorage::shared().get<mg::DataUnit>("unit1")};
+    std::map<const mg::DataUnit*, int> map_units_1 = {
+            std::make_pair(mg::DataStorage::shared().get<mg::DataUnit>("unit1"), 1),
+    };
+    std::map<int, const mg::DataUnit*> map_units_2 = {
+            std::make_pair(1, mg::DataStorage::shared().get<mg::DataUnit>("unit1")),
+    };
+    std::map<const mg::DataUnit*, const mg::DataUnit*> map_units_3 = {
+            std::make_pair(mg::DataStorage::shared().get<mg::DataUnit>("unit1"), mg::DataStorage::shared().get<mg::DataUnit>("unit1")),
+    };
+
+
     Json::Value json;
     
     SerializerJson serializer(json);
@@ -487,6 +507,10 @@ int test_json() {
     serializer.serialize(list_foo_foo, "list_foo_foo");
     serializer.serialize(list_foo_ptr, "list_foo_ptr");
     serializer.serialize(data, std::string("data"));
+    serializer.serialize(units, std::string("units"));
+    serializer.serialize(map_units_1, std::string("map_units_1"));
+    serializer.serialize(map_units_2, std::string("map_units_2"));
+    serializer.serialize(map_units_3, std::string("map_units_3"));
     log(json);
     
     auto d_v_int = v_int;
@@ -511,6 +535,10 @@ int test_json() {
     auto d_map_t17 = map_t17;
     auto d_list_list_bool = list_list_bool;
     auto d_list_foo_foo = list_foo_foo;
+    auto d_units = units;
+    auto d_map_units_1 = map_units_1;
+    auto d_map_units_2 = map_units_2;
+    auto d_map_units_3 = map_units_3;
 
     mg::TestEnum d_enum_value;
     d_v_int.clear();
@@ -535,6 +563,10 @@ int test_json() {
     d_map_t17.clear();
     d_list_list_bool.clear();
     d_list_foo_foo.clear();
+    d_units.clear();
+    d_map_units_1.clear();
+    d_map_units_2.clear();
+    d_map_units_3.clear();
     
     DeserializerJson deserializer(json);
     deserializer.deserialize(int_type, "int_type", 0);
@@ -569,6 +601,10 @@ int test_json() {
     deserializer.deserialize(d_list_list_bool, "list_list_bool");
     deserializer.deserialize(d_list_foo_foo, "list_foo_foo");
     deserializer.deserialize(data, std::string("data"));
+    deserializer.deserialize(d_units, std::string("units"));
+    deserializer.deserialize(d_map_units_1, std::string("map_units_1"));
+    deserializer.deserialize(d_map_units_2, std::string("map_units_2"));
+    deserializer.deserialize(d_map_units_3, std::string("map_units_3"));
 
     assert(enum_value == d_enum_value);
     assert (v_int == d_v_int);
@@ -593,6 +629,10 @@ int test_json() {
     assert (map_t17 == d_map_t17);
     assert (list_list_bool == d_list_list_bool);
     assert (list_foo_foo.size() == d_list_foo_foo.size());
+    assert (d_units == units);
+    assert (d_map_units_1 == map_units_1);
+    assert (d_map_units_2 == map_units_2);
+    assert (d_map_units_3 == map_units_3);
     
     return 0;
 }
@@ -608,8 +648,8 @@ void test_switch_enum()
             assert(0);
             break;
     }
-    mg::TestEnum enum_value2 = mg::TestEnum::value2;
-    switch(enum_value2)
+    enum_value = mg::TestEnum::value2;
+    switch(enum_value)
     {
         case mg::TestEnum::value1:
             assert(0);
@@ -632,14 +672,18 @@ int main() {
     Factory::shared().registrationCommand<FooObject>("FooObject");
     Factory::shared().registrationCommand<BarObject>("BarObject");
 
+    const_cast<mg::DataStorage&>(mg::DataStorage().shared()).units["unit1"].name = "unit1";
+    const_cast<mg::DataStorage&>(mg::DataStorage().shared())._loaded = true;
+
 //    std::cout << " xml: " << sizeof(pugi::xml_node) << "\n";
 //    std::cout << "json: " << sizeof(Json::Value) << "\n";
 //    std::cout << "iter: " << sizeof(Json::ValueIterator) << "\n";
-    test_all_types_equals_with_old_format_xml();
-    test_all_types_equals_with_old_format_json();
-    test_xml();
-    test_json();
-    test_switch_enum();
+//    test_all_types_equals_with_old_format_xml();
+//    test_all_types_equals_with_old_format_json();
+//    test_xml();
+//    test_json();
+//    test_switch_enum();
+    run_generated_tests();
 
     return 0;
 }

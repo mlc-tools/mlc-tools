@@ -163,6 +163,21 @@ public:
     }
 
     template<class Key, class Value>
+    typename std::enable_if<is_attribute<Key>::value && !is_attribute<Value>::value, void>::type
+    serialize(const std::map<Key, const Value*> &values, const std::string &key)
+    {
+        if (values.empty())
+            return;
+        SerializerJson child = key.empty() ? *this : add_child(key);
+        for (auto &pair : values)
+        {
+            SerializerJson item = child.add_array_item();
+            item.add_attribute("key", pair.first, default_value::value<Key>());
+            item.add_attribute("value", pair.second->name, default_value::value<std::string>());
+        }
+    }
+
+    template<class Key, class Value>
     typename std::enable_if<is_enum<Key>::value && is_attribute<Value>::value, void>::type
     serialize(const std::map<Key, Value> &values, const std::string &key)
     {
@@ -188,7 +203,22 @@ public:
         {
             SerializerJson item = child.add_array_item();
             item.add_attribute("value", pair.second, default_value::value<Value>());
-            pair.first.serialize_json(item);
+            item.serialize(pair.first, "key");
+        }
+    }
+
+    template<class Key, class Value>
+    typename std::enable_if<!is_attribute<Key>::value && is_attribute<Value>::value, void>::type
+    serialize(const std::map<const Key*, Value> &values, const std::string &key)
+    {
+        if (values.empty())
+            return;
+        SerializerJson child = key.empty() ? *this : add_child(key);
+        for (auto &pair : values)
+        {
+            SerializerJson item = child.add_array_item();
+            item.add_attribute("key", pair.first->name, default_value::value<std::string>());
+            item.add_attribute("value", pair.second, default_value::value<Value>());
         }
     }
 
@@ -206,6 +236,26 @@ public:
             SerializerJson value = item.add_child("value");
             pair.first.serialize_json(pair_key);
             pair.second.serialize_json(value);
+        }
+    }
+
+    template<class Key, class Value>
+    typename std::enable_if<!is_attribute<Key>::value && !is_attribute<Value>::value, void>::type
+    serialize(const std::map<const Key*, const Value*> &values, const std::string &key)
+    {
+        if (values.empty())
+            return;
+        SerializerJson child = key.empty() ? *this : add_child(key);
+        for (auto &pair : values)
+        {
+            SerializerJson item = child.add_array_item();
+            item.add_attribute("key", pair.first->name, default_value::value<std::string>());
+            item.add_attribute("value", pair.second->name, default_value::value<std::string>());
+//            SerializerJson item = child.add_array_item();
+//            SerializerJson pair_key = item.add_child("key");
+//            SerializerJson value = item.add_child("value");
+//            pair.first.serialize_json(pair_key);
+//            pair.second.serialize_json(value);
         }
     }
 
@@ -459,6 +509,19 @@ public:
     }
 
     template<class Key, class Value>
+    typename std::enable_if<is_attribute<Key>::value && !is_attribute<Value>::value, void>::type
+    deserialize(std::map<Key, const Value*> &values, const std::string &key)
+    {
+        DeserializerJson child = key.empty() ? *this : get_child(key);
+        for (DeserializerJson item : child)
+        {
+            Key key_object = item.get_attribute("key", default_value::value<Key>());
+            const Value* value_object = DataStorage::shared().get<Value>(item.get_attribute("value", default_value::value<std::string>()));
+            values[key_object] = value_object;
+        }
+    }
+
+    template<class Key, class Value>
     typename std::enable_if<!is_attribute<Key>::value && is_enum<Key>::value && !is_attribute<Value>::value, void>::type
     deserialize(std::map<Key, Value> &values, const std::string &key)
     {
@@ -482,10 +545,21 @@ public:
         DeserializerJson child = key.empty() ? *this : get_child(key);
         for (DeserializerJson item : child)
         {
-            Key key_object;
-            Value value = get_attribute("value", default_value::value<Value>());
-            key_object.deserialize_json(item);
-            values[key_object] = value;
+            Key object;
+            item.deserialize(object, "key");
+            values[object] = get_attribute("value", default_value::value<Value>());
+        }
+    }
+
+    template<class Key, class Value>
+    typename std::enable_if<!is_attribute<Key>::value && !is_enum<Key>::value && is_attribute<Value>::value, void>::type
+    deserialize(std::map<const Key*, Value> &values, const std::string &key)
+    {
+        DeserializerJson child = key.empty() ? *this : get_child(key);
+        for (DeserializerJson item : child)
+        {
+            const Key* object = DataStorage::shared().get<Key>(item.get_attribute("key", default_value::value<std::string>()));
+            values[object] = item.get_attribute("value", default_value::value<Value>());
         }
     }
 
@@ -505,6 +579,19 @@ public:
             value.deserialize_json(value_json);
 
             values[key_object] = value;
+        }
+    }
+
+    template <class Key, class Value>
+    typename std::enable_if<!is_attribute<Key>::value && !is_attribute<Value>::value, void>::type
+    deserialize(std::map<const Key*, const Value*>& values, const std::string& key)
+    {
+        DeserializerJson child = key.empty() ? *this : get_child(key);
+        for (DeserializerJson item : child)
+        {
+            const Value* key_data = DataStorage::shared().get<Key>(item.get_attribute("key", default_value::value<std::string>()));
+            const Value* value_data = DataStorage::shared().get<Value>(item.get_attribute("value", default_value::value<std::string>()));
+            values[key_data] = value_data;
         }
     }
 
