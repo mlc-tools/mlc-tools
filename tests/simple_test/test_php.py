@@ -7,5 +7,6 @@ def main(argv):
     if 0 != os.system('php {}/{} {}'.format(path, 'test_php.php', ' '.join(argv[1:]))):
         sys.exit(1)
 
+
 if __name__ == '__main__':
     main(sys.argv)

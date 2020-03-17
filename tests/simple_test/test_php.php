@@ -34,7 +34,7 @@ $tests = new RunAllTests();
 $tests->initialize($logger);
 $result = $result && $tests->execute();
 
-echo ("\n\n");
+echo ("\nTests Ok\n");
 exit($result == true?0:1);
 
 ?>

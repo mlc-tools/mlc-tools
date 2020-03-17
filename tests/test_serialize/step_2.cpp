@@ -4,6 +4,8 @@
 #include "pugixml/pugixml.hpp"
 #include "jsoncpp/json.h"
 #include "generated_cpp/TestData.h"
+#include "generated_cpp/SerializerXml.h"
+#include "generated_cpp/SerializerJson.h"
 
 int main()
 {
@@ -14,11 +16,13 @@ int main()
         auto root = doc.root().first_child();
 
         auto data = mg::make_intrusive<mg::TestData>();
-        data->deserialize_xml(root);
+        mg::DeserializerXml deserializer(root);
+        data->deserialize_xml(deserializer);
 
         pugi::xml_document doc2;
         auto root2 = doc2.root().append_child("data");
-        data->serialize_xml(root2);
+        mg::SerializerXml serializer(root2);
+        data->serialize_xml(serializer);
 
         doc2.save_file("data.cpp.xml");
 	}
@@ -32,10 +36,13 @@ int main()
         reader.parse(buffer, json);
 
         auto data = mg::make_intrusive<mg::TestData>();
-        data->deserialize_json(json);
+
+        mg::DeserializerJson deserializer(json);
+        data->deserialize_json(deserializer);
 
         Json::Value json2;
-        data->serialize_json(json2);
+        mg::SerializerJson serializer(json2);
+        data->serialize_json(serializer);
 
         Json::StreamWriterBuilder wbuilder;
         wbuilder["indentation"] = " ";

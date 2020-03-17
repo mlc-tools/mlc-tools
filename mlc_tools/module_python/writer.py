@@ -26,7 +26,7 @@ class Writer(WriterBase):
             text = self.write_function(method)
             functions += text
 
-        imports = ''
+        imports = 'from .common import *\n'
         init_superclass = ''
         name = cls.name
         if cls.superclasses:

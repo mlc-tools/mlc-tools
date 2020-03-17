@@ -24,7 +24,7 @@ class Writer(WriterBase):
             text = self.write_function(method)
             functions += text
 
-        imports = ''
+        imports = 'require_once "common.php";\n'
         name = cls.name
         extend = ''
         include_patter = '\nrequire_once "{}.php";'

@@ -20,5 +20,5 @@ class GeneratorOperatorValueOf(object):
         method = Function()
         method.name = 'valueOf'
         method.return_type = Objects.STRING
-        method.operations.append('return Factory.serialize_command_to_json(this);')
+        method.operations.append('return serialize_command_to_json(this);')
         class_.functions.append(method)

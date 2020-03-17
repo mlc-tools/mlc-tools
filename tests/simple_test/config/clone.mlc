@@ -38,4 +38,3 @@ class clone/TestCloneObject<ITestCloneObject>:test
         this->assertEqual(object_a->ptr->t, object_b->ptr->t);
     }
 }
-
