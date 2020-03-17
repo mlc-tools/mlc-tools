@@ -1,11 +1,5 @@
-//
-// Created by Vladimir Tolmachev on 18/02/2020.
-//
-
 #include "SerializerXml.h"
-#include "../../third/pugixml/pugixml.hpp"
-#include <iostream>
-#include <sstream>
+#include "pugixml/pugixml.hpp"
 
 
 namespace mg

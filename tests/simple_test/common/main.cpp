@@ -22,6 +22,7 @@
 #include "tests/Logger.h"
 #include "tests/RunAllTests.h"
 #include "Registrar.h"
+#include "SerializerCommon.h"
 
 extern mg::intrusive_ptr<mg::CommandBase> createCommand(const std::string& payload);
 std::string root = "../../";
@@ -53,6 +54,41 @@ public:
 
 int main(int argc, char ** args)
 {
+    static_assert(mg::is_attribute<int>::value);
+    static_assert(mg::is_attribute<float>::value);
+    static_assert(mg::is_attribute<bool>::value);
+    static_assert(mg::is_attribute<std::string>::value);
+    static_assert(mg::is_enum<mg::TestEnum>::value);
+    static_assert(!mg::is_attribute<mg::TestEnum>::value);
+
+    static_assert(mg::is_data<const mg::DataUnit*>::value);
+    static_assert(mg::is_data<mg::DataUnit const*>::value);
+    static_assert(!mg::is_data<mg::DataUnit*>::value);
+    static_assert(!mg::is_data<mg::DataUnit* const>::value);
+    static_assert(!mg::is_data<const mg::TestEnum*>::value);
+
+    static_assert(mg::is_serializable<mg::DataUnit>::value);
+    static_assert(!mg::is_serializable<mg::TestEnum>::value);
+    static_assert(!mg::is_serializable<int>::value);
+    static_assert(!mg::is_serializable<std::string>::value);
+    static_assert(!mg::is_serializable<mg::intrusive_ptr<mg::DataUnit>>::value);
+
+    static_assert(mg::is_intrusive<mg::intrusive_ptr<mg::DataUnit>>::value);
+    static_assert(!mg::is_intrusive<mg::DataUnit>::value);
+    static_assert(!mg::is_intrusive<mg::DataUnit*>::value);
+    static_assert(!mg::is_intrusive<const mg::DataUnit*>::value);
+
+    static_assert(mg::is_not_serialize_to_attribute<std::vector<int>>::value);
+    static_assert(mg::is_not_serialize_to_attribute<std::map<int, mg::DataUnit>>::value);
+    static_assert(mg::is_not_serialize_to_attribute<mg::DataUnit>::value);
+    static_assert(mg::is_not_serialize_to_attribute<mg::intrusive_ptr<mg::DataUnit>>::value);
+    static_assert(!mg::is_not_serialize_to_attribute<int>::value);
+    static_assert(!mg::is_not_serialize_to_attribute<const mg::DataUnit*>::value);
+    static_assert(!mg::is_not_serialize_to_attribute<mg::TestEnum>::value);
+
+    static_assert(std::is_same<mg::DataUnit, mg::data_type<const mg::DataUnit*>::type>::value);
+    
+    
     if(argc > 1)
     {
         root = args[1];

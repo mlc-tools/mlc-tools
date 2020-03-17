@@ -44,7 +44,7 @@ def run_tests(generator, root, withdata=False, cpp=True, python=True, php=True, 
         print('-----------------------------------------')
 
     if cpp:
-        # run('cpp', 'json')
+        run('cpp', 'json')
         run('cpp', 'xml')
     # if python:
     #     run('py', 'json', False)

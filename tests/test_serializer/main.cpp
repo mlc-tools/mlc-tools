@@ -459,7 +459,7 @@ int test_json() {
     std::map<int, intrusive_ptr<FooObject>> map_t15 = {std::make_pair(1, make_intrusive<FooObject>())};
     std::map<std::string, intrusive_ptr<FooObject>> map_t16 = {std::make_pair("dsfg", nullptr)};
     std::map<int, std::vector<int>> map_t17 = {std::make_pair<int, std::vector<int>>(1, {2, 3})};
-    std::vector<const DataUnit*> units = {DataStorage::shared().get<DataUnit>("unit1")};
+    std::vector<const DataUnit*> units = {DataStorage::shared().get<DataUnit>("unit1"), DataStorage::shared().get<DataUnit>("unit1")};
     std::map<const DataUnit*, int> map_units_1 = {
             std::make_pair(DataStorage::shared().get<DataUnit>("unit1"), 1),
     };

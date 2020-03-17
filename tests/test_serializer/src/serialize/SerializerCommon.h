@@ -1,7 +1,3 @@
-//
-// Created by Vladimir Tolmachev on 2020-02-21.
-//
-
 #ifndef __mg_SERIALIZERCOMMON_H__
 #define __mg_SERIALIZERCOMMON_H__
 
@@ -48,17 +44,25 @@ template<typename C, typename Ret, typename... Args>
 struct has_serialize<C, Ret(Args...)> {
 private:
     template<typename T>
-    static constexpr auto check(T*) -> typename std::is_same< decltype( std::declval<T>().serialize_xml( std::declval<Args>()... ) ),Ret>::type;
-
+    static constexpr auto check_xml(T*) -> typename std::is_same< decltype( std::declval<T>().serialize_xml( std::declval<Args>()... ) ),Ret>::type;
     template<typename>
-    static constexpr std::false_type check(...);
-    typedef decltype(check<C>(0)) type;
+    static constexpr std::false_type check_xml(...);
+    typedef decltype(check_xml<C>(0)) type_xml;
+
+    template<typename T>
+    static constexpr auto check_json(T*) -> typename std::is_same< decltype( std::declval<T>().serialize_json( std::declval<Args>()... ) ),Ret>::type;
+    template<typename>
+    static constexpr std::false_type check_json(...);
+    typedef decltype(check_json<C>(0)) type_json;
 public:
-    static constexpr bool value = type::value;
+    static constexpr bool value_xml = type_xml::value;
+    static constexpr bool value_json = type_json::value;
 };
 template <class T>
 struct is_serializable{
-    constexpr static bool value = has_serialize<T, void(SerializerXml&)>::value;
+    constexpr static bool value =
+            has_serialize<T, void(SerializerXml&)>::value_xml ||
+            has_serialize<T, void(SerializerJson&)>::value_json;
     constexpr bool operator()() {
         return value;
     }

@@ -1,7 +1,3 @@
-//
-// Created by Vladimir Tolmachev on 2020-02-21.
-//
-
 #ifndef __mg_SERIALIZERJSON_H__
 #define __mg_SERIALIZERJSON_H__
 
@@ -103,24 +99,21 @@ public:
             child.add_array_item(value);
         }
     }
-
     template<class T>
-    typename std::enable_if<!is_attribute<T>::value, void>::type
-    serialize(const std::vector<mg::intrusive_ptr<T>> &values, const std::string &key)
+    typename std::enable_if<is_data<T>::value, void>::type
+    serialize(const std::vector<T> &values, const std::string &key)
     {
         if (values.empty())
             return;
         SerializerJson child = key.empty() ? *this : add_array(key);
-        for (const mg::intrusive_ptr<T> &value : values)
+        for (const T &value : values)
         {
-            SerializerJson item = child.add_array_item();
-            item.add_attribute(std::string("type"), value->get_type(), default_value::value<std::string>());
-            value->serialize_json(item);
+            child.add_array_item(value->name);
         }
     }
 
     template<class T>
-    typename std::enable_if<!is_attribute<T>::value && !is_enum<T>::value, void>::type
+    typename std::enable_if<is_not_serialize_to_attribute<T>::value, void>::type
     serialize(const std::vector<T> &values, const std::string &key)
     {
         if (values.empty())
@@ -484,24 +477,21 @@ public:
     }
 
     template<class T>
-    typename std::enable_if<!is_attribute<T>::value, void>::type
-    deserialize(std::vector<mg::intrusive_ptr<T>> &values, const std::string &key)
+    typename std::enable_if<is_data<T>::value, void>::type
+    deserialize(std::vector<T> &values, const std::string &key)
     {
         DeserializerJson child = key.empty() ? *this : get_child(key);
         for (DeserializerJson item : child)
         {
-            auto type = item.get_attribute(std::string("type"), default_value::value<std::string>());
-            auto value = Factory::shared().build<T>(item.get_attribute("type", std::string()));
-            if(value)
-            {
-                value->deserialize_json(item);
-            }
+            std::string value_string;
+            item.get_array_item(value_string);
+            T value = DataStorage::shared().get<typename data_type<T>::type>(value_string);
             values.push_back(value);
         }
     }
 
     template<class T>
-    typename std::enable_if<!is_attribute<T>::value && !is_enum<T>::value, void>::type
+    typename std::enable_if<is_not_serialize_to_attribute<T>::value, void>::type
     deserialize(std::vector<T> &values, const std::string &key)
     {
         DeserializerJson child = key.empty() ? *this : get_child(key);

@@ -1,10 +1,5 @@
-//
-// Created by Vladimir Tolmachev on 2020-02-21.
-//
-
 #include "SerializerJson.h"
-#include "../../third/jsoncpp/json.h"
-#include <iostream>
+#include "jsoncpp/json.h"
 
 
 namespace mg
