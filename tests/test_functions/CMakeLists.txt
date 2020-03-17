@@ -22,9 +22,9 @@ file(GLOB_RECURSE SRC
 )
 
 if(WIN32)
-	add_definitions(-w -std=c++14)
+	add_definitions(-w -std=c++17)
 else()
-	add_definitions(-Wall -std=c++14)
+	add_definitions(-Wall -std=c++17)
 endif()
 
 include_directories(
