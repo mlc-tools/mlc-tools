@@ -288,14 +288,14 @@ class Parser(object):
             last = 0
             for char in text:
                 last += 1
-                if not counter and char is '{':
+                if not counter and char == '{':
                     counter += 1
                     left = last
                     continue
 
-                if char is '{':
+                if char == '{':
                     counter += 1
-                if char is '}':
+                if char == '}':
                     counter -= 1
                 if not counter:
                     body = text[left:last-1]

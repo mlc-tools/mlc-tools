@@ -15,7 +15,7 @@ from mlc_tools.base.linker import Linker
 from mlc_tools.base.validator import Validator
 
 
-def create_test_model():
+def create_test_model(with_ctr=False):
     cls = Class()
     cls.name = 'Test'
 
@@ -36,6 +36,16 @@ def create_test_model():
         'return result;\n'
     ]
     cls.functions.append(f)
+
+    if with_ctr:
+        ctr = Function()
+        ctr.name = 'const'
+        ctr.name += 'ructor'
+        ctr.return_type = Object()
+        ctr.args = []
+        ctr.operations = ['this->int_value = 1;']
+        cls.functions.append(ctr)
+        cls.generate_constructor()
 
     model = Model()
     # model.parser = Parser(model)
@@ -91,7 +101,19 @@ class TestWriteClass(unittest.TestCase):
 
         hpp = model.out_dict['Test.h']
         cpp = model.out_dict['Test.cpp']
-        self.assertEqual(cpp, get_cpp())
+        self.assertEqual(cpp, get_cpp(False))
+        self.assertEqual(hpp, get_hpp())
+
+    def test_cpp_with_ctr(self):
+        model = create_test_model(True)
+        save('cpp', model)
+
+        self.assertTrue('Test.h' in model.out_dict)
+        self.assertTrue('Test.cpp' in model.out_dict)
+
+        hpp = model.out_dict['Test.h']
+        cpp = model.out_dict['Test.cpp']
+        self.assertEqual(cpp, get_cpp(True))
         self.assertEqual(hpp, get_hpp())
 
 
@@ -255,7 +277,7 @@ class TestWriterPrepareFile(unittest.TestCase):
         return text
 
 
-def get_cpp():
+def get_cpp(with_ctr):
     return '''#include "intrusive_ptr.h"
 #include "mg_Factory.h"
 #include "Test.h"
@@ -270,7 +292,7 @@ namespace mg
     Test::Test()
     : int_value(42)
     {
-
+{ctr}
     }
 
     Test::~Test()
@@ -303,7 +325,7 @@ namespace mg
     }
 
 } //namespace mg
-'''
+'''.replace('{ctr}', '        this->int_value = 1;' if with_ctr else '')
 
 
 def get_hpp():
@@ -335,6 +357,10 @@ namespace mg
 
 #endif //#ifndef __mg_Test_h__
 '''
+
+
+def get_hpp_with_ctr():
+    return ''''''
 
 
 if __name__ == '__main__':

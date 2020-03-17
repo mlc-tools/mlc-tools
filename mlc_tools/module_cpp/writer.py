@@ -39,12 +39,12 @@ class Writer(WriterBase):
         static_initialization = ''
 
         assert isinstance(obj.type, str)
-        if self.current_class.type is 'class':
+        if self.current_class.type == 'class':
             declaration = self.write_member_declaration(obj)
-        elif self.current_class.type is 'enum':
+        elif self.current_class.type == 'enum':
             declaration = self.write_member_enum_declaration(obj)
 
-        if self.current_class.type is 'enum' and obj.name != 'value':
+        if self.current_class.type == 'enum' and obj.name != 'value':
             static_initialization = self.write_member_static_enum(self.current_class, obj)
         elif obj.is_static:
             static_initialization = self.write_member_static_init(self.current_class, obj)
@@ -63,7 +63,7 @@ class Writer(WriterBase):
 
         access = AccessSpecifier.public
         for method in cls.functions:
-            if method.name is 'constructor':
+            if method.name == 'constructor':
                 continue
             hpp = self.methods_cache[method][0]
             if access != method.access:
@@ -112,7 +112,7 @@ class Writer(WriterBase):
         class_name = cls.name
         functions = ''
         for method in cls.functions:
-            if method.name is 'constructor':
+            if method.name == 'constructor':
                 continue
             cpp = self.methods_cache[method][1]
             functions += cpp
@@ -245,7 +245,7 @@ class Writer(WriterBase):
         return self.write_named_object(obj, obj.name, False, True) + ';'
 
     def write_member_enum_declaration(self, obj):
-        if obj.name is 'value':
+        if obj.name == 'value':
             return self.write_member_declaration(obj)
         return 'static constexpr {type} {name} = {value};'.format(type=obj.type,
                                                                   name=obj.name,
@@ -272,10 +272,10 @@ class Writer(WriterBase):
         return 'const int {}::{};'.format(cls.name, obj.name)
 
     def convert_initial_value(self, object_):
-        if object_.is_pointer and (object_.initial_value is '0' or object_.initial_value is None):
+        if object_.is_pointer and (object_.initial_value == '0' or object_.initial_value is None):
             return 'nullptr'
         type_class = self.model.get_class(object_.type) if self.model.has_class(object_.type) else None
-        if type_class is not None and type_class.type is 'enum' and object_.initial_value is None:
+        if type_class is not None and type_class.type == 'enum' and object_.initial_value is None:
             assert type_class.members
             return '{}::{}'.format(type_class.name, type_class.members[0].name)
 
@@ -362,7 +362,7 @@ class Writer(WriterBase):
             line = line.strip()
 
             backward = False
-            if line and line[0] is '}':
+            if line and line[0] == '}':
                 tabs -= 1
             elif 'public:' in line or 'protected:' in line or 'private:' in line:
                 backward = True
@@ -372,7 +372,7 @@ class Writer(WriterBase):
                 line = get_tabs(tabs) + line
             if backward:
                 tabs += 1
-            if line_strip and line_strip[0] is '{':
+            if line_strip and line_strip[0] == '{':
                 tabs += 1
             text.append(line)
         text = '\n'.join(text)

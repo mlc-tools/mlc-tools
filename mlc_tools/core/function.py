@@ -34,13 +34,13 @@ class Function(object):
         square_brackets = 0
 
         for pos, char in enumerate(body):
-            if char is '{':
+            if char == '{':
                 curly_braces += 1
-            elif char is '}':
+            elif char == '}':
                 curly_braces -= 1
-            elif char is '[':
+            elif char == '[':
                 square_brackets += 1
-            elif char is ']':
+            elif char == ']':
                 square_brackets -= 1
 
             if curly_braces < 0 or square_brackets < 0:
