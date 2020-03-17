@@ -32,8 +32,8 @@ std::string rand_str()
 }
 
 
-mg::AllTypes build_object(){
-    mg::AllTypes objA;
+AllTypes build_object(){
+    AllTypes objA;
     
     objA.int_value0 = 1234;
     objA.int_value1= 6346363;
@@ -61,52 +61,52 @@ mg::AllTypes build_object(){
     for (int i = 0; i < 2; ++i)
         objA.bool_string_map[static_cast<bool>(i)] = rand_str();
     for (int i = 0; i < count; ++i)
-        objA.string_string_map[mg::toStr(i)] = rand_str();
+        objA.string_string_map[toStr(i)] = rand_str();
     for (int i = 0; i < count; ++i)
-        objA.string_int_map[mg::toStr(i)] = i;
+        objA.string_int_map[toStr(i)] = i;
     for (int i = 0; i < count; ++i)
-        objA.string_float_map[mg::toStr(i)] = static_cast<float>(i);
+        objA.string_float_map[toStr(i)] = static_cast<float>(i);
     for (int i = 0; i < 2; ++i)
-        objA.string_bool_map[mg::toStr(i)] = static_cast<bool>(i);
+        objA.string_bool_map[toStr(i)] = static_cast<bool>(i);
     
     objA.object.value = 487998;
     
-    objA.object_ptr = mg::make_intrusive<mg::AllTypesChildren>();
+    objA.object_ptr = make_intrusive<AllTypesChildren>();
     objA.object_ptr->value = 243525235;
     
     for (int i = 0; i < count; ++i)
     {
-        mg::AllTypesChildren object;
+        AllTypesChildren object;
         object.value = 132123123;
         objA.object_list.push_back(object);
     }
     for (int i = 0; i < count; ++i)
     {
-        auto object_ptr = mg::make_intrusive<mg::AllTypesChildren>();
+        auto object_ptr = make_intrusive<AllTypesChildren>();
         object_ptr->value = 234234;
         objA.object_ptr_list.push_back(object_ptr);
     }
     for (int i = 0; i < count; ++i)
     {
-        mg::AllTypesChildren object;
+        AllTypesChildren object;
         object.value = 547987;
-        objA.object_map[mg::toStr(i)] = object;
+        objA.object_map[toStr(i)] = object;
     }
     for (int i = 0; i < count; ++i)
     {
-        auto object_ptr = mg::make_intrusive<mg::AllTypesChildren>();
+        auto object_ptr = make_intrusive<AllTypesChildren>();
         object_ptr->value = 6879;
-        objA.object_ptr_map[mg::toStr(i)] = object_ptr;
+        objA.object_ptr_map[toStr(i)] = object_ptr;
     }
     
-    objA.enum_list.push_back(mg::TestEnum::value1);
-    objA.enum_list.push_back(mg::TestEnum::value2);
-    objA.enum_map[mg::TestEnum::value1] = 1;
-    objA.enum_map[mg::TestEnum::value2] = 2;
+    objA.enum_list.push_back(TestEnum::value1);
+    objA.enum_list.push_back(TestEnum::value2);
+    objA.enum_map[TestEnum::value1] = 1;
+    objA.enum_map[TestEnum::value2] = 2;
     return objA;
 }
 
-void compare_objects(const mg::AllTypes& objA, const mg::AllTypes& objB){
+void compare_objects(const AllTypes& objA, const AllTypes& objB){
     auto result = true;
     result = result && objA.int_value0 == objB.int_value0;
     result = result && objA.int_value1 == objB.int_value1;
@@ -167,7 +167,7 @@ void test_all_types_equals_with_old_format_xml() {
     }
     
     DeserializerXml deserializer(node);
-    mg::AllTypes objB;
+    AllTypes objB;
     objB.deserialize_xml(deserializer);
     
     compare_objects(objA, objB);
@@ -188,65 +188,65 @@ void test_all_types_equals_with_old_format_json() {
 //    SerializerJson::log(jsonSource);
 
     DeserializerJson deserializer(json);
-    mg::AllTypes objB;
+    AllTypes objB;
     objB.deserialize_json(deserializer);
     
     compare_objects(objA, objB);
 }
 
 int test_xml() {
-    mg::FooObject foo;
+    FooObject foo;
     foo.value = 1;
     
-    mg::intrusive_ptr<mg::FooObject> foo_ptr = mg::make_intrusive<mg::FooObject>();
+    intrusive_ptr<FooObject> foo_ptr = make_intrusive<FooObject>();
     foo_ptr->value = 2;
     
-    mg::BarObject bar;
+    BarObject bar;
     bar.foo_ptr = &foo;
     
-    mg::BarObject bar2;
+    BarObject bar2;
     bar2.foo_ptr = &bar;
     foo.name = "data_name";
 
-    const_cast<mg::DataStorage&>(DataStorage::shared()).foo_objects["data_name"].name = "data_name";
-    const mg::FooObject* data = DataStorage::shared().get<FooObject>("data_name");
+    const_cast<DataStorage&>(DataStorage::shared()).foo_objects["data_name"].name = "data_name";
+    const FooObject* data = DataStorage::shared().get<FooObject>("data_name");
 
     int int_type = 123;
     bool bool_type = true;
     float float_type = 25.f;
     std::string string_type = "gdhsih";
-    mg::TestEnum enum_value = mg::TestEnum::value1;
+    TestEnum enum_value = TestEnum::value1;
     std::vector<int> v_int = {1, 2, 3};
     std::vector<bool> v_bool = {true, false};
     std::vector<float> v_float = {1.f, 2.f, 5.f};
     std::vector<std::string> v_string = {std::string("123"), std::string("234")};
     std::vector<std::vector<bool>> list_list_bool = {{false, true}, {true, false, true, false}};
-    std::vector<std::vector<mg::FooObject>> list_foo_foo = {{foo, foo}, {foo, foo, foo, foo}};
+    std::vector<std::vector<FooObject>> list_foo_foo = {{foo, foo}, {foo, foo, foo, foo}};
     std::map<int, int> map_i_i = {std::make_pair(1, 2)};
     std::map<bool, bool> map_b_b = {std::make_pair(true, false)};
     std::map<float, float> map_f_f = {std::make_pair(1.5f, 2.5f)};
     std::map<std::string, std::string> map_s_s = {std::make_pair("key_v", "value_v"), std::make_pair("1", "2")};
-    std::map<mg::FooObject, mg::intrusive_ptr<mg::FooObject>> map_t6 = {std::make_pair(foo, foo_ptr)};
-    std::map<mg::intrusive_ptr<mg::FooObject>, mg::intrusive_ptr<mg::FooObject>> map_t7 = {std::make_pair(foo_ptr, foo_ptr)};
+    std::map<FooObject, intrusive_ptr<FooObject>> map_t6 = {std::make_pair(foo, foo_ptr)};
+    std::map<intrusive_ptr<FooObject>, intrusive_ptr<FooObject>> map_t7 = {std::make_pair(foo_ptr, foo_ptr)};
     std::map<std::string, int> map_t8 = {std::make_pair("123", 1)};
     std::map<float, std::string> map_t9 = {std::make_pair(1.f, "adf")};
-    std::map<int, mg::FooObject> map_t10 = {std::make_pair(1.f, foo)};
-    std::map<std::string, mg::FooObject> map_t11 = {std::make_pair("asd", foo)};
-    std::map<mg::FooObject, mg::FooObject> map_t12 = {std::make_pair(foo, foo)};
-    std::map<mg::BarObject, mg::BarObject> map_t13 = {std::make_pair(bar, bar2)};
-    std::map<mg::FooObject, int> map_t14 = {std::make_pair(foo, 123)};
-    std::map<int, mg::intrusive_ptr<mg::FooObject>> map_t15 = {std::make_pair(1, mg::make_intrusive<mg::FooObject>())};
-    std::map<std::string, mg::intrusive_ptr<mg::FooObject>> map_t16 = {std::make_pair("dsfg", nullptr)};
+    std::map<int, FooObject> map_t10 = {std::make_pair(1.f, foo)};
+    std::map<std::string, FooObject> map_t11 = {std::make_pair("asd", foo)};
+    std::map<FooObject, FooObject> map_t12 = {std::make_pair(foo, foo)};
+    std::map<BarObject, BarObject> map_t13 = {std::make_pair(bar, bar2)};
+    std::map<FooObject, int> map_t14 = {std::make_pair(foo, 123)};
+    std::map<int, intrusive_ptr<FooObject>> map_t15 = {std::make_pair(1, make_intrusive<FooObject>())};
+    std::map<std::string, intrusive_ptr<FooObject>> map_t16 = {std::make_pair("dsfg", nullptr)};
     std::map<int, std::vector<int>> map_t17 = {std::make_pair<int, std::vector<int>>(1, {2, 3})};
-    std::vector<const mg::DataUnit*> units = {mg::DataStorage::shared().get<mg::DataUnit>("unit1")};
-    std::map<const mg::DataUnit*, int> map_units_1 = {
-            std::make_pair(mg::DataStorage::shared().get<mg::DataUnit>("unit1"), 1),
+    std::vector<const DataUnit*> units = {DataStorage::shared().get<DataUnit>("unit1")};
+    std::map<const DataUnit*, int> map_units_1 = {
+            std::make_pair(DataStorage::shared().get<DataUnit>("unit1"), 1),
     };
-    std::map<int, const mg::DataUnit*> map_units_2 = {
-            std::make_pair(1, mg::DataStorage::shared().get<mg::DataUnit>("unit1")),
+    std::map<int, const DataUnit*> map_units_2 = {
+            std::make_pair(1, DataStorage::shared().get<DataUnit>("unit1")),
     };
-    std::map<const mg::DataUnit*, const mg::DataUnit*> map_units_3 = {
-            std::make_pair(mg::DataStorage::shared().get<mg::DataUnit>("unit1"), mg::DataStorage::shared().get<mg::DataUnit>("unit1")),
+    std::map<const DataUnit*, const DataUnit*> map_units_3 = {
+            std::make_pair(DataStorage::shared().get<DataUnit>("unit1"), DataStorage::shared().get<DataUnit>("unit1")),
     };
 
     pugi::xml_document doc;
@@ -291,7 +291,7 @@ int test_xml() {
     serializer.serialize(map_units_3, std::string("map_units_3"));
     log(doc);
 
-    mg::TestEnum d_enum_value;
+    TestEnum d_enum_value;
     auto d_v_int = v_int;
     auto d_v_bool = v_bool;
     auto d_v_float = v_float;
@@ -416,58 +416,58 @@ int test_xml() {
 }
 
 int test_json() {
-    mg::FooObject foo;
+    FooObject foo;
     foo.value = 1;
     
-    mg::intrusive_ptr<mg::FooObject> foo_ptr = mg::make_intrusive<mg::FooObject>();
+    intrusive_ptr<FooObject> foo_ptr = make_intrusive<FooObject>();
     foo_ptr->value = 2;
     
-    mg::BarObject bar;
+    BarObject bar;
     bar.foo_ptr = &foo;
     
-    mg::BarObject bar2;
+    BarObject bar2;
     bar2.foo_ptr = &bar;
 
-    const_cast<mg::DataStorage&>(DataStorage::shared()).foo_objects["data_name"].name = "data_name";
+    const_cast<DataStorage&>(DataStorage::shared()).foo_objects["data_name"].name = "data_name";
     const FooObject* data = DataStorage::shared().get<FooObject>("data_name");
 
     int int_type = 123;
     bool bool_type = true;
     float float_type = 25.f;
     std::string string_type = "gdhsih";
-    mg::TestEnum enum_value = mg::TestEnum::value1;
+    TestEnum enum_value = TestEnum::value1;
     std::vector<int> v_int = {0, 1, 2, 3};
     std::vector<bool> v_bool = {true, false};
     std::vector<float> v_float = {1.f, 2.f, 5.f};
     std::vector<std::string> v_string = {std::string("123"), std::string("234")};
     std::vector<std::vector<bool>> list_list_bool = {{false, true}, {true, false, true, false}};
-    std::vector<mg::intrusive_ptr<mg::FooObject>> list_foo_ptr = {foo_ptr, foo_ptr};
-    std::vector<std::vector<mg::FooObject>> list_foo_foo = {{foo, foo}, {foo, foo, foo, foo}};
+    std::vector<intrusive_ptr<FooObject>> list_foo_ptr = {foo_ptr, foo_ptr};
+    std::vector<std::vector<FooObject>> list_foo_foo = {{foo, foo}, {foo, foo, foo, foo}};
     std::map<int, int> map_i_i = {std::make_pair(1, 2)};
     std::map<bool, bool> map_b_b = {std::make_pair(true, false)};
     std::map<float, float> map_f_f = {std::make_pair(1.5f, 2.5f)};
     std::map<std::string, std::string> map_s_s = {std::make_pair("key_v", "value_v"), std::make_pair("1", "2")};
-    std::map<mg::FooObject, mg::intrusive_ptr<mg::FooObject>> map_t6 = {std::make_pair(foo, foo_ptr)};
-    std::map<mg::intrusive_ptr<mg::FooObject>, mg::intrusive_ptr<mg::FooObject>> map_t7 = {std::make_pair(foo_ptr, foo_ptr)};
+    std::map<FooObject, intrusive_ptr<FooObject>> map_t6 = {std::make_pair(foo, foo_ptr)};
+    std::map<intrusive_ptr<FooObject>, intrusive_ptr<FooObject>> map_t7 = {std::make_pair(foo_ptr, foo_ptr)};
     std::map<std::string, int> map_t8 = {std::make_pair("123", 1)};
     std::map<float, std::string> map_t9 = {std::make_pair(1.f, "adf")};
-    std::map<int, mg::FooObject> map_t10 = {std::make_pair(1.f, foo)};
-    std::map<std::string, mg::FooObject> map_t11 = {std::make_pair("asd", foo)};
-    std::map<mg::FooObject, mg::FooObject> map_t12 = {std::make_pair(foo, foo)};
-    std::map<mg::BarObject, mg::BarObject> map_t13 = {std::make_pair(bar, bar2)};
-    std::map<mg::FooObject, int> map_t14 = {std::make_pair(foo, 123)};
-    std::map<int, mg::intrusive_ptr<mg::FooObject>> map_t15 = {std::make_pair(1, mg::make_intrusive<mg::FooObject>())};
-    std::map<std::string, mg::intrusive_ptr<mg::FooObject>> map_t16 = {std::make_pair("dsfg", nullptr)};
+    std::map<int, FooObject> map_t10 = {std::make_pair(1.f, foo)};
+    std::map<std::string, FooObject> map_t11 = {std::make_pair("asd", foo)};
+    std::map<FooObject, FooObject> map_t12 = {std::make_pair(foo, foo)};
+    std::map<BarObject, BarObject> map_t13 = {std::make_pair(bar, bar2)};
+    std::map<FooObject, int> map_t14 = {std::make_pair(foo, 123)};
+    std::map<int, intrusive_ptr<FooObject>> map_t15 = {std::make_pair(1, make_intrusive<FooObject>())};
+    std::map<std::string, intrusive_ptr<FooObject>> map_t16 = {std::make_pair("dsfg", nullptr)};
     std::map<int, std::vector<int>> map_t17 = {std::make_pair<int, std::vector<int>>(1, {2, 3})};
-    std::vector<const mg::DataUnit*> units = {mg::DataStorage::shared().get<mg::DataUnit>("unit1")};
-    std::map<const mg::DataUnit*, int> map_units_1 = {
-            std::make_pair(mg::DataStorage::shared().get<mg::DataUnit>("unit1"), 1),
+    std::vector<const DataUnit*> units = {DataStorage::shared().get<DataUnit>("unit1")};
+    std::map<const DataUnit*, int> map_units_1 = {
+            std::make_pair(DataStorage::shared().get<DataUnit>("unit1"), 1),
     };
-    std::map<int, const mg::DataUnit*> map_units_2 = {
-            std::make_pair(1, mg::DataStorage::shared().get<mg::DataUnit>("unit1")),
+    std::map<int, const DataUnit*> map_units_2 = {
+            std::make_pair(1, DataStorage::shared().get<DataUnit>("unit1")),
     };
-    std::map<const mg::DataUnit*, const mg::DataUnit*> map_units_3 = {
-            std::make_pair(mg::DataStorage::shared().get<mg::DataUnit>("unit1"), mg::DataStorage::shared().get<mg::DataUnit>("unit1")),
+    std::map<const DataUnit*, const DataUnit*> map_units_3 = {
+            std::make_pair(DataStorage::shared().get<DataUnit>("unit1"), DataStorage::shared().get<DataUnit>("unit1")),
     };
 
 
@@ -540,7 +540,7 @@ int test_json() {
     auto d_map_units_2 = map_units_2;
     auto d_map_units_3 = map_units_3;
 
-    mg::TestEnum d_enum_value;
+    TestEnum d_enum_value;
     d_v_int.clear();
     d_v_bool.clear();
     d_v_float.clear();
@@ -639,30 +639,66 @@ int test_json() {
 
 void test_switch_enum()
 {
-    mg::TestEnum enum_value = mg::TestEnum::value1;
+    TestEnum enum_value = TestEnum::value1;
     switch(enum_value)
     {
-        case mg::TestEnum::value1:
+        case TestEnum::value1:
             break;
-        case mg::TestEnum::value2:
+        case TestEnum::value2:
             assert(0);
             break;
     }
-    enum_value = mg::TestEnum::value2;
+    enum_value = TestEnum::value2;
     switch(enum_value)
     {
-        case mg::TestEnum::value1:
+        case TestEnum::value1:
             assert(0);
             break;
-        case mg::TestEnum::value2:
+        case TestEnum::value2:
             break;
     }
 }
 
 
+void test_static_asserts()
+{
+    static_assert(is_attribute<int>::value);
+    static_assert(is_attribute<float>::value);
+    static_assert(is_attribute<bool>::value);
+    static_assert(is_attribute<std::string>::value);
+    static_assert(is_enum<TestEnum>::value);
+    static_assert(!is_attribute<TestEnum>::value);
+
+    static_assert(is_data<const DataUnit*>::value);
+    static_assert(is_data<DataUnit const*>::value);
+    static_assert(!is_data<DataUnit*>::value);
+    static_assert(!is_data<DataUnit* const>::value);
+    static_assert(!is_data<const TestEnum*>::value);
+
+    static_assert(is_serializable<DataUnit>::value);
+    static_assert(!is_serializable<TestEnum>::value);
+    static_assert(!is_serializable<int>::value);
+    static_assert(!is_serializable<std::string>::value);
+    static_assert(!is_serializable<intrusive_ptr<DataUnit>>::value);
+
+    static_assert(is_intrusive<intrusive_ptr<DataUnit>>::value);
+    static_assert(!is_intrusive<DataUnit>::value);
+    static_assert(!is_intrusive<DataUnit*>::value);
+    static_assert(!is_intrusive<const DataUnit*>::value);
+
+    static_assert(is_not_serialize_to_attribute<std::vector<int>>::value);
+    static_assert(is_not_serialize_to_attribute<std::map<int, DataUnit>>::value);
+    static_assert(is_not_serialize_to_attribute<DataUnit>::value);
+    static_assert(is_not_serialize_to_attribute<intrusive_ptr<DataUnit>>::value);
+    static_assert(!is_not_serialize_to_attribute<int>::value);
+    static_assert(!is_not_serialize_to_attribute<const DataUnit*>::value);
+    static_assert(!is_not_serialize_to_attribute<TestEnum>::value);
+
+    static_assert(std::is_same<DataUnit, data_type<const DataUnit*>::type>::value);
+}
+
 int main() {
-    static_assert(is_enum<mg::TestEnum>::value);
-    static_assert(!is_attribute<mg::TestEnum>::value);
+    test_static_asserts();
 
     Factory::shared().registrationCommand<AllTypesChildren>(AllTypesChildren::TYPE);
     Factory::shared().registrationCommand<AllTypes>(AllTypes::TYPE);
@@ -672,17 +708,17 @@ int main() {
     Factory::shared().registrationCommand<FooObject>("FooObject");
     Factory::shared().registrationCommand<BarObject>("BarObject");
 
-    const_cast<mg::DataStorage&>(mg::DataStorage().shared()).units["unit1"].name = "unit1";
-    const_cast<mg::DataStorage&>(mg::DataStorage().shared())._loaded = true;
+    const_cast<DataStorage&>(DataStorage().shared()).units["unit1"].name = "unit1";
+    const_cast<DataStorage&>(DataStorage().shared())._loaded = true;
 
 //    std::cout << " xml: " << sizeof(pugi::xml_node) << "\n";
 //    std::cout << "json: " << sizeof(Json::Value) << "\n";
 //    std::cout << "iter: " << sizeof(Json::ValueIterator) << "\n";
-//    test_all_types_equals_with_old_format_xml();
-//    test_all_types_equals_with_old_format_json();
-//    test_xml();
-//    test_json();
-//    test_switch_enum();
+    test_all_types_equals_with_old_format_xml();
+    test_all_types_equals_with_old_format_json();
+    test_xml();
+    test_json();
+    test_switch_enum();
     run_generated_tests();
 
     return 0;
