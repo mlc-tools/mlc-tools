@@ -282,6 +282,8 @@ def get_cpp(with_ctr):
 #include "mg_Factory.h"
 #include "Test.h"
 #include "mg_extensions.h"
+#include "SerializerJson.h"
+#include "SerializerXml.h"
 
 namespace mg
 {
@@ -338,6 +340,10 @@ def get_hpp():
 
 namespace mg
 {
+    class SerializerXml;
+    class DeserializerXml;
+    class SerializerJson;
+    class DeserializerJson;
 
     class Test
     {
