@@ -160,7 +160,6 @@ class Translator(TranslatorBase):
 
         def add_method_str():
             method = add_method(Objects.STRING, 'str', True)
-            method.is_virtual = True
             for index, obj in enumerate(cls.members):
                 if obj.name != 'value' and index <= len(values):
                     method.operations.append('''if(value == {0})

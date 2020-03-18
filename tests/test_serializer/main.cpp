@@ -197,10 +197,13 @@ void test_all_types_equals_with_old_format_json() {
 int test_xml() {
     FooObject foo;
     foo.value = 1;
-    
+
     intrusive_ptr<FooObject> foo_ptr = make_intrusive<FooObject>();
     foo_ptr->value = 2;
-    
+
+    intrusive_ptr<BarObject> bar_ptr = make_intrusive<BarObject>();
+    bar_ptr->value = 23;
+
     BarObject bar;
     bar.foo_ptr = &foo;
     
@@ -248,6 +251,7 @@ int test_xml() {
     std::map<const DataUnit*, const DataUnit*> map_units_3 = {
             std::make_pair(DataStorage::shared().get<DataUnit>("unit1"), DataStorage::shared().get<DataUnit>("unit1")),
     };
+    std::vector<intrusive_ptr<FooObject>> vector_intrusive_foo_and_bar = {foo_ptr, bar_ptr};
 
     pugi::xml_document doc;
     pugi::xml_node node = doc.root().append_child("root");
@@ -289,6 +293,7 @@ int test_xml() {
     serializer.serialize(map_units_1, std::string("map_units_1"));
     serializer.serialize(map_units_2, std::string("map_units_2"));
     serializer.serialize(map_units_3, std::string("map_units_3"));
+    serializer.serialize(vector_intrusive_foo_and_bar, "vector_intrusive_foo_and_bar");
     log(doc);
 
     TestEnum d_enum_value;
@@ -318,6 +323,7 @@ int test_xml() {
     auto d_map_units_1 = map_units_1;
     auto d_map_units_2 = map_units_2;
     auto d_map_units_3 = map_units_3;
+    auto d_vector_intrusive_foo_and_bar = vector_intrusive_foo_and_bar;
     
     d_v_int.clear();
     d_v_bool.clear();
@@ -345,6 +351,7 @@ int test_xml() {
     d_map_units_1.clear();
     d_map_units_2.clear();
     d_map_units_3.clear();
+    d_vector_intrusive_foo_and_bar.clear();
     
     DeserializerXml deserializer(node);
     deserializer.deserialize(int_type, "int_type", 0);
@@ -383,6 +390,7 @@ int test_xml() {
     deserializer.deserialize(d_map_units_1, std::string("map_units_1"));
     deserializer.deserialize(d_map_units_2, std::string("map_units_2"));
     deserializer.deserialize(d_map_units_3, std::string("map_units_3"));
+    deserializer.deserialize(d_vector_intrusive_foo_and_bar, "vector_intrusive_foo_and_bar");
 
     assert(enum_value == d_enum_value);
     assert (v_int == d_v_int);
@@ -411,6 +419,12 @@ int test_xml() {
     assert (d_map_units_1 == map_units_1);
     assert (d_map_units_2 == map_units_2);
     assert (d_map_units_3 == map_units_3);
+    assert (d_vector_intrusive_foo_and_bar.size() == vector_intrusive_foo_and_bar.size() &&
+                    vector_intrusive_foo_and_bar.size() == 2);
+    assert (d_vector_intrusive_foo_and_bar[0]->get_type() == vector_intrusive_foo_and_bar[0]->get_type());
+    assert (d_vector_intrusive_foo_and_bar[0]->value == vector_intrusive_foo_and_bar[0]->value);
+    assert (d_vector_intrusive_foo_and_bar[1]->get_type() == vector_intrusive_foo_and_bar[1]->get_type());
+    assert (d_vector_intrusive_foo_and_bar[1]->value == vector_intrusive_foo_and_bar[1]->value);
 
     return 0;
 }
@@ -421,6 +435,9 @@ int test_json() {
     
     intrusive_ptr<FooObject> foo_ptr = make_intrusive<FooObject>();
     foo_ptr->value = 2;
+
+    intrusive_ptr<BarObject> bar_ptr = make_intrusive<BarObject>();
+    bar_ptr->value = 23;
     
     BarObject bar;
     bar.foo_ptr = &foo;
@@ -469,6 +486,7 @@ int test_json() {
     std::map<const DataUnit*, const DataUnit*> map_units_3 = {
             std::make_pair(DataStorage::shared().get<DataUnit>("unit1"), DataStorage::shared().get<DataUnit>("unit1")),
     };
+    std::vector<intrusive_ptr<FooObject>> vector_intrusive_foo_and_bar = {foo_ptr, bar_ptr};
 
 
     Json::Value json;
@@ -511,6 +529,7 @@ int test_json() {
     serializer.serialize(map_units_1, std::string("map_units_1"));
     serializer.serialize(map_units_2, std::string("map_units_2"));
     serializer.serialize(map_units_3, std::string("map_units_3"));
+    serializer.serialize(vector_intrusive_foo_and_bar, "vector_intrusive_foo_and_bar");
     log(json);
     
     auto d_v_int = v_int;
@@ -539,6 +558,7 @@ int test_json() {
     auto d_map_units_1 = map_units_1;
     auto d_map_units_2 = map_units_2;
     auto d_map_units_3 = map_units_3;
+    auto d_vector_intrusive_foo_and_bar = vector_intrusive_foo_and_bar;
 
     TestEnum d_enum_value;
     d_v_int.clear();
@@ -567,6 +587,7 @@ int test_json() {
     d_map_units_1.clear();
     d_map_units_2.clear();
     d_map_units_3.clear();
+    d_vector_intrusive_foo_and_bar.clear();
     
     DeserializerJson deserializer(json);
     deserializer.deserialize(int_type, "int_type", 0);
@@ -605,6 +626,7 @@ int test_json() {
     deserializer.deserialize(d_map_units_1, std::string("map_units_1"));
     deserializer.deserialize(d_map_units_2, std::string("map_units_2"));
     deserializer.deserialize(d_map_units_3, std::string("map_units_3"));
+    deserializer.deserialize(d_vector_intrusive_foo_and_bar, "vector_intrusive_foo_and_bar");
 
     assert(enum_value == d_enum_value);
     assert (v_int == d_v_int);
@@ -633,6 +655,12 @@ int test_json() {
     assert (d_map_units_1 == map_units_1);
     assert (d_map_units_2 == map_units_2);
     assert (d_map_units_3 == map_units_3);
+    assert (d_vector_intrusive_foo_and_bar.size() == vector_intrusive_foo_and_bar.size() &&
+            vector_intrusive_foo_and_bar.size() == 2);
+    assert (d_vector_intrusive_foo_and_bar[0]->get_type() == vector_intrusive_foo_and_bar[0]->get_type());
+    assert (d_vector_intrusive_foo_and_bar[0]->value == vector_intrusive_foo_and_bar[0]->value);
+    assert (d_vector_intrusive_foo_and_bar[1]->get_type() == vector_intrusive_foo_and_bar[1]->get_type());
+    assert (d_vector_intrusive_foo_and_bar[1]->value == vector_intrusive_foo_and_bar[1]->value);
     
     return 0;
 }
@@ -708,12 +736,12 @@ int main() {
     Factory::shared().registrationCommand<FooObject>("FooObject");
     Factory::shared().registrationCommand<BarObject>("BarObject");
 
-    const_cast<DataStorage&>(DataStorage().shared()).units["unit1"].name = "unit1";
-    const_cast<DataStorage&>(DataStorage().shared())._loaded = true;
+    const_cast<DataStorage&>(DataStorage::shared()).units["unit1"].name = "unit1";
+    const_cast<DataStorage&>(DataStorage::shared())._loaded = true;
 
-//    std::cout << " xml: " << sizeof(pugi::xml_node) << "\n";
-//    std::cout << "json: " << sizeof(Json::Value) << "\n";
-//    std::cout << "iter: " << sizeof(Json::ValueIterator) << "\n";
+    std::cout << " xml: " << sizeof(pugi::xml_node) << "\n";
+    std::cout << "json: " << sizeof(Json::Value) << "\n";
+    std::cout << "iter: " << sizeof(Json::ValueIterator) << "\n";
     test_all_types_equals_with_old_format_xml();
     test_all_types_equals_with_old_format_json();
     test_xml();

@@ -19,7 +19,7 @@ struct is_attribute
                                    std::is_same<bool, T>::value ||
                                    std::is_same<float, T>::value ||
                                    std::is_same<std::string, T>::value) &&
-                                  !std::is_base_of<mg::BaseEnum, T>::value;
+                                  !std::is_base_of<BaseEnum, T>::value;
 
     constexpr bool operator()() {
         return value;
@@ -29,7 +29,7 @@ struct is_attribute
 template<class T>
 struct is_enum
 {
-    constexpr static bool value = std::is_base_of<mg::BaseEnum, T>::value;
+    constexpr static bool value = std::is_base_of<BaseEnum, T>::value;
 
     constexpr bool operator()() {
         return value;

@@ -95,6 +95,11 @@ DeserializerXml DeserializerXml::get_child(const std::string &name)
     return DeserializerXml(_node->child(name.c_str()));
 }
 
+std::string DeserializerXml::get_name()const
+{
+    return _node->name();
+}
+
 int DeserializerXml::get_attribute(const std::string &key, int default_value)
 {
     return _node->attribute(key.c_str()).as_int(default_value);
@@ -117,7 +122,8 @@ std::string DeserializerXml::get_attribute(const std::string &key, const std::st
 
 DeserializerXml DeserializerXml::begin()
 {
-    return DeserializerXml(*_node ? *_node->begin() : pugi::xml_node());
+    auto begin = _node->begin();
+    return DeserializerXml(begin != _node->end() ? *begin : pugi::xml_node());
 }
 
 DeserializerXml DeserializerXml::end()

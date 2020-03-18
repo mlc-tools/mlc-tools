@@ -11,7 +11,6 @@ namespace mg
         constexpr BaseEnum(int value_ = 0): value(value_) {}
         constexpr BaseEnum(const BaseEnum& rhs): value(rhs.value) {}
         constexpr operator int() const { return value; }
-        virtual std::string str() const {assert(0 && "Override me"); return std::string(); }
     protected:
         int value;
     };

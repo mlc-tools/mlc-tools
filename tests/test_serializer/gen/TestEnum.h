@@ -32,7 +32,7 @@ namespace mg
         bool operator <(const TestEnum& rhs) const;
         operator int() const;
         operator std::string() const;
-        virtual std::string str() const;
+        std::string str() const;
 
         static constexpr BaseEnum value1 = 0;
         static constexpr BaseEnum value2 = 1;

@@ -60,7 +60,7 @@ public:
 
     template <class T>
     typename std::enable_if<!is_attribute<T>::value && !is_enum<T>::value, void>::type
-    serialize(const mg::intrusive_ptr<T>& value, const std::string& key)
+    serialize(const intrusive_ptr<T>& value, const std::string& key)
     {
         if (value)
         {
@@ -94,12 +94,12 @@ public:
 
     template <class T>
     typename std::enable_if<!is_attribute<T>::value, void>::type
-    serialize(const std::vector<mg::intrusive_ptr<T>>& values, const std::string& key)
+    serialize(const std::vector<intrusive_ptr<T>>& values, const std::string& key)
     {
         if (values.empty())
             return;
         SerializerXml child = key.empty() ? *this : add_child(key);
-        for (const mg::intrusive_ptr<T>& value : values)
+        for (const intrusive_ptr<T>& value : values)
         {
             SerializerXml item = child.add_child(value->get_type());
             value->serialize_xml(item);
@@ -392,6 +392,7 @@ public:
 
     DeserializerXml get_child(const std::string& name);
 
+    std::string get_name()const;
     int get_attribute(const std::string& key, int default_value=0);
     bool get_attribute(const std::string& key, bool default_value=false);
     float get_attribute(const std::string& key, float default_value=0.f);
@@ -423,12 +424,12 @@ public:
     typename std::enable_if<!is_attribute<T>::value, void>::type
     deserialize(T const *&value, const std::string& key)
     {
-        value = mg::DataStorage::shared().get<T>(get_attribute(key, default_value::value<std::string>()));
+        value = DataStorage::shared().get<T>(get_attribute(key, default_value::value<std::string>()));
     }
 
     template <class T>
     typename std::enable_if<!is_attribute<T>::value, void>::type
-    deserialize(mg::intrusive_ptr<T>& value, const std::string& key)
+    deserialize(intrusive_ptr<T>& value, const std::string& key)
     {
         DeserializerXml child = key.empty() ? *this : get_child(key);
         auto type = child.get_attribute("type", std::string());
@@ -463,12 +464,13 @@ public:
 
     template <class T>
     typename std::enable_if<!is_attribute<T>::value, void>::type
-    deserialize(std::vector<mg::intrusive_ptr<T>>& values, const std::string& key)
+    deserialize(std::vector<intrusive_ptr<T>>& values, const std::string& key)
     {
         DeserializerXml child = key.empty() ? *this : get_child(key);
         for (auto item : child)
         {
-            mg::intrusive_ptr<T> object = mg::make_intrusive<T>();
+            std::string type = item.get_name();
+            intrusive_ptr<T> object = Factory::shared().build<T>(type);
             object->deserialize_xml(item);
             values.push_back(object);
         }
@@ -481,7 +483,7 @@ public:
         DeserializerXml child = key.empty() ? *this : get_child(key);
         for (auto item : child)
         {
-            const T* value = mg::DataStorage::shared().get<T>(item.get_attribute("value", default_value::value<std::string>()));
+            const T* value = DataStorage::shared().get<T>(item.get_attribute("value", default_value::value<std::string>()));
             values.push_back(value);
         }
     }

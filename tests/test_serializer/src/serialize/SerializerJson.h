@@ -41,7 +41,13 @@ public:
     void add_array_item(const bool &value);
     void add_array_item(const float &value);
     void add_array_item(const std::string &value);
-    void add_array_item(const mg::BaseEnum &value);
+
+    template <class T>
+    typename std::enable_if<is_enum<T>::value, void>::type
+    add_array_item(const T& value)
+    {
+        add_array_item(value.str());
+    }
 
     template<class T>
     typename std::enable_if<is_attribute<T>::value, void>::type
@@ -69,7 +75,7 @@ public:
 
     template<class T>
     typename std::enable_if<!is_attribute<T>::value, void>::type
-    serialize(const mg::intrusive_ptr<T> &value, const std::string &key)
+    serialize(const intrusive_ptr<T> &value, const std::string &key)
     {
         if (value)
         {
@@ -424,12 +430,12 @@ public:
     typename std::enable_if<!is_attribute<T>::value, void>::type
     deserialize(const T *&value, const std::string &key)
     {
-        value = mg::DataStorage::shared().get<T>(get_attribute(key, default_value::value<std::string>()));
+        value = DataStorage::shared().get<T>(get_attribute(key, default_value::value<std::string>()));
     }
 
     template<class T>
     typename std::enable_if<!is_attribute<T>::value, void>::type
-    deserialize(mg::intrusive_ptr<T> &value, const std::string &key)
+    deserialize(intrusive_ptr<T> &value, const std::string &key)
     {
         DeserializerJson child = key.empty() ? *this : get_child(key);
         std::string type = child.get_attribute(std::string("type"), default_value::value<std::string>());

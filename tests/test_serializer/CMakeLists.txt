@@ -12,6 +12,8 @@ include_directories(
         ${CMAKE_SOURCE_DIR}/third/
 )
 
+add_definitions(-Wall -Wno-overloaded-virtual -Wnon-virtual-dtor -Wsign-promo -Wduplicate-enum -Werror)
+
 add_executable(Serializer
         main.cpp
         tests.h

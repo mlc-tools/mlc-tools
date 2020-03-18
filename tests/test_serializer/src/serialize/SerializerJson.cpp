@@ -83,11 +83,6 @@ void SerializerJson::add_array_item(const std::string &value)
     _json.append(value);
 }
 
-void SerializerJson::add_array_item(const mg::BaseEnum &value)
-{
-    _json.append(value.str());
-}
-
 
 DeserializerJson::DeserializerJson(Json::Value &json) : _json(json)
 {

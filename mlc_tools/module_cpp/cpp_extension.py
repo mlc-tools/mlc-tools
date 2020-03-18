@@ -834,7 +834,7 @@ public:
 
     template <class T>
     typename std::enable_if<!is_attribute<T>::value && !is_enum<T>::value, void>::type
-    serialize(const mg::intrusive_ptr<T>& value, const std::string& key)
+    serialize(const intrusive_ptr<T>& value, const std::string& key)
     {
         if (value)
         {
@@ -868,12 +868,12 @@ public:
 
     template <class T>
     typename std::enable_if<!is_attribute<T>::value, void>::type
-    serialize(const std::vector<mg::intrusive_ptr<T>>& values, const std::string& key)
+    serialize(const std::vector<intrusive_ptr<T>>& values, const std::string& key)
     {
         if (values.empty())
             return;
         SerializerXml child = key.empty() ? *this : add_child(key);
-        for (const mg::intrusive_ptr<T>& value : values)
+        for (const intrusive_ptr<T>& value : values)
         {
             SerializerXml item = child.add_child(value->get_type());
             value->serialize_xml(item);
@@ -1166,6 +1166,7 @@ public:
 
     DeserializerXml get_child(const std::string& name);
 
+    std::string get_name()const;
     int get_attribute(const std::string& key, int default_value=0);
     bool get_attribute(const std::string& key, bool default_value=false);
     float get_attribute(const std::string& key, float default_value=0.f);
@@ -1197,12 +1198,12 @@ public:
     typename std::enable_if<!is_attribute<T>::value, void>::type
     deserialize(T const *&value, const std::string& key)
     {
-        value = mg::DataStorage::shared().get<T>(get_attribute(key, default_value::value<std::string>()));
+        value = DataStorage::shared().get<T>(get_attribute(key, default_value::value<std::string>()));
     }
 
     template <class T>
     typename std::enable_if<!is_attribute<T>::value, void>::type
-    deserialize(mg::intrusive_ptr<T>& value, const std::string& key)
+    deserialize(intrusive_ptr<T>& value, const std::string& key)
     {
         DeserializerXml child = key.empty() ? *this : get_child(key);
         auto type = child.get_attribute("type", std::string());
@@ -1237,12 +1238,13 @@ public:
 
     template <class T>
     typename std::enable_if<!is_attribute<T>::value, void>::type
-    deserialize(std::vector<mg::intrusive_ptr<T>>& values, const std::string& key)
+    deserialize(std::vector<intrusive_ptr<T>>& values, const std::string& key)
     {
         DeserializerXml child = key.empty() ? *this : get_child(key);
         for (auto item : child)
         {
-            mg::intrusive_ptr<T> object = mg::make_intrusive<T>();
+            std::string type = item.get_name();
+            intrusive_ptr<T> object = Factory::shared().build<T>(type);
             object->deserialize_xml(item);
             values.push_back(object);
         }
@@ -1255,7 +1257,7 @@ public:
         DeserializerXml child = key.empty() ? *this : get_child(key);
         for (auto item : child)
         {
-            const T* value = mg::DataStorage::shared().get<T>(item.get_attribute("value", default_value::value<std::string>()));
+            const T* value = DataStorage::shared().get<T>(item.get_attribute("value", default_value::value<std::string>()));
             values.push_back(value);
         }
     }
@@ -1588,6 +1590,11 @@ DeserializerXml DeserializerXml::get_child(const std::string &name)
     return DeserializerXml(_node->child(name.c_str()));
 }
 
+std::string DeserializerXml::get_name()const
+{
+    return _node->name();
+}
+
 int DeserializerXml::get_attribute(const std::string &key, int default_value)
 {
     return _node->attribute(key.c_str()).as_int(default_value);
@@ -1610,7 +1617,8 @@ std::string DeserializerXml::get_attribute(const std::string &key, const std::st
 
 DeserializerXml DeserializerXml::begin()
 {
-    return DeserializerXml(*_node ? *_node->begin() : pugi::xml_node());
+    auto begin = _node->begin();
+    return DeserializerXml(begin != _node->end() ? *begin : pugi::xml_node());
 }
 
 DeserializerXml DeserializerXml::end()
@@ -1677,7 +1685,13 @@ public:
     void add_array_item(const bool &value);
     void add_array_item(const float &value);
     void add_array_item(const std::string &value);
-    void add_array_item(const mg::BaseEnum &value);
+
+    template <class T>
+    typename std::enable_if<is_enum<T>::value, void>::type
+    add_array_item(const T& value)
+    {
+        add_array_item(value.str());
+    }
 
     template<class T>
     typename std::enable_if<is_attribute<T>::value, void>::type
@@ -1705,7 +1719,7 @@ public:
 
     template<class T>
     typename std::enable_if<!is_attribute<T>::value, void>::type
-    serialize(const mg::intrusive_ptr<T> &value, const std::string &key)
+    serialize(const intrusive_ptr<T> &value, const std::string &key)
     {
         if (value)
         {
@@ -2060,12 +2074,12 @@ public:
     typename std::enable_if<!is_attribute<T>::value, void>::type
     deserialize(const T *&value, const std::string &key)
     {
-        value = mg::DataStorage::shared().get<T>(get_attribute(key, default_value::value<std::string>()));
+        value = DataStorage::shared().get<T>(get_attribute(key, default_value::value<std::string>()));
     }
 
     template<class T>
     typename std::enable_if<!is_attribute<T>::value, void>::type
-    deserialize(mg::intrusive_ptr<T> &value, const std::string &key)
+    deserialize(intrusive_ptr<T> &value, const std::string &key)
     {
         DeserializerJson child = key.empty() ? *this : get_child(key);
         std::string type = child.get_attribute(std::string("type"), default_value::value<std::string>());
@@ -2441,11 +2455,6 @@ void SerializerJson::add_array_item(const std::string &value)
     _json.append(value);
 }
 
-void SerializerJson::add_array_item(const mg::BaseEnum &value)
-{
-    _json.append(value.str());
-}
-
 
 DeserializerJson::DeserializerJson(Json::Value &json) : _json(json)
 {
@@ -2558,7 +2567,7 @@ struct is_attribute
                                    std::is_same<bool, T>::value ||
                                    std::is_same<float, T>::value ||
                                    std::is_same<std::string, T>::value) &&
-                                  !std::is_base_of<mg::BaseEnum, T>::value;
+                                  !std::is_base_of<BaseEnum, T>::value;
 
     constexpr bool operator()() {
         return value;
@@ -2568,7 +2577,7 @@ struct is_attribute
 template<class T>
 struct is_enum
 {
-    constexpr static bool value = std::is_base_of<mg::BaseEnum, T>::value;
+    constexpr static bool value = std::is_base_of<BaseEnum, T>::value;
 
     constexpr bool operator()() {
         return value;
@@ -2739,7 +2748,6 @@ namespace mg
         constexpr BaseEnum(int value_ = 0): value(value_) {}
         constexpr BaseEnum(const BaseEnum& rhs): value(rhs.value) {}
         constexpr operator int() const { return value; }
-        virtual std::string str() const {assert(0 && "Override me"); return std::string(); }
     protected:
         int value;
     };
