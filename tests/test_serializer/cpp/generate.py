@@ -90,7 +90,7 @@ for item1 in keys:
         index += 2
 
 tests = '''/*
-    This is generated file by generate_tests.py script
+    This is generated file by generate.py script
 */
 #ifndef __TESTS_H__
 #define __TESTS_H__
@@ -302,7 +302,7 @@ content = replace(content, json_map_deserialize, 'Maps deserialization')
 open('src/serialize/SerializerJson.h', 'w').write(content)
 
 # Save serializers to mlc_tools
-content = open('../../mlc_tools/module_cpp/cpp_extension.py').read()
+content = open('../../../mlc_tools/module_cpp/cpp_extension.py').read()
 
 data = open('src/serialize/SerializerXml.h').read()
 start = content.find("'''", content.find('SERIALIZER_XML_HPP')) + 3
@@ -329,4 +329,4 @@ start = content.find("'''", content.find('SERIALIZER_COMMON')) + 3
 finish = content.find("'''", start)
 content = content[:start] + data + content[finish:]
 
-open('../../mlc_tools/module_cpp/cpp_extension.py', 'w').write(content)
+open('../../../mlc_tools/module_cpp/cpp_extension.py', 'w').write(content)

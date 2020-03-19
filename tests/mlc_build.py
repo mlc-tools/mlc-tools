@@ -44,21 +44,21 @@ def run_tests(generator, root, withdata=False, cpp=True, python=True, php=True, 
         print('|  test with params [{}, {}] finished'.format(lang, serialized_format))
         print('-----------------------------------------')
 
-    if cpp:
-        run('cpp', 'json')
-        run('cpp', 'xml')
+    # if cpp:
+    #     run('cpp', 'json')
+    #     run('cpp', 'xml')
     if python:
         run('py', 'json', False)
-        run('py', 'xml', False)
-        with_join and run('py', 'json', True)
-        with_join and run('py', 'xml', True)
-    if php:
-        run('php', 'json', False)
+        # run('py', 'xml', False)
+        # with_join and run('py', 'json', True)
+        # with_join and run('py', 'xml', True)
+    # if php:
+    #     run('php', 'json', False)
         # run('php', 'xml', False)
         # with_join and run('php', 'json', True)
         # with_join and run('php', 'xml', True)
-    if js:
-        run('js', 'json')
+    # if js:
+    #     run('js', 'json')
 
 
 def simple_test():

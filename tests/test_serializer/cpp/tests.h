@@ -1,5 +1,5 @@
 /*
-    This is generated file by generate_tests.py script
+    This is generated file by generate.py script
 */
 #ifndef __TESTS_H__
 #define __TESTS_H__
