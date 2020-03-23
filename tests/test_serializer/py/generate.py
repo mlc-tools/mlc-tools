@@ -1,77 +1,48 @@
 
 
-types = {
-    'int': '123',
-    'bool': 'true',
-    'float': '123.5f',
-    'std::string': '"434312some_random"',
-    'TestEnum': 'TestEnum::value2',
-    'const DataUnit*': 'DataStorage::shared().get<DataUnit>("unit1")',
-    'AllTypesChildren': 'AllTypesChildren()',
-    'intrusive_ptr<AllTypesChildren>': 'make_intrusive<AllTypesChildren>()',
-    'std::vector<int>': 'std::vector<int>{1, 2, 3, 4}',
-    'std::vector<std::vector<bool>>': 'std::vector<std::vector<bool>>{{true, false}, {false, true}}',
-    'std::map<int, int>': 'std::map<int, int>{std::make_pair(1, 2), std::make_pair(2, 3)}',
-}
+# types = {
+#     'int': '123',
+#     'bool': 'true',
+#     'float': '123.5f',
+#     'std::string': '"434312some_random"',
+#     'TestEnum': 'TestEnum::value2',
+#     'const DataUnit*': 'DataStorage::shared().get<DataUnit>("unit1")',
+#     'AllTypesChildren': 'AllTypesChildren()',
+#     'intrusive_ptr<AllTypesChildren>': 'make_intrusive<AllTypesChildren>()',
+#     'std::vector<int>': 'std::vector<int>{1, 2, 3, 4}',
+#     'std::vector<std::vector<bool>>': 'std::vector<std::vector<bool>>{{true, false}, {false, true}}',
+#     'std::map<int, int>': 'std::map<int, int>{std::make_pair(1, 2), std::make_pair(2, 3)}',
+# }
 
-comparators = {
-    'intrusive_ptr<AllTypesChildren>': '*{0} == *deserialized_{0}'
-}
+# comparators = {
+#     'intrusive_ptr<AllTypesChildren>': '*{0} == *deserialized_{0}'
+# }
+
 
 test = '''
-inline void test_{index1}_xml()
-{{
-    std::map<{type1}, {type2}> object1;
-    std::map<{type1}, {type2}> object2;
+def test_{index1}_json():
+    object1 = {}
+    object2 = {}
     
-    auto key = {initialize1};
-    auto value = {initialize2};
+    key = {initialize1};
+    value = {initialize2};
     object1[key] = value;
     
-    pugi::xml_document doc;
-    pugi::xml_node node = doc.root().append_child("root");
+    js = {}
 
-    SerializerXml serializer(node);
+    serializer = SerializerJson(js);
     serializer.serialize(object1, "object");
-    std::cout << std::endl << ",\\"map<{type1}|{type2}>\\":" << std::endl; 
-    log(doc);
+    log_js(js);
 
-    DeserializerXml deserializer(node);
-    deserializer.deserialize(object2, "object");
-    
-    assert(object1.size() == object2.size() && object2.size() == 1);
-    
-    auto& deserialized_key = object2.begin()->first; 
-    auto& deserialized_value = object2.begin()->second; 
-    assert({compare_key});
-    assert({compare_value});
-}}
-
-inline void test_{index2}_json()
-{{
-    std::map<{type1}, {type2}> object1;
-    std::map<{type1}, {type2}> object2;
-    
-    auto key = {initialize1};
-    auto value = {initialize2};
-    object1[key] = value;
-    
-    Json::Value json;
-
-    SerializerJson serializer(json);
-    serializer.serialize(object1, "object");
-    std::cout << std::endl << ",\\"map<{type1}|{type2}>\\":" << std::endl; 
-    log(json);
-
-    DeserializerJson deserializer(json);
-    deserializer.deserialize(object2, "object");
-    
-    assert(object1.size() == object2.size() && object2.size() == 1);
-    
-    auto& deserialized_key = object2.begin()->first; 
-    auto& deserialized_value = object2.begin()->second; 
-    assert({compare_key});
-    assert({compare_value});
+    # DeserializerXml deserializer(node);
+    # deserializer.deserialize(object2, "object");
+    # 
+    # assert(object1.size() == object2.size() && object2.size() == 1);
+    # 
+    # auto& deserialized_key = object2.begin()->first; 
+    # auto& deserialized_value = object2.begin()->second; 
+    # assert({compare_key});
+    # assert({compare_value});
 }}
 '''
 
@@ -87,7 +58,7 @@ for item1 in keys:
                              type1=item1, type2=item2,
                              initialize1=types[item1], initialize2=types[item2],
                              compare_key=compare_key, compare_value=compare_value)
-        # runner += '\n    test_{index}_xml();'.format(index=index)
+        runner += '\n    test_{index}_xml();'.format(index=index)
         runner += '\n    test_{index}_json();'.format(index=index+1)
         index += 2
 

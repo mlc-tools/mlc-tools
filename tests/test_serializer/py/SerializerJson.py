@@ -1,46 +1,33 @@
-"""
-Serializer:
-общий метод serialize
- - проверяет, есть ли метод serialize у объекта. Если есть, дергает его
- - если нет, то уже isinstance и вызывает соответствующие методы у Serialize - долго
-"""
-
-"""
-dict[Object, Object]:
-"map_t12": [{
-    "key": {
-        "value": 1
-    },
-    "value": {
-        "value": 1
-    }
-}],
-
-dict[int, int]:
-"map_i_i": [{
-    "key": 1,
-    "value": 2
-}],
-
-"""
+from tests.test_serializer.py.gen.DataWrapper import DataWrapper
+from tests.test_serializer.py.gen.intrusive_ptr import IntrusivePtr
 
 
 class SerializerJson(object):
     def __init__(self, json):
         self.json = json
 
-    def serialize(self, obj, key):
-        if hasattr(obj, 'serialize_json'):
+    def serialize(self, obj, key, default_value=None):
+        if isinstance(obj, DataWrapper):
+            self.serialize_attr(obj.name, key, default_value)
+        elif isinstance(obj, IntrusivePtr):
+            child = self.add_child(key)
+            child.serialize_attr(obj.get_type(), 'type', default_value)
+            obj.serialize_json(child)
+            pass
+        elif hasattr(obj, 'serialize_json'):
             obj.serialize_json(self.add_child(key))
         elif isinstance(obj, list):
             self.serialize_list(obj, key)
         elif isinstance(obj, dict):
             self.serialize_dict(obj, key)
+        elif isinstance(obj, dict):
+            self.serialize_dict(obj, key)
         else:
-            self.serialize_attr(obj, key)
+            self.serialize_attr(obj, key, default_value)
 
-    def serialize_attr(self, obj, key):
-        self.json[key] = obj
+    def serialize_attr(self, obj, key, default_value):
+        if obj != default_value:
+            self.json[key] = obj
 
     def serialize_dict(self, obj, key):
         js = SerializerJson(self.json) if not key else self.add_child_array(key)
@@ -79,7 +66,8 @@ class SerializerJson(object):
             serializer = SerializerJson(self.json[-1])
             serializer.serialize(obj, '')
         elif isinstance(obj, list):
-            self.serialize_list(obj, '')
+            self.json[-1] = []
+            SerializerJson(self.json[-1]).serialize_list(obj, '')
         elif isinstance(obj, dict):
             self.serialize_dict(obj, '')
         else:

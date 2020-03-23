@@ -51,6 +51,7 @@ inline void test_0_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<int|int>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -77,6 +78,7 @@ inline void test_1_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<int|int>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -104,6 +106,7 @@ inline void test_2_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<int|bool>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -130,6 +133,7 @@ inline void test_3_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<int|bool>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -157,6 +161,7 @@ inline void test_4_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<int|float>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -183,6 +188,7 @@ inline void test_5_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<int|float>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -210,6 +216,7 @@ inline void test_6_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<int|std::string>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -236,6 +243,7 @@ inline void test_7_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<int|std::string>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -263,6 +271,7 @@ inline void test_8_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<int|TestEnum>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -289,6 +298,7 @@ inline void test_9_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<int|TestEnum>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -316,6 +326,7 @@ inline void test_10_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<int|const DataUnit*>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -342,6 +353,7 @@ inline void test_11_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<int|const DataUnit*>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -369,6 +381,7 @@ inline void test_12_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<int|AllTypesChildren>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -395,6 +408,7 @@ inline void test_13_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<int|AllTypesChildren>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -422,6 +436,7 @@ inline void test_14_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<int|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -448,6 +463,7 @@ inline void test_15_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<int|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -475,6 +491,7 @@ inline void test_16_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<int|std::vector<int>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -501,6 +518,7 @@ inline void test_17_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<int|std::vector<int>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -528,6 +546,7 @@ inline void test_18_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<int|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -554,6 +573,7 @@ inline void test_19_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<int|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -581,6 +601,7 @@ inline void test_20_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<int|std::map<int, int>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -607,6 +628,7 @@ inline void test_21_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<int|std::map<int, int>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -634,6 +656,7 @@ inline void test_22_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<bool|int>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -660,6 +683,7 @@ inline void test_23_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<bool|int>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -687,6 +711,7 @@ inline void test_24_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<bool|bool>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -713,6 +738,7 @@ inline void test_25_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<bool|bool>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -740,6 +766,7 @@ inline void test_26_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<bool|float>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -766,6 +793,7 @@ inline void test_27_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<bool|float>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -793,6 +821,7 @@ inline void test_28_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<bool|std::string>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -819,6 +848,7 @@ inline void test_29_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<bool|std::string>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -846,6 +876,7 @@ inline void test_30_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<bool|TestEnum>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -872,6 +903,7 @@ inline void test_31_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<bool|TestEnum>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -899,6 +931,7 @@ inline void test_32_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<bool|const DataUnit*>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -925,6 +958,7 @@ inline void test_33_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<bool|const DataUnit*>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -952,6 +986,7 @@ inline void test_34_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<bool|AllTypesChildren>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -978,6 +1013,7 @@ inline void test_35_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<bool|AllTypesChildren>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -1005,6 +1041,7 @@ inline void test_36_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<bool|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -1031,6 +1068,7 @@ inline void test_37_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<bool|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -1058,6 +1096,7 @@ inline void test_38_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<bool|std::vector<int>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -1084,6 +1123,7 @@ inline void test_39_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<bool|std::vector<int>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -1111,6 +1151,7 @@ inline void test_40_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<bool|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -1137,6 +1178,7 @@ inline void test_41_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<bool|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -1164,6 +1206,7 @@ inline void test_42_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<bool|std::map<int, int>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -1190,6 +1233,7 @@ inline void test_43_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<bool|std::map<int, int>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -1217,6 +1261,7 @@ inline void test_44_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<float|int>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -1243,6 +1288,7 @@ inline void test_45_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<float|int>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -1270,6 +1316,7 @@ inline void test_46_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<float|bool>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -1296,6 +1343,7 @@ inline void test_47_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<float|bool>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -1323,6 +1371,7 @@ inline void test_48_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<float|float>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -1349,6 +1398,7 @@ inline void test_49_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<float|float>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -1376,6 +1426,7 @@ inline void test_50_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<float|std::string>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -1402,6 +1453,7 @@ inline void test_51_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<float|std::string>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -1429,6 +1481,7 @@ inline void test_52_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<float|TestEnum>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -1455,6 +1508,7 @@ inline void test_53_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<float|TestEnum>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -1482,6 +1536,7 @@ inline void test_54_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<float|const DataUnit*>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -1508,6 +1563,7 @@ inline void test_55_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<float|const DataUnit*>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -1535,6 +1591,7 @@ inline void test_56_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<float|AllTypesChildren>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -1561,6 +1618,7 @@ inline void test_57_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<float|AllTypesChildren>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -1588,6 +1646,7 @@ inline void test_58_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<float|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -1614,6 +1673,7 @@ inline void test_59_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<float|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -1641,6 +1701,7 @@ inline void test_60_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<float|std::vector<int>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -1667,6 +1728,7 @@ inline void test_61_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<float|std::vector<int>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -1694,6 +1756,7 @@ inline void test_62_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<float|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -1720,6 +1783,7 @@ inline void test_63_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<float|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -1747,6 +1811,7 @@ inline void test_64_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<float|std::map<int, int>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -1773,6 +1838,7 @@ inline void test_65_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<float|std::map<int, int>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -1800,6 +1866,7 @@ inline void test_66_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::string|int>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -1826,6 +1893,7 @@ inline void test_67_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::string|int>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -1853,6 +1921,7 @@ inline void test_68_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::string|bool>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -1879,6 +1948,7 @@ inline void test_69_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::string|bool>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -1906,6 +1976,7 @@ inline void test_70_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::string|float>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -1932,6 +2003,7 @@ inline void test_71_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::string|float>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -1959,6 +2031,7 @@ inline void test_72_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::string|std::string>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -1985,6 +2058,7 @@ inline void test_73_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::string|std::string>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -2012,6 +2086,7 @@ inline void test_74_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::string|TestEnum>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -2038,6 +2113,7 @@ inline void test_75_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::string|TestEnum>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -2065,6 +2141,7 @@ inline void test_76_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::string|const DataUnit*>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -2091,6 +2168,7 @@ inline void test_77_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::string|const DataUnit*>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -2118,6 +2196,7 @@ inline void test_78_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::string|AllTypesChildren>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -2144,6 +2223,7 @@ inline void test_79_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::string|AllTypesChildren>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -2171,6 +2251,7 @@ inline void test_80_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::string|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -2197,6 +2278,7 @@ inline void test_81_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::string|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -2224,6 +2306,7 @@ inline void test_82_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::string|std::vector<int>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -2250,6 +2333,7 @@ inline void test_83_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::string|std::vector<int>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -2277,6 +2361,7 @@ inline void test_84_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::string|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -2303,6 +2388,7 @@ inline void test_85_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::string|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -2330,6 +2416,7 @@ inline void test_86_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::string|std::map<int, int>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -2356,6 +2443,7 @@ inline void test_87_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::string|std::map<int, int>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -2383,6 +2471,7 @@ inline void test_88_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<TestEnum|int>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -2409,6 +2498,7 @@ inline void test_89_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<TestEnum|int>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -2436,6 +2526,7 @@ inline void test_90_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<TestEnum|bool>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -2462,6 +2553,7 @@ inline void test_91_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<TestEnum|bool>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -2489,6 +2581,7 @@ inline void test_92_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<TestEnum|float>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -2515,6 +2608,7 @@ inline void test_93_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<TestEnum|float>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -2542,6 +2636,7 @@ inline void test_94_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<TestEnum|std::string>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -2568,6 +2663,7 @@ inline void test_95_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<TestEnum|std::string>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -2595,6 +2691,7 @@ inline void test_96_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<TestEnum|TestEnum>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -2621,6 +2718,7 @@ inline void test_97_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<TestEnum|TestEnum>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -2648,6 +2746,7 @@ inline void test_98_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<TestEnum|const DataUnit*>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -2674,6 +2773,7 @@ inline void test_99_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<TestEnum|const DataUnit*>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -2701,6 +2801,7 @@ inline void test_100_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<TestEnum|AllTypesChildren>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -2727,6 +2828,7 @@ inline void test_101_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<TestEnum|AllTypesChildren>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -2754,6 +2856,7 @@ inline void test_102_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<TestEnum|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -2780,6 +2883,7 @@ inline void test_103_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<TestEnum|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -2807,6 +2911,7 @@ inline void test_104_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<TestEnum|std::vector<int>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -2833,6 +2938,7 @@ inline void test_105_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<TestEnum|std::vector<int>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -2860,6 +2966,7 @@ inline void test_106_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<TestEnum|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -2886,6 +2993,7 @@ inline void test_107_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<TestEnum|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -2913,6 +3021,7 @@ inline void test_108_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<TestEnum|std::map<int, int>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -2939,6 +3048,7 @@ inline void test_109_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<TestEnum|std::map<int, int>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -2966,6 +3076,7 @@ inline void test_110_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<const DataUnit*|int>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -2992,6 +3103,7 @@ inline void test_111_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<const DataUnit*|int>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -3019,6 +3131,7 @@ inline void test_112_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<const DataUnit*|bool>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -3045,6 +3158,7 @@ inline void test_113_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<const DataUnit*|bool>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -3072,6 +3186,7 @@ inline void test_114_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<const DataUnit*|float>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -3098,6 +3213,7 @@ inline void test_115_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<const DataUnit*|float>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -3125,6 +3241,7 @@ inline void test_116_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<const DataUnit*|std::string>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -3151,6 +3268,7 @@ inline void test_117_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<const DataUnit*|std::string>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -3178,6 +3296,7 @@ inline void test_118_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<const DataUnit*|TestEnum>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -3204,6 +3323,7 @@ inline void test_119_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<const DataUnit*|TestEnum>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -3231,6 +3351,7 @@ inline void test_120_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<const DataUnit*|const DataUnit*>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -3257,6 +3378,7 @@ inline void test_121_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<const DataUnit*|const DataUnit*>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -3284,6 +3406,7 @@ inline void test_122_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<const DataUnit*|AllTypesChildren>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -3310,6 +3433,7 @@ inline void test_123_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<const DataUnit*|AllTypesChildren>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -3337,6 +3461,7 @@ inline void test_124_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<const DataUnit*|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -3363,6 +3488,7 @@ inline void test_125_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<const DataUnit*|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -3390,6 +3516,7 @@ inline void test_126_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<const DataUnit*|std::vector<int>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -3416,6 +3543,7 @@ inline void test_127_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<const DataUnit*|std::vector<int>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -3443,6 +3571,7 @@ inline void test_128_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<const DataUnit*|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -3469,6 +3598,7 @@ inline void test_129_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<const DataUnit*|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -3496,6 +3626,7 @@ inline void test_130_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<const DataUnit*|std::map<int, int>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -3522,6 +3653,7 @@ inline void test_131_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<const DataUnit*|std::map<int, int>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -3549,6 +3681,7 @@ inline void test_132_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<AllTypesChildren|int>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -3575,6 +3708,7 @@ inline void test_133_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<AllTypesChildren|int>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -3602,6 +3736,7 @@ inline void test_134_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<AllTypesChildren|bool>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -3628,6 +3763,7 @@ inline void test_135_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<AllTypesChildren|bool>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -3655,6 +3791,7 @@ inline void test_136_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<AllTypesChildren|float>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -3681,6 +3818,7 @@ inline void test_137_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<AllTypesChildren|float>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -3708,6 +3846,7 @@ inline void test_138_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<AllTypesChildren|std::string>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -3734,6 +3873,7 @@ inline void test_139_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<AllTypesChildren|std::string>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -3761,6 +3901,7 @@ inline void test_140_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<AllTypesChildren|TestEnum>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -3787,6 +3928,7 @@ inline void test_141_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<AllTypesChildren|TestEnum>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -3814,6 +3956,7 @@ inline void test_142_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<AllTypesChildren|const DataUnit*>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -3840,6 +3983,7 @@ inline void test_143_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<AllTypesChildren|const DataUnit*>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -3867,6 +4011,7 @@ inline void test_144_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<AllTypesChildren|AllTypesChildren>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -3893,6 +4038,7 @@ inline void test_145_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<AllTypesChildren|AllTypesChildren>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -3920,6 +4066,7 @@ inline void test_146_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<AllTypesChildren|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -3946,6 +4093,7 @@ inline void test_147_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<AllTypesChildren|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -3973,6 +4121,7 @@ inline void test_148_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<AllTypesChildren|std::vector<int>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -3999,6 +4148,7 @@ inline void test_149_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<AllTypesChildren|std::vector<int>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -4026,6 +4176,7 @@ inline void test_150_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<AllTypesChildren|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -4052,6 +4203,7 @@ inline void test_151_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<AllTypesChildren|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -4079,6 +4231,7 @@ inline void test_152_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<AllTypesChildren|std::map<int, int>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -4105,6 +4258,7 @@ inline void test_153_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<AllTypesChildren|std::map<int, int>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -4132,6 +4286,7 @@ inline void test_154_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|int>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -4158,6 +4313,7 @@ inline void test_155_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|int>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -4185,6 +4341,7 @@ inline void test_156_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|bool>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -4211,6 +4368,7 @@ inline void test_157_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|bool>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -4238,6 +4396,7 @@ inline void test_158_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|float>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -4264,6 +4423,7 @@ inline void test_159_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|float>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -4291,6 +4451,7 @@ inline void test_160_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|std::string>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -4317,6 +4478,7 @@ inline void test_161_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|std::string>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -4344,6 +4506,7 @@ inline void test_162_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|TestEnum>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -4370,6 +4533,7 @@ inline void test_163_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|TestEnum>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -4397,6 +4561,7 @@ inline void test_164_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|const DataUnit*>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -4423,6 +4588,7 @@ inline void test_165_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|const DataUnit*>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -4450,6 +4616,7 @@ inline void test_166_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|AllTypesChildren>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -4476,6 +4643,7 @@ inline void test_167_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|AllTypesChildren>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -4503,6 +4671,7 @@ inline void test_168_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -4529,6 +4698,7 @@ inline void test_169_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -4556,6 +4726,7 @@ inline void test_170_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|std::vector<int>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -4582,6 +4753,7 @@ inline void test_171_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|std::vector<int>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -4609,6 +4781,7 @@ inline void test_172_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -4635,6 +4808,7 @@ inline void test_173_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -4662,6 +4836,7 @@ inline void test_174_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|std::map<int, int>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -4688,6 +4863,7 @@ inline void test_175_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|std::map<int, int>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -4715,6 +4891,7 @@ inline void test_176_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<int>|int>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -4741,6 +4918,7 @@ inline void test_177_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<int>|int>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -4768,6 +4946,7 @@ inline void test_178_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<int>|bool>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -4794,6 +4973,7 @@ inline void test_179_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<int>|bool>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -4821,6 +5001,7 @@ inline void test_180_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<int>|float>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -4847,6 +5028,7 @@ inline void test_181_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<int>|float>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -4874,6 +5056,7 @@ inline void test_182_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<int>|std::string>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -4900,6 +5083,7 @@ inline void test_183_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<int>|std::string>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -4927,6 +5111,7 @@ inline void test_184_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<int>|TestEnum>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -4953,6 +5138,7 @@ inline void test_185_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<int>|TestEnum>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -4980,6 +5166,7 @@ inline void test_186_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<int>|const DataUnit*>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -5006,6 +5193,7 @@ inline void test_187_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<int>|const DataUnit*>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -5033,6 +5221,7 @@ inline void test_188_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<int>|AllTypesChildren>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -5059,6 +5248,7 @@ inline void test_189_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<int>|AllTypesChildren>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -5086,6 +5276,7 @@ inline void test_190_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<int>|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -5112,6 +5303,7 @@ inline void test_191_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<int>|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -5139,6 +5331,7 @@ inline void test_192_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<int>|std::vector<int>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -5165,6 +5358,7 @@ inline void test_193_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<int>|std::vector<int>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -5192,6 +5386,7 @@ inline void test_194_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<int>|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -5218,6 +5413,7 @@ inline void test_195_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<int>|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -5245,6 +5441,7 @@ inline void test_196_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<int>|std::map<int, int>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -5271,6 +5468,7 @@ inline void test_197_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<int>|std::map<int, int>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -5298,6 +5496,7 @@ inline void test_198_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|int>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -5324,6 +5523,7 @@ inline void test_199_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|int>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -5351,6 +5551,7 @@ inline void test_200_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|bool>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -5377,6 +5578,7 @@ inline void test_201_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|bool>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -5404,6 +5606,7 @@ inline void test_202_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|float>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -5430,6 +5633,7 @@ inline void test_203_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|float>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -5457,6 +5661,7 @@ inline void test_204_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|std::string>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -5483,6 +5688,7 @@ inline void test_205_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|std::string>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -5510,6 +5716,7 @@ inline void test_206_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|TestEnum>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -5536,6 +5743,7 @@ inline void test_207_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|TestEnum>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -5563,6 +5771,7 @@ inline void test_208_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|const DataUnit*>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -5589,6 +5798,7 @@ inline void test_209_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|const DataUnit*>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -5616,6 +5826,7 @@ inline void test_210_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|AllTypesChildren>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -5642,6 +5853,7 @@ inline void test_211_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|AllTypesChildren>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -5669,6 +5881,7 @@ inline void test_212_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -5695,6 +5908,7 @@ inline void test_213_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -5722,6 +5936,7 @@ inline void test_214_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|std::vector<int>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -5748,6 +5963,7 @@ inline void test_215_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|std::vector<int>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -5775,6 +5991,7 @@ inline void test_216_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -5801,6 +6018,7 @@ inline void test_217_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -5828,6 +6046,7 @@ inline void test_218_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|std::map<int, int>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -5854,6 +6073,7 @@ inline void test_219_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|std::map<int, int>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -5881,6 +6101,7 @@ inline void test_220_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::map<int, int>|int>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -5907,6 +6128,7 @@ inline void test_221_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::map<int, int>|int>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -5934,6 +6156,7 @@ inline void test_222_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::map<int, int>|bool>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -5960,6 +6183,7 @@ inline void test_223_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::map<int, int>|bool>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -5987,6 +6211,7 @@ inline void test_224_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::map<int, int>|float>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -6013,6 +6238,7 @@ inline void test_225_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::map<int, int>|float>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -6040,6 +6266,7 @@ inline void test_226_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::map<int, int>|std::string>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -6066,6 +6293,7 @@ inline void test_227_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::map<int, int>|std::string>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -6093,6 +6321,7 @@ inline void test_228_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::map<int, int>|TestEnum>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -6119,6 +6348,7 @@ inline void test_229_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::map<int, int>|TestEnum>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -6146,6 +6376,7 @@ inline void test_230_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::map<int, int>|const DataUnit*>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -6172,6 +6403,7 @@ inline void test_231_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::map<int, int>|const DataUnit*>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -6199,6 +6431,7 @@ inline void test_232_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::map<int, int>|AllTypesChildren>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -6225,6 +6458,7 @@ inline void test_233_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::map<int, int>|AllTypesChildren>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -6252,6 +6486,7 @@ inline void test_234_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::map<int, int>|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -6278,6 +6513,7 @@ inline void test_235_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::map<int, int>|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -6305,6 +6541,7 @@ inline void test_236_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::map<int, int>|std::vector<int>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -6331,6 +6568,7 @@ inline void test_237_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::map<int, int>|std::vector<int>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -6358,6 +6596,7 @@ inline void test_238_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::map<int, int>|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -6384,6 +6623,7 @@ inline void test_239_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::map<int, int>|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -6411,6 +6651,7 @@ inline void test_240_xml()
 
     SerializerXml serializer(node);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::map<int, int>|std::map<int, int>>\":" << std::endl; 
     log(doc);
 
     DeserializerXml deserializer(node);
@@ -6437,6 +6678,7 @@ inline void test_241_json()
 
     SerializerJson serializer(json);
     serializer.serialize(object1, "object");
+    std::cout << std::endl << ",\"map<std::map<int, int>|std::map<int, int>>\":" << std::endl; 
     log(json);
 
     DeserializerJson deserializer(json);
@@ -6453,247 +6695,126 @@ inline void test_241_json()
 
 inline void run_generated_tests()
 {
-    test_0_xml();
     test_1_json();
-    test_2_xml();
     test_3_json();
-    test_4_xml();
     test_5_json();
-    test_6_xml();
     test_7_json();
-    test_8_xml();
     test_9_json();
-    test_10_xml();
     test_11_json();
-    test_12_xml();
     test_13_json();
-    test_14_xml();
     test_15_json();
-    test_16_xml();
     test_17_json();
-    test_18_xml();
     test_19_json();
-    test_20_xml();
     test_21_json();
-    test_22_xml();
     test_23_json();
-    test_24_xml();
     test_25_json();
-    test_26_xml();
     test_27_json();
-    test_28_xml();
     test_29_json();
-    test_30_xml();
     test_31_json();
-    test_32_xml();
     test_33_json();
-    test_34_xml();
     test_35_json();
-    test_36_xml();
     test_37_json();
-    test_38_xml();
     test_39_json();
-    test_40_xml();
     test_41_json();
-    test_42_xml();
     test_43_json();
-    test_44_xml();
     test_45_json();
-    test_46_xml();
     test_47_json();
-    test_48_xml();
     test_49_json();
-    test_50_xml();
     test_51_json();
-    test_52_xml();
     test_53_json();
-    test_54_xml();
     test_55_json();
-    test_56_xml();
     test_57_json();
-    test_58_xml();
     test_59_json();
-    test_60_xml();
     test_61_json();
-    test_62_xml();
     test_63_json();
-    test_64_xml();
     test_65_json();
-    test_66_xml();
     test_67_json();
-    test_68_xml();
     test_69_json();
-    test_70_xml();
     test_71_json();
-    test_72_xml();
     test_73_json();
-    test_74_xml();
     test_75_json();
-    test_76_xml();
     test_77_json();
-    test_78_xml();
     test_79_json();
-    test_80_xml();
     test_81_json();
-    test_82_xml();
     test_83_json();
-    test_84_xml();
     test_85_json();
-    test_86_xml();
     test_87_json();
-    test_88_xml();
     test_89_json();
-    test_90_xml();
     test_91_json();
-    test_92_xml();
     test_93_json();
-    test_94_xml();
     test_95_json();
-    test_96_xml();
     test_97_json();
-    test_98_xml();
     test_99_json();
-    test_100_xml();
     test_101_json();
-    test_102_xml();
     test_103_json();
-    test_104_xml();
     test_105_json();
-    test_106_xml();
     test_107_json();
-    test_108_xml();
     test_109_json();
-    test_110_xml();
     test_111_json();
-    test_112_xml();
     test_113_json();
-    test_114_xml();
     test_115_json();
-    test_116_xml();
     test_117_json();
-    test_118_xml();
     test_119_json();
-    test_120_xml();
     test_121_json();
-    test_122_xml();
     test_123_json();
-    test_124_xml();
     test_125_json();
-    test_126_xml();
     test_127_json();
-    test_128_xml();
     test_129_json();
-    test_130_xml();
     test_131_json();
-    test_132_xml();
     test_133_json();
-    test_134_xml();
     test_135_json();
-    test_136_xml();
     test_137_json();
-    test_138_xml();
     test_139_json();
-    test_140_xml();
     test_141_json();
-    test_142_xml();
     test_143_json();
-    test_144_xml();
     test_145_json();
-    test_146_xml();
     test_147_json();
-    test_148_xml();
     test_149_json();
-    test_150_xml();
     test_151_json();
-    test_152_xml();
     test_153_json();
-    test_154_xml();
     test_155_json();
-    test_156_xml();
     test_157_json();
-    test_158_xml();
     test_159_json();
-    test_160_xml();
     test_161_json();
-    test_162_xml();
     test_163_json();
-    test_164_xml();
     test_165_json();
-    test_166_xml();
     test_167_json();
-    test_168_xml();
     test_169_json();
-    test_170_xml();
     test_171_json();
-    test_172_xml();
     test_173_json();
-    test_174_xml();
     test_175_json();
-    test_176_xml();
     test_177_json();
-    test_178_xml();
     test_179_json();
-    test_180_xml();
     test_181_json();
-    test_182_xml();
     test_183_json();
-    test_184_xml();
     test_185_json();
-    test_186_xml();
     test_187_json();
-    test_188_xml();
     test_189_json();
-    test_190_xml();
     test_191_json();
-    test_192_xml();
     test_193_json();
-    test_194_xml();
     test_195_json();
-    test_196_xml();
     test_197_json();
-    test_198_xml();
     test_199_json();
-    test_200_xml();
     test_201_json();
-    test_202_xml();
     test_203_json();
-    test_204_xml();
     test_205_json();
-    test_206_xml();
     test_207_json();
-    test_208_xml();
     test_209_json();
-    test_210_xml();
     test_211_json();
-    test_212_xml();
     test_213_json();
-    test_214_xml();
     test_215_json();
-    test_216_xml();
     test_217_json();
-    test_218_xml();
     test_219_json();
-    test_220_xml();
     test_221_json();
-    test_222_xml();
     test_223_json();
-    test_224_xml();
     test_225_json();
-    test_226_xml();
     test_227_json();
-    test_228_xml();
     test_229_json();
-    test_230_xml();
     test_231_json();
-    test_232_xml();
     test_233_json();
-    test_234_xml();
     test_235_json();
-    test_236_xml();
     test_237_json();
-    test_238_xml();
     test_239_json();
-    test_240_xml();
     test_241_json();
 }
 

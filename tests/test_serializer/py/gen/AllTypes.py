@@ -5,6 +5,9 @@ import json
 from .AllTypesChildren import AllTypesChildren
 from .common import *
 from ..SerializerJson import SerializerJson
+from ..DeserializerJson import DeserializerJson, Meta
+from tests.test_serializer.py.gen.intrusive_ptr import IntrusivePtr, make_intrusive
+from .TestEnum import TestEnum
 
 
 class AllTypes(object):
@@ -46,7 +49,6 @@ class AllTypes(object):
 
     def initialize(self):
         from .AllTypesChildren import AllTypesChildren
-        from .TestEnum import TestEnum
         self.int_value0 = 1
         self.int_value1 = 1
         self.float_value0 = 1.0
@@ -80,9 +82,9 @@ class AllTypes(object):
         self.string_string_map["0"] = "0"
         self.string_string_map["1"] = "1"
         self.object.value = 0
-        self.object_ptr = AllTypesChildren()
+        self.object_ptr = make_intrusive(AllTypesChildren)
         self.object_ptr.value = 0
-        self.object_list.extend([self.object_ptr, self.object_ptr])
+        self.object_list.extend([self.object, self.object])
         self.enum_list.append(TestEnum.value1)
         self.enum_list.append(TestEnum.value2)
         self.enum_map[TestEnum.value1] = 1
@@ -166,5 +168,31 @@ class AllTypes(object):
         serializer.serialize(self.enum_list, 'enum_list')
         serializer.serialize(self.enum_map, 'enum_map')
 
-    def deserialize_json(self, dictionary):
-        pass
+    def deserialize_json(self, deserializer: DeserializerJson):
+        self.int_value0 = deserializer.deserialize('int_value0', int, 0)
+        self.int_value1 = deserializer.deserialize('int_value1', int, 1)
+        self.float_value0 = deserializer.deserialize('float_value0', float, 0)
+        self.float_value1 = deserializer.deserialize('float_value1', float, 0.0)
+        self.bool_value0 = deserializer.deserialize('bool_value0', bool, True)
+        self.bool_value1 = deserializer.deserialize('bool_value1', bool, False)
+        self.str_value0 = deserializer.deserialize('str_value0', str, '')
+        self.str_value1 = deserializer.deserialize('str_value1', str, '')
+        self.int_list = deserializer.deserialize('int_list', Meta(list, int))
+        self.float_list = deserializer.deserialize('float_list', Meta(list, float))
+        self.bool_list = deserializer.deserialize('bool_list', Meta(list, bool))
+        self.string_list = deserializer.deserialize('string_list', Meta(list, str))
+        self.int_string_map = deserializer.deserialize('int_string_map', Meta(dict, int, str))
+        self.float_string_map = deserializer.deserialize('float_string_map', Meta(dict, float, str))
+        self.bool_string_map = deserializer.deserialize('bool_string_map', Meta(dict, bool, str))
+        self.string_string_map = deserializer.deserialize('string_string_map', Meta(dict, str, str))
+        self.string_int_map = deserializer.deserialize('string_int_map', Meta(dict, str, int))
+        self.string_float_map = deserializer.deserialize('string_float_map', Meta(dict, str, float))
+        self.string_bool_map = deserializer.deserialize('string_bool_map', Meta(dict, str, bool))
+        self.object = deserializer.deserialize('object', AllTypesChildren)
+        self.object_ptr = deserializer.deserialize('object_ptr', Meta(IntrusivePtr, AllTypesChildren))
+        self.object_list = deserializer.deserialize('object_list', Meta(list, AllTypesChildren))
+        self.object_ptr_list = deserializer.deserialize('object_ptr_list', Meta(list, Meta(IntrusivePtr, AllTypesChildren)))
+        self.object_map = deserializer.deserialize('object_map', Meta(dict, str, AllTypesChildren))
+        self.object_ptr_map = deserializer.deserialize('object_ptr_map', Meta(dict, str, Meta(IntrusivePtr, AllTypesChildren)))
+        self.enum_list = deserializer.deserialize('enum_list', Meta(list, TestEnum))
+        self.enum_map = deserializer.deserialize('enum_map', Meta(dict, TestEnum, int))

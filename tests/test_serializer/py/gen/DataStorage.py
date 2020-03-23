@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import xml.etree.ElementTree as ET
 import json
+
+from .DataWrapper import DataWrapper
 from .common import *
 from ..SerializerJson import SerializerJson
 
@@ -34,7 +36,7 @@ class DataStorage(object):
             from .DataUnit import DataUnit
             self.units[name] = DataUnit()
             self.units[name].name = name
-        return self.units[name]
+        return DataWrapper(self.units[name])
         pass
 
     def get_type(self):

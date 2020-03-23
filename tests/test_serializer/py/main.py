@@ -3,15 +3,23 @@ import json as JS
 
 from tests.test_serializer.py.SerializerJson import SerializerJson
 from tests.test_serializer.py.gen.AllTypes import AllTypes
+from tests.test_serializer.py.gen.DataStorage import DataStorage
+from tests.test_serializer.py.gen.TestEnum import TestEnum
+from tests.test_serializer.py.tests_from_serialize_cpp import test_cpp
+from tests.test_serializer.py.tests_from_serialize_cpp import test_all_types
 
-test = AllTypes()
-test.initialize()
+# test = AllTypes()
+# test.initialize()
+#
+# serializer = SerializerJson({})
+# serializer.serialize(test, "AllTypes")
+# print(JS.dumps(serializer.json))
+#
+# test_dict = {test: test}
+# serializer = SerializerJson({})
+# serializer.serialize(test_dict, "AllTypes")
+# print(JS.dumps(serializer.json))
 
-serializer = SerializerJson({})
-serializer.serialize(test, "AllTypes")
-print(JS.dumps(serializer.json))
 
-test_dict = {test: test}
-serializer = SerializerJson({})
-serializer.serialize(test_dict, "AllTypes")
-print(JS.dumps(serializer.json))
+test_cpp()
+test_all_types()

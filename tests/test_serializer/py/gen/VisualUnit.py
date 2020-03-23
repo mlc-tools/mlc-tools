@@ -2,6 +2,7 @@
 import xml.etree.ElementTree as ET
 import json
 from .common import *
+from ..SerializerJson import SerializerJson
 
 
 class VisualUnit(object):
