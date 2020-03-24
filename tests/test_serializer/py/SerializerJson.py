@@ -20,8 +20,6 @@ class SerializerJson(object):
             self.serialize_list(obj, key)
         elif isinstance(obj, dict):
             self.serialize_dict(obj, key)
-        elif isinstance(obj, dict):
-            self.serialize_dict(obj, key)
         else:
             self.serialize_attr(obj, key, default_value)
 

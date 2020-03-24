@@ -87,8 +87,8 @@ for item1 in keys:
                              type1=item1, type2=item2,
                              initialize1=types[item1], initialize2=types[item2],
                              compare_key=compare_key, compare_value=compare_value)
-        # runner += '\n    test_{index}_xml();'.format(index=index)
-        runner += '\n    test_{index}_json();'.format(index=index+1)
+        runner += '\n    test_{index}_xml();'.format(index=index)
+        # runner += '\n    test_{index}_json();'.format(index=index+1)
         index += 2
 
 tests = '''/*

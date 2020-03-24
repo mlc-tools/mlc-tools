@@ -4,6 +4,8 @@ import json
 
 from .DataWrapper import DataWrapper
 from .common import *
+from .. import SerializerXml
+from ..DeserializerXml import DeserializerXml
 from ..SerializerJson import SerializerJson
 
 
@@ -41,6 +43,12 @@ class DataStorage(object):
 
     def get_type(self):
         return DataStorage.TYPE
+        pass
+
+    def serialize_xml(self, serializer: SerializerXml):
+        pass
+
+    def deserialize_xml(self, serializer: DeserializerXml):
         pass
 
     def serialize_json(self, serializer: SerializerJson):

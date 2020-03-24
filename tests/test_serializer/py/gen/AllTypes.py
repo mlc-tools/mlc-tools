@@ -4,10 +4,13 @@ import json
 
 from .AllTypesChildren import AllTypesChildren
 from .common import *
+from ..DeserializerXml import DeserializerXml
 from ..SerializerJson import SerializerJson
-from ..DeserializerJson import DeserializerJson, Meta
+from ..DeserializerJson import DeserializerJson
+from ..Meta import Meta
 from tests.test_serializer.py.gen.intrusive_ptr import IntrusivePtr, make_intrusive
 from .TestEnum import TestEnum
+from ..SerializerXml import SerializerXml
 
 
 class AllTypes(object):
@@ -137,6 +140,12 @@ class AllTypes(object):
 
     def get_type(self):
         return AllTypes.TYPE
+        pass
+
+    def serialize_xml(self, serializer: SerializerXml):
+        pass
+
+    def deserialize_xml(self, serializer: DeserializerXml):
         pass
 
     def serialize_json(self, serializer: SerializerJson):

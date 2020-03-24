@@ -1,18 +1,7 @@
+from tests.test_serializer.py.Meta import Meta
 from tests.test_serializer.py.gen.BaseEnum import BaseEnum
 from tests.test_serializer.py.gen.DataWrapper import DataWrapper
 from tests.test_serializer.py.gen.intrusive_ptr import IntrusivePtr, make_intrusive
-
-
-class Meta(object):
-    __base__ = object
-
-    def __init__(self, *args):
-        self.args = args
-
-    def build(self, value):
-        if isinstance(self.args[0], Meta):
-            return self.args[0].build(value)
-        return self.args[0](value)
 
 
 class DeserializerJson(object):
@@ -37,7 +26,6 @@ class DeserializerJson(object):
                 obj = make_intrusive(meta.args[1])
                 obj.deserialize_json(DeserializerJson(js))
                 return obj
-            assert 0
         if hasattr(meta, 'deserialize_json'):
             obj = meta()
             obj.deserialize_json(DeserializerJson(js))
@@ -74,9 +62,6 @@ class DeserializerJson(object):
             result.append(item)
         return result
 
-    def get_child(self, key):
-        return DeserializerJson(self.json[key] if key in self.json else {})
-
     def get_child_array(self, key):
         return DeserializerJson(self.json[key] if key in self.json else [])
 
@@ -85,17 +70,3 @@ class DeserializerJson(object):
 
     def deserialize_value(self, meta: Meta):
         return self.deserialize('value', meta)
-
-    def deserialize_list_item(self, obj):
-        self.json.append(None)
-        if hasattr(obj, 'deserialize_json'):
-            self.json[-1] = {}
-            deserializer = DeserializerJson(self.json[-1])
-            deserializer.deserialize(obj, '')
-        elif isinstance(obj, list):
-            self.json[-1] = []
-            DeserializerJson(self.json[-1]).deserialize_list(obj, '')
-        elif isinstance(obj, dict):
-            self.deserialize_dict(obj, '')
-        else:
-            self.json[-1] = obj

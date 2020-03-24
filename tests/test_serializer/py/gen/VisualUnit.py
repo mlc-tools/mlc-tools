@@ -2,7 +2,9 @@
 import xml.etree.ElementTree as ET
 import json
 from .common import *
+from ..DeserializerXml import DeserializerXml
 from ..SerializerJson import SerializerJson
+from ..SerializerXml import SerializerXml
 
 
 class VisualUnit(object):
@@ -29,6 +31,12 @@ class VisualUnit(object):
 
     def get_type(self):
         return VisualUnit.TYPE
+        pass
+
+    def serialize_xml(self, serializer: SerializerXml):
+        pass
+
+    def deserialize_xml(self, serializer: DeserializerXml):
         pass
 
     def serialize_json(self, serializer: SerializerJson):

@@ -1,8 +1,12 @@
 import re
+import xml.etree.ElementTree as ET
 
-from tests.test_serializer.py.DeserializerJson import DeserializerJson, Meta
+from tests.test_serializer.py.DeserializerJson import DeserializerJson
+from tests.test_serializer.py.DeserializerXml import DeserializerXml
+from tests.test_serializer.py.Meta import Meta
 from tests.test_serializer.py.SerializerJson import SerializerJson
-from tests.test_serializer.py.cpp_tests import TESTS
+from tests.test_serializer.py.SerializerXml import SerializerXml
+from tests.test_serializer.py.cpp_tests import JSON_TESTS, XML_TESTS
 from tests.test_serializer.py.gen.AllTypes import AllTypes
 from tests.test_serializer.py.gen.AllTypesChildren import AllTypesChildren
 from tests.test_serializer.py.gen.DataStorage import DataStorage
@@ -61,43 +65,78 @@ def get_meta(description) -> Meta:
     return Meta(dict, k, v)
 
 
-def compare(counter, description, orig, serialized):
+def compare_json(counter, description, orig, serialized, total):
     if orig != serialized:
         counter += 1
         print('-------')
-        print("Failed: ", description)
+        print("Failed Json: ", description)
         print('Orig:', orig)
         print('Curr:', serialized)
-        print('{}/{}'.format(counter, len(TESTS)))
+        print('{}/{}'.format(counter, total))
         exit(1)
     return counter
 
 
-def test_cpp():
+def compare_xml(counter, description, orig, serialized, total):
+
+    if ET.tostring(orig) != ET.tostring(serialized):
+        counter += 1
+        print('-------')
+        print("Failed Xml: ", description)
+        print('Orig:', ET.tostring(orig).decode())
+        print('Curr:', ET.tostring(serialized).decode())
+        print('{}/{}'.format(counter, total))
+        exit(1)
+    return counter
+
+
+def test_json():
     counter = 0
-    for description in TESTS:
+    for description in JSON_TESTS:
         obj = get_object(description)
         meta = get_meta(description)
-        orig = TESTS[description]
+        orig = JSON_TESTS[description]
 
         try:
             serializer = SerializerJson({})
             serializer.serialize(obj, 'object')
-            counter = compare(counter, description, orig, serializer.json)
+            counter = compare_json(counter, description, orig, serializer.json, len(JSON_TESTS))
 
             deserializer = DeserializerJson(serializer.json)
             obj = deserializer.deserialize('object', meta)
             serializer = SerializerJson({})
             serializer.serialize(obj, 'object')
-            counter = compare(counter, description, orig, serializer.json)
+            counter = compare_json(counter, description, orig, serializer.json, len(JSON_TESTS))
         except AssertionError as e:
             print(e)
-            counter = compare(counter, description, orig, {})
+            counter = compare_json(counter, description, orig, {}, len(JSON_TESTS))
+    print('Success Json: {}/{}'.format(len(JSON_TESTS) - counter, len(JSON_TESTS)))
 
-    print('Success: {}/{}'.format(len(TESTS) - counter, len(TESTS)))
+
+def test_xml():
+    counter = 0
+    for description in XML_TESTS:
+        obj = get_object(description)
+        meta = get_meta(description)
+        orig = ET.fromstring(XML_TESTS[description])
+
+        try:
+            serializer = SerializerXml(ET.Element('root'))
+            serializer.serialize(obj, 'object')
+            counter = compare_xml(counter, description, orig, serializer.node, len(XML_TESTS))
+
+            deserializer = DeserializerXml(serializer.node)
+            obj = deserializer.deserialize('object', meta)
+            serializer = SerializerXml(ET.Element('root'))
+            serializer.serialize(obj, 'object')
+            counter = compare_xml(counter, description, orig, serializer.node, len(XML_TESTS))
+        except AssertionError as e:
+            print(e)
+            counter = compare_xml(counter, description, orig, {})
+    print('Success Xml: {}/{}'.format(len(XML_TESTS) - counter, len(XML_TESTS)))
 
 
-def test_all_types():
+def test_all_types_json():
     obj = AllTypes()
     obj.initialize()
     serializer = SerializerJson({})
@@ -108,4 +147,20 @@ def test_all_types():
     obj = deserializer.deserialize('object', AllTypes)
     serializer = SerializerJson({})
     serializer.serialize(obj, 'object')
-    compare(0, 'AllTypes', orig, serializer.json)
+    compare_json(0, 'AllTypes Json', orig, serializer.json, 1)
+    print('Success AllTypes Json: {}/{}'.format(1, 1))
+
+
+def test_all_types_xml():
+    obj = AllTypes()
+    obj.initialize()
+    serializer = SerializerXml(ET.Element('root'))
+    serializer.serialize(obj, 'object')
+    orig = ET.fromstring(ET.tostring(serializer.node))
+
+    deserializer = DeserializerXml(serializer.node)
+    obj = deserializer.deserialize('object', AllTypes)
+    serializer = SerializerXml(ET.Element('root'))
+    serializer.serialize(obj, 'object')
+    compare_xml(0, 'AllTypes Json', orig, serializer.node, 1)
+    print('Success AllTypes Xml: {}/{}'.format(1, 1))

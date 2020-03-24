@@ -3,7 +3,10 @@ import xml.etree.ElementTree as ET
 import json
 from .common import *
 from .UnitType import UnitType
+from ..DeserializerJson import DeserializerJson
+from ..DeserializerXml import DeserializerXml
 from ..SerializerJson import SerializerJson
+from ..SerializerXml import SerializerXml
 
 
 class DataUnit(object):
@@ -40,8 +43,14 @@ class DataUnit(object):
         return DataUnit.TYPE
         pass
 
+    def serialize_xml(self, serializer: SerializerXml):
+        pass
+
+    def deserialize_xml(self, deserializer: DeserializerXml):
+        pass
+
     def serialize_json(self, serializer: SerializerJson):
         pass
 
-    def deserialize_json(self, dictionary):
+    def deserialize_json(self, deserializer: DeserializerJson):
         pass

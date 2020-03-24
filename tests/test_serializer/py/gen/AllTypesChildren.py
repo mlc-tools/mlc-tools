@@ -2,8 +2,11 @@
 import xml.etree.ElementTree as ET
 import json
 from .common import *
-from ..DeserializerJson import DeserializerJson, Meta
+from ..DeserializerJson import DeserializerJson
+from ..DeserializerXml import DeserializerXml
+from ..Meta import Meta
 from ..SerializerJson import SerializerJson
+from ..SerializerXml import SerializerXml
 
 
 class AllTypesChildren(object):
@@ -28,6 +31,12 @@ class AllTypesChildren(object):
 
     def get_type(self):
         return AllTypesChildren.TYPE
+        pass
+
+    def serialize_xml(self, serializer: SerializerXml):
+        pass
+
+    def deserialize_xml(self, serializer: DeserializerXml):
         pass
 
     def serialize_json(self, serializer: SerializerJson):
