@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 def create_command_from_json(string):
     import json

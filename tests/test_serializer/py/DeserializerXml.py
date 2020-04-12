@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from tests.test_serializer.py.Meta import Meta
 from tests.test_serializer.py.gen.BaseEnum import BaseEnum
 from tests.test_serializer.py.gen.DataWrapper import DataWrapper

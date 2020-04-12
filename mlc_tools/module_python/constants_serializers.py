@@ -14,7 +14,8 @@ class Meta(object):
         return self.args[0](value)
 """
 
-DATA_WRAPPER = """
+DATA_WRAPPER = """# -*- coding: utf-8 -*-
+
 
 class DataWrapper(object):
 
@@ -28,7 +29,8 @@ class DataWrapper(object):
         return object.__getattribute__(self, 'instance').__getattribute__(name)
 """
 
-INTRUSIVE = """
+INTRUSIVE = """# -*- coding: utf-8 -*-
+
 
 class IntrusivePtr(object):
 
@@ -56,7 +58,8 @@ def make_intrusive(class_name, *args):
     return IntrusivePtr(class_name(*args))
 """
 
-SERIALIZER_XML = """from .DataWrapper import DataWrapper
+SERIALIZER_XML = """# -*- coding: utf-8 -*-
+from .DataWrapper import DataWrapper
 from .IntrusivePtr import IntrusivePtr
 import xml.etree.ElementTree as ET
 
@@ -129,7 +132,8 @@ class SerializerXml(object):
             self.serialize_attr(obj, 'value', None)
 """
 
-DESERIALIZER_XML = """from .Meta import Meta
+DESERIALIZER_XML = """# -*- coding: utf-8 -*-
+from .Meta import Meta
 from .BaseEnum import BaseEnum
 from .DataWrapper import DataWrapper
 from .IntrusivePtr import IntrusivePtr, make_intrusive
@@ -225,7 +229,8 @@ class DeserializerXml(object):
             return self.deserialize_attr('value', meta, None)
 """
 
-SERIALIZER_JSON = """from .DataWrapper import DataWrapper
+SERIALIZER_JSON = """# -*- coding: utf-8 -*-
+from .DataWrapper import DataWrapper
 from .IntrusivePtr import IntrusivePtr
 
 
@@ -306,7 +311,8 @@ class SerializerJson(object):
             self.json[-1] = obj
 """
 
-DESERIALIZER_JSON = """from .Meta import Meta
+DESERIALIZER_JSON = """# -*- coding: utf-8 -*-
+from .Meta import Meta
 from .BaseEnum import BaseEnum
 from .DataWrapper import DataWrapper
 from .IntrusivePtr import IntrusivePtr, make_intrusive

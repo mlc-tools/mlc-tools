@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from tests.test_serializer.py.gen.DataWrapper import DataWrapper
 from tests.test_serializer.py.gen.IntrusivePtr import IntrusivePtr
 import xml.etree.ElementTree as ET
