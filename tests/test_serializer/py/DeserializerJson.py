@@ -46,6 +46,8 @@ class DeserializerJson(object):
 
     def deserialize_dict(self, key, meta):
         js = DeserializerJson(self.json) if not key else self.get_child_array(key)
+        if not js.json:
+            return []
         assert isinstance(js.json, list)
         result = {}
         for item in js.json:
@@ -55,9 +57,9 @@ class DeserializerJson(object):
         return result
 
     def deserialize_list(self, key, meta):
-        assert isinstance(self.json, list)
         if not self.json:
             return []
+        assert isinstance(self.json, list)
         result = []
         for js in self.json:
             item = DeserializerJson(js).deserialize('', meta.args[1])

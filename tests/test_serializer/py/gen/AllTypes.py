@@ -205,6 +205,7 @@ class AllTypes(object):
         self.enum_list = deserializer.deserialize('enum_list', Meta(list, TestEnum))
         self.enum_map = deserializer.deserialize('enum_map', Meta(dict, TestEnum, int))
 
+
     def serialize_json(self, serializer: SerializerJson):
         serializer.serialize(self.int_value0, 'int_value0')
         serializer.serialize(self.int_value1, 'int_value1')

@@ -189,3 +189,17 @@ def test_all_types_xml():
     serializer.serialize(obj, 'object')
     compare_xml(0, 'AllTypes Json', orig, serializer.node, 1)
     print('Success AllTypes Xml: {}/{}'.format(1, 1))
+
+
+def test_deserialize_all_types_from_min_string_xml():
+    deserializer = DeserializerXml(ET.fromstring('<object int_value0="5" />'))
+    obj = AllTypes()
+    obj.deserialize_xml(deserializer)
+    assert obj.int_value0 == 5
+
+
+def test_deserialize_all_types_from_min_string_json():
+    deserializer = DeserializerJson({"int_value0": 10})
+    obj = AllTypes()
+    obj.deserialize_json(deserializer)
+    assert obj.int_value0 == 10

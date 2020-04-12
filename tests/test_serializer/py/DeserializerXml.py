@@ -14,7 +14,7 @@ class DeserializerXml(object):
         node = self.get_child(key)
         if meta.__base__ == BaseEnum:
             value = self.deserialize_attr(key, str, '')
-            return getattr(meta, value)
+            return getattr(meta, value) if hasattr(meta, value) else default_value
         if isinstance(meta, Meta):
             if meta.args[0] == dict:
                 return node.deserialize_dict('', meta)
@@ -36,7 +36,7 @@ class DeserializerXml(object):
 
     def deserialize_attr(self, key, meta, default_value):
         value = None
-        if key:
+        if key and self.node is not None:
             if key in self.node.attrib:
                 value = self.node.attrib[key]
             else:
@@ -47,6 +47,8 @@ class DeserializerXml(object):
 
     def deserialize_dict(self, key, meta):
         node = DeserializerXml(self.node) if not key else self.get_child(key)
+        if node.node is None:
+            return {}
         result = {}
         for item in node.node:
             k = DeserializerXml(item).deserialize_key(meta.args[1])
@@ -55,6 +57,8 @@ class DeserializerXml(object):
         return result
 
     def deserialize_list(self, key, meta):
+        if self.node is None:
+            return []
         result = []
         for child in self.node:
             item = DeserializerXml(child).deserialize_list_item(meta.args[1])
@@ -62,7 +66,7 @@ class DeserializerXml(object):
         return result
 
     def get_child(self, key):
-        return DeserializerXml(self.node.find(key) if key else self.node)
+        return DeserializerXml(self.node.find(key) if key and self.node else self.node)
 
     def deserialize_key(self, meta: Meta):
         return self.deserialize('key', meta)
