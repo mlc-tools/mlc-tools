@@ -35,4 +35,18 @@
 			</pair>
 		</complex_map>
 	</complex_map>
+
+
+	<list_list_bool name="test">
+		<list_list_bool>
+			<item>
+				<item value="true"/>
+				<item value="false"/>
+			</item>
+			<item>
+				<item value="false"/>
+				<item value="true"/>
+			</item>
+		</list_list_bool>
+	</list_list_bool>
 </data>

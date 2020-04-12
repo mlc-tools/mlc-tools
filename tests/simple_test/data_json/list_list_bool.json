@@ -1,0 +1,6 @@
+{
+  "list_list_bool": {
+    "name": "test",
+    "list_list_bool": [[true, false], [false, true]]
+  }
+}

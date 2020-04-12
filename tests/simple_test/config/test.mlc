@@ -460,6 +460,15 @@ class DataComplexMap<SerializedObject>:storage
     }
 }
 
+class DataListListBool<SerializedObject>:storage:cpp:py
+{
+    string name
+    list<list<bool>> list_list_bool
+    function void foo()
+    {
+    }
+}
+
 class TestDataComplexMap<ITestDataComplexMap>:tests
 {
     function void test_foo()
@@ -472,6 +481,21 @@ class TestDataComplexMap<ITestDataComplexMap>:tests
         this->assertTrue(list_size(data->complex_map.at(1)) == 2);
         this->assertTrue(data->complex_map.at(1)[0] == 1);
         this->assertTrue(data->complex_map.at(1)[1] == 2);
+    }
+}
+
+class TestDataListListBool<ITestDataListListBool>:tests:cpp:py
+{
+    function void test_foo()
+    {
+        auto data = DataStorage::shared().get<DataListListBool>("test");
+        this->assertTrue(list_size(data->list_list_bool) == 2);
+        this->assertTrue(list_size(data->list_list_bool[0]) == 2);
+        this->assertTrue(list_size(data->list_list_bool[1]) == 2);
+        this->assertTrue(data->list_list_bool[0][0] == true);
+        this->assertTrue(data->list_list_bool[0][1] == false);
+        this->assertTrue(data->list_list_bool[1][0] == false);
+        this->assertTrue(data->list_list_bool[1][1] == true);
     }
 }
 
