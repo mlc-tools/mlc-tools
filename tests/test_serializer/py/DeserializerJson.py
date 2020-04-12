@@ -1,7 +1,8 @@
 from tests.test_serializer.py.Meta import Meta
 from tests.test_serializer.py.gen.BaseEnum import BaseEnum
 from tests.test_serializer.py.gen.DataWrapper import DataWrapper
-from tests.test_serializer.py.gen.intrusive_ptr import IntrusivePtr, make_intrusive
+from tests.test_serializer.py.gen.IntrusivePtr import IntrusivePtr, make_intrusive
+from tests.test_serializer.py.gen.Factory import Factory
 
 
 class DeserializerJson(object):
@@ -40,7 +41,7 @@ class DeserializerJson(object):
                 return default_value
         if self.json.__class__ == meta:
             return meta(self.json)
-        return default_value
+        return self.json or default_value
 
     def deserialize_dict(self, key, meta):
         js = DeserializerJson(self.json) if not key else self.get_child_array(key)

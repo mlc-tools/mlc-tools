@@ -27,6 +27,12 @@ class Writer(WriterBase):
             functions += text
 
         imports = 'from .common import *\n'
+        if not cls.type == 'enum' and cls.name != 'BaseEnum':
+            imports += 'from .SerializerXml import SerializerXml\n'
+            imports += 'from .DeserializerXml import DeserializerXml\n'
+            imports += 'from .SerializerJson import SerializerJson\n'
+            imports += 'from .DeserializerJson import DeserializerJson\n'
+            imports += 'from .IntrusivePtr import *\n'
         init_superclass = ''
         name = cls.name
         if cls.superclasses:

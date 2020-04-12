@@ -2,6 +2,7 @@ from .constants import COMMON_XML, COMMON_JSON
 from ..base.writer_base import WriterBase
 from ..base.model import SerializeFormat, Model
 from ..core.class_ import Class
+from .constants_serializers import *
 
 
 class GeneratorPredefinedFiles(object):
@@ -29,5 +30,12 @@ class GeneratorPredefinedFiles(object):
 
 
 FILES = {
-    'common.py': ''
+    'common.py': '',
+    'Meta.py': META,
+    'DataWrapper.py': DATA_WRAPPER,
+    'IntrusivePtr.py': INTRUSIVE,
+    'SerializerXml.py': SERIALIZER_XML,
+    'DeserializerXml.py': DESERIALIZER_XML,
+    'SerializerJson.py': SERIALIZER_JSON,
+    'DeserializerJson.py': DESERIALIZER_JSON,
 }

@@ -1,7 +1,8 @@
 from tests.test_serializer.py.Meta import Meta
 from tests.test_serializer.py.gen.BaseEnum import BaseEnum
 from tests.test_serializer.py.gen.DataWrapper import DataWrapper
-from tests.test_serializer.py.gen.intrusive_ptr import IntrusivePtr, make_intrusive
+from tests.test_serializer.py.gen.IntrusivePtr import IntrusivePtr, make_intrusive
+from tests.test_serializer.py.gen.Factory import Factory
 
 
 class DeserializerXml(object):
@@ -39,7 +40,9 @@ class DeserializerXml(object):
                 value = self.node.attrib[key]
             else:
                 value = default_value
-        return meta(value)
+        if meta == bool:
+            return True if value == 'true' else False if value == 'false' else default_value if default_value else False
+        return meta(value or default_value or 0)
 
     def deserialize_dict(self, key, meta):
         node = DeserializerXml(self.node) if not key else self.get_child(key)
@@ -67,7 +70,10 @@ class DeserializerXml(object):
         return self.deserialize('value', meta)
 
     def deserialize_list_item(self, meta):
-        if hasattr(meta, 'serialize_xml'):
+        if meta.__base__ == BaseEnum:
+            value = self.deserialize_attr('value', str, '')
+            return getattr(meta, value)
+        elif hasattr(meta, 'serialize_xml'):
             obj = meta()
             obj.deserialize_xml(self)
             return obj
@@ -75,5 +81,14 @@ class DeserializerXml(object):
             return self.deserialize_list('', meta)
         elif isinstance(meta, dict):
             return self.deserialize_dict('', meta)
+        elif isinstance(meta, Meta):
+            if meta.args[0] == DataWrapper:
+                from tests.test_serializer.py.gen.DataStorage import DataStorage
+                value = self.deserialize_attr('value', str, '')
+                return DataStorage.shared().getDataUnit(value)
+            if meta.args[0] == IntrusivePtr:
+                obj = Factory.build(self.node.tag)
+                obj.deserialize_xml(self)
+                return obj
         else:
             return self.deserialize_attr('value', meta, None)

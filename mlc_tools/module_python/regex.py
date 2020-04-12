@@ -71,8 +71,9 @@ class RegexPatternPython(object):
         (re.compile(r'&(\w+)'), r'\1'),
         (re.compile(r'!(\w+)'), r'not \1'),
         (re.compile(r'!\('), r'not ('),
-        (re.compile(r'make_intrusive<(\w+)>\(\)'), r'\1()', ['make_intrusive']),
-        (re.compile(r'new\s*(\w+)\s*\((.*?)\)'), r'\1(\2)', ['new']),
+        (re.compile(r'make_intrusive<(\w+)>\(\)'), r'make_intrusive(\1)', ['make_intrusive']),
+        (re.compile(r'new\s*(\w+)\s*\(\s*?\)'), r'make_intrusive(\1)', ['new']),
+        (re.compile(r'new\s*(\w+)\s*\((.*?)\)'), r'make_intrusive(\1, \2)', ['new']),
         (re.compile(r'assert\(.+\);'), r'', ['assert ']),
         (re.compile(r'(\b[-0-9]+)\.f\b'), r'\1.0'),
         (re.compile(r'(\b[-0-9]+)\.([-0-9]*)f\b'), r'\1.\2'),
@@ -97,6 +98,7 @@ class RegexPatternPython(object):
         (re.compile(r'try\n\s*{([\s\S.]+?)}\n\s*catch\(((\w+)\s*(\w*))\)\n\s+{([\s\S.]+?)}'),
          r'try:\n{\n\1\n}\nexcept BaseException as \4:\n{\n\5\n}\n', ['try']),
         (re.compile(r'throw Exception\((.*?)\)'), r'raise BaseException()', ['throw']),
+        (re.compile(r'throw make_intrusive\(Exception\)'), r'raise BaseException()', ['throw']),
     )
 
     PEP8 = (

@@ -1,4 +1,5 @@
 from generated_py.TestData import TestData
+from generated_py.SerializerXml import SerializerXml
 import xml.etree.ElementTree as ET
 import json
 
@@ -8,8 +9,9 @@ data.initialize()
 
 if True:  # MG_SERIALIZE_FORMAT == MG_XML:
     root = ET.Element('data')
-    data.serialize_xml(root)
-    string = str(ET.tostring(root))
+    serializer = SerializerXml(root)
+    data.serialize_xml(serializer)
+    string = str(ET.tostring(serializer.node))
     string = string.strip()
     string = string.replace('\\n', '\n')
     string = string.replace('\\t', '\t')

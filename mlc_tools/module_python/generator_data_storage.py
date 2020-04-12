@@ -16,15 +16,18 @@ return DataStorage.__instance'''
             from .{type} import {type}
             self.{map}[name] = {type}()
             self.{map}[name].name = name
-        return self.{map}[name]'''
+        from .DataWrapper import DataWrapper
+        return DataWrapper(self.{map}[name])'''
 
     def get_initialize_function_json_body(self):
         return '''        js = json.loads(content)
-        self.deserialize_json(js)
+        deserializer = DeserializerJson(js)
+        self.deserialize_json(deserializer)
         self._loaded = True'''
 
     def get_initialize_function_xml_body(self):
         return '''        root = ET.fromstring(content)
-        self.deserialize_xml(root)
+        deserializer = DeserializerXml(root)
+        self.deserialize_xml(deserializer)
         self._loaded = True
         '''

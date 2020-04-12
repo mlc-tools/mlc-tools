@@ -1,5 +1,5 @@
 import sys
-from ..base.serializer_base import SerializerBase, DESERIALIZATION
+from ..base.serializer_base import SerializerBase, DESERIALIZATION, SERIALIZATION
 from ..core.object import Object, Objects
 from .regex import RegexPatternPython
 from .protocols import PY_XML
@@ -24,6 +24,10 @@ class Serializer(SerializerBase):
         use_data_storage = 'DataStorage.shared()' in method.body
         imports = ''
         if serialize_type == DESERIALIZATION:
+            imports += '        from .Meta import Meta\n'
+            for member in cls.members:
+                if self.model.has_class(member.type):
+                    imports += '        from .{0} import {0}\n'.format(member.type)
             if use_factory:
                 imports += '        from .Factory import Factory\n'
             if use_data_storage:
@@ -77,9 +81,15 @@ class Serializer(SerializerBase):
         return value
 
     def get_serialization_function_args(self, serialize_type, serialize_format):
-        return ['xml', Objects.VOID] if serialize_format == 'xml' else ['dictionary', Objects.VOID]
+        return ['serializer', Objects.VOID]
 
     def build_serialize_operation(self, obj, serialization_type, serialize_format):
+        if serialization_type == SERIALIZATION:
+            return '\n        serializer.serialize(self.{0}, "{0}")'.format(obj.name)
+        if serialization_type == DESERIALIZATION:
+            meta, imports = self.create_meta_class(obj)
+            imports = '\n'.join(['        from .{0} import {0}'.format(x) for x in imports]) if imports else ''
+            return '\n{2}\n        self.{0} = serializer.deserialize("{0}", {1})'.format(obj.name, meta, imports)
         return self.build_serialize_operation_(obj.name, obj.type, obj.initial_value,
                                                serialization_type, obj.template_args, obj.is_pointer, 'self.',
                                                obj.is_link, serialize_format)
@@ -88,3 +98,30 @@ class Serializer(SerializerBase):
         for pattern in RegexPatternPython.PEP8:
             string = pattern[0].sub(pattern[1], string)
         return '        ' + string + '\n'
+
+    def create_meta_class(self, obj: Object) -> (str, []):
+        types = {
+            'string': 'str',
+            'map': 'dict',
+            'int': 'int',
+            'float': 'float',
+            'bool': 'bool',
+        }
+        if obj.is_link:
+            return 'Meta(DataWrapper, {})'.format(obj.type), ['DataWrapper', obj.type]
+        elif obj.is_pointer:
+            return 'Meta(IntrusivePtr, {})'.format(obj.type), ['IntrusivePtr', obj.type]
+        elif not obj.template_args:
+            if obj.type in types:
+                return types[obj.type], []
+            return obj.type, [obj.type]
+        args = [self.create_meta_class(x) for x in obj.template_args]
+        type = types[obj.type] if obj.type in types else obj.type
+        meta = 'Meta({}, {})'.format(type, ', '.join([x[0] for x in args]))
+        args_ = []
+        for x in args:
+            if x[1]:
+                args_.extend(x[1])
+        args = [obj.type] if self.model.has_class(obj.type) else []
+        args.extend(args_)
+        return meta, args

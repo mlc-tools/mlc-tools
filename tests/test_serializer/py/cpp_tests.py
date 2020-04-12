@@ -1,4 +1,13 @@
 JSON_TESTS = {
+  "map<int|std::vector<float>>": {
+    "object": [{
+      "key": 123,
+      "value": [
+        1,
+        2
+      ]
+    }]
+  },
   "map<int|int>": {
     "object": [{
       "key": 123,
@@ -740,11 +749,34 @@ JSON_TESTS = {
         }
       ]
     }]
-  }
+  },
+  "map<int|std::vector<const DataUnit*>>": {
+    "object": [{
+      "key": 123,
+      "value": [
+        "unit1",
+        "unit1"
+      ]
+    }]
+  },
+  "map<int|std::vector<intrusive_ptr<AllTypesChildren>>": {
+    "object": [{
+      "key": 123,
+      "value": [{
+        "type": "AllTypesChildren"
+      },{
+        "type": "AllTypesChildren"
+      }]
+    }]
+  },
+
 }
 
 
 XML_TESTS = {
+  "map<int|std::vector<AllTypesChildren>>": "<root><object><pair key='123'><value><item /><item /></value></pair></object></root>",
+  "map<int|std::vector<const DataUnit*>>": "<root><object><pair key='123'><value><item value='unit1' /><item value='unit1' /></value></pair></object></root>",
+  "map<int|std::vector<intrusive_ptr<AllTypesChildren>>": "<root><object><pair key='123'><value><AllTypesChildren /><AllTypesChildren /></value></pair></object></root>",
   "map<int|int>": "<root><object><pair key='123' value='123' /></object></root>",
   "map<int|bool>": "<root><object><pair key='123' value='true' /></object></root>",
   "map<int|float>": "<root><object><pair key='123' value='123.5' /></object></root>",

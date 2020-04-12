@@ -1,48 +1,7 @@
 from tests.test_serializer.py.gen.DataWrapper import DataWrapper
-from tests.test_serializer.py.gen.intrusive_ptr import IntrusivePtr
+from tests.test_serializer.py.gen.IntrusivePtr import IntrusivePtr
 import xml.etree.ElementTree as ET
 
-"""
-<root>
-   <object>
-      <pair key="123">
-         <value>
-            <item>
-               <item value="true" />
-               <item />
-            </item>
-            <item>
-               <item />
-               <item value="true" />
-            </item>
-         </value>
-      </pair>
-   </object>
-</root>
-
-<root>
-   <object>
-      <pair key="123">
-         <value>
-            <item>
-               <item>
-                  <item value="true" />
-                  <item value="false" />
-               </item>
-            </item>
-            <item>
-               <item>
-                  <item value="false" />
-                  <item value="true" />
-               </item>
-            </item>
-         </value>
-      </pair>
-   </object>
-</root>
-
-
-"""
 
 class SerializerXml(object):
     def __init__(self, node):
@@ -69,7 +28,7 @@ class SerializerXml(object):
             if obj is True:
                 self.node.attrib[key] = 'true'
             elif obj is False:
-                if default_value is not None and obj != default_value:
+                if default_value is not None:
                     self.node.attrib[key] = 'false'
             else:
                 self.node.attrib[key] = str(obj)
@@ -87,7 +46,7 @@ class SerializerXml(object):
             node.add_child('item').serialize_list_item(item)
 
     def add_child(self, key):
-        node = ET.SubElement(self.node, key)
+        node = ET.SubElement(self.node, key) if key else self.node
         return SerializerXml(node)
 
     def serialize_key(self, k):
@@ -97,7 +56,12 @@ class SerializerXml(object):
         self.serialize(v, 'value')
 
     def serialize_list_item(self, obj):
-        if hasattr(obj, 'serialize_xml'):
+        if isinstance(obj, DataWrapper):
+            self.serialize_attr(obj.name, 'value', '')
+        elif isinstance(obj, IntrusivePtr):
+            self.node.tag = obj.get_type()
+            obj.serialize_xml(self)
+        elif hasattr(obj, 'serialize_xml'):
             self.serialize(obj, '')
         elif isinstance(obj, list):
             self.serialize_list(obj, '')

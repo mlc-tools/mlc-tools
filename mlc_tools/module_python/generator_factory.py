@@ -14,7 +14,7 @@ class GeneratorFactory(object):
         line = '''
         if type == "{0}":
             from .{0} import {0}
-            return {0}()'''
+            return make_intrusive({0})'''
         builders = ''
         for cls in model.classes:
             builders += line.format(cls.name)

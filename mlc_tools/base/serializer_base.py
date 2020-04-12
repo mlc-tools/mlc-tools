@@ -1,4 +1,5 @@
-from ..base.model import SerializeFormat
+from ..base.model import SerializeFormat, Model
+from ..core.class_ import Class
 from ..core.function import Function
 from ..core.object import Objects, Object
 from ..utils.error import Error
@@ -11,10 +12,10 @@ class SerializerBase(object):
 
     def __init__(self):
         self.serialize_protocol = {}
-        self.model = None
-        self.current_class = None
+        self.model: Model or None = None
+        self.current_class: Class or None = None
 
-    def generate_methods(self, model):
+    def generate_methods(self, model: Model):
         self.model = model
 
         formats = SerializeFormat.get_all()

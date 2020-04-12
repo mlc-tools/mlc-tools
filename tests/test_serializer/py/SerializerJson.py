@@ -1,5 +1,5 @@
 from tests.test_serializer.py.gen.DataWrapper import DataWrapper
-from tests.test_serializer.py.gen.intrusive_ptr import IntrusivePtr
+from tests.test_serializer.py.gen.IntrusivePtr import IntrusivePtr
 
 
 class SerializerJson(object):
@@ -59,7 +59,14 @@ class SerializerJson(object):
 
     def serialize_list_item(self, obj):
         self.json.append(None)
-        if hasattr(obj, 'serialize_json'):
+        if isinstance(obj, DataWrapper):
+            self.json[-1] = obj.name
+        elif isinstance(obj, IntrusivePtr):
+            self.json[-1] = {}
+            self.json[-1]['type'] = obj.get_type()
+            obj.serialize_xml(SerializerJson(self.json[-1]))
+            pass
+        elif hasattr(obj, 'serialize_json'):
             self.json[-1] = {}
             serializer = SerializerJson(self.json[-1])
             serializer.serialize(obj, '')

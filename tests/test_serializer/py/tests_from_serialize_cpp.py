@@ -13,7 +13,7 @@ from tests.test_serializer.py.gen.DataStorage import DataStorage
 from tests.test_serializer.py.gen.DataUnit import DataUnit
 from tests.test_serializer.py.gen.DataWrapper import DataWrapper
 from tests.test_serializer.py.gen.TestEnum import TestEnum
-from tests.test_serializer.py.gen.intrusive_ptr import make_intrusive, IntrusivePtr
+from tests.test_serializer.py.gen.IntrusivePtr import make_intrusive, IntrusivePtr
 
 
 def build_dict(parts, types, functor):
@@ -40,8 +40,21 @@ def get_object(description):
         'AllTypesChildren': AllTypesChildren(),
         'intrusive_ptr<AllTypesChildren>': make_intrusive(AllTypesChildren),
         'std::vector<int>': [1, 2, 3, 4],
+        'std::vector<float>': [1, 2],
         'std::vector<std::vector<bool>>': [[True, False], [False, True]],
         'std::map<int, int>': {1: 2, 2: 3},
+        'std::vector<const DataUnit*>': [
+            DataStorage.shared().getDataUnit("unit1"),
+            DataStorage.shared().getDataUnit("unit1"),
+        ],
+        'std::vector<intrusive_ptr<AllTypesChildren>': [
+            make_intrusive(AllTypesChildren),
+            make_intrusive(AllTypesChildren),
+        ],
+        'std::vector<AllTypesChildren>': [
+            AllTypesChildren(),
+            AllTypesChildren()
+        ]
     }
     return build_dict(parts, types, get_object)
 
@@ -58,8 +71,12 @@ def get_meta(description) -> Meta:
         'AllTypesChildren': AllTypesChildren,
         'intrusive_ptr<AllTypesChildren>': Meta(IntrusivePtr, AllTypesChildren),
         'std::vector<int>': Meta(list, int),
+        'std::vector<float>': Meta(list, float),
         'std::vector<std::vector<bool>>': Meta(list, Meta(list, bool)),
-        'std::map<int, int>': Meta(dict, int, int)
+        'std::map<int, int>': Meta(dict, int, int),
+        'std::vector<const DataUnit*>': Meta(list, Meta(DataWrapper, DataUnit)),
+        'std::vector<intrusive_ptr<AllTypesChildren>': Meta(list, Meta(IntrusivePtr, AllTypesChildren)),
+        'std::vector<AllTypesChildren>': Meta(list, AllTypesChildren)
     }
     (k, v), = build_dict(parts, types, get_object).items()
     return Meta(dict, k, v)
@@ -116,11 +133,11 @@ def test_json():
 def test_xml():
     counter = 0
     for description in XML_TESTS:
-        obj = get_object(description)
-        meta = get_meta(description)
         orig = ET.fromstring(XML_TESTS[description])
 
         try:
+            obj = get_object(description)
+            meta = get_meta(description)
             serializer = SerializerXml(ET.Element('root'))
             serializer.serialize(obj, 'object')
             counter = compare_xml(counter, description, orig, serializer.node, len(XML_TESTS))
@@ -133,6 +150,14 @@ def test_xml():
         except AssertionError as e:
             print(e)
             counter = compare_xml(counter, description, orig, {})
+        except IndexError as e:
+            print(e)
+            print('  - Cannot build object or meta for description: [%s]' % description)
+            exit(1)
+        # except TypeError as e:
+        #     print('  -', e)
+        #     print('  - Cannot save xml for description: [%s]' % description)
+        #     exit(1)
     print('Success Xml: {}/{}'.format(len(XML_TESTS) - counter, len(XML_TESTS)))
 
 

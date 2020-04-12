@@ -8,18 +8,19 @@ from ..DeserializerXml import DeserializerXml
 from ..SerializerJson import SerializerJson
 from ..DeserializerJson import DeserializerJson
 from ..Meta import Meta
-from tests.test_serializer.py.gen.intrusive_ptr import IntrusivePtr, make_intrusive
+from tests.test_serializer.py.gen.IntrusivePtr import IntrusivePtr, make_intrusive
 from .TestEnum import TestEnum
 from ..SerializerXml import SerializerXml
 
 
 class AllTypes(object):
     TYPE = "AllTypes"
-    __slots__ = ["int_value0", "int_value1", "float_value0", "float_value1", "bool_value0", "bool_value1", "str_value0", "str_value1", "int_list", "float_list", "bool_list", "string_list", "int_string_map", "float_string_map", "bool_string_map", "string_string_map", "string_int_map", "string_float_map", "string_bool_map", "object", "object_ptr", "object_list", "object_ptr_list", "object_map", "object_ptr_map", "enum_list", "enum_map"]
+    __slots__ = ["int_value0", "int_value1", "int_value2", "float_value0", "float_value1", "bool_value0", "bool_value1", "str_value0", "str_value1", "int_list", "float_list", "bool_list", "string_list", "int_string_map", "float_string_map", "bool_string_map", "string_string_map", "string_int_map", "string_float_map", "string_bool_map", "object", "object_ptr", "object_list", "object_ptr_list", "object_map", "object_ptr_map", "enum_list", "enum_map"]
 
-    def __init__(self):
-        self.int_value0 = 0
+    def __init__(self, arg=None):
+        self.int_value0 = 0 if arg is None else arg
         self.int_value1 = 0
+        self.int_value2 = None
         self.float_value0 = 0
         self.float_value1 = 0.0
         self.bool_value0 = True
@@ -54,6 +55,7 @@ class AllTypes(object):
         from .AllTypesChildren import AllTypesChildren
         self.int_value0 = 1
         self.int_value1 = 1
+        self.int_value2 = 0
         self.float_value0 = 1.0
         self.float_value1 = 1.0
         self.bool_value0 = False
@@ -106,6 +108,7 @@ class AllTypes(object):
         result = True
         result = result and self.int_value0 == rhs.int_value0
         result = result and self.int_value1 == rhs.int_value1
+        result = result and self.int_value2 == rhs.int_value2
         result = result and self.float_value0 == rhs.float_value0
         result = result and self.float_value1 == rhs.float_value1
         result = result and self.bool_value0 == rhs.bool_value0
@@ -143,14 +146,69 @@ class AllTypes(object):
         pass
 
     def serialize_xml(self, serializer: SerializerXml):
-        pass
+        serializer.serialize(self.int_value0, 'int_value0')
+        serializer.serialize(self.int_value1, 'int_value1')
+        serializer.serialize(self.int_value2, 'int_value2')
+        serializer.serialize(self.float_value0, 'float_value0')
+        serializer.serialize(self.float_value1, 'float_value1')
+        serializer.serialize(self.bool_value0, 'bool_value0', True)
+        serializer.serialize(self.bool_value1, 'bool_value1', False)
+        serializer.serialize(self.str_value0, 'str_value0')
+        serializer.serialize(self.str_value1, 'str_value1')
+        serializer.serialize(self.int_list, 'int_list')
+        serializer.serialize(self.float_list, 'float_list')
+        serializer.serialize(self.bool_list, 'bool_list')
+        serializer.serialize(self.string_list, 'string_list')
+        serializer.serialize(self.int_string_map, 'int_string_map')
+        serializer.serialize(self.float_string_map, 'float_string_map')
+        serializer.serialize(self.bool_string_map, 'bool_string_map')
+        serializer.serialize(self.string_string_map, 'string_string_map')
+        serializer.serialize(self.string_int_map, 'string_int_map')
+        serializer.serialize(self.string_float_map, 'string_float_map')
+        serializer.serialize(self.string_bool_map, 'string_bool_map')
+        serializer.serialize(self.object, 'object')
+        serializer.serialize(self.object_ptr, 'object_ptr')
+        serializer.serialize(self.object_list, 'object_list')
+        serializer.serialize(self.object_ptr_list, 'object_ptr_list')
+        serializer.serialize(self.object_map, 'object_map')
+        serializer.serialize(self.object_ptr_map, 'object_ptr_map')
+        serializer.serialize(self.enum_list, 'enum_list')
+        serializer.serialize(self.enum_map, 'enum_map')
 
-    def deserialize_xml(self, serializer: DeserializerXml):
-        pass
+    def deserialize_xml(self, deserializer: DeserializerXml):
+        self.int_value0 = deserializer.deserialize('int_value0', int, 0)
+        self.int_value1 = deserializer.deserialize('int_value1', int, 1)
+        self.int_value2 = deserializer.deserialize('int_value2', int)
+        self.float_value0 = deserializer.deserialize('float_value0', float, 0)
+        self.float_value1 = deserializer.deserialize('float_value1', float, 0.0)
+        self.bool_value0 = deserializer.deserialize('bool_value0', bool, True)
+        self.bool_value1 = deserializer.deserialize('bool_value1', bool, False)
+        self.str_value0 = deserializer.deserialize('str_value0', str, '')
+        self.str_value1 = deserializer.deserialize('str_value1', str, '')
+        self.int_list = deserializer.deserialize('int_list', Meta(list, int))
+        self.float_list = deserializer.deserialize('float_list', Meta(list, float))
+        self.bool_list = deserializer.deserialize('bool_list', Meta(list, bool))
+        self.string_list = deserializer.deserialize('string_list', Meta(list, str))
+        self.int_string_map = deserializer.deserialize('int_string_map', Meta(dict, int, str))
+        self.float_string_map = deserializer.deserialize('float_string_map', Meta(dict, float, str))
+        self.bool_string_map = deserializer.deserialize('bool_string_map', Meta(dict, bool, str))
+        self.string_string_map = deserializer.deserialize('string_string_map', Meta(dict, str, str))
+        self.string_int_map = deserializer.deserialize('string_int_map', Meta(dict, str, int))
+        self.string_float_map = deserializer.deserialize('string_float_map', Meta(dict, str, float))
+        self.string_bool_map = deserializer.deserialize('string_bool_map', Meta(dict, str, bool))
+        self.object = deserializer.deserialize('object', AllTypesChildren)
+        self.object_ptr = deserializer.deserialize('object_ptr', Meta(IntrusivePtr, AllTypesChildren))
+        self.object_list = deserializer.deserialize('object_list', Meta(list, AllTypesChildren))
+        self.object_ptr_list = deserializer.deserialize('object_ptr_list', Meta(list, Meta(IntrusivePtr, AllTypesChildren)))
+        self.object_map = deserializer.deserialize('object_map', Meta(dict, str, AllTypesChildren))
+        self.object_ptr_map = deserializer.deserialize('object_ptr_map', Meta(dict, str, Meta(IntrusivePtr, AllTypesChildren)))
+        self.enum_list = deserializer.deserialize('enum_list', Meta(list, TestEnum))
+        self.enum_map = deserializer.deserialize('enum_map', Meta(dict, TestEnum, int))
 
     def serialize_json(self, serializer: SerializerJson):
         serializer.serialize(self.int_value0, 'int_value0')
         serializer.serialize(self.int_value1, 'int_value1')
+        # serializer.serialize(self.int_value2, 'int_value2')
         serializer.serialize(self.float_value0, 'float_value0')
         serializer.serialize(self.float_value1, 'float_value1')
         serializer.serialize(self.bool_value0, 'bool_value0')
@@ -180,6 +238,7 @@ class AllTypes(object):
     def deserialize_json(self, deserializer: DeserializerJson):
         self.int_value0 = deserializer.deserialize('int_value0', int, 0)
         self.int_value1 = deserializer.deserialize('int_value1', int, 1)
+        self.int_value2 = deserializer.deserialize('int_value2', int)
         self.float_value0 = deserializer.deserialize('float_value0', float, 0)
         self.float_value1 = deserializer.deserialize('float_value1', float, 0.0)
         self.bool_value0 = deserializer.deserialize('bool_value0', bool, True)
