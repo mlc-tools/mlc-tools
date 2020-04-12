@@ -20,7 +20,7 @@ class GeneratorPredefinedFiles(object):
             model.add_file(None, filename, content)
 
     def build_common_content(self):
-        content = FILES['common.php']
+        content = COMMON
         xml = ''
         json = ''
         if self.model.serialize_formats & SerializeFormat.xml and self.model.serialize_formats & SerializeFormat.json:
@@ -35,6 +35,4 @@ class GeneratorPredefinedFiles(object):
         FILES['common.php'] = content
 
 
-FILES = {
-    'common.php': COMMON
-}
+FILES = {}
