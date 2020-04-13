@@ -2,6 +2,23 @@ from ..base.parser import Parser
 from ..core.class_ import Class
 from ..core.object import Object, Objects, AccessSpecifier
 from ..core.function import Function
+from ..utils.common import *
+
+
+ASSERTS = {
+    'this->assertTrue(': 1,
+    'this->assertFalse(': 1,
+    'this->assertEqual(': 2,
+    'this->assertNotEqual(': 2,
+    'this->assertNull(': 1,
+    'this->assertNotNull(': 1,
+    'this->assertInMap(': 2,
+    'this->assertNotInMap(': 2,
+    'this->assertInList(': 2,
+    'this->assertNotInList(': 2,
+    'this->assertInRange(': 3,
+    'this->assertNotInRange(': 3,
+}
 
 
 class GeneratorUnitTestsInterface(object):
@@ -14,13 +31,13 @@ class GeneratorUnitTestsInterface(object):
 
     def generate(self, model):
         self.model = model
-        tests = []
+        test_classes = []
         for cls in model.classes:
             test = self.generate_test_interface(cls)
             if test:
-                tests.append(test)
+                test_classes.append(test)
         self.generate_base_classes()
-        model.add_classes(tests)
+        model.add_classes(test_classes)
         model.add_class(self.generate_all_tests_class())
 
     def generate_base_classes(self):
@@ -59,6 +76,7 @@ class GeneratorUnitTestsInterface(object):
             for func in impl.functions:
                 if func.name.startswith('test_') and func.name not in generated_functions:
                     self.add_method(test, func.name)
+                    self.generate_messages_if_empty(impl, func)
                 else:
                     self.tests_implemented_methods_count += 1
 
@@ -124,6 +142,26 @@ class GeneratorUnitTestsInterface(object):
         method.operations.append('return result;')
 
         return test_all
+
+    @staticmethod
+    def generate_messages_if_empty(cls: Class, method: Function):
+        for assert_method, count in ASSERTS.items():
+            for i, line in enumerate(method.operations):
+                if line.startswith(assert_method):
+                    parts = [x.strip() for x in smart_split(line[len(assert_method):line.rfind(')')], ',', ['(', ')'])]
+                    if count < len(parts):
+                        continue
+
+                    ass_method = assert_method.replace('this->', '').replace('(', '')
+                    message = '"{expr} is false in {cls}::{method}:\\n     Args: {args}"'
+                    message = message.format(expr=ass_method,
+                                             cls=cls.name,
+                                             method=method.name,
+                                             args=', '.join(parts).replace('"', '\\"'))
+                    pos = line.rfind(');')
+                    line = line[0:pos] + ', ' + message + ');'
+                    method.operations[i] = line
+
 
 
 BASE_CLASSES = '''
