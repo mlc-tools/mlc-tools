@@ -73,17 +73,6 @@ int main(int argc, char ** args)
     test.initialize(&logger);
     result = result && test.execute();
 
-    std::cout << "====================================" << std::endl;
-    std::cout << "Sumary: " << std::endl;
-    std::cout << "  Steps: " << logger.success_count << "/" << logger.tests_count << " success" << std::endl;
-    std::cout << "  Count of classes: " << logger.class_count << std::endl;
-    std::cout << "  Count of method: " << logger.methods_count << std::endl;
-    std::cout << "  Count of all methods: " << logger.all_methods_count << std::endl;
-    std::cout << "  Count of tested methods: " << logger.implemented_methods_count << std::endl;
-    std::cout << "  Percent of cover: " << 100.f * logger.implemented_methods_count / logger.all_methods_count << "%" << std::endl;
-    std::cout << "====================================" << std::endl;
-
-
 	std::cout << "Execute results = " << (result ? "Ok" : "Fail") << std::endl;
 	return result ? 0 : -1;
 }
