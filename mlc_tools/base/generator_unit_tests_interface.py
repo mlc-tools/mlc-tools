@@ -26,8 +26,6 @@ class GeneratorUnitTestsInterface(object):
     def __init__(self):
         self.tests = []
         self.model = None
-        self.tests_interface_methods_count = 0
-        self.tests_implemented_methods_count = 0
 
     def generate(self, model):
         self.model = model
@@ -42,8 +40,6 @@ class GeneratorUnitTestsInterface(object):
 
     def generate_base_classes(self):
         base = BASE_CLASSES
-        base = base.replace('@{all_methods}', str(self.tests_interface_methods_count))
-        base = base.replace('@{implemented_methods}', str(self.tests_implemented_methods_count))
         self.model.parser.parse_text(base)
 
     @staticmethod
@@ -69,7 +65,6 @@ class GeneratorUnitTestsInterface(object):
             if func.name not in ignored and func.access == AccessSpecifier.public:
                 self.add_method(test, 'test_' + func.name)
                 generated_functions.append('test_' + func.name)
-                self.tests_interface_methods_count += 1
 
         if self.model.has_class(test.name[1:]):
             impl = self.model.get_class(test.name[1:])
@@ -77,8 +72,6 @@ class GeneratorUnitTestsInterface(object):
                 if func.name.startswith('test_') and func.name not in generated_functions:
                     self.add_method(test, func.name)
                     self.generate_messages_if_empty(impl, func)
-                else:
-                    self.tests_implemented_methods_count += 1
 
         if not test.functions:
             return None
@@ -163,17 +156,9 @@ class GeneratorUnitTestsInterface(object):
                     method.operations[i] = line
 
 
-
 BASE_CLASSES = '''
 class tests/Logger<SerializedObject>:test:virtual
 {
-    int tests_count
-    int success_count
-    int class_count = 0
-    int methods_count = 0
-    int all_methods_count = @{all_methods}
-    int implemented_methods_count = @{implemented_methods}
-    
     function void message(string message):abstract
     function void log(string message)
     {
