@@ -1,10 +1,13 @@
 import re
 
 
-def smart_split(string, divider):
+def smart_split(string, divider, symbols=('<(', '>)')):
     assert len(divider) == 1
     if not string:
         return []
+
+    left = symbols[0]
+    right = symbols[1]
 
     parts = []
     depth = 0
@@ -16,9 +19,9 @@ def smart_split(string, divider):
         if char == divider and depth == 0:
             parts.append(string[start:curr])
             start = curr + 1
-        elif char in '<(':
+        elif char in left:
             depth += 1
-        elif char in '>)':
+        elif char in right:
             depth -= 1
     parts.append(string[start:])
     return parts
