@@ -455,6 +455,9 @@ class DataComplexMap<SerializedObject>:storage
     function void foo()
     {
     }
+    function void bar_private():private
+    {
+    }
 }
 
 class TestDataComplexMap<ITestDataComplexMap>:tests
