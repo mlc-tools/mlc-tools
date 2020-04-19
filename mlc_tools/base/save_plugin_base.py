@@ -86,4 +86,4 @@ class SavePluginBase(object):
         for local_path in files:
             if local_path not in self.model.created_files and not local_path.endswith('.pyc'):
                 os.remove(self.model.out_directory + local_path)
-                Log.debug('Removed {}'.format(local_path))
+                Log.debug(' Removed: {}'.format(local_path))
