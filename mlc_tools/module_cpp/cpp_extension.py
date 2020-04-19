@@ -1151,7 +1151,7 @@ public:
 /* Maps serialization finish */
 
 private:
-    Pimpl<pugi::xml_node, 8> _node;
+    Pimpl<pugi::xml_node, sizeof(void*)> _node;
 
 };
 
@@ -1486,7 +1486,7 @@ public:
 /* Maps deserialization finish */
 
 private:
-    Pimpl<pugi::xml_node, 8> _node;
+    Pimpl<pugi::xml_node, sizeof(void*)> _node;
 
 };
 
@@ -2033,7 +2033,7 @@ class DeserializerJson
         iterator operator++(int) noexcept = delete;
         DeserializerJson operator*();
     private:
-        Pimpl<Json::ValueIterator, 16> _iterator;
+        Pimpl<Json::ValueIterator, sizeof(void*)*2> _iterator;
     };
 public:
     explicit DeserializerJson(Json::Value &json);

@@ -389,7 +389,7 @@ class DeserializerJson
         iterator operator++(int) noexcept = delete;
         DeserializerJson operator*();
     private:
-        Pimpl<Json::ValueIterator, 16> _iterator;
+        Pimpl<Json::ValueIterator, sizeof(void*)*2> _iterator;
     };
 public:
     explicit DeserializerJson(Json::Value &json);

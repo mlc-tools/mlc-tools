@@ -377,7 +377,7 @@ public:
 /* Maps serialization finish */
 
 private:
-    Pimpl<pugi::xml_node, 8> _node;
+    Pimpl<pugi::xml_node, sizeof(void*)> _node;
 
 };
 
@@ -712,7 +712,7 @@ public:
 /* Maps deserialization finish */
 
 private:
-    Pimpl<pugi::xml_node, 8> _node;
+    Pimpl<pugi::xml_node, sizeof(void*)> _node;
 
 };
 
