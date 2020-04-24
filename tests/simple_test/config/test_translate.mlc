@@ -215,6 +215,28 @@ class TestTranslates<ITestTranslates>
         this->assertTrue(vector[0] == 2);
     }
 
+    function void test_list_truncate()
+    {
+        list<int> vector;
+        list_push(vector, 1);
+        list_push(vector, 2);
+        list_push(vector, 3);
+        list_push(vector, 4);
+
+        list_truncate(vector, 3);
+        this->assertTrue(list_size(vector) == 3);
+        this->assertTrue(vector[0] == 1);
+        this->assertTrue(vector[1] == 2);
+        this->assertTrue(vector[2] == 3);
+
+        list_truncate(vector, 1);
+        this->assertTrue(list_size(vector) == 1);
+        this->assertTrue(vector[0] == 1);
+
+        list_truncate(vector, 0);
+        this->assertTrue(list_size(vector) == 0);
+    }
+
     function void test_translate_declare_empty_string()
     {
         //mock data
@@ -248,15 +270,15 @@ class TestTranslates<ITestTranslates>
 
         auto request_base = request;
         this->assertTrue(request_base != nullptr);
-        this->assertEqual(request_base->get_type(), RequestBar::TYPE);
+        this->assertEqual(request_base->get_type(), RequestBar::TYPE, "");
 
         auto request_bar = dynamic_pointer_cast_intrusive<RequestBar>(request_base);
         this->assertTrue(request_bar != nullptr);
-        this->assertEqual(request_bar->get_type(), RequestBar::TYPE);
+        this->assertEqual(request_bar->get_type(), RequestBar::TYPE, "");
 
         auto request_bar2 = dynamic_pointer_cast_intrusive<RequestBar, Request>(request_base);
         this->assertTrue(request_bar2 != nullptr);
-        this->assertEqual(request_bar2->get_type(), RequestBar::TYPE);
+        this->assertEqual(request_bar2->get_type(), RequestBar::TYPE, "");
     }
     function void test_min_max()
     {
