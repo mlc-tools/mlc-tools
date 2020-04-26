@@ -12,11 +12,14 @@ class Parser(object):
 
     def __init__(self, model):
         self.model = model
+        self.current_file: str = ''
 
     def parse_files(self, files):
         for path in files:
+            self.current_file = path
             text = open(path).read()
             self.parse_text(text)
+            self.model.cache.mark_parse_time(path)
 
     def parse_text(self, text):
         text = self.remove_comments(text)
@@ -83,10 +86,10 @@ class Parser(object):
         if self.model.has_class(cls.name):
             Error.exit(Error.DUBLICATE_CLASS, cls.name)
         for inner_cls in cls.inner_classes:
-            self.model.add_class(inner_cls)
+            self.model.add_class(inner_cls, self.current_file)
 
         cls.generate_constructor()
-        self.model.add_class(cls)
+        self.model.add_class(cls, self.current_file)
         return text
 
     def _create_enum_class(self, text):
@@ -104,7 +107,7 @@ class Parser(object):
         parser = Parser(self.model.empty_copy())
         parser.model.side = self.model.side
         cls.parse_body(parser, body)
-        self.model.add_class(cls)
+        self.model.add_class(cls, self.current_file)
         return text
 
     def _create_member(self, text):

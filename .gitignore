@@ -47,3 +47,4 @@ temp.py
 test_dungeon.py
 tests/test_console_compile/
 cmake-build-debug/
+.mlc.*.cache

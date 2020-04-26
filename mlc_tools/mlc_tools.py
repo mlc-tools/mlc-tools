@@ -95,9 +95,11 @@ class Mlc(object):
             return result_files
 
         all_files = get_config_files()
+        self.model.cache.load()
         parser = Parser(self.model)
         parser.parse_files(all_files)
         self.model.parser = parser
+        self.model.cache.save()
 
         language = Language(self.model.language, self.model)
         language.get_generator().generate(self.model)

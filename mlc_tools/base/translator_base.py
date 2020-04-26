@@ -14,7 +14,8 @@ class TranslatorBase(object):
             if cls.type == 'enum':
                 self.convert_to_enum(cls)
             for method in cls.functions:
-                self.translate_function(cls, method, model)
+                if cls.changed:
+                    self.translate_function(cls, method, model)
 
     def translate_function(self, cls, method, model):
         if not method.translated:

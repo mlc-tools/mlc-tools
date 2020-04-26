@@ -1,5 +1,8 @@
 from copy import copy
 
+from mlc_tools.core.class_ import Class
+from mlc_tools.base.cache import Cache
+
 
 class SerializeFormat(object):
     xml = 1
@@ -16,7 +19,10 @@ class SerializeFormat(object):
 class Model(object):
 
     def __init__(self):
-        self.parser = None
+        from mlc_tools.base import Parser
+
+        self.parser: Parser or None = None
+        self.cache: Cache = Cache(self)
 
         self.classes = []
         self.classes_for_data = []
@@ -66,6 +72,7 @@ class Model(object):
 
     def clear_data(self):
         self.parser = None
+        self.cache = Cache(self)
         self.classes = []
         self.classes_for_data = []
         self.objects = []
@@ -75,7 +82,10 @@ class Model(object):
         self.files = []
         self.created_files = []
 
-    def add_class(self, cls):
+    def add_class(self, cls: Class, file_path: str = ''):
+        cls.file_path = file_path
+        if not self.join_to_one_file:
+            cls.changed = not file_path or self.cache.is_file_changed(file_path)
         self.classes_dict[cls.name] = cls
         self.classes.append(cls)
 

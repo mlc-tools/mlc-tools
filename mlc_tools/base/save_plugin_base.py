@@ -1,4 +1,6 @@
 import os
+
+from ..core.class_ import Class
 from ..utils import fileutils
 from ..utils.error import Log
 
@@ -41,9 +43,9 @@ class SavePluginBase(object):
         for _, local_path, content in self.model.files:
             combine_file = self.__add_to_combine_file(combine_file, content)
             if self._is_need_save_file_on_combine(local_path):
-                self.__save_file(local_path, combine_file)
+                self.__save_file(None, local_path, combine_file)
 
-        self.__save_file(file_path, combine_file)
+        self.__save_file(None, file_path, combine_file)
 
     def __save_all(self):
         if isinstance(self.model.out_dict, dict):
@@ -51,18 +53,19 @@ class SavePluginBase(object):
                 self.model.out_dict[local_path] = content
             return
 
-        for _, local_path, content in self.model.files:
-            self.__save_file(local_path, content)
+        for cls, local_path, content in self.model.files:
+            self.__save_file(cls, local_path, content)
 
-    def __save_file(self, local_path, content):
+    def __save_file(self, cls: Class, local_path, content):
         self.model.created_files.append(local_path)
         full_path = fileutils.normalize_path(self.model.out_directory) + local_path
         exist = os.path.isfile(full_path)
-        result, stream = fileutils.write(full_path, content)
-        if result:
-            self.streams.append(stream)
-            msg = ' Create: {}' if not exist else ' Overwriting: {}'
-            Log.message(msg.format(local_path))
+        if not cls or cls.changed or not exist:
+            result, stream = fileutils.write(full_path, content)
+            if result:
+                self.streams.append(stream)
+                msg = ' Create: {}' if not exist else ' Overwriting: {}'
+                Log.message(msg.format(local_path))
 
     def __sort_files(self):
         def sort_func(data):

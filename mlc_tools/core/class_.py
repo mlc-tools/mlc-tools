@@ -8,6 +8,8 @@ class Class(Object):
 
     def __init__(self):
         Object.__init__(self)
+        self.file_path: str = ''
+        self.changed = True
         self.superclasses = []
         self.subclasses = []
         self.constructor = None
