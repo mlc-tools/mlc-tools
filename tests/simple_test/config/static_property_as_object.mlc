@@ -1,0 +1,15 @@
+
+class StaticStringProperty<SerializedObject>
+{
+	string:static value = "123"
+	constructor(string value="")
+	{
+	}
+}
+
+class StaticProperty
+{
+	StaticStringProperty:static value0
+	StaticStringProperty:static value1 = StaticStringProperty("1234")
+	StaticStringProperty*:static value2 = new StaticStringProperty()
+}

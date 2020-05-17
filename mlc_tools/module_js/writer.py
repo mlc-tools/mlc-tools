@@ -1,4 +1,5 @@
 from ..base import WriterBase
+from ..core.object import Object
 
 
 class Writer(WriterBase):
@@ -40,7 +41,7 @@ class Writer(WriterBase):
                                   constructor_body=constructor_body)
         return [('%s.js' % cls.name, self.prepare_file(out))]
 
-    def write_object(self, obj):
+    def write_object(self, obj: Object):
         member = ''
         static = ''
         value = obj.initial_value.replace('::', '.') if obj.initial_value else None
@@ -67,6 +68,9 @@ class Writer(WriterBase):
                     value = 'new {}()'.format(obj.type)
         elif value is None and obj.is_pointer:
             value = 'null'
+        elif value and not obj.is_pointer and not obj.is_link and value not in ['null', 'NULL', 'nullptr'] and \
+                self.model.has_class(obj.type) and self.model.get_class(obj.type).type != 'enum':
+            value = 'new ' + value
 
         if obj.is_static:
             static = '{}.{} = {};'.format(self.current_class.name, obj.name, value)

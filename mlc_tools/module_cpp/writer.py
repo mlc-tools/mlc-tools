@@ -1,5 +1,6 @@
 import re
 from ..base import WriterBase
+from ..core.class_ import Class
 from ..core.object import Object, AccessSpecifier
 from .regex import RegexPatternCpp
 
@@ -251,7 +252,9 @@ class Writer(WriterBase):
                                                                   name=obj.name,
                                                                   value=obj.initial_value)
 
-    def write_member_static_init(self, cls, obj, use_intrusive=True):
+    def write_member_static_init(self, cls: Class, obj: Object, use_intrusive=True) -> str or None:
+        if obj.initial_value is None:
+            return None
         string_pointer = '{const}intrusive_ptr<{type}> {owner}::{name}({initial_value});'
         string_non_pointer = '{const}{type}{pointer} {owner}::{name}({initial_value});'
 

@@ -13,11 +13,14 @@ class Writer(WriterBase):
 
         declaration_list = ''
         initialization_list = ''
+        static_initialization_list = ''
         for member in cls.members:
-            declare, init = self.write_object(member)
+            declare, init, static_init = self.write_object(member)
             declaration_list += declare + '\n'
             if init:
                 initialization_list += init + '\n'
+            if static_init:
+                static_initialization_list += static_init + '\n'
 
         functions = ''
         for method in cls.functions:
@@ -48,6 +51,7 @@ class Writer(WriterBase):
                                   extend=extend,
                                   declarations=declaration_list,
                                   initialize_list=initialization_list,
+                                  static_initialization=static_initialization_list,
                                   functions=functions,
                                   imports=imports,
                                   constructor_args=constructor_args,
@@ -56,8 +60,10 @@ class Writer(WriterBase):
             ('%s.php' % cls.name, self.prepare_file(out))
         ]
 
-    def write_object(self, obj):
-        out_init = ''
+    def write_object(self, obj) -> (str, str or None, str or None):
+        static_initialization = None
+        constructor_initialization = None
+        declaration = None
         value = obj.initial_value
         cls_type = self.model.get_class(obj.type) if self.model.has_class(obj.type) else None
         if (value in [None, '"NONE"'] and not obj.is_pointer) or (cls_type and cls_type.type == 'enum'):
@@ -82,16 +88,28 @@ class Writer(WriterBase):
                         initial_value = obj.initial_value.replace('::', '::$')
                     else:
                         initial_value = '{}::${}'.format(cls_type.name, cls_type.members[0].name)
-                    out_init = '$this->{} = {};'.format(obj.name, initial_value)
+                    constructor_initialization = '$this->{} = {};'.format(obj.name, initial_value)
                 elif cls_type:
-                    out_init = '$this->{} = new {}();'.format(obj.name, obj.type)
+                    constructor_initialization = '$this->{} = new {}();'.format(obj.name, obj.type)
 
         if obj.is_static:
-            out_declaration = AccessSpecifier.to_string(obj.access) + ' static ${0} = {1};'
+            if self.model.has_class(obj.type) and value and value not in ['null', 'NULL']:
+                if not obj.is_pointer:
+                    value = 'new ' + value
+                static_initialization = '{}::${} = {};'
+                declaration = ' static ${0};'
+            # if not  and obj.type in ['list', 'map', 'int', 'bool', 'float', 'string']:
+            else:
+                declaration = AccessSpecifier.to_string(obj.access) + ' static ${0} = {1};'
         else:
-            out_declaration = AccessSpecifier.to_string(obj.access) + ' ${0} = {1};'
-        out_declaration = out_declaration.format(obj.name, Serializer().convert_initialize_value(value))
-        return out_declaration, out_init
+            declaration = AccessSpecifier.to_string(obj.access) + ' ${0} = {1};'
+
+        declaration = declaration.format(obj.name, Serializer().convert_initialize_value(value))
+        if static_initialization:
+            static_initialization = static_initialization.format(self.current_class.name,
+                                                                 obj.name,
+                                                                 Serializer().convert_initialize_value(value))
+        return declaration, constructor_initialization, static_initialization
 
     def prepare_file(self, text):
         text = self.prepare_file_codestype_php(text)
@@ -134,6 +152,7 @@ class {name} {extend}
     //functions
     {functions}
 }};
+{static_initialization}
 
 ?>
 '''

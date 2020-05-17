@@ -63,6 +63,7 @@ class Error(object):
     TESTS_FAILED = inspect.currentframe().f_lineno
     CIRCULAR_REFERENCE = inspect.currentframe().f_lineno
     ERROR_CONST_MODIFIER = inspect.currentframe().f_lineno
+    INCORRECT_NEW_IN_INITIAL_VALUE_OF_NOT_POINTER = inspect.currentframe().f_lineno
 
     texts = {
         UNKNOWN_SERIALISED_TYPE: '[{}] unknown serialized serialized format. Base type - [{}]',
@@ -85,6 +86,11 @@ class Error(object):
         TESTS_FAILED: 'Tests failed',
         CIRCULAR_REFERENCE: 'Circular reference: [{}]',
         ERROR_CONST_MODIFIER: 'Const modifier should be declare as [Type:const]: {}',
+        INCORRECT_NEW_IN_INITIAL_VALUE_OF_NOT_POINTER:
+            'Incorrect operator "new" in initialized value. \n'
+            '    class: {}, \n'
+            '    member: {} {}, \n'
+            '    value: {}',
     }
 
     @staticmethod

@@ -132,7 +132,7 @@ class TestWriteObject(unittest.TestCase):
     def test_php(self):
         model = create_test_model()
         result = save_object('php', model)
-        self.assertEqual(result, ('public $int_value = 42;', ''))
+        self.assertEqual(result, ('public $int_value = 42;', None, None))
 
 
 class TestWriteFunction(unittest.TestCase):
@@ -215,17 +215,20 @@ class TestCppWriterBuildIncludesWithGroups(unittest.TestCase):
 class TestCppWriterWriteObject(unittest.TestCase):
 
     def test_0(self):
-        from mlc_tools.module_cpp.writer import Writer
         model = create_test_model()
         lang = create_lang('cpp', model)
         writer = lang.get_writer()
 
-        member = Parser.create_object('DataBase*:static db')
+        member = Parser.create_object('DataBase*:static db = nullptr')
         model.classes[0].members.append(member)
 
         self.assertEqual(writer.write_member_declaration(member), 'static intrusive_ptr<DataBase> db;')
         self.assertEqual(writer.write_member_static_init(model.classes[0], member),
                          'intrusive_ptr<DataBase> Test::db(nullptr);')
+
+        member = Parser.create_object('DataBase*:static db')
+        model.classes[0].members[0] = member
+        self.assertEqual(writer.write_member_static_init(model.classes[0], member), None)
 
 
 class TestWriterPrepareFile(unittest.TestCase):

@@ -1,4 +1,6 @@
 import os
+
+from ..core.class_ import Class
 from ..utils import fileutils
 from ..utils.error import Log
 
@@ -67,13 +69,17 @@ class SavePluginBase(object):
     def __sort_files(self):
         def sort_func(data):
             weight = ''
-            cls = data[0]
+            cls: Class = data[0]
             if cls is None:
                 return weight
             weight = cls.name
+            for obj in cls.members:
+                if obj.is_static and self.model.has_class(obj.type):
+                    weight = obj.name + weight
             while cls.superclasses:
                 cls = cls.superclasses[0]
                 weight = '~' + weight
+
             return weight
         self.model.files = sorted(self.model.files, key=sort_func)
 

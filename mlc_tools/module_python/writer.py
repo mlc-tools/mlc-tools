@@ -95,7 +95,10 @@ class Writer(WriterBase):
             out = '{0} = {1}'
         else:
             out = 'self.{0} = {1}'
-        out = imports + out.format(obj.name, Serializer().convert_initialize_value(value))
+        value = Serializer().convert_initialize_value(value)
+        if value and value.startswith('new '):
+            value = value[4:]
+        out = imports + out.format(obj.name, value)
         return out if out.strip() else 'pass'
 
     def prepare_file(self, text):

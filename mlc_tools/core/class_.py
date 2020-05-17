@@ -122,6 +122,11 @@ class Class(Object):
         if self._linked:
             return
 
+        for obj in self.members:
+            if not obj.is_pointer and obj.initial_value and obj.initial_value.startswith('new '):
+                Error.exit(Error.INCORRECT_NEW_IN_INITIAL_VALUE_OF_NOT_POINTER,
+                           self.name, obj.type, obj.name, obj.initial_value)
+
         for func in self.functions:
             func.is_virtual = self.is_virtual or \
                 func.is_virtual or \
