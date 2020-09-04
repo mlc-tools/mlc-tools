@@ -37,6 +37,7 @@ class RegexPatternPython(object):
         (re.compile(r'list_insert\s*\(\s*(.+?),\s*(.+)\s*,\s*(.+)\s*\)'), r'\1.insert(\2, \3)', ['list_insert']),
         (re.compile(r'list_remove\s*\(\s*(.+),\s*(.+)\s*\)'), r'\1.remove(\2)', ['list_remove']),
         (re.compile(r'list_erase\s*\(\s*(.+),\s*(.+)\s*\)'), r'\1.remove(\1[\2])', ['list_erase']),
+        (re.compile(r'list_truncate\s*\(\s*(.+),\s*(.+)\s*\)'), r'\1 = \1[:\2]', ['list_truncate']),
         (re.compile(r'list_clear\s*\(\s*(.+)\s*\)'), r'\1 = list()', ['list_clear']),
         (re.compile(r'list_size\s*\('), r'len(', ['list_size']),
         (re.compile(r'list_resize\s*\(\s*(.+),\s*(.+)\s*\)'), r'\1 = [None for _ in range(int(\2))]', ['list_resize']),
@@ -52,8 +53,13 @@ class RegexPatternPython(object):
         (re.compile(r'std::string\s+(\w+)'), r'\1', ['std::string']),
         (re.compile(r'\blist<.+>\s+(\w+)'), r'\1 = list()', ['list<']),
         (re.compile(r'\bmap<([<:>\w\s\*&]+),\s*([<:>\w\s\*&]+)>\s*(\w+)'), r'\3 = dict()', ['map<']),
+
+        # nullish coalescing operator
+        # auto c = test->a ?? test->b;
+        # https://trello.com/c/WPR70BUY/37-add-operator
         (re.compile(r'[\w\*]+ ([\w\->\.]+)\s*=\s*([\w\->\.]+)\s*\?\?\s*([\w\->\.]+)'),
          r'\1 = (\2) if (\2 is not None) else (\3)', ['??']),
+
         (re.compile(r'\bauto\&* (\w+)'), r'\1', ['auto']),
         (re.compile(r'\bstring (\w+)'), r'\1', ['string']),
         (re.compile(r'\bint (\w+)'), r'\1', ['int']),

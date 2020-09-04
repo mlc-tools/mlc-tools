@@ -60,6 +60,13 @@ namespace @{namespace}
     }
 
     template <class T>
+    void list_truncate(std::vector<T>& list, size_t length)
+    {
+        assert(length < list.size());
+        list.erase(list.begin() + length, list.end());
+    }
+
+    template <class T>
     int list_size(const std::vector<T>& vector)
     {
         return static_cast<int>(vector.size());

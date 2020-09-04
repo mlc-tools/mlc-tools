@@ -88,6 +88,7 @@ class RegexPatternJs(object):
         (re.compile(r'list_insert\s*\(\s*(.+?),\s*(.+)\s*,\s*(.+)\s*\)'), r'\1.splice(\2, 0, \3)', ['list_insert']),
         (re.compile(r'list_remove\s*\(\s*(.+),\s*(.+)\s*\)'), r'\1.splice(\1.indexOf(\2), 1)', ['list_remove']),
         (re.compile(r'list_erase\s*\(\s*(.+),\s*(.+)\s*\)'), r'\1.splice(\2, 1)', ['list_erase']),
+        (re.compile(r'list_truncate\s*\(\s*(.+),\s*(.+)\s*\)'), r'\1 = \1.splice(0, \2)', ['list_truncate']),
         (re.compile(r'list_clear\s*\(\s*(.+)\s*\)'), r'\1 = []', ['list_clear']),
         (re.compile(r'list_resize\s*\(\s*(.+),\s*(.+)\s*\)'), r'\1.length = \2', ['list_resize']),
         (re.compile(r'in_map\s*\(\s*(.+?),\s*(.+?)\s*\)'), r'(\1 in \2)', ['in_map']),
