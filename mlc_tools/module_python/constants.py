@@ -34,7 +34,7 @@ def serialize_command_to_xml(command):
     return ET.tostring(root)
 
 
-def clone_object(obj):
+def clone_object(obj, _=None):
     payload = serialize_command_to_xml(obj)
     clone = create_command_from_xml(payload)
     return clone
@@ -64,7 +64,7 @@ def serialize_command_to_json(command):
     return json.dumps(js)
 
 
-def clone_object(obj):
+def clone_object(obj, _=None):
     payload = serialize_command_to_json(obj)
     clone = create_command_from_json(payload)
     return clone
