@@ -5,6 +5,10 @@ enum UnitType
     support
 }
 
+class data/DataNonExist<SerializedObject>:storage
+{
+    string name
+}
 class data/DataUnit<SerializedObject>:storage
 {
 	string name

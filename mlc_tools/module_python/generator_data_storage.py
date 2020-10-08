@@ -47,11 +47,13 @@ return DataStorage.__instance'''
         for key, obj in self.data_members.items():
             getter = 'get' + key
             map_name = obj.name
-            method.operations.append(f"for o in deserializer.json['{map_name}']:")
-            method.operations.append(f"    self.{getter}(o['key'])")
-            method.operations.append(f"for o in deserializer.json['{map_name}']:")
-            method.operations.append(f"    data = self.{getter}(o['key'])")
-            method.operations.append(f"    data.deserialize_json(DeserializerJson(o['value']))")
+            method.operations.append(f"{map_name} = deserializer.json.get('{map_name}', None)")
+            method.operations.append(f"if {map_name}:")
+            method.operations.append(f"    for o in {map_name}:")
+            method.operations.append(f"        self.{getter}(o['key'])")
+            method.operations.append(f"    for o in {map_name}:")
+            method.operations.append(f"        data = self.{getter}(o['key'])")
+            method.operations.append(f"        data.deserialize_json(DeserializerJson(o['value']))")
 
     def add_deserialize_xml(self, model):
         method = self.add_deserialize_method('deserialize_xml')
@@ -59,12 +61,13 @@ return DataStorage.__instance'''
             getter = 'get' + key
             map_name = obj.name
             method.operations.append(f"{map_name} = deserializer.node.find('{map_name}')")
-            method.operations.append(f"for o in {map_name}:")
-            method.operations.append(f"    self.{getter}(o.attrib['key'])")
-            method.operations.append(f"for o in {map_name}:")
-            method.operations.append(f"    data = self.{getter}(o.attrib['key'])")
-            method.operations.append(f"    deserializer_data = DeserializerXml(o.find('value'))")
-            method.operations.append(f"    data.deserialize_xml(deserializer_data)")
+            method.operations.append(f"if {map_name}:")
+            method.operations.append(f"    for o in {map_name}:")
+            method.operations.append(f"        self.{getter}(o.attrib['key'])")
+            method.operations.append(f"    for o in {map_name}:")
+            method.operations.append(f"        data = self.{getter}(o.attrib['key'])")
+            method.operations.append(f"        deserializer_data = DeserializerXml(o.find('value'))")
+            method.operations.append(f"        data.deserialize_xml(deserializer_data)")
 
     def add_deserialize_method(self, name):
         method = Function()
