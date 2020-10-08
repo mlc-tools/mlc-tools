@@ -70,6 +70,7 @@ class GeneratorDataStorageBase(Class):
     def __init__(self):
         Class.__init__(self)
         self.model = None
+        self.data_members = {}
 
     def generate(self, model):
         self.model = model
@@ -84,9 +85,9 @@ class GeneratorDataStorageBase(Class):
                 obj.name = get_data_list_name(get_data_name(class_.name))
                 obj.template_args.append(Objects.STRING)
                 obj.template_args.append(class_.name)
-
                 obj.access = AccessSpecifier.public
                 self.members.append(obj)
+                self.data_members[class_.name] = obj
 
         loaded = Object()
         loaded.is_runtime = True

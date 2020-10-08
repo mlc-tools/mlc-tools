@@ -1,5 +1,5 @@
 from ..base.translator_base import TranslatorBase
-from ..core.object import Objects, Object, AccessSpecifier
+from ..core.object import Objects, Object
 from ..core.function import Function
 from .regex import RegexPatternCpp
 

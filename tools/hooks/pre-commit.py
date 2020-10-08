@@ -24,7 +24,7 @@ def run_pylint():
     if not groups:
         return
     current, previuos, delta = groups[0]
-    if float(current) < 9.95:
+    if float(current) < 9.5:
         print('Low rated')
         sys.exit(1)
     if float(delta) < 0.0:
@@ -36,9 +36,9 @@ def run_pylint():
     if 'trailing - whitespace' in out:
         print('Please remove a trailing - whitespace warning. see pylint')
         sys.exit(1)
-    if 'no-name-in-module' in out:
-        print('Please check a imports. see pylint no-name-in-module warning')
-        sys.exit(1)
+    # if 'no-name-in-module' in out:
+    #     print('Please check a imports. see pylint no-name-in-module warning')
+    #     sys.exit(1)
 
 
 if __name__ == '__main__':

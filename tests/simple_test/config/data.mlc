@@ -57,6 +57,10 @@ class data/DataUnit<SerializedObject>:storage
 
         result = result && unit1->link_to_data->name == unit2->name;
         result = result && unit2->link_to_data->name == unit1->name;
+
+        result = result && map_size(unit2->link_to_data->map_units) == map_size(unit1->map_units);
+        result = result && map_size(unit1->link_to_data->map_units) == map_size(unit2->map_units);
+
         result = result && unit1 != unit2;
         return result;
 	}

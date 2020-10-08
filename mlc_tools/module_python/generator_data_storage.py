@@ -1,3 +1,6 @@
+from mlc_tools.base.model import Model, SerializeFormat
+from mlc_tools.core.function import Function
+from mlc_tools.core.object import Objects
 from ..base.generator_data_storage_base import GeneratorDataStorageBase
 
 
@@ -31,3 +34,48 @@ return DataStorage.__instance'''
         self.deserialize_xml(deserializer)
         self._loaded = True
         '''
+
+    def generate(self, model: Model):
+        GeneratorDataStorageBase.generate(self, model)
+        if model.serialize_formats & SerializeFormat.xml:
+            self.add_deserialize_xml(model)
+        if model.serialize_formats & SerializeFormat.json:
+            self.add_deserialize_json(model)
+
+    def add_deserialize_json(self, model):
+        method = self.add_deserialize_method('deserialize_json')
+        for key, obj in self.data_members.items():
+            getter = 'get' + key
+            map_name = obj.name
+            method.operations.append(f"for o in deserializer.json['{map_name}']:")
+            method.operations.append(f"    self.{getter}(o['key'])")
+            method.operations.append(f"for o in deserializer.json['{map_name}']:")
+            method.operations.append(f"    data = self.{getter}(o['key'])")
+            method.operations.append(f"    data.deserialize_json(DeserializerJson(o['value']))")
+
+    def add_deserialize_xml(self, model):
+        method = self.add_deserialize_method('deserialize_xml')
+        for key, obj in self.data_members.items():
+            getter = 'get' + key
+            map_name = obj.name
+            method.operations.append(f"{map_name} = deserializer.node.find('{map_name}')")
+            method.operations.append(f"for o in {map_name}:")
+            method.operations.append(f"    self.{getter}(o.attrib['key'])")
+            method.operations.append(f"for o in {map_name}:")
+            method.operations.append(f"    data = self.{getter}(o.attrib['key'])")
+            method.operations.append(f"    deserializer_data = DeserializerXml(o.find('value'))")
+            method.operations.append(f"    data.deserialize_xml(deserializer_data)")
+
+    def add_deserialize_method(self, name):
+        method = Function()
+        method.name = name
+        method.translated = True
+        method.return_type = Objects.VOID
+        method.is_virtual = False
+        method.is_const = False
+        method.operations.append('        pass')
+        method.args.append(['deserializer', self])
+        self.functions.append(method)
+        return method
+
+

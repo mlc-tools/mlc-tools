@@ -1,4 +1,3 @@
-from ..core.object import Object, AccessSpecifier
 
 
 class TranslatorBase(object):
