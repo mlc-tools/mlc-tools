@@ -5,6 +5,7 @@ from .generator_factory import GeneratorFactory
 from .generator_package import GeneratorPackage
 from .generator_observer import GeneratorObserver
 from .generator_operator_equals import GeneratorOperatorEquals
+from .generator_predefined_files import GeneratorPredefinedFiles
 
 
 class Generator(GeneratorBase):
@@ -20,3 +21,4 @@ class Generator(GeneratorBase):
         GeneratorPackage().generate(model)
         GeneratorObserver().generate(model)
         GeneratorOperatorEquals().generate(model)
+        GeneratorPredefinedFiles().generate(model)

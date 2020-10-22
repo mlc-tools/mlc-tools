@@ -93,3 +93,16 @@ class Factory(object):
         return clone
     {{{{end_format=both}}}}
 '''
+
+MG_EXTENSIONS = '''
+
+def strTo(value, class_):
+    if class_ == bool:
+        return value.lower() in ['yes', 'true', 'y']
+    return class_(value)
+
+'''
+
+FILES_DICT = [
+    ['mg_extensions.py', MG_EXTENSIONS],
+]

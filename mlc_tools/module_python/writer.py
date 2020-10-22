@@ -148,6 +148,7 @@ class Writer(WriterBase):
 PATTERN_FILE = '''
 import xml.etree.ElementTree as ET
 import json
+from .mg_extensions import *
 {imports}
 class {name}:
 {static_list}

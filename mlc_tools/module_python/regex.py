@@ -91,11 +91,11 @@ class RegexPatternPython(object):
          r'(\3 if isinstance(\3, \1) else None)', ['dynamic_pointer_cast_intrusive']),
         (re.compile(r'dynamic_pointer_cast_intrusive<(.+)>\((.+?)\)'), r'(\2 if isinstance(\2, \1) else None)',
          ['dynamic_pointer_cast_intrusive']),
-        (re.compile(r'(\w+)<(.+)>\((.+?)\)'), r'\1(\3, \2)', ['<']),
         (re.compile(r'([\w\.]+?)\s*!=\s*False'), r'(\1)', ['False']),
         (re.compile(r'([\w\.]+?)\s*==\s*False'), r'not (\1)', ['False']),
-        (re.compile(r'\bstrTo<(\w+)>\((.+?)\)'), r'\1(\2)', ['strTo']),
+        (re.compile(r'\bstrTo<(\w+)>\((.+?)\)'), r'strTo(\2, \1)', ['strTo']),
         (re.compile(r'\btoStr\((.+?)\)'), r'str(\1)', ['toStr']),
+        (re.compile(r'(\w+)<(.+)>\((.+?)\)'), r'\1(\3, \2)', ['<']),
         (re.compile(r'std::strcat\((.+?),\s*(.+?)\)'), r'((\1)+(\2))', ['std::strcat']),
         (re.compile(r'\.at\((.*?)\)'), r'[\1]', ['at']),
 
