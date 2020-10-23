@@ -139,12 +139,25 @@ class TestTranslates<ITestTranslates>
 
         list_resize(vector, 1);
         this->assertTrue(list_size(vector) == 1);
-
         list_resize(vector, 2);
         this->assertTrue(list_size(vector) == 2);
-
         list_resize(vector, 10);
         this->assertTrue(list_size(vector) == 10);
+
+        vector[0] = 123;
+        list_resize(vector, 1);
+        this->assertTrue(list_size(vector) == 1);
+        this->assertTrue(vector[0] == 123);
+    }
+    function void test_string_size()
+    {
+        this->assertTrue(string_size("") == 0);
+        this->assertTrue(string_size("s") == 1);
+        this->assertTrue(string_size("1") == 1);
+        this->assertTrue(string_size("00") == 2);
+
+        std::string s = "123";
+        this->assertTrue(string_size(s) == 3);
     }
     function void test_string_empty()
     {

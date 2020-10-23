@@ -100,6 +100,54 @@ def strTo(value, class_):
     if class_ == bool:
         return value.lower() in ['yes', 'true', 'y']
     return class_(value)
+    
+def in_list(key, container):
+    return key in container
+    
+def list_push(container, value):
+    container.append(value)
+    
+def list_insert(container, value, index):
+    container.insert(value, index)
+    
+def list_remove(container, value):
+    container.remove(value)
+    
+def list_erase(container, index):
+    container.remove(container[index])
+    
+def list_truncate(container, size):
+    while len(container) > size:
+        container.pop()
+        
+def list_clear(container):
+    container.clear()
+    
+def list_size(container):
+    return len(container)
+    
+def list_resize(container, size):
+    list_truncate(container, size)
+    while len(container) < size:
+        container.append(None)
+
+def in_map(key, container):
+    return key in container
+    
+def map_size(container):
+    return len(container)
+    
+def map_remove(container, value):
+    container.pop(value, None)
+    
+def map_clear(container):
+    container.clear()
+
+def string_empty(container):
+    return len(container) == 0
+    
+def string_size(container):
+    return len(container)
 
 '''
 
