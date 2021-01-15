@@ -35,7 +35,12 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
                 impl = '''
                 template<>const {type}* DataStorage::get(const std::string& name) const
                 {{
-                    return _loaded ? &{name}.at(name) : &const_cast<DataStorage*>(this)->{name}[name];
+                    if(_loaded)
+                    {{
+                        auto iter = {name}.find(name);
+                        return iter != {name}.end() ? &iter->second : nullptr;
+                    }}
+                    return &const_cast<DataStorage*>(this)->{name}[name];
                 }}
                 '''
                 name = get_data_list_name(get_data_name(class_.name))

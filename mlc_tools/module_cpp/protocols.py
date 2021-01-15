@@ -181,7 +181,10 @@ for(auto child : arr_$(FIELD))
 
 #link
 #serialize:
-xml.append_attribute("$(FIELD)").set_value($(FIELD)->name.c_str());
+if($(FIELD))
+{ 
+    xml.append_attribute("$(FIELD)").set_value($(FIELD)->name.c_str());
+}
 #deserialize:
 auto name_$(FIELD) = xml.attribute("$(FIELD)").as_string();
 $(FIELD) = DataStorage::shared().get<$(TYPE)>(name_$(FIELD));
@@ -366,7 +369,10 @@ for(int i = 0; i < size_$(FIELD); ++i)
 
 #link
 #serialize:
-$(NAMESPACE)::set(json,"$(FIELD)",$(FIELD)->name);
+if($(FIELD))
+{
+    $(NAMESPACE)::set(json,"$(FIELD)",$(FIELD)->name);
+}
 #deserialize:
 $(FIELD) = DataStorage::shared().get<$(TYPE)>($(NAMESPACE)::get<std::string>(json["$(FIELD)"]));
 
