@@ -84,6 +84,8 @@ def write(path, content):
     if rewrite:
         create_dir_for_file(path)
         with open(path, 'w') as stream:
+            if isinstance(content, bytes):
+                content = content.decode()
             stream.write(content)
             return True, stream
     return False, None
