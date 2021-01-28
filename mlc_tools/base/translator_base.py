@@ -48,11 +48,9 @@ class TranslatorBase(object):
                     values.append(1 << shift)
                 elif cast == 'string':
                     member.initial_value = '"{}"'.format(member.name)
-            elif cast == 'int':
+            else:
                 # TODO if initialization is as enumerate of others members need throw error (example: one|two)
                 values.append(member.initial_value)
-            else:
-                member.initial_value = 'None'
 
             shift += 1
         value = Object()
