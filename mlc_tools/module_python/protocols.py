@@ -219,7 +219,8 @@ $(VALUE_SERIALIZE)
 #serialize:
 xml.set("$(FIELD)", $(OWNER)$(FIELD) if isinstance($(OWNER)$(FIELD), str) else $(OWNER)$(FIELD).str() )
 #deserialize:
-$(OWNER)$(FIELD) = $(TYPE)()
+from .$(TYPE) import $(TYPE)
+        $(OWNER)$(FIELD) = $(TYPE)()
         $(OWNER)$(FIELD).set(xml.get("$(FIELD)", default=$(DEFAULT_VALUE)))
 '''
 
@@ -366,5 +367,7 @@ $(VALUE_SERIALIZE)
 #serialize:
 dictionary["$(FIELD)"] = $(OWNER)$(FIELD).str()
 #deserialize
-$(OWNER)$(FIELD).set(dictionary.get("$(FIELD)", ''))
+from .$(TYPE) import $(TYPE)
+        $(OWNER)$(FIELD) = $(TYPE)()
+        $(OWNER)$(FIELD).set(dictionary.get("$(FIELD)", ''))
 '''
