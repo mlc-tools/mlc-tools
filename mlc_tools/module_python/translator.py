@@ -134,11 +134,10 @@ class Translator(TranslatorBase):
 
         getter = Function()
         getter.name = 'str'
-        getter.args.append(['value', Objects.VOID])
         if cast == 'int':
             for index, obj in enumerate(cls.members):
                 if obj.name != '_value':
-                    getter.operations.append(f'''if(this->_value == "{cls.name}::{obj.name}")
+                    getter.operations.append(f'''if(this->_value == {cls.name}::{obj.name})
                     {{
                         return "{obj.name}";
                     }}''')
