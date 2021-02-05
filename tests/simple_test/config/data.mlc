@@ -13,6 +13,7 @@ class data/DataUnit<SerializedObject>:storage
 	DataUnit*:link link_to_data
 	list<DataUnit*:link> all_units
 	map<string, int> map_units
+	EnumWithIntValue enum_with_int_value
 
 	function bool tests(Logger* logger):static
 	{

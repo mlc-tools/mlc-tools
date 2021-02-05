@@ -1,5 +1,5 @@
 <data>
-	<unit name="unitname1" link_to_data="unitname2" unit_type="attack">
+	<unit name="unitname1" link_to_data="unitname2" unit_type="attack" enum_with_int_value="foo">
 		<visual  icon="some_image" name="some_locale_key">
 		</visual>
 		<all_units>

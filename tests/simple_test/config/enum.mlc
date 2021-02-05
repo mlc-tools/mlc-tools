@@ -47,7 +47,7 @@ class TestFooEnumTestParent<ITestFooEnumTestParent>:test
         this->assertTrue(this->enumBar == FooEnum::bar, "enumBar initialized as FooEnum::bar correct");
     }
 
-    function void test_enum_with_int_values()
+    function void test_enum_with_int_values():cpp:py
     {
         this->assertTrue(this->enum_int1 == EnumWithIntValue::foo);
         this->assertTrue(this->enum_int2 == EnumWithIntValue::bar);
@@ -56,5 +56,10 @@ class TestFooEnumTestParent<ITestFooEnumTestParent>:test
         this->assertTrue(this->enum_int2 & EnumWithIntValue::foo_bar);
         this->assertTrue(this->enum_int3 & EnumWithIntValue::foo_bar);
         this->assertFalse(this->enum_int1 & EnumWithIntValue::bar);
+
+        auto unit = DataStorage::shared().get<DataUnit>("unitname1");
+        this->assertTrue(unit->enum_with_int_value == EnumWithIntValue::foo);
+        this->assertTrue(unit->enum_with_int_value & EnumWithIntValue::foo_bar);
+        this->assertTrue(unit->enum_with_int_value | EnumWithIntValue::foo_bar);
     }
 }

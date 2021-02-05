@@ -50,6 +50,7 @@ class TranslatorBase(object):
                     member.initial_value = '"{}"'.format(member.name)
             else:
                 # TODO if initialization is as enumerate of others members need throw error (example: one|two)
+                cast = 'int'
                 values.append(member.initial_value)
 
             shift += 1
