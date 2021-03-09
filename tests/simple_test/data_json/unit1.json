@@ -2,6 +2,7 @@
 	"unit": {
 		"name": "unitname1",
 		"unit_type": "attack",
+		"enum_with_int_value": "foo",
 		"visual": {
 			"name": "some_locale_key",
 			"icon": "some_image"

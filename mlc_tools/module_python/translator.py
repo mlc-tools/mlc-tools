@@ -1,6 +1,9 @@
 import re
 from .regex import RegexPatternPython
 from ..base.translator_base import TranslatorBase
+from ..core.class_ import Class
+from ..core.function import Function
+from ..core.object import Objects
 
 
 class Translator(TranslatorBase):
@@ -109,3 +112,55 @@ class Translator(TranslatorBase):
     @staticmethod
     def get_tabs(count):
         return '    ' * count
+
+    def convert_to_enum(self, cls: Class):
+        TranslatorBase.convert_to_enum(self, cls)
+        cast = cls.members[-1].type
+
+        setter = Function()
+        setter.name = 'set'
+        setter.args.append(['value', Objects.VOID])
+        if cast == 'int':
+            for index, obj in enumerate(cls.members):
+                if obj.name != '_value':
+                    setter.operations.append(f'''if(value == "{obj.name}")
+                    {{
+                        this->_value = {cls.name}::{obj.name};
+                        return;
+                    }}''')
+        else:
+            setter.operations.append('this->_value = value;')
+        cls.functions.append(setter)
+
+        getter = Function()
+        getter.name = 'str'
+        if cast == 'int':
+            for index, obj in enumerate(cls.members):
+                if obj.name != '_value':
+                    getter.operations.append(f'''if(this->_value == {cls.name}::{obj.name})
+                    {{
+                        return "{obj.name}";
+                    }}''')
+        else:
+            getter.operations.append('return this->_value;')
+        cls.functions.append(getter)
+
+        def add_binary_method(name, operator):
+            method = Function()
+            method.name = name
+            method.return_type = Objects.BOOL
+            method.args.append(['rhs', Objects.VOID])
+            method.operations.append(f'''if(isinstance(rhs, {cls.name}))
+             {{
+                return this->_value {operator} rhs._value;
+             }}
+             else
+             {{
+                return this->_value {operator} rhs
+             }}''')
+            cls.functions.append(method)
+        add_binary_method('__eq__', '==')
+        add_binary_method('__and__', '&')
+        add_binary_method('__or__', '|')
+        add_binary_method('__xor__', '^')
+

@@ -31,7 +31,7 @@ namespace mg
     void DataStorage::initialize_xml(const std::string& content) const
     {
         pugi::xml_document doc;
-        doc.load(content.c_str());
+        doc.load_string(content.c_str());
         pugi::xml_node node = doc.root().first_child();
         DeserializerXml deserializer(node);
         const_cast<DataStorage*>(this)->deserialize_xml(deserializer);

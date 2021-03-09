@@ -19,6 +19,8 @@ tests/test_serialize/data.cpp.xml
 tests/test_serialize/step_2
 tests/test_serialize/step_2.exe
 
+tests/test_serializer/cpp/build/
+
 tests/*/generated*
 tests/*/build*
 

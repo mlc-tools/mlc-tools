@@ -1,8 +1,7 @@
-from .constants import COMMON_XML, COMMON_JSON
+from .constants import COMMON_XML, COMMON_JSON, MG_EXTENSIONS
+from .constants_serializers import *
 from ..base.writer_base import WriterBase
 from ..base.model import SerializeFormat, Model
-from ..core.class_ import Class
-from .constants_serializers import *
 
 
 class GeneratorPredefinedFiles(object):
@@ -17,7 +16,10 @@ class GeneratorPredefinedFiles(object):
 
         self.build_common_content()
 
-        for filename, content in FILES.items():
+        # for filename, content in FILES_DICT.items():
+        #     model.add_file(None, filename, content)
+        for filename, content in FILES_DICT.items():
+            content = writer.prepare_file(content)
             model.add_file(None, filename, content)
 
     def build_common_content(self):
@@ -26,11 +28,12 @@ class GeneratorPredefinedFiles(object):
             content += COMMON_XML
         if self.model.serialize_formats & SerializeFormat.json:
             content += COMMON_JSON
-        FILES['common.py'] = content
+        FILES_DICT['common.py'] = content
 
 
-FILES = {
+FILES_DICT = {
     'common.py': '',
+    'mg_extensions.py': MG_EXTENSIONS,
     'Meta.py': META,
     'DataWrapper.py': DATA_WRAPPER,
     'IntrusivePtr.py': INTRUSIVE,

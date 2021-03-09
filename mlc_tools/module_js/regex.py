@@ -105,19 +105,11 @@ class RegexPatternJs(object):
         (re.compile(r'(\w+\.\w+)\.add\((\w+), \w+::(\w+)(.+)\);'), r'\1.add(\2, \2.\3\4);', ['']),
         (re.compile(r',\s*std::placeholders::_\d'), r'', ['std::placeholders']),
 
-        # (re.compile(r'list_remove\((\$.+?),\s*([\$.\w]+?)\);'), r'array_splice(\1, array_search(\2, \1), 1);',
-        #  ['list_remove']),
-        # (re.compile(r'list_erase\((\$.+?),\s*([\$.\w]+?)\);'), r'array_splice(\1, \2, 1);',
-        #  ['list_erase']),
-        # (re.compile(r'list_clear\((.+?)\);'), r'\1 = array();', ['list_clear']),
-        # (re.compile(r'list_resize\s*\(\s*(.+),\s*(.+)\s*\)'), r'\1 = array_fill(0, \2, NULL);', ['list_resize']),
         (re.compile(r'string_empty\((.+?)\)'), r'(length_of(\1) == 0)', ['string_empty']),
+        (re.compile(r'string_size\((.+?)\)'), r'length_of(\1)', ['string_size']),
         # (re.compile(r'random_float\(\)'), r'(mt_rand() * 1.0 / mt_getrandmax())', ['random_float']),
         # (re.compile(r'random_int\((.+?),\s*(.+)\)'), r'mt_rand(\1, \2-1)', ['random_int']),
         (re.compile(r'std::strcat\((.+?),\s*(.+?)\)'), r'((\1)+(\2))', ['std::strcat']),
-        # (re.compile(r'list_push\s*\((.+)\)'), r'array_push(\1)', ['list_push']),
-        # (re.compile(r'list_insert\s*\((\$.+?),\s*([\$.\w]+?),\s*([\$.\w]+?)\)'), r'array_splice(\1, \2, 0, \3);',
-        #  ['list_insert']),
         #
         # # Exception with try/catch block (one catch)
         # (re.compile(r'try\n\s*{([\s\S.]+?)}\n\s*catch__((\w+)__(\w*))\n\s+{([\s\S.]+?)}'),

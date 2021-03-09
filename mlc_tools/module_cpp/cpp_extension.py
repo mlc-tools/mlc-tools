@@ -211,7 +211,7 @@ namespace @{namespace}
     static intrusive_ptr<TType> create_command_from_xml(const std::string& payload)
     {
         pugi::xml_document doc;
-        doc.load(payload.c_str());
+        doc.load_string(payload.c_str());
         auto root = doc.root().first_child();
         DeserializerXml deserializer(root);
         auto command = Factory::shared().build<TType>(root.name());
@@ -257,7 +257,7 @@ namespace @{namespace}
     static intrusive_ptr<TType> create_command_from_xml(const std::string& payload)
     {
         pugi::xml_document doc;
-        doc.load(payload.c_str());
+        doc.load_string(payload.c_str());
         auto root = doc.root().first_child();
         auto command = Factory::shared().build<TType>(root.name());
         DeserializerXml deserializer(root);
@@ -811,6 +811,7 @@ public:
     SerializerXml add_child(const std::string& name);
 
     void add_attribute(const std::string& key, const int& value, int default_value=0);
+    void add_attribute(const std::string& key, const long long& value, long long default_value=0);
     void add_attribute(const std::string& key, const bool& value, bool default_value=false);
     void add_attribute(const std::string& key, const float& value, float default_value=0.f);
     void add_attribute(const std::string& key, const std::string& value, const std::string& default_value);
@@ -860,13 +861,27 @@ public:
 
 /* Vectors serialization start */
     template <class T>
-    typename std::enable_if<is_attribute<T>::value, void>::type
+    typename std::enable_if<is_attribute<T>::value && !std::is_same<T, bool>::value, void>::type
     serialize(const std::vector<T>& values, const std::string& key)
     {
         if (values.empty())
             return;
         SerializerXml child = key.empty() ? *this : add_child(key);
         for (const T& value : values)
+        {
+            SerializerXml item = child.add_child("item");
+            item.serialize(value, "value", default_value::value<T>());
+        }
+    }
+    
+    template <class T>
+    typename std::enable_if<is_attribute<T>::value && std::is_same<T, bool>::value, void>::type
+    serialize(const std::vector<T>& values, const std::string& key)
+    {
+        if (values.empty())
+            return;
+        SerializerXml child = key.empty() ? *this : add_child(key);
+        for (T value : values)
         {
             SerializerXml item = child.add_child("item");
             item.serialize(value, "value", default_value::value<T>());
@@ -1175,6 +1190,7 @@ public:
 
     std::string get_name()const;
     int get_attribute(const std::string& key, int default_value=0);
+    int64_t get_attribute(const std::string& key, int64_t default_value=0);
     bool get_attribute(const std::string& key, bool default_value=false);
     float get_attribute(const std::string& key, float default_value=0.f);
     std::string get_attribute(const std::string& key, const std::string& default_value);
@@ -1544,6 +1560,14 @@ void SerializerXml::add_attribute(const std::string &key, const int &value, int 
     }
 }
 
+void SerializerXml::add_attribute(const std::string &key, const long long &value, long long default_value)
+{
+    if (value != default_value)
+    {
+        _node->append_attribute(key.c_str()).set_value(value);
+    }
+}
+
 void SerializerXml::add_attribute(const std::string &key, const bool &value, bool default_value)
 {
     if (value != default_value)
@@ -1607,6 +1631,11 @@ int DeserializerXml::get_attribute(const std::string &key, int default_value)
     return _node->attribute(key.c_str()).as_int(default_value);
 }
 
+int64_t DeserializerXml::get_attribute(const std::string &key, int64_t default_value)
+{
+    return _node->attribute(key.c_str()).as_llong(default_value);
+}
+
 bool DeserializerXml::get_attribute(const std::string &key, bool default_value)
 {
     return _node->attribute(key.c_str()).as_bool(default_value);
@@ -1648,7 +1677,8 @@ DeserializerXml DeserializerXml::operator*()
 {
     return *this;
 }
-}'''
+}
+'''
 SERIALIZER_JSON_HPP = '''#ifndef __mg_SERIALIZERJSON_H__
 #define __mg_SERIALIZERJSON_H__
 
@@ -1684,11 +1714,13 @@ public:
     SerializerJson add_array_item();
 
     void add_attribute(const std::string &key, const int &value, int default_value = 0);
+    void add_attribute(const std::string &key, const int64_t &value, int64_t default_value = 0);
     void add_attribute(const std::string &key, const bool &value, bool default_value = false);
     void add_attribute(const std::string &key, const float &value, float default_value = 0.f);
     void add_attribute(const std::string &key, const std::string &value, const std::string &default_value);
 
     void add_array_item(const int &value);
+    void add_array_item(const int64_t &value);
     void add_array_item(const bool &value);
     void add_array_item(const float &value);
     void add_array_item(const std::string &value);
@@ -1745,13 +1777,25 @@ public:
     }
 /* Vectors serialization start */
     template<class T>
-    typename std::enable_if<is_attribute<T>::value || is_enum<T>::value, void>::type
+    typename std::enable_if<(is_attribute<T>::value && !std::is_same<T, bool>::value) || is_enum<T>::value, void>::type
     serialize(const std::vector<T> &values, const std::string &key)
     {
         if (values.empty())
             return;
         SerializerJson child = key.empty() ? *this : add_array(key);
-        for (const T &value : values)
+        for (const T& value : values)
+        {
+            child.add_array_item(value);
+        }
+    }
+    template<class T>
+    typename std::enable_if<is_attribute<T>::value && std::is_same<T, bool>::value>::type
+    serialize(const std::vector<T> &values, const std::string &key)
+    {
+        if (values.empty())
+            return;
+        SerializerJson child = key.empty() ? *this : add_array(key);
+        for (T value : values)
         {
             child.add_array_item(value);
         }
@@ -2051,11 +2095,13 @@ public:
     DeserializerJson get_child(const std::string &name);
 
     int get_attribute(const std::string &key, int default_value = 0);
+    int64_t get_attribute(const std::string &key, int64_t default_value = 0);
     bool get_attribute(const std::string &key, bool default_value = false);
     float get_attribute(const std::string &key, float default_value = 0.f);
     std::string get_attribute(const std::string &key, const std::string &default_value);
 
     void get_array_item(int &value);
+    void get_array_item(int64_t &value);
     void get_array_item(bool &value);
     void get_array_item(float &value);
     void get_array_item(std::string &value);
@@ -2418,6 +2464,14 @@ void SerializerJson::add_attribute(const std::string &key, const int &value, int
     }
 }
 
+void SerializerJson::add_attribute(const std::string &key, const int64_t &value, int64_t default_value)
+{
+    if (value != default_value)
+    {
+        _json[key] = value;
+    }
+}
+
 void SerializerJson::add_attribute(const std::string &key, const bool &value, bool default_value)
 {
     if (value != default_value)
@@ -2443,6 +2497,11 @@ void SerializerJson::add_attribute(const std::string &key, const std::string &va
 }
 
 void SerializerJson::add_array_item(const int &value)
+{
+    _json.append(value);
+}
+
+void SerializerJson::add_array_item(const int64_t &value)
 {
     _json.append(value);
 }
@@ -2487,6 +2546,11 @@ int DeserializerJson::get_attribute(const std::string &key, int default_value)
     return _json.isMember(key) ? _json[key].asInt() : default_value;
 }
 
+int64_t DeserializerJson::get_attribute(const std::string &key, int64_t default_value)
+{
+    return _json.isMember(key) ? _json[key].asInt64() : default_value;
+}
+
 bool DeserializerJson::get_attribute(const std::string &key, bool default_value)
 {
     return _json.isMember(key) ? _json[key].asBool() : default_value;
@@ -2505,6 +2569,11 @@ std::string DeserializerJson::get_attribute(const std::string &key, const std::s
 void DeserializerJson::get_array_item(int &value)
 {
     value = _json.asInt();
+}
+
+void DeserializerJson::get_array_item(int64_t &value)
+{
+    value = _json.asInt64();
 }
 
 void DeserializerJson::get_array_item(bool &value)
@@ -2552,7 +2621,8 @@ DeserializerJson DeserializerJson::iterator::operator*()
 {
     return DeserializerJson(**_iterator);
 }
-}'''
+}
+'''
 SERIALIZER_COMMON = '''#ifndef __mg_SERIALIZERCOMMON_H__
 #define __mg_SERIALIZERCOMMON_H__
 
@@ -2571,6 +2641,9 @@ template<class T>
 struct is_attribute
 {
     constexpr static bool value = (std::is_same<int, T>::value ||
+                                   std::is_same<unsigned, T>::value ||
+                                   std::is_same<int64_t, T>::value ||
+                                   std::is_same<uint64_t, T>::value ||
                                    std::is_same<bool, T>::value ||
                                    std::is_same<float, T>::value ||
                                    std::is_same<std::string, T>::value) &&

@@ -215,6 +215,7 @@ int test_xml() {
     const FooObject* data = DataStorage::shared().get<FooObject>("data_name");
 
     int int_type = 123;
+    int64_t int_type64 = 123;
     bool bool_type = true;
     float float_type = 25.f;
     std::string string_type = "gdhsih";
@@ -258,6 +259,7 @@ int test_xml() {
     
     SerializerXml serializer(node);
     serializer.serialize(int_type, "int_type", 0);
+    serializer.serialize(int_type64, "int_type64", 0ll);
     serializer.serialize(bool_type, "bool_type", false);
     serializer.serialize(float_type, "float_type", 0.f);
     serializer.serialize(string_type, "string_type", std::string(""));

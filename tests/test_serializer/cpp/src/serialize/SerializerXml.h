@@ -30,6 +30,7 @@ public:
     SerializerXml add_child(const std::string& name);
 
     void add_attribute(const std::string& key, const int& value, int default_value=0);
+    void add_attribute(const std::string& key, const long long& value, long long default_value=0);
     void add_attribute(const std::string& key, const bool& value, bool default_value=false);
     void add_attribute(const std::string& key, const float& value, float default_value=0.f);
     void add_attribute(const std::string& key, const std::string& value, const std::string& default_value);
@@ -79,13 +80,27 @@ public:
 
 /* Vectors serialization start */
     template <class T>
-    typename std::enable_if<is_attribute<T>::value, void>::type
+    typename std::enable_if<is_attribute<T>::value && !std::is_same<T, bool>::value, void>::type
     serialize(const std::vector<T>& values, const std::string& key)
     {
         if (values.empty())
             return;
         SerializerXml child = key.empty() ? *this : add_child(key);
         for (const T& value : values)
+        {
+            SerializerXml item = child.add_child("item");
+            item.serialize(value, "value", default_value::value<T>());
+        }
+    }
+    
+    template <class T>
+    typename std::enable_if<is_attribute<T>::value && std::is_same<T, bool>::value, void>::type
+    serialize(const std::vector<T>& values, const std::string& key)
+    {
+        if (values.empty())
+            return;
+        SerializerXml child = key.empty() ? *this : add_child(key);
+        for (T value : values)
         {
             SerializerXml item = child.add_child("item");
             item.serialize(value, "value", default_value::value<T>());
@@ -394,6 +409,7 @@ public:
 
     std::string get_name()const;
     int get_attribute(const std::string& key, int default_value=0);
+    int64_t get_attribute(const std::string& key, int64_t default_value=0);
     bool get_attribute(const std::string& key, bool default_value=false);
     float get_attribute(const std::string& key, float default_value=0.f);
     std::string get_attribute(const std::string& key, const std::string& default_value);

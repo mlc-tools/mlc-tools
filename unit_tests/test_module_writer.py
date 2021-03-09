@@ -334,6 +334,7 @@ def get_hpp():
     return '''#ifndef __mg_Test_h__
 #define __mg_Test_h__
 
+#include <cstdint>
 #include "intrusive_ptr.h"
 #include "pugixml/pugixml.hpp"
 #include <string>

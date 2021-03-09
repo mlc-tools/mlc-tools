@@ -33,11 +33,13 @@ public:
     SerializerJson add_array_item();
 
     void add_attribute(const std::string &key, const int &value, int default_value = 0);
+    void add_attribute(const std::string &key, const int64_t &value, int64_t default_value = 0);
     void add_attribute(const std::string &key, const bool &value, bool default_value = false);
     void add_attribute(const std::string &key, const float &value, float default_value = 0.f);
     void add_attribute(const std::string &key, const std::string &value, const std::string &default_value);
 
     void add_array_item(const int &value);
+    void add_array_item(const int64_t &value);
     void add_array_item(const bool &value);
     void add_array_item(const float &value);
     void add_array_item(const std::string &value);
@@ -94,13 +96,25 @@ public:
     }
 /* Vectors serialization start */
     template<class T>
-    typename std::enable_if<is_attribute<T>::value || is_enum<T>::value, void>::type
+    typename std::enable_if<(is_attribute<T>::value && !std::is_same<T, bool>::value) || is_enum<T>::value, void>::type
     serialize(const std::vector<T> &values, const std::string &key)
     {
         if (values.empty())
             return;
         SerializerJson child = key.empty() ? *this : add_array(key);
-        for (const T &value : values)
+        for (const T& value : values)
+        {
+            child.add_array_item(value);
+        }
+    }
+    template<class T>
+    typename std::enable_if<is_attribute<T>::value && std::is_same<T, bool>::value>::type
+    serialize(const std::vector<T> &values, const std::string &key)
+    {
+        if (values.empty())
+            return;
+        SerializerJson child = key.empty() ? *this : add_array(key);
+        for (T value : values)
         {
             child.add_array_item(value);
         }
@@ -400,11 +414,13 @@ public:
     DeserializerJson get_child(const std::string &name);
 
     int get_attribute(const std::string &key, int default_value = 0);
+    int64_t get_attribute(const std::string &key, int64_t default_value = 0);
     bool get_attribute(const std::string &key, bool default_value = false);
     float get_attribute(const std::string &key, float default_value = 0.f);
     std::string get_attribute(const std::string &key, const std::string &default_value);
 
     void get_array_item(int &value);
+    void get_array_item(int64_t &value);
     void get_array_item(bool &value);
     void get_array_item(float &value);
     void get_array_item(std::string &value);

@@ -104,6 +104,9 @@ class Serializer(SerializerBase):
             'string': 'str',
             'map': 'dict',
             'int': 'int',
+            'uint': 'int',
+            'int64_t': 'int',
+            'uint64_t': 'int',
             'float': 'float',
             'bool': 'bool',
         }

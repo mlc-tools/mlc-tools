@@ -16,6 +16,9 @@ template<class T>
 struct is_attribute
 {
     constexpr static bool value = (std::is_same<int, T>::value ||
+                                   std::is_same<unsigned, T>::value ||
+                                   std::is_same<int64_t, T>::value ||
+                                   std::is_same<uint64_t, T>::value ||
                                    std::is_same<bool, T>::value ||
                                    std::is_same<float, T>::value ||
                                    std::is_same<std::string, T>::value) &&

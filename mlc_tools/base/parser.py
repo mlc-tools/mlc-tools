@@ -345,6 +345,10 @@ class Parser(object):
         in_serialize = False
         in_initial_value = initial_value is None
         pattern = []
+        if type_object in ['int64_t', 'uint', 'uint64_t']:
+            type_object = 'int'
+        if type_object in ['list<int64_t>', 'list<uint>', 'list<uint64_t>']:
+            type_object = 'list<int>'
         for original_line in lines:
             if original_line.endswith('\n'):
                 original_line = original_line[0:-1]

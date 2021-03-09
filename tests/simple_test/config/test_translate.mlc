@@ -87,6 +87,17 @@ class TestTranslates<ITestTranslates>
         std::string s = "1";
         this->assertTrue(toStr(a) == s);
     }
+    function void test_str_to():py:cpp
+    {
+        std::string s = "1";
+        this->assertTrue(strTo<int>(s) == 1);
+        this->assertTrue(strTo<float>(s) == 1.f);
+        this->assertTrue(strTo<bool>("yes") == true);
+        this->assertTrue(strTo<bool>("true") == true);
+        this->assertTrue(strTo<bool>("no") == false);
+        this->assertTrue(strTo<bool>("false") == false);
+        this->assertTrue(strTo<bool>("") == false);
+    }
     function void test_at()
     {
         list<int> vector;
@@ -128,12 +139,25 @@ class TestTranslates<ITestTranslates>
 
         list_resize(vector, 1);
         this->assertTrue(list_size(vector) == 1);
-
         list_resize(vector, 2);
         this->assertTrue(list_size(vector) == 2);
-
         list_resize(vector, 10);
         this->assertTrue(list_size(vector) == 10);
+
+        vector[0] = 123;
+        list_resize(vector, 1);
+        this->assertTrue(list_size(vector) == 1);
+        this->assertTrue(vector[0] == 123);
+    }
+    function void test_string_size()
+    {
+        this->assertTrue(string_size("") == 0);
+        this->assertTrue(string_size("s") == 1);
+        this->assertTrue(string_size("1") == 1);
+        this->assertTrue(string_size("00") == 2);
+
+        std::string s = "123";
+        this->assertTrue(string_size(s) == 3);
     }
     function void test_string_empty()
     {

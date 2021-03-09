@@ -1,12 +1,12 @@
-from .generator_predefined_files import GeneratorPredefinedFiles
 from ..base.generator import GeneratorBase
 from ..base.generator_visitor import GeneratorVisitor
+from ..core.class_ import Class
 from .generator_data_storage import GeneratorDataStorage
 from .generator_factory import GeneratorFactory
 from .generator_package import GeneratorPackage
 from .generator_observer import GeneratorObserver
 from .generator_operator_equals import GeneratorOperatorEquals
-from ..core.class_ import Class
+from .generator_predefined_files import GeneratorPredefinedFiles
 
 
 class Generator(GeneratorBase):
@@ -30,4 +30,3 @@ class Generator(GeneratorBase):
         base_enum.name = 'BaseEnum'
         base_enum.type = 'class'
         model.add_class(base_enum)
-
