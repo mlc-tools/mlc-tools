@@ -14,6 +14,7 @@ class data/DataUnit<SerializedObject>:storage
 	list<DataUnit*:link> all_units
 	map<string, int> map_units
 	EnumWithIntValue enum_with_int_value
+	int64_t int64_value = 0
 
 	function bool tests(Logger* logger):static
 	{

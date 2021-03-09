@@ -85,9 +85,13 @@ class Serializer(SerializerBase):
         return ['xml', Objects.VOID] if serialize_format == 'xml' else ['json', Objects.VOID]
 
     def build_serialize_operation(self, obj, serialization_type, serialize_format):
-        return self.build_serialize_operation_(obj.name, obj.type, obj.initial_value,
-                                               serialization_type, obj.template_args, obj.is_pointer, '$this->',
-                                               obj.is_link, serialize_format)
+        value = self.build_serialize_operation_(obj.name, obj.type, obj.initial_value,
+                                                serialization_type, obj.template_args, obj.is_pointer, '$this->',
+                                                obj.is_link, serialize_format)
+        value = value.replace('(int64_t)', '(int)')
+        value = value.replace('(uint)', '(int)')
+        value = value.replace('(uint64_t)', 'int)')
+        return value
 
     def finalize_serialize_operation(self, string):
         return string + '\n'
