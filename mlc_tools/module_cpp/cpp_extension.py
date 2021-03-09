@@ -662,7 +662,7 @@ namespace @{namespace}
         static intrusive_ptr<TType> create_command_from_xml(const std::string& payload)
         {
             pugi::xml_document doc;
-            doc.load(payload.c_str());
+            doc.load_string(payload.c_str());
             auto root = doc.root().first_child();
             auto command = shared().build<TType>(root.name());
             command->deserialize_xml(root);
@@ -706,7 +706,7 @@ namespace @{namespace}
         static intrusive_ptr<TType> create_command_from_xml(const std::string& payload)
         {
             pugi::xml_document doc;
-            doc.load(payload.c_str());
+            doc.load_string(payload.c_str());
             auto root = doc.root().first_child();
             auto command = shared().build<TType>(root.name());
             command->deserialize_xml(root);
