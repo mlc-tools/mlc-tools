@@ -2,6 +2,7 @@ import xml.etree.ElementTree as ElementTree
 import xml.dom.minidom
 import json
 import os
+import re
 from ..utils import fileutils
 from ..utils.error import Error
 from ..base.generator_data_storage_base import get_class_name_from_data_name
@@ -115,24 +116,8 @@ class DataParser(object):
                 obj.tag = 'value'
                 pair.append(obj)
 
-        buffer_ = ElementTree.tostring(root)
-        xml_ = xml.dom.minidom.parseString(buffer_)
-        buffer_ = str(xml_.toprettyxml(encoding='utf-8'))
-        lines = buffer_.split('\n')
-
-        buffer_ = ''
-        for line in lines:
-            if line.strip():
-                buffer_ += line + '\n'
-        buffer_ = buffer_.strip()
-        buffer_ = buffer_.replace('\\t', '\t')
-        buffer_ = buffer_.replace('\\n', '\n')
-        if buffer_.startswith("b'"):
-            buffer_ = buffer_[2:]
-        if buffer_.endswith("'"):
-            buffer_ = buffer_[0:-1]
-
-        return buffer_
+        text = ElementTree.tostring(root).decode()
+        return re.sub(r'>(\s+)<', '><', text)
 
     def _flush_json(self):
         dict_ = {}
