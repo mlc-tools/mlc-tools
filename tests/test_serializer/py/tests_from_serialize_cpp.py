@@ -1,6 +1,7 @@
 import re
 import xml.etree.ElementTree as ET
 
+from tests.simple_test.generated_py.UnitType import UnitType
 from tests.test_serializer.py.DeserializerJson import DeserializerJson
 from tests.test_serializer.py.DeserializerXml import DeserializerXml
 from tests.test_serializer.py.Meta import Meta
@@ -203,3 +204,20 @@ def test_deserialize_all_types_from_min_string_json():
     obj = AllTypes()
     obj.deserialize_json(deserializer)
     assert obj.int_value0 == 10
+
+
+def test_empty_enum_deserialize_xml():
+    string = '<unit/>'
+    deserializer = DeserializerXml(ET.fromstring(string))
+    data = DataUnit()
+    data.deserialize_xml(deserializer)
+    assert data.unit_type == UnitType.defend
+    assert isinstance(data.unit_type, UnitType)
+
+
+def test_empty_enum_deserialize_json():
+    deserializer = DeserializerJson({})
+    data = DataUnit()
+    data.deserialize_json(deserializer)
+    assert data.unit_type == UnitType.attack
+    assert isinstance(data.unit_type, UnitType)

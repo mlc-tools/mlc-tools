@@ -178,6 +178,8 @@ class DeserializerXml(object):
             else:
                 value = default_value
         if meta == bool:
+            if isinstance(value, bool):
+                return value
             if value is not None:
                 value = value.lower()
             return True if value in ['true', 'yes'] else False if value in ['false', 'no'] else default_value if default_value else False
@@ -335,7 +337,7 @@ class DeserializerJson(object):
         js = self.json if not key else self.json[key] if key in self.json else {}
         if meta.__base__ == BaseEnum:
             value = DeserializerJson(js).deserialize_attr('', str, '')
-            return getattr(meta, value)
+            return getattr(meta, value) if hasattr(meta, value) else default_value
         if isinstance(meta, Meta):
             if meta.args[0] == dict:
                 return DeserializerJson(js).deserialize_dict('', meta)

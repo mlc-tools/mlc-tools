@@ -23,11 +23,13 @@ class DeserializerXml(object):
             if meta.args[0] == DataWrapper:
                 from tests.test_serializer.py.gen.DataStorage import DataStorage
                 value = self.deserialize_attr(key, str, '')
-                return DataStorage.shared().getDataUnit(value)
+                return getattr(DataStorage.shared(), 'get' + meta.args[1].TYPE)(value)
             if meta.args[0] == IntrusivePtr:
-                obj = make_intrusive(meta.args[1])
-                obj.deserialize_xml(node)
-                return obj
+                if node is not None and node.node is not None:
+                    obj = make_intrusive(meta.args[1])
+                    obj.deserialize_xml(node)
+                    return obj
+                return None
         if hasattr(meta, 'deserialize_xml'):
             obj = meta()
             obj.deserialize_xml(node)
@@ -42,7 +44,11 @@ class DeserializerXml(object):
             else:
                 value = default_value
         if meta == bool:
-            return True if value == 'true' else False if value == 'false' else default_value if default_value else False
+            if isinstance(value, bool):
+                return value
+            if value is not None:
+                value = value.lower()
+            return True if value in ['true', 'yes'] else False if value in ['false', 'no'] else default_value if default_value else False
         return meta(value or default_value or 0)
 
     def deserialize_dict(self, key, meta):
@@ -90,7 +96,7 @@ class DeserializerXml(object):
             if meta.args[0] == DataWrapper:
                 from tests.test_serializer.py.gen.DataStorage import DataStorage
                 value = self.deserialize_attr('value', str, '')
-                return DataStorage.shared().getDataUnit(value)
+                return getattr(DataStorage.shared(), 'get' + meta.args[1].TYPE)(value)
             if meta.args[0] == IntrusivePtr:
                 obj = Factory.build(self.node.tag)
                 obj.deserialize_xml(self)

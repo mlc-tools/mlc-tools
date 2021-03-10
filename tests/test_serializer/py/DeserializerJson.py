@@ -14,7 +14,7 @@ class DeserializerJson(object):
         js = self.json if not key else self.json[key] if key in self.json else {}
         if meta.__base__ == BaseEnum:
             value = DeserializerJson(js).deserialize_attr('', str, '')
-            return getattr(meta, value)
+            return getattr(meta, value) if hasattr(meta, value) else default_value
         if isinstance(meta, Meta):
             if meta.args[0] == dict:
                 return DeserializerJson(js).deserialize_dict('', meta)
@@ -23,7 +23,7 @@ class DeserializerJson(object):
             if meta.args[0] == DataWrapper:
                 from tests.test_serializer.py.gen.DataStorage import DataStorage
                 value = DeserializerJson(js).deserialize_attr('', str, '')
-                return DataStorage.shared().getDataUnit(value)
+                return getattr(DataStorage.shared(), 'get' + meta.args[1].TYPE)(value)
             if meta.args[0] == IntrusivePtr:
                 obj = make_intrusive(meta.args[1])
                 obj.deserialize_json(DeserializerJson(js))

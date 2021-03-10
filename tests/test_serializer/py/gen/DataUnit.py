@@ -47,10 +47,11 @@ class DataUnit(object):
         pass
 
     def deserialize_xml(self, deserializer: DeserializerXml):
+        self.unit_type = deserializer.deserialize('unit_type', UnitType, UnitType.defend)
         pass
 
     def serialize_json(self, serializer: SerializerJson):
         pass
 
     def deserialize_json(self, deserializer: DeserializerJson):
-        pass
+        self.unit_type = deserializer.deserialize('unit_type', UnitType, UnitType.attack)
