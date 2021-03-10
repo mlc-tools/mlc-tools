@@ -353,9 +353,12 @@ class DeserializerJson(object):
                 value = DeserializerJson(js).deserialize_attr('', str, '')
                 return getattr(DataStorage.shared(), 'get' + meta.args[1].TYPE)(value)
             if meta.args[0] == IntrusivePtr:
-                obj = make_intrusive(meta.args[1])
-                obj.deserialize_json(DeserializerJson(js))
-                return obj
+                if js and 'type' in js:
+                    obj = Factory.build(js['type'])
+                    # obj = make_intrusive(meta.args[1])
+                    obj.deserialize_json(DeserializerJson(js))
+                    return obj
+                return None
         if hasattr(meta, 'deserialize_json'):
             obj = meta()
             obj.deserialize_json(DeserializerJson(js))

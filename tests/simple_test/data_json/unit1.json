@@ -15,8 +15,6 @@
 			{ "key": "unitname1", "value" : 1},
 			{ "key": "unitname2", "value" : 2}
 		],
-		"skills": [
-			{ "type": "SkillFoo", "foo" : 1}
-		]
+		"skill": { "type": "SkillFoo", "foo" : 1}
 	}
 }
