@@ -2,6 +2,7 @@ import os
 import sys
 import glob
 import inspect
+import shutil
 from time import sleep
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -21,14 +22,13 @@ def run_tests(generator, root, withdata=False, cpp=True, python=True, php=True, 
 
         # clean python pyc files:
         def clean_pyc():
-            temp_files = glob.glob(out_directory + '/*.pyc')
-            for filePath in temp_files:
-                try:
-                    os.remove(filePath)
-                except OSError:
-                    pass
+            try:
+                shutil.rmtree(out_directory)
+            except OSError:
+                pass
 
-        clean_pyc()
+        if python:
+            clean_pyc()
         generator.generate(language=lang,
                            out_directory=out_directory,
                            formats=serialized_format,
