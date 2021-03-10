@@ -151,3 +151,40 @@ class TestDataAdd<ITestDataAdd>:test
         this->assertTrue(in_map("add_data", mapdata), "Additional data in DataStorage");
     }
 }
+
+
+enum Resource
+{
+    gold
+    gems
+}
+class data/DataDict<SerializedObject>:storage
+{
+    string name
+    map<Resource, int> resources
+}
+
+class data/TestDataDict<ITestDataDict>
+{
+    map<Resource, int> resources
+
+    function void test_resources_in_map()
+    {
+        auto data = DataStorage::shared().get<DataDict>("default");
+        this->assertTrue(in_map(Resource::gold, data->resources));
+        this->assertTrue(in_map(Resource::gems, data->resources));
+        this->assertTrue(data->resources.at(Resource::gold) == 10);
+        this->assertTrue(data->resources.at(Resource::gems) == 20);
+
+        map_clear(this->resources);
+        for(auto&& [res, count] : data->resources)
+        {
+            this->resources[res] = count;
+        }
+
+        this->assertTrue(in_map(Resource::gold, this->resources));
+        this->assertTrue(in_map(Resource::gems, this->resources));
+        this->assertTrue(this->resources.at(Resource::gold) == 10);
+        this->assertTrue(this->resources.at(Resource::gems) == 20);
+    }
+}

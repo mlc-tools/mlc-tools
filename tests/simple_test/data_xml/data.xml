@@ -49,4 +49,11 @@
 			</item>
 		</list_list_bool>
 	</list_list_bool>
+
+	<dict name="default">
+		<resources>
+			<pair key="gold" value="10"/>
+			<pair key="gems" value="20"/>
+		</resources>
+	</dict>
 </data>

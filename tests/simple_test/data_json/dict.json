@@ -1,0 +1,9 @@
+{
+  "dict": {
+    "name": "default",
+    "resources": [
+      {"key": "gold", "value": 10},
+      {"key": "gems", "value": 20}
+    ]
+  }
+}
