@@ -49,6 +49,8 @@ class DeserializerXml(object):
             if value is not None:
                 value = value.lower()
             return True if value in ['true', 'yes'] else False if value in ['false', 'no'] else default_value if default_value else False
+        if meta == str and not value and not default_value:
+            return ''
         return meta(value or default_value or 0)
 
     def deserialize_dict(self, key, meta):

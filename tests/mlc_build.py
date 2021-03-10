@@ -39,26 +39,25 @@ def run_tests(generator, root, withdata=False, cpp=True, python=True, php=True, 
                                     out_data_directory=root + 'assets')
         generator.run_test(test_script=root + 'test_%s.py' % lang,
                            test_script_args=serialized_format)
-        clean_pyc()
         print('-----------------------------------------')
         print('|  test with params [{}, {}] finished'.format(lang, serialized_format))
         print('-----------------------------------------')
 
-    if cpp:
-        run('cpp', 'json')
-        run('cpp', 'xml')
+    # if cpp:
+    #     run('cpp', 'json')
+    #     run('cpp', 'xml')
     if python:
         run('py', 'json', False)
-        run('py', 'xml', False)
-        with_join and run('py', 'json', True)
-        with_join and run('py', 'xml', True)
-    if php:
-        run('php', 'json', False)
-        run('php', 'xml', False)
-        with_join and run('php', 'json', True)
-        with_join and run('php', 'xml', True)
-    if js:
-        run('js', 'json')
+    #     run('py', 'xml', False)
+    #     with_join and run('py', 'json', True)
+    #     with_join and run('py', 'xml', True)
+    # if php:
+    #     run('php', 'json', False)
+    #     run('php', 'xml', False)
+    #     with_join and run('php', 'json', True)
+    #     with_join and run('php', 'xml', True)
+    # if js:
+    #     run('js', 'json')
 
 
 def simple_test():

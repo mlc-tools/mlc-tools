@@ -1,7 +1,6 @@
 import re
 import xml.etree.ElementTree as ET
 
-from tests.simple_test.generated_py.UnitType import UnitType
 from tests.test_serializer.py.DeserializerJson import DeserializerJson
 from tests.test_serializer.py.DeserializerXml import DeserializerXml
 from tests.test_serializer.py.Meta import Meta
@@ -15,6 +14,7 @@ from tests.test_serializer.py.gen.DataUnit import DataUnit
 from tests.test_serializer.py.gen.DataWrapper import DataWrapper
 from tests.test_serializer.py.gen.TestEnum import TestEnum
 from tests.test_serializer.py.gen.IntrusivePtr import make_intrusive, IntrusivePtr
+from tests.test_serializer.py.gen.UnitType import UnitType
 
 
 def build_dict(parts, types, functor):
@@ -212,7 +212,7 @@ def test_empty_enum_deserialize_xml():
     data = DataUnit()
     data.deserialize_xml(deserializer)
     assert data.unit_type == UnitType.defend
-    assert isinstance(data.unit_type, UnitType)
+    assert isinstance(data.items, dict)
 
 
 def test_empty_enum_deserialize_json():
@@ -220,4 +220,4 @@ def test_empty_enum_deserialize_json():
     data = DataUnit()
     data.deserialize_json(deserializer)
     assert data.unit_type == UnitType.attack
-    assert isinstance(data.unit_type, UnitType)
+    assert isinstance(data.items, dict)

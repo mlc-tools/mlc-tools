@@ -161,6 +161,7 @@ enum Resource:py:cpp
 class data/DataDict<SerializedObject>:storage:py:cpp
 {
     string name
+	string string_with_def_value = "default"
     map<Resource, int> resources
 }
 
@@ -186,5 +187,11 @@ class data/TestDataDict<ITestDataDict>:py:cpp
         this->assertTrue(in_map(Resource::gems, this->resources));
         this->assertTrue(this->resources.at(Resource::gold) == 10);
         this->assertTrue(this->resources.at(Resource::gems) == 20);
+    }
+
+    function void test_resources_def_value()
+    {
+        auto data = DataStorage::shared().get<DataDict>("default");
+        this->assertTrue(data->string_with_def_value == "default");
     }
 }
