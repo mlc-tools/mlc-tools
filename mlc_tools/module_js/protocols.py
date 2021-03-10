@@ -39,19 +39,15 @@ if('$(FIELD)' in json)
 if($(OWNER)$(FIELD))
 {
     json['$(FIELD)'] = $({});
-    json['$(FIELD)'][$(OWNER)$(FIELD).get_type()] = $({});
-    $(OWNER)$(FIELD).serialize_$(FORMAT)(json['$(FIELD)'][$(OWNER)$(FIELD).get_type()]);
+    json['$(FIELD)'].type = $(OWNER)$(FIELD).get_type();
+    $(OWNER)$(FIELD).serialize_$(FORMAT)(json['$(FIELD)']);
 }
 #deserialize
 if('$(FIELD)' in json)
 {
-    for(let key in json['$(FIELD)'])
-    {
-        let value = json['$(FIELD)'][key];
-        $(OWNER)$(FIELD) = Factory.build(key);
-        $(OWNER)$(FIELD).deserialize_$(FORMAT)(value);
-        break;
-    }
+    let type = json['$(FIELD)'].type;
+    $(OWNER)$(FIELD) = Factory.build(type);
+    $(OWNER)$(FIELD).deserialize_$(FORMAT)(json['$(FIELD)']);
 }
 
 

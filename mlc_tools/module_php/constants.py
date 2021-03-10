@@ -4,6 +4,10 @@ class Factory
 {
     static function build($type)
     {
+        if(strcmp($type, "") == 0)
+        {
+            return null;
+        }
         require_once "$type.php";
         return new $type;
     }

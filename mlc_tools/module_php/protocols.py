@@ -244,15 +244,15 @@ if($(OWNER)$(FIELD))
 {
     $type = $(OWNER)$(FIELD)->get_type();
     $json->$(FIELD)        = json_decode("{}");
-    $json->$(FIELD)->$type = json_decode("{}");
-    $(OWNER)$(FIELD)->serialize_$(FORMAT)($json->$(FIELD)->$type);
+    $json->$(FIELD)->type  = $type;
+    $(OWNER)$(FIELD)->serialize_$(FORMAT)($json->$(FIELD));
 }
 #deserialize:
 if(isset($json->$(FIELD)))
 {
-    $type = (string) key($json->$(FIELD));
+    $type = (string) $json->$(FIELD)->type;
     $(OWNER)$(FIELD) = Factory::build($type);
-    $(OWNER)$(FIELD)->deserialize_$(FORMAT)($json->$(FIELD)->$type);
+    $(OWNER)$(FIELD)->deserialize_$(FORMAT)($json->$(FIELD));
 }
 
 
