@@ -12,9 +12,11 @@ from tests.test_serializer.py.gen.AllTypesChildren import AllTypesChildren
 from tests.test_serializer.py.gen.DataStorage import DataStorage
 from tests.test_serializer.py.gen.DataUnit import DataUnit
 from tests.test_serializer.py.gen.DataWrapper import DataWrapper
+from tests.test_serializer.py.gen.Point import Point
 from tests.test_serializer.py.gen.TestEnum import TestEnum
 from tests.test_serializer.py.gen.IntrusivePtr import make_intrusive, IntrusivePtr
 from tests.test_serializer.py.gen.UnitType import UnitType
+from tests.test_serializer.py.gen.common import serialize_command_to_json
 
 
 def build_dict(parts, types, functor):
@@ -221,3 +223,12 @@ def test_empty_enum_deserialize_json():
     data.deserialize_json(deserializer)
     assert data.unit_type == UnitType.attack
     assert isinstance(data.items, dict)
+
+
+def test_serialize_list_points_to_json():
+    unit = DataUnit()
+    unit.points.append(Point())
+    unit.points[-1].row = 1
+    unit.points[-1].col = 2
+    js = serialize_command_to_json(unit)
+    assert js == '{"DataUnit": {"points": [{"row": 1, "col": 2}]}}'

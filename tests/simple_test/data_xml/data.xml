@@ -10,6 +10,7 @@
 			<pair key="unitname1" value="1"/>
 			<pair key="unitname2" value="2"/>
 		</map_units>
+		<skill type="SkillFoo" foo="1"/>
 	</unit>
 
 	<unit name="unitname2" link_to_data="unitname1"  unit_type="defend">
@@ -23,6 +24,7 @@
 			<pair key="unitname1" value="1"/>
 			<pair key="unitname2" value="2"/>
 		</map_units>
+		<skill type="SkillBase"/>
 	</unit>
 
 	<complex_map name="test">

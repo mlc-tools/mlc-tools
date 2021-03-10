@@ -9,6 +9,13 @@ class data/DataNonExist<SerializedObject>:storage
 {
     string name
 }
+class SkillBase<SerializedObject>
+{}
+class SkillFoo<SkillBase>
+{
+    int foo = -1
+}
+
 class data/DataUnit<SerializedObject>:storage
 {
 	string name
@@ -19,6 +26,7 @@ class data/DataUnit<SerializedObject>:storage
 	map<string, int> map_units
 	EnumWithIntValue enum_with_int_value
 	int64_t int64_value = 0
+	SkillBase* skill
 
 	function bool tests(Logger* logger):static
 	{
@@ -193,5 +201,16 @@ class data/TestDataDict<ITestDataDict>:py:cpp
     {
         auto data = DataStorage::shared().get<DataDict>("default");
         this->assertTrue(data->string_with_def_value == "default");
+    }
+
+    function void test_skills()
+    {
+        auto unit1 = DataStorage::shared().get<DataUnit>("unitname1");
+        auto unit2 = DataStorage::shared().get<DataUnit>("unitname2");
+        this->assertTrue(unit1->skill->get_type() == SkillFoo::TYPE);
+        auto skill = dynamic_pointer_cast_intrusive<SkillFoo>(unit1->skill);
+        this->assertTrue(skill->foo == 1);
+        this->assertTrue(unit2->skill->get_type() == SkillBase::TYPE);
+
     }
 }

@@ -48,7 +48,7 @@ def run_tests(generator, root, withdata=False, cpp=True, python=True, php=True, 
     #     run('cpp', 'xml')
     if python:
         run('py', 'json', False)
-    #     run('py', 'xml', False)
+        # run('py', 'xml', False)
     #     with_join and run('py', 'json', True)
     #     with_join and run('py', 'xml', True)
     # if php:

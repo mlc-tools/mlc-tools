@@ -160,8 +160,8 @@ class DeserializerXml(object):
                 return getattr(DataStorage.shared(), 'get' + meta.args[1].TYPE)(value)
             if meta.args[0] == IntrusivePtr:
                 if node is not None and node.node is not None:
-                    obj = make_intrusive(meta.args[1])
-                    obj.deserialize_xml(node)
+                    obj = Factory.build(node.node.attrib['type'])
+                    obj.deserialize_xml(DeserializerXml(node.node))
                     return obj
                 return None
         if hasattr(meta, 'deserialize_xml'):
@@ -208,7 +208,7 @@ class DeserializerXml(object):
         return result
 
     def get_child(self, key):
-        return DeserializerXml(self.node.find(key) if key and self.node else self.node)
+        return DeserializerXml(self.node.find(key) if (key and self.node is not None) else self.node)
 
     def deserialize_key(self, meta: Meta):
         return self.deserialize('key', meta)
@@ -284,8 +284,11 @@ class SerializerJson(object):
             js.serialize_list_item(item)
 
     def add_child(self, key):
-        self.json[key] = {}
-        return SerializerJson(self.json[key])
+        if key:
+            self.json[key] = {}
+            return SerializerJson(self.json[key])
+        else:
+            return self
 
     def add_child_array(self, key):
         self.json[key] = []

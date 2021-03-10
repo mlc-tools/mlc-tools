@@ -41,8 +41,11 @@ class SerializerJson(object):
             js.serialize_list_item(item)
 
     def add_child(self, key):
-        self.json[key] = {}
-        return SerializerJson(self.json[key])
+        if key:
+            self.json[key] = {}
+            return SerializerJson(self.json[key])
+        else:
+            return self
 
     def add_child_array(self, key):
         self.json[key] = []

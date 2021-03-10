@@ -12,7 +12,7 @@ from ..SerializerXml import SerializerXml
 
 class DataUnit(object):
     TYPE = "DataUnit"
-    __slots__ = ["name", "unit_type", "visual", "link_to_data", "all_units", "map_units", "items"]
+    __slots__ = ["name", "unit_type", "visual", "link_to_data", "all_units", "map_units", "items", 'points']
 
     def __init__(self):
         self.name = ""
@@ -23,6 +23,7 @@ class DataUnit(object):
         self.all_units = []
         self.map_units = {}
         self.items = {}
+        self.points = []
 
     def __hash__(self):
         return id(self)
@@ -53,7 +54,7 @@ class DataUnit(object):
         self.items = deserializer.deserialize("items", Meta(dict, str, int))
 
     def serialize_json(self, serializer: SerializerJson):
-        pass
+        serializer.serialize(self.points, "points")
 
     def deserialize_json(self, deserializer: DeserializerJson):
         self.unit_type = deserializer.deserialize('unit_type', UnitType, UnitType.attack)
