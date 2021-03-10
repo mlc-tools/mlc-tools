@@ -17,18 +17,18 @@ def get_root():
 
 
 def run_tests(generator, root, withdata=False, cpp=True, python=True, php=True, js=True, with_join=False):
-    def run(lang, serialized_format, join_to_one_file=False):
+    def run(lang, serialized_format, join_to_one_file=False, clean_out_dir=True):
         out_directory = root + 'generated_%s' % (lang if lang != 'cpp' else lang + '/' + serialized_format)
 
         # clean python pyc files:
-        def clean_pyc():
+        def clean():
             try:
                 shutil.rmtree(out_directory)
             except OSError:
                 pass
 
-        if python:
-            clean_pyc()
+        if clean_out_dir:
+            clean()
         generator.generate(language=lang,
                            out_directory=out_directory,
                            formats=serialized_format,
@@ -44,8 +44,8 @@ def run_tests(generator, root, withdata=False, cpp=True, python=True, php=True, 
         print('-----------------------------------------')
 
     if cpp:
-        run('cpp', 'json')
-        run('cpp', 'xml')
+        run('cpp', 'json', clean_out_dir=False)
+        run('cpp', 'xml', clean_out_dir=False)
     if python:
         run('py', 'json', False)
         run('py', 'xml', False)
