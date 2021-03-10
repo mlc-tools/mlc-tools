@@ -153,18 +153,18 @@ class TestDataAdd<ITestDataAdd>:test
 }
 
 
-enum Resource
+enum Resource:py:cpp
 {
     gold
     gems
 }
-class data/DataDict<SerializedObject>:storage
+class data/DataDict<SerializedObject>:storage:py:cpp
 {
     string name
     map<Resource, int> resources
 }
 
-class data/TestDataDict<ITestDataDict>
+class data/TestDataDict<ITestDataDict>:py:cpp
 {
     map<Resource, int> resources
 
