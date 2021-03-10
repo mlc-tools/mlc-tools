@@ -811,7 +811,7 @@ public:
     SerializerXml add_child(const std::string& name);
 
     void add_attribute(const std::string& key, const int& value, int default_value=0);
-    void add_attribute(const std::string& key, const long long& value, long long default_value=0);
+    void add_attribute(const std::string& key, const int64_t& value, int64_t default_value=0);
     void add_attribute(const std::string& key, const bool& value, bool default_value=false);
     void add_attribute(const std::string& key, const float& value, float default_value=0.f);
     void add_attribute(const std::string& key, const std::string& value, const std::string& default_value);
@@ -1560,7 +1560,7 @@ void SerializerXml::add_attribute(const std::string &key, const int &value, int 
     }
 }
 
-void SerializerXml::add_attribute(const std::string &key, const long long &value, long long default_value)
+void SerializerXml::add_attribute(const std::string &key, const int64_t &value, int64_t default_value)
 {
     if (value != default_value)
     {

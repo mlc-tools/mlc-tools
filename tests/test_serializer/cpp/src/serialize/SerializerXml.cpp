@@ -42,7 +42,7 @@ void SerializerXml::add_attribute(const std::string &key, const int &value, int 
     }
 }
 
-void SerializerXml::add_attribute(const std::string &key, const long long &value, long long default_value)
+void SerializerXml::add_attribute(const std::string &key, const int64_t &value, int64_t default_value)
 {
     if (value != default_value)
     {
