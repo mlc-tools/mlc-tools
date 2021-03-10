@@ -3,7 +3,7 @@ from .regex import RegexPatternPython
 from ..base.translator_base import TranslatorBase
 from ..core.class_ import Class
 from ..core.function import Function
-from ..core.object import Objects
+from ..core.object import Objects, Object
 
 
 class Translator(TranslatorBase):
@@ -117,10 +117,16 @@ class Translator(TranslatorBase):
         TranslatorBase.convert_to_enum(self, cls)
         cast = cls.members[-1].type
 
+        member = Object()
+        member.name = '_value'
+        member.type = Objects.STRING
+        cls.members.append(member)
+
         setter = Function()
         setter.name = 'set'
         setter.args.append(['value', Objects.VOID])
         if cast == 'int':
+            member.type = Objects.INT
             for index, obj in enumerate(cls.members):
                 if obj.name != '_value':
                     setter.operations.append(f'''if(value == "{obj.name}")
