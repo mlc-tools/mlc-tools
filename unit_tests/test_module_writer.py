@@ -54,6 +54,7 @@ def create_test_model(with_ctr=False):
     model.generate_tests = False
     model.generate_factory = False
     model.generate_intrusive = False
+    model.generate_ref_counter = True
     model.out_dict = {}
     return model
 
@@ -266,6 +267,7 @@ class TestWriterPrepareFile(unittest.TestCase):
         from mlc_tools.base.writer_base import WriterBase
         writer = WriterBase('')
         writer.model = Model()
+        writer.model.generate_ref_counter = True
         return writer
 
     @staticmethod
