@@ -440,7 +440,7 @@ class DataComplexMap:storage
     }
 }
 
-class DataListListBool<SerializedObject>:storage:cpp:py
+class DataListListBool:storage:cpp:py
 {
     string name
     list<list<bool>> list_list_bool
