@@ -4,6 +4,7 @@ option(BUILD_XML "Build the xml test" OFF)
 option(BUILD_JSON "Build the json test" OFF)
 
 SET(ROOT ${CMAKE_SOURCE_DIR})
+set(THIRD_PARTY_DIR ${ROOT}/../../third_party)
 
 if(BUILD_XML)
     set(TYPE xml)
@@ -16,9 +17,9 @@ project(test_mlc_${TYPE})
 file(GLOB_RECURSE SRC
 						${ROOT}/common/*.cpp *.h
 						${ROOT}/external/ml/*.cpp *.h
-						${ROOT}/external/pugixml/*.cpp *.h
-						${ROOT}/external/jsoncpp/*.cpp *.h
 						${ROOT}/generated_cpp/${TYPE}/*.cpp *.h
+						${THIRD_PARTY_DIR}/pugixml/*.cpp *.h
+						${THIRD_PARTY_DIR}/jsoncpp/*.cpp *.h
 						)
 
 foreach(FILE ${SRC})
@@ -56,6 +57,7 @@ include_directories(
 	${ROOT}/common/
 	${ROOT}/external/
 	${ROOT}/external/ml
+	${THIRD_PARTY_DIR}
 )
 
 add_executable(${PROJECT_NAME}

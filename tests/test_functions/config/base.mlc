@@ -1,29 +1,9 @@
-class SerializedObject:serialized
-{
-	int:runtime _reference_counter = 1
-	function int retain():cpp
-	{
-		this->_reference_counter += 1;
-		return this->_reference_counter;
-	}
-	function int release():cpp
-	{
-		this->_reference_counter -= 1;
-		auto c = this->_reference_counter;
-		if( c == 0)
-		{
-			delete this;
-		}
-		return c;
-	}
-}
-
-class ReturnValue<SerializedObject>
+class ReturnValue
 {
     int f_value
 }
 
-class Test<SerializedObject>
+class Test
 {
     ReturnValue r0
 

@@ -25,7 +25,8 @@ def generate(lang, protocol):
                     disable_logs=False,
                     generate_tests='no',
                     generate_intrusive='yes',
-                    generate_factory='yes')
+                    generate_factory='yes',
+                    generate_ref_counter=True)
     generator.generate(language=lang,
                        out_directory=test_dir + 'generated_%s' % lang)
 

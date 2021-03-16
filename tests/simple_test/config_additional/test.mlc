@@ -1,4 +1,4 @@
-class DataAdd<SerializedObject>:storage
+class DataAdd:storage
 {
     string name
     function void test()

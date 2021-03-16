@@ -1,20 +1,3 @@
-# from setuptools import setup, find_packages
-# import mlc_tools.version
-
-# setup(
-#     name='mlc-tools',
-#     version=mlc_tools.version,
-#     packages=find_packages(),
-#     long_description="mlc-tools",
-#     install_requires=[
-#         'enum'
-#     ]
-#     # entry_points={
-#     #     'console_scripts':
-#     #         ['mlc-tools = mlc_tools.main:console']
-#     # },
-#     # test_suite='tests'
-# )
 import setuptools
 import mlc_tools.version
 
@@ -36,5 +19,13 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
+    install_requires=[
+        'PyYaml'
+    ],
+    entry_points={
+        'console_scripts': [
+            'mlc = mlc_tools.console.console:main'
+        ]
+    },
     python_requires='>=3.6',
 )

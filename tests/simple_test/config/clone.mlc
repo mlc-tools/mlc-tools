@@ -1,4 +1,4 @@
-class clone/CloneObject<SerializedObject>
+class clone/CloneObject
 {
     int t
 

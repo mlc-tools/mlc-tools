@@ -94,6 +94,7 @@ class TestWriteClass(unittest.TestCase):
 
     def test_cpp(self):
         model = create_test_model()
+        model.generate_ref_counter = True
         save('cpp', model)
 
         self.assertTrue('Test.h' in model.out_dict)
@@ -293,6 +294,7 @@ namespace mg
 
     Test::Test()
     : int_value(42)
+    , _reference_counter(1)
     {
 {ctr}
     }
@@ -319,6 +321,20 @@ namespace mg
     bool Test::operator !=(const Test& rhs) const
     {
         return !(*this == rhs);
+    }
+
+    void Test::retain()
+    {
+        this->_reference_counter += 1;
+    }
+
+    int Test::release()
+    {
+        this->_reference_counter -= 1;
+        auto counter = this->_reference_counter;
+        if(counter == 0)
+        delete this;
+        return counter;
     }
 
     std::string Test::get_type() const
@@ -354,9 +370,14 @@ namespace mg
         int foo(int a0, const std::string& a1);
         bool operator ==(const Test& rhs) const;
         bool operator !=(const Test& rhs) const;
+        void retain();
+        int release();
         std::string get_type() const;
 
         int int_value;
+    private:
+        int _reference_counter;
+    public:
         static const std::string TYPE;
 
     };

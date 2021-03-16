@@ -1,24 +1,4 @@
-class SerializedObject:serialized
-{
-    int:runtime _reference_counter = 1
-    function int retain()
-    {
-        this->_reference_counter += 1;
-        return this->_reference_counter;
-    }
-    function int release()
-    {
-        this->_reference_counter -= 1;
-        auto c = this->_reference_counter;
-        if( c == 0)
-        {
-            delete this;
-        }
-        return c;
-    }
-}
-
-class DataBase<SerializedObject>
+class DataBase
 {
     function void connect(string host, string database, string user, string password):abstract
     function list<list<string>> query_all(string query):abstract
