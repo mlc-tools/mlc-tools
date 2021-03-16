@@ -2725,6 +2725,18 @@ struct default_value
     value() { return 0; }
 
     template<class T>
+    static typename std::enable_if<std::is_same<unsigned int, T>::value, unsigned int>::type
+    value() { return 0; }
+
+    template<class T>
+    static typename std::enable_if<std::is_same<int64_t, T>::value, int64_t>::type
+    value() { return 0ull; }
+
+    template<class T>
+    static typename std::enable_if<std::is_same<uint64_t, T>::value, uint64_t>::type
+    value() { return 0ll; }
+
+    template<class T>
     static typename std::enable_if<std::is_same<bool, T>::value, bool>::type
     value() { return false; }
 
