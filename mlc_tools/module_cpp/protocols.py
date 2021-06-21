@@ -88,7 +88,10 @@ if(xml_$(FIELD))
 {
     std::string type = xml_$(FIELD).attribute("type").as_string();
     $(FIELD) = Factory::shared().build<$(TYPE)>(type);
-    $(FIELD)->deserialize_$(FORMAT)(xml_$(FIELD));
+    if($(FIELD))
+    {
+        $(FIELD)->deserialize_$(FORMAT)(xml_$(FIELD));
+    }
 }
 
 
@@ -174,8 +177,12 @@ auto arr_$(FIELD) = xml.child("$(FIELD)");
 for(auto child : arr_$(FIELD))
 {
     auto type = child.name();
-    $(FIELD).push_back(Factory::shared().build<$(ARG_0)>(type));
-    $(FIELD).back()->deserialize_$(FORMAT)(child);
+    auto obj = Factory::shared().build<$(ARG_0)>(type);
+    if(obj)
+    {
+        $(FIELD).push_back(obj);
+        $(FIELD).back()->deserialize_$(FORMAT)(child);
+    }
 }
 
 
@@ -294,7 +301,10 @@ if(json.isMember("$(FIELD)"))
 {
     auto type_$(FIELD) = json["$(FIELD)"].getMemberNames()[0];
     $(FIELD) = Factory::shared().build<$(TYPE)>(type_$(FIELD));
-    $(FIELD)->deserialize_$(FORMAT)(json["$(FIELD)"][type_$(FIELD)]);
+    if($(FIELD))
+    {
+        $(FIELD)->deserialize_$(FORMAT)(json["$(FIELD)"][type_$(FIELD)]);
+    }
 }
 
 
@@ -362,8 +372,11 @@ for(int i = 0; i < size_$(FIELD); ++i)
 {
     auto type = arr_$(FIELD)[i].getMemberNames()[0];
     auto obj = Factory::shared().build<$(ARG_0)>(type);
-    $(FIELD).emplace_back(obj);
-    $(FIELD).back()->deserialize_$(FORMAT)(arr_$(FIELD)[i][type]);
+    if(obj)
+    {
+        $(FIELD).emplace_back(obj);
+        $(FIELD).back()->deserialize_$(FORMAT)(arr_$(FIELD)[i][type]);
+    }
 }
 
 

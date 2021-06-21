@@ -622,7 +622,9 @@ namespace @{namespace}
             auto type = json.getMemberNames()[0];
             auto command = shared().build<TType>(type);
             if (command != nullptr)
-            command->deserialize_json(json[type]);
+            {
+                command->deserialize_json(json[type]);
+            }
             return command;
         }
         template <class TType>
@@ -665,7 +667,10 @@ namespace @{namespace}
             doc.load(payload.c_str());
             auto root = doc.root().first_child();
             auto command = shared().build<TType>(root.name());
-            command->deserialize_xml(root);
+            if(command != nullptr)
+            {
+                command->deserialize_xml(root);
+            }
             return command;
         }
 
@@ -709,7 +714,10 @@ namespace @{namespace}
             doc.load(payload.c_str());
             auto root = doc.root().first_child();
             auto command = shared().build<TType>(root.name());
-            command->deserialize_xml(root);
+            if(command != nullptr)
+            {
+                command->deserialize_xml(root);
+            }
             return command;
         }
         
@@ -734,7 +742,9 @@ namespace @{namespace}
             auto type = json.getMemberNames()[0];
             auto command = shared().build<TType>(type);
             if (command != nullptr)
-            command->deserialize_json(json[type]);
+            {
+                command->deserialize_json(json[type]);
+            }
             return command;
         }
         
