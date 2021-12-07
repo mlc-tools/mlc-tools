@@ -16,7 +16,7 @@ return DataStorage.__instance'''
             from .{type} import {type}
             self.{map}[name] = {type}()
             self.{map}[name].name = name
-        return self.{map}[name]'''
+        return self.{map}[name] if name in self.{map} else None'''
 
     def get_initialize_function_json_body(self):
         return '''        js = json.loads(content)
