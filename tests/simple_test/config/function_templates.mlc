@@ -1,4 +1,4 @@
-class FunctionTemplates<SerializedObject>
+class FunctionTemplates
 {
     function<T> T add(T a, T b)
     {
@@ -12,7 +12,7 @@ class FunctionTemplates<SerializedObject>
     }
 }
 
-class FunctionTemplatesSomeOtherClass<SerializedObject>
+class FunctionTemplatesSomeOtherClass
 {
     function void some_method()
     {
@@ -44,7 +44,7 @@ class TestFunctionTemplates<ITestFunctionTemplates>:test
 }
 
 
-class TemplateMethod<SerializedObject>
+class TemplateMethod
 {
     map<string, BaseClass*> members
 
@@ -61,7 +61,7 @@ class TemplateMethod<SerializedObject>
     }
 }
 
-class BaseClass<SerializedObject>
+class BaseClass
 {
 }
 class FooClassFromBase<BaseClass>

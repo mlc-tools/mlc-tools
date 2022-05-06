@@ -46,6 +46,7 @@ class Mlc(object):
         self.model.out_data_directory = fileutils.normalize_path(self.model.out_data_directory)
         self.model.join_to_one_file = kwargs.get('join_to_one_file', self.model.join_to_one_file)
         self.model.auto_registration = kwargs.get('auto_registration', self.model.auto_registration)
+        self.model.generate_ref_counter = kwargs.get('generate_ref_counter', self.model.generate_ref_counter)
         if 'add_config' in kwargs:
             directory = fileutils.normalize_path(kwargs.get('add_config'))
             self.model.additional_config_directories.append(directory)

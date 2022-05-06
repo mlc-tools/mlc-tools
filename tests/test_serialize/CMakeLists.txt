@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.6.2)
 
 SET(ROOT ${CMAKE_SOURCE_DIR})
-SET(EXTERNAL ${CMAKE_SOURCE_DIR}/../simple_test/external)
+set(THIRD_PARTY_DIR ${ROOT}/../../third_party)
 
 project(step_2)
 
 file(GLOB_RECURSE SRC
-						${EXTERNAL}/pugixml/*.cpp
-						${EXTERNAL}/jsoncpp/*.cpp
+						${THIRD_PARTY_DIR}/pugixml/*.cpp
+						${THIRD_PARTY_DIR}/jsoncpp/*.cpp
 						${ROOT}/generated_cpp/*.cpp
 						)
 
@@ -19,7 +19,7 @@ endif()
 
 include_directories(
 	${ROOT}/generated_cpp/
-	${EXTERNAL}/
+	${THIRD_PARTY_DIR}/
 	${EXTERNAL}/ml
 )
 

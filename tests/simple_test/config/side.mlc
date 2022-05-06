@@ -1,18 +1,18 @@
-class SideTestBase<SerializedObject>
+class SideTestBase
 {
 }
 
-class SideTestServer<SerializedObject>:server
-{
-    int value = 0
-}
-
-class SideTestClient<SerializedObject>:client
+class SideTestServer:server
 {
     int value = 0
 }
 
-class SideTestCommon<SerializedObject>
+class SideTestClient:client
+{
+    int value = 0
+}
+
+class SideTestCommon
 {
     string:server server_value = "server"
     string:client client_value = "client"

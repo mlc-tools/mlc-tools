@@ -1,4 +1,4 @@
-class observable/ObservableClass<SerializedObject>
+class observable/ObservableClass
 {
 	Observable<void()> eventTest
 	Observable<void(int)> eventTestInt
@@ -9,7 +9,7 @@ class observable/ObservableClass<SerializedObject>
 	Observable<void(DataUnit*)> eventTestDataPointer
 }
 
-class observable/ListenerClass<SerializedObject>
+class observable/ListenerClass
 {
 	TestObservableClass* test
 

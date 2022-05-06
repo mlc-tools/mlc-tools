@@ -5,18 +5,18 @@ enum UnitType
     support
 }
 
-class data/DataNonExist<SerializedObject>:storage
+class data/DataNonExist:storage
 {
     string name
 }
-class SkillBase<SerializedObject>
+class SkillBase
 {}
 class SkillFoo<SkillBase>
 {
     int foo = -1
 }
 
-class data/DataUnit<SerializedObject>:storage
+class data/DataUnit:storage
 {
 	string name
 	UnitType unit_type
@@ -144,7 +144,7 @@ class data/DataUnit<SerializedObject>:storage
     }
 
 }
-class data/VisualUnit<SerializedObject>
+class data/VisualUnit
 {
 	string name
 	string icon
@@ -166,7 +166,7 @@ enum Resource:py:cpp
     gold
     gems
 }
-class data/DataDict<SerializedObject>:storage:py:cpp
+class data/DataDict:storage:py:cpp
 {
     string name
 	string string_with_def_value = "default"

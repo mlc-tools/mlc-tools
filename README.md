@@ -34,7 +34,7 @@ python main.py
 ### Syntax: ###
 
 ```
-class core/Request<SerializedObject>
+class core/Request<RequestBase>
 {
     Action action
     int int_data
@@ -49,7 +49,7 @@ class core/Request<SerializedObject>
 
 ```Request                          ``` - Name of the class
 
-```SerializedObject                 ``` - The inherited class. Multiple inheritance is not supported.
+```RequestBase                 ``` - The inherited class. Multiple inheritance is not supported.
 
 ```{ ... }                          ``` - Body of the class or method
 

@@ -157,7 +157,7 @@ class GeneratorUnitTestsInterface(object):
 
 
 BASE_CLASSES = '''
-class tests/Logger<SerializedObject>:test:virtual
+class tests/Logger:test:virtual
 {
     function void message(string message):abstract
     function void log(string message)
@@ -166,7 +166,7 @@ class tests/Logger<SerializedObject>:test:virtual
     }
 }
 
-class tests/TestCase<SerializedObject>:test
+class tests/TestCase:test
 {
     Logger*:runtime logger
     bool:runtime result = true

@@ -1,11 +1,11 @@
-class Translates<SerializedObject>
+class Translates
 {
     function void dummy_function()
     {
 
     }
 }
-class Point<SerializedObject>
+class Point
 {
     int x
     int y
@@ -315,7 +315,7 @@ class TestTranslates<ITestTranslates>
     }
 }
 
-class NullishOperator<SerializedObject>
+class NullishOperator
 {
     Point* point_a
     Point* point_b
