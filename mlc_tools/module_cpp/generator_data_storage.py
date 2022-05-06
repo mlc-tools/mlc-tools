@@ -38,6 +38,10 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
                 if(_loaded)
                 {{
                     auto iter = {name}.find(name);
+                    if(iter == {name}.end())
+                    {{
+                        std::cout << "Cannot find data with name [" << name << "] in DataStorage::{name}" << std::endl; 
+                    }}
                     return iter != {name}.end() ? &iter->second : nullptr;
                 }}
                 return &const_cast<DataStorage*>(this)->{name}[name];
