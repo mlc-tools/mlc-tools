@@ -20,7 +20,7 @@ return DataStorage.__instance'''
             self.{map}[name] = {type}()
             self.{map}[name].name = name
         from .DataWrapper import DataWrapper
-        return DataWrapper(self.{map}[name])'''
+        return DataWrapper(self.{map}[name] if name in self.{map} else None)'''
 
     def get_initialize_function_json_body(self):
         return '''        js = json.loads(content)

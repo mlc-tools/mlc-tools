@@ -174,7 +174,8 @@ $(OWNER)$(FIELD) = list()
 #link
 #serialize:
 from .$(TYPE) import $(TYPE)
-        xml.set("$(FIELD)", $(OWNER)$(FIELD).name)
+        if $(OWNER)$(FIELD):
+            xml.set("$(FIELD)", $(OWNER)$(FIELD).name)
 #deserialize:
 name_$(FIELD) = xml.get("$(FIELD)")
         from .$(TYPE) import $(TYPE)
