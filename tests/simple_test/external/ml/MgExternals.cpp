@@ -30,7 +30,7 @@ mg::intrusive_ptr<mg::CommandBase> createCommand(const pugi::xml_node& xml)
 mg::intrusive_ptr<mg::CommandBase> createCommand(const std::string& payload)
 {
 	pugi::xml_document doc;
-	doc.load(payload.c_str());
+	doc.load_string(payload.c_str());
 	auto root = doc.root().first_child();
 	return createCommand(root);
 }

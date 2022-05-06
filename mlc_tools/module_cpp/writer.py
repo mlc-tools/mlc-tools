@@ -534,6 +534,7 @@ class Writer(WriterBase):
 HEADER = '''#ifndef __{namespace}_{class_name}_h__
 #define __{namespace}_{class_name}_h__
 
+#include <cstdint>
 #include "intrusive_ptr.h"
 #include "pugixml/pugixml.hpp"
 {includes}

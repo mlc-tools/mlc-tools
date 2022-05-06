@@ -56,6 +56,6 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
 
     def get_initialize_function_xml_body(self):
         return '''pugi::xml_document doc;
-        doc.load(content.c_str());
+        doc.load_string(content.c_str());
         const_cast<DataStorage*>(this)->deserialize_xml(doc.root().first_child());
         const_cast<DataStorage*>(this)->_loaded = doc.root() != nullptr;'''

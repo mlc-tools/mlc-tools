@@ -218,9 +218,11 @@ $(VALUE_SERIALIZE)
 
 #enum
 #serialize:
-xml.set("$(FIELD)", str($(OWNER)$(FIELD)))
+xml.set("$(FIELD)", $(OWNER)$(FIELD) if isinstance($(OWNER)$(FIELD), str) else $(OWNER)$(FIELD).str() )
 #deserialize:
-$(OWNER)$(FIELD) = xml.get("$(FIELD)")
+from .$(TYPE) import $(TYPE)
+        $(OWNER)$(FIELD) = $(TYPE)()
+        $(OWNER)$(FIELD).set(xml.get("$(FIELD)", default=$(DEFAULT_VALUE)))
 '''
 
 PY_JSON = '''
@@ -364,7 +366,9 @@ $(VALUE_SERIALIZE)
 
 #enum
 #serialize:
-dictionary["$(FIELD)"] = $(OWNER)$(FIELD)
+dictionary["$(FIELD)"] = $(OWNER)$(FIELD).str()
 #deserialize
-$(OWNER)$(FIELD) = dictionary["$(FIELD)"]
+from .$(TYPE) import $(TYPE)
+        $(OWNER)$(FIELD) = $(TYPE)()
+        $(OWNER)$(FIELD).set(dictionary.get("$(FIELD)", ''))
 '''

@@ -48,7 +48,7 @@ class Model(object):
         self.join_to_one_file = False
         self.auto_registration = True
 
-        self.simple_types = ["int", "float", "bool", "string"]
+        self.simple_types = ["int", "float", "bool", "string", 'int64_t', 'uint', 'uint64_t']
 
         self.out_dict = None
         self.files = []
