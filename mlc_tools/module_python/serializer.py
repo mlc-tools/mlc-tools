@@ -85,7 +85,11 @@ class Serializer(SerializerBase):
 
     def build_serialize_operation(self, obj, serialization_type, serialize_format):
         if serialization_type == SERIALIZATION:
-            return '\n        serializer.serialize(self.{0}, "{0}")'.format(obj.name)
+            if obj.initial_value is not None:
+                value = self.convert_initialize_value(obj.initial_value)
+                return '\n        serializer.serialize(self.{0}, "{0}", {1})'.format(obj.name, value)
+            else:
+                return '\n        serializer.serialize(self.{0}, "{0}")'.format(obj.name)
         if serialization_type == DESERIALIZATION:
             meta, imports = self.create_meta_class(obj)
             imports = '\n'.join(['        from .{0} import {0}'.format(x) for x in imports]) if imports else ''
