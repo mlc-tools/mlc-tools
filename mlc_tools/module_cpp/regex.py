@@ -16,7 +16,7 @@ class RegexPatternCpp(object):
     FUNCTION = [
         (re.compile(r'throw new Exception\((.*?)\)'), r'throw std::exception(\1)', ['throw ']),
         (re.compile(r'(\w+)\*\s+(\w+) = new\s*(\w+)\s*\(\s*\)'), r'auto \2 = make_intrusive<\3>()', ['new']),
-        (re.compile(r'new\s*(\w+)\s*\(\s*\)'), r'make_intrusive<\1>()', ['new']),
+        (re.compile(r'new\s*(\w+)\s*\((.*)\)'), r'make_intrusive<\1>(\2)', ['new']),
         (re.compile(r'\blist<([<:>\w\s\*&]+)>\s*(\w+)'), r'std::vector<\1> \2', ['list<']),
         (re.compile(r'\bmap<([<:>\w\s\*&]+),\s*([<:>\w\s\*&]+)>\s*(\w+)'), r'std::map<\1, \2> \3', ['map<']),
         (re.compile(r'std::strcat\((.+?),\s*(.+?)\)'), r'(std::string(\1) + std::string(\2))', ['std::strcat']),

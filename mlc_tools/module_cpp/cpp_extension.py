@@ -1000,6 +1000,10 @@ public:
         SerializerXml child = key.empty() ? *this : add_child(key);
         for (auto& pair : values)
         {
+            if(!pair.second)
+            {
+                continue;
+            }
             SerializerXml item = child.add_child("pair");
             item.add_attribute("key", pair.first, default_value::value<Key>());
             item.add_attribute("value", pair.second->name, default_value::value<std::string>());            
@@ -1060,6 +1064,10 @@ public:
         SerializerXml child = key.empty() ? *this : add_child(key);
         for (auto& pair : values)
         {
+            if(!pair.second)
+            {
+                continue;
+            }
             SerializerXml item = child.add_child("pair");
             item.add_attribute("key", pair.first.str(), default_value::value<std::string>());
             item.add_attribute("value", pair.second->name, default_value::value<std::string>());            
@@ -1090,6 +1098,10 @@ public:
         SerializerXml child = key.empty() ? *this : add_child(key);
         for (auto& pair : values)
         {
+            if(!pair.first)
+            {
+                continue;
+            }
             SerializerXml item = child.add_child("pair");
             item.add_attribute("key", pair.first->name, default_value::value<std::string>());
             item.add_attribute("value", pair.second, default_value::value<Value>());            
@@ -1105,6 +1117,10 @@ public:
         SerializerXml child = key.empty() ? *this : add_child(key);
         for (auto& pair : values)
         {
+            if(!pair.first)
+            {
+                continue;
+            }
             SerializerXml item = child.add_child("pair");
             item.add_attribute("key", pair.first->name, default_value::value<std::string>());
             item.add_attribute("value", pair.second.str(), default_value::value<std::string>());            
@@ -1120,6 +1136,10 @@ public:
         SerializerXml child = key.empty() ? *this : add_child(key);
         for (auto& pair : values)
         {
+            if(!pair.first || !pair.second)
+            {
+                continue;
+            }
             SerializerXml item = child.add_child("pair");
             item.add_attribute("key", pair.first->name, default_value::value<std::string>());
             item.add_attribute("value", pair.second->name, default_value::value<std::string>());            
@@ -1135,6 +1155,10 @@ public:
         SerializerXml child = key.empty() ? *this : add_child(key);
         for (auto& pair : values)
         {
+            if(!pair.first)
+            {
+                continue;
+            }
             SerializerXml item = child.add_child("pair");
             item.add_attribute("key", pair.first->name, default_value::value<std::string>());
             item.serialize(pair.second, "value");            
@@ -1180,9 +1204,13 @@ public:
         SerializerXml child = key.empty() ? *this : add_child(key);
         for (auto& pair : values)
         {
+            if(!pair.second)
+            {
+                continue;
+            }
             SerializerXml item = child.add_child("pair");
             item.serialize(pair.first, "key");
-            item.add_attribute("value", pair.second->name, default_value::value<std::string>());            
+            item.add_attribute("value", pair.second->name, default_value::value<std::string>());
         }
     }
 
@@ -1263,7 +1291,10 @@ public:
         if(!type.empty())
         {
             value = Factory::shared().build<T>(type);
-            value->deserialize_xml(child);
+            if(value)
+            {
+                value->deserialize_xml(child);
+            }
         }
     }
 
@@ -1298,8 +1329,11 @@ public:
         {
             std::string type = item.get_name();
             intrusive_ptr<T> object = Factory::shared().build<T>(type);
-            object->deserialize_xml(item);
-            values.push_back(object);
+            if(object)
+            {
+                object->deserialize_xml(item);
+                values.push_back(object);
+            }
         }
     }
 
@@ -1364,7 +1398,7 @@ public:
         {
             Key key_ = item.get_attribute("key", default_value::value<Key>());
             Value value_ = DataStorage::shared().get<typename data_type<Value>::type>(item.get_attribute("value", default_value::value<std::string>()));
-            map[key_] = value_;            
+            map[key_] = value_;
         }
     }
 
