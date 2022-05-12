@@ -157,7 +157,7 @@ return result;
     def test_python(self):
         model = create_test_model()
         result = save_function('py', model)
-        self.assertEqual(result, '\n    def foo(self, a0, a1):\n        result = self.int_value\n        result += a0\n        return result\n        \n        pass\n')
+        self.assertEqual(result, '\n    def foo(self, a0, a1):\n        result = self.int_value\n        result += a0\n        return result\n        \n')
 
     def test_php(self):
         model = create_test_model()
