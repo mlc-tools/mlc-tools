@@ -20,14 +20,28 @@ class Serializer(SerializerBase):
     def create_serialization_function(self, cls, serialize_type, serialize_format):
         method = SerializerBase.create_serialization_function(self, cls, serialize_type, serialize_format)
 
+        if 'import' in method.body:
+            imports = []
+            body = []
+            lines = method.body.split('\n')
+            for line in lines:
+                if line.startswith('        from '):
+                    if line not in imports:
+                        imports.append(line)
+                elif line.strip():
+                    body.append(line)
+            method.body = '\n'.join(imports) + '\n' + '\n'.join(body)
+
         use_factory = RegexPatternPython.FACTORY.search(method.body) is not None
         use_data_storage = 'DataStorage.shared()' in method.body
         imports = ''
         if serialize_type == DESERIALIZATION:
             imports += '        from .Meta import Meta\n'
             for member in cls.members:
-                if self.model.has_class(member.type):
-                    imports += '        from .{0} import {0}\n'.format(member.type)
+                if self.model.has_class(member.type) and member.type != cls.name:
+                    line = '        from .{0} import {0}\n'.format(member.type)
+                    if line not in imports and line not in method.body:
+                        imports += line
             if use_factory:
                 imports += '        from .Factory import Factory\n'
             if use_data_storage:
@@ -94,7 +108,7 @@ class Serializer(SerializerBase):
                 return '\n        serializer.serialize(self.{0}, "{0}")'.format(obj.name)
         if serialization_type == DESERIALIZATION:
             meta, imports = self.create_meta_class(obj)
-            imports = '\n'.join(['        from .{0} import {0}'.format(x) for x in imports]) if imports else ''
+            imports = '\n'.join(['        from .{0} import {0}'.format(x) for x in imports if x != self.current_class.name]) if imports else ''
             if obj.initial_value:
                 value = self.convert_initialize_value(obj.initial_value)
                 return '\n{2}\n        self.{0} = serializer.deserialize("{0}", {1}, {3})'.format(obj.name, meta, imports, value)
