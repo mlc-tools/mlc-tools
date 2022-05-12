@@ -170,5 +170,4 @@ class {name}:
 PATTERN_METHOD = '''
     def {name}({args}):
 {body}
-        pass
 '''

@@ -32,8 +32,10 @@ class Serializer(SerializerBase):
                 imports += '        from .Factory import Factory\n'
             if use_data_storage:
                 imports += '        from .DataStorage import DataStorage\n'
-        if imports:
+        if imports and method.body:
             method.body = imports + method.body
+        elif not method.body:
+            method.body = '        pass'
         method.body = method.body.replace('::', '.')
         return method.body
 

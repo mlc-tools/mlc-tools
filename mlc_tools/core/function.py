@@ -38,9 +38,9 @@ class Function(object):
                 curly_braces += 1
             elif char == '}':
                 curly_braces -= 1
-            elif char == '[':
+            elif char in '([':
                 square_brackets += 1
-            elif char == ']':
+            elif char in ')]':
                 square_brackets -= 1
 
             if curly_braces < 0 or square_brackets < 0:
