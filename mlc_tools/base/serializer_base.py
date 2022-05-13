@@ -54,7 +54,7 @@ class SerializerBase(object):
             if obj.is_const and not obj.is_link:
                 continue
             body += self.build_serialize_operation(obj, serialize_type, serialize_format)
-        method.body = body
+        method.body = body.rstrip()
         cls.functions.append(method)
         return method
 
