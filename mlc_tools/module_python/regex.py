@@ -12,6 +12,21 @@ class RegexPatternPython(object):
     FACTORY = re.compile(r'\bFactory\b')
 
     FUNCTION = (
+
+        # lambdas
+        # FROM:
+        #   map_remove_if(this->test_models, (key, value -> value->data == nullptr));
+        # TO:
+        #   self.test_models = {key: value for key, value in self.test_models.items() if not(value.data == nullptr)}
+        (re.compile(r'map_remove_if\(([\w\d\-\>\.\[\]]+),\s*\((\w+),\s*(\w+)\s*->\s*(.+)\)\)'),
+         r'\1 = [@[\2: \3 for \2, \3 in \1.items() if not(\4)]@]', ['map_remove_if']),
+
+        # FROM:
+        #   list_remove_if(this->test_list_lambda, (value -> value == 3));
+        (re.compile(r'list_remove_if\(([\w\d\-\>\[\]]+),\s*\((\w+)\s*->\s*(.+)\)\)'), r'''
+    \1 = [\2 for \2 in \1 if not(\3)]
+    ''', ['list_remove_if']),
+
         (re.compile(r'DataStorage::shared\(\).get<(\w+)>'), r'DataStorage::shared().get\1', ['DataStorage::shared']),
         (re.compile(r'Factory::(.+)<\w+>'), r'Factory.\1', ['Factory::']),
         (re.compile(r'for\s*\(\s*\w+[\s&\*]*(\w+)\s*:\s*(.+)\s*\)'), r'for \1 in \2:', ['for']),

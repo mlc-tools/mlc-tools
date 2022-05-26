@@ -14,6 +14,25 @@ class RegexPatternCpp(object):
     FUNC_ARGS = (re.compile(r'\s*=\s*.+'), r'')
 
     FUNCTION = [
+
+        # lambdas
+        # FROM:
+        #   map_remove_if(this->test_models, (key, value -> value->data == nullptr));
+        (re.compile(r'map_remove_if\(([\w\d\-\>\.\[\]]+),\s*\((\w+),\s*(\w+)\s*->\s*(.+)\)\)'),
+         r'''for(auto __iter__ = \1.begin(); __iter__ != \1.end();)
+{
+    auto& \2 = __iter__->first; auto& \3 = __iter__->second; (void)\2;(void)\3;
+    if(\4) __iter__ = \1.erase(__iter__);
+    else ++__iter__;
+}''', ['map_remove_if']),
+
+        # FROM:
+        #   list_remove_if(this->test_list_lambda, (value -> value == 3));
+        (re.compile(r'list_remove_if\(([\w\d\-\>\[\]]+),\s*\((\w+)\s*->\s*(.+)\)\)'), r'''
+auto iter = std::remove_if(\1.begin(), \1.end(), [](auto& value){return \3;});
+\1.erase(iter, \1.end());
+''', ['list_remove_if']),
+
         (re.compile(r'throw new Exception\((.*?)\)'), r'throw std::exception(\1)', ['throw ']),
         (re.compile(r'(\w+)\*\s+(\w+) = new\s*(\w+)\s*\(\s*\)'), r'auto \2 = make_intrusive<\3>()', ['new']),
         (re.compile(r'new\s*(\w+)\s*\((.*)\)'), r'make_intrusive<\1>(\2)', ['new']),

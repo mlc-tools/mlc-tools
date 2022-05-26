@@ -29,6 +29,7 @@ class Translator(TranslatorBase):
         body = Translator.convert_braces_to_tabs(body)
         body = Translator.remove_double_eol(body)
         body = Translator.add_imports(cls, body, model)
+        body = Translator.convert_braces(body)
         return body
 
     @staticmethod
@@ -99,6 +100,10 @@ class Translator(TranslatorBase):
 
         func = '\n'.join(lines)
         return func
+
+    @staticmethod
+    def convert_braces(body):
+        return body.replace('[@[', '{').replace(']@]', '}')
 
     def replace_by_regex(self, func, body, model, args):
         if not body:

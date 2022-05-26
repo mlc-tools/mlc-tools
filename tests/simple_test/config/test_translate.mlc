@@ -20,6 +20,36 @@ class Point
 }
 class TestTranslates<ITestTranslates>
 {
+    class Model
+    {
+        DataUnit:link data
+    }
+    map<string, Model*> test_map_models
+    list<int> test_list_lambda
+
+    function void test_map_remove_if():cpp:py
+    {
+        map_clear(this->test_map_models);
+        this->test_map_models["1"] = new TestTranslatesModel();
+        this->test_map_models["1"]->data = DataStorage::shared().get<DataUnit>("unitname1");
+        this->test_map_models["2"] = new TestTranslatesModel();
+        this->test_map_models["2"]->data = nullptr;
+
+        map_remove_if(this->test_map_models, (key, value -> value->data == nullptr));
+
+        this->assertEqual(map_size(this->test_map_models), 1);
+        this->assertTrue(in_map("1", this->test_map_models));
+    }
+    function void test_list_remove_if():cpp:py
+    {
+        list_clear(this->test_list_lambda);
+        list_push(this->test_list_lambda, 3);
+        list_push(this->test_list_lambda, 4);
+        list_remove_if(this->test_list_lambda, (value -> value == 3));
+
+        this->assertEqual(list_size(this->test_list_lambda), 1);
+        this->assertEqual(this->test_list_lambda[0], 4);
+    }
     function void test_dummy_function()
     {
     }
