@@ -18,14 +18,50 @@ class RegexPatternPython(object):
         #   map_remove_if(this->test_models, (key, value -> value->data == nullptr));
         # TO:
         #   self.test_models = {key: value for key, value in self.test_models.items() if not(value.data == nullptr)}
-        (re.compile(r'map_remove_if\(([\w\d\-\>\.\[\]]+),\s*\((\w+),\s*(\w+)\s*->\s*(.+)\)\)'),
+        (re.compile(r'map_remove_if\(([\w\d\-\>\.\[\]]+),\s*\((\w+),\s*(\w+)\s*:>\s*(.+)\)\)'),
          r'\1 = [@[\2: \3 for \2, \3 in \1.items() if not(\4)]@]', ['map_remove_if']),
 
         # FROM:
         #   list_remove_if(this->test_list_lambda, (value -> value == 3));
-        (re.compile(r'list_remove_if\(([\w\d\-\>\[\]]+),\s*\((\w+)\s*->\s*(.+)\)\)'), r'''
+        (re.compile(r'list_remove_if\(([\w\d\-\>\[\]]+),\s*\((\w+)\s*:>\s*(.+)\)\)'), r'''
     \1 = [\2 for \2 in \1 if not(\3)]
     ''', ['list_remove_if']),
+
+        # lambdas
+        # FROM:
+        #   map_do_if(this->test_models, (key, value -> value->data == nullptr -> some_action));
+        (re.compile(r'map_do_if\(([\w\d\-\>\.\[\]]+),\s*\((\w+),\s*(\w+?)\s*:>\s*(.+?):>\s*(.+)\)\);'),
+         r'''__keys__ = list(\1.keys())
+    for \2 in __keys__:
+    { 
+        \3 = \1.get(\2)
+        if \4: 
+        {
+            \5
+        }
+    }
+    ''', ['map_do_if']),
+
+        # FROM:
+        #   list_do_if(this->test_list_lambda, (value :> value == 3 :> some_action);
+        (re.compile(r'list_do_if\(([\w\d\-\>\.\[\]]+),\s*\((\w+)\s*:>\s*(.+?):>\s*(.+)\)\);'), r'''
+    __size__ = len(\1)
+    __index__ = 0
+    while __index__ < __size__:
+    {
+        \2 = \1[__index__]
+        if \3:
+        {
+            \4
+            if __size__ != len(\1):
+            {
+                __size__ = len(\1)
+                __index__ -= 1
+            }
+        }
+        __index__ += 1
+    }
+    ''', ['list_do_if']),
 
         (re.compile(r'DataStorage::shared\(\).get<(\w+)>'), r'DataStorage::shared().get\1', ['DataStorage::shared']),
         (re.compile(r'Factory::(.+)<\w+>'), r'Factory.\1', ['Factory::']),

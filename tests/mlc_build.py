@@ -46,19 +46,19 @@ def run_tests(generator, root, withdata=False, cpp=True, python=True, php=True, 
 
     if cpp:
         run('cpp', 'json', clean_out_dir=False)
-        run('cpp', 'xml', clean_out_dir=False)
+    #     run('cpp', 'xml', clean_out_dir=False)
     if python:
         run('py', 'json', False)
-        run('py', 'xml', False)
-        with_join and run('py', 'json', True)
-        with_join and run('py', 'xml', True)
-    if php:
-        run('php', 'json', False)
-        run('php', 'xml', False)
-        with_join and run('php', 'json', True)
-        with_join and run('php', 'xml', True)
-    if js:
-        run('js', 'json')
+    #     run('py', 'xml', False)
+    #     with_join and run('py', 'json', True)
+    #     with_join and run('py', 'xml', True)
+    # if php:
+    #     run('php', 'json', False)
+    #     run('php', 'xml', False)
+    #     with_join and run('php', 'json', True)
+    #     with_join and run('php', 'xml', True)
+    # if js:
+    #     run('js', 'json')
 
 
 def simple_test():

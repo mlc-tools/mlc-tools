@@ -17,8 +17,8 @@ class RegexPatternCpp(object):
 
         # lambdas
         # FROM:
-        #   map_remove_if(this->test_models, (key, value -> value->data == nullptr));
-        (re.compile(r'map_remove_if\(([\w\d\-\>\.\[\]]+),\s*\((\w+),\s*(\w+)\s*->\s*(.+)\)\)'),
+        #   map_remove_if(this->test_models, (key, value :> value->data == nullptr));
+        (re.compile(r'map_remove_if\(([\w\d\-\>\.\[\]]+),\s*\((\w+),\s*(\w+)\s*:>\s*(.+)\)\)'),
          r'''for(auto __iter__ = \1.begin(); __iter__ != \1.end();)
 {
     auto& \2 = __iter__->first; auto& \3 = __iter__->second; (void)\2;(void)\3;
@@ -27,11 +27,40 @@ class RegexPatternCpp(object):
 }''', ['map_remove_if']),
 
         # FROM:
-        #   list_remove_if(this->test_list_lambda, (value -> value == 3));
-        (re.compile(r'list_remove_if\(([\w\d\-\>\[\]]+),\s*\((\w+)\s*->\s*(.+)\)\)'), r'''
+        #   list_remove_if(this->test_list_lambda, (value :> value == 3));
+        (re.compile(r'list_remove_if\(([\w\d\-\>\[\]]+),\s*\((\w+)\s*:>\s*(.+)\)\)'), r'''
 auto iter = std::remove_if(\1.begin(), \1.end(), [](const auto& value){return \3;});
 \1.erase(iter, \1.end());
 ''', ['list_remove_if']),
+
+        # lambdas
+        # FROM:
+        #   map_do_if(this->test_models, (key, value :> value->data == nullptr :> some_action));
+        (re.compile(r'map_do_if\(([\w\d\-\>\.\[\]]+),\s*\((\w+),\s*(\w+?)\s*:>\s*(.+?):>\s*(.+)\)\);'),
+         r'''for(auto __iter__ = \1.begin(); __iter__ != \1.end();)
+{
+    auto& \2 = __iter__->first; auto& \3 = __iter__->second; (void)\2;(void)\3;
+    if(\4) {++__iter__; \5;}
+    else ++__iter__;
+}''', ['map_do_if']),
+
+        # FROM:
+        #   list_do_if(this->test_list_lambda, (value :> value == 3 :> some_action);
+        (re.compile(r'list_do_if\(([\w\d\-\>\.\[\]]+),\s*\((\w+)\s*:>\s*(.+?):>\s*(.+)\)\);'), r'''
+        for(int __index__ = 0; __index__ < \1.size(); ++__index__)
+        {
+            auto \2 = \1.at(__index__);
+            if(\3)
+            {
+                auto __size__ = \1.size();
+                \4;
+                if(__size__ != \1.size())
+                {
+                    __index__ -= 1;
+                }
+            }
+        }
+    ''', ['list_do_if']),
 
         (re.compile(r'throw new Exception\((.*?)\)'), r'throw std::exception(\1)', ['throw ']),
         (re.compile(r'(\w+)\*\s+(\w+) = new\s*(\w+)\s*\(\s*\)'), r'auto \2 = make_intrusive<\3>()', ['new']),
