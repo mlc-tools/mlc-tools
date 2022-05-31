@@ -14,6 +14,10 @@
 			{ "key": "unitname1", "value" : 1},
 			{ "key": "unitname2", "value" : 2}
 		],
+		"map_units_data" : [
+			{ "key": "unitname1", "value" : 1},
+			{ "key": "unitname2", "value" : 2}
+		],
 		"skill": { "type": "SkillBase"}
 	}
 }

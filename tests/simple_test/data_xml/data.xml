@@ -10,6 +10,10 @@
 			<pair key="unitname1" value="1"/>
 			<pair key="unitname2" value="2"/>
 		</map_units>
+		<map_units_data>
+			<pair key="unitname1" value="1"/>
+			<pair key="unitname2" value="2"/>
+		</map_units_data>
 		<skill type="SkillFoo" foo="1"/>
 	</unit>
 
@@ -24,6 +28,10 @@
 			<pair key="unitname1" value="1"/>
 			<pair key="unitname2" value="2"/>
 		</map_units>
+		<map_units_data>
+			<pair key="unitname1" value="1"/>
+			<pair key="unitname2" value="2"/>
+		</map_units_data>
 		<skill type="SkillBase"/>
 	</unit>
 

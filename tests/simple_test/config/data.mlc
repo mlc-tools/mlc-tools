@@ -24,6 +24,7 @@ class data/DataUnit:storage
 	DataUnit*:link link_to_data
 	list<DataUnit*:link> all_units
 	map<string, int> map_units
+	map<DataUnit:link, int>:cpp:py map_units_data
 	EnumWithIntValue enum_with_int_value
 	int64_t int64_value = 0
 	SkillBase* skill
@@ -74,6 +75,9 @@ class data/DataUnit:storage
 
         result = result && map_size(unit2->link_to_data->map_units) == map_size(unit1->map_units);
         result = result && map_size(unit1->link_to_data->map_units) == map_size(unit2->map_units);
+
+        result = result && map_size(unit2->link_to_data->map_units_data) == map_size(unit1->map_units_data);
+        result = result && map_size(unit1->link_to_data->map_units_data) == map_size(unit2->map_units_data);
 
         result = result && unit1 != unit2;
         return result;
@@ -128,7 +132,6 @@ class data/DataUnit:storage
 
         result = result && map_size(unit1->map_units) == 2;
         result = result && map_size(unit2->map_units) == 2;
-
         for (auto&& [name, count] : unit1->map_units)
         {
             result = result && (name == unit1->name || name == unit2->name);
@@ -137,6 +140,19 @@ class data/DataUnit:storage
         for (auto&& [name, count] : unit2->map_units)
         {
             result = result && (name == unit1->name || name == unit2->name);
+            result = result && (count == 1 || count == 2);
+        }
+
+        result = result && map_size(unit1->map_units_data) == 2;
+        result = result && map_size(unit2->map_units_data) == 2;
+        for (auto&& [data, count] : unit1->map_units_data)
+        {
+            result = result && (data == unit1 || data == unit2);
+            result = result && (count == 1 || count == 2);
+        }
+        for (auto&& [data, count] : unit2->map_units_data)
+        {
+            result = result && (data == unit1 || data == unit2);
             result = result && (count == 1 || count == 2);
         }
 

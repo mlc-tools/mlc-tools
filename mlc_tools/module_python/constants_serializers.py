@@ -27,6 +27,15 @@ class DataWrapper(object):
 
     def __getattribute__(self, name):
         return object.__getattribute__(self, 'instance').__getattribute__(name)
+
+    def __eq__(self, rhs):
+        return rhs.name is not None and self.name == rhs.name
+
+    def __ne__(self, rhs):
+        return rhs.name is None or self.name != rhs.name
+
+    def __hash__(self):
+        return hash(self.name)
 """
 
 INTRUSIVE = """# -*- coding: utf-8 -*-
