@@ -39,6 +39,7 @@ class data/DataUnit:storage
 	    result = DataUnit::test_enums(logger) && result;
 	    result = DataUnit::test_list_links(logger) && result;
 	    result = DataUnit::test_map_links(logger) && result;
+	    result = DataUnit::test_map_data_links(logger) && result;
 	    return result;
 	}
 
@@ -142,6 +143,17 @@ class data/DataUnit:storage
             result = result && (name == unit1->name || name == unit2->name);
             result = result && (count == 1 || count == 2);
         }
+        return result;
+    }
+    function bool test_map_data_links(Logger* logger):static:js:php
+    {
+    }
+    function bool test_map_data_links(Logger* logger):static:cpp:py
+    {
+        bool result = true;
+
+        auto unit1 = DataStorage::shared().get<DataUnit>("unitname1");
+        auto unit2 = DataStorage::shared().get<DataUnit>("unitname2");
 
         result = result && map_size(unit1->map_units_data) == 2;
         result = result && map_size(unit2->map_units_data) == 2;

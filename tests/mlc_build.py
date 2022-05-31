@@ -61,6 +61,7 @@ def run_tests(generator, root, withdata=False, cpp=True, python=True, php=True, 
         with_join and run('php', 'json', True)
         with_join and run('php', 'xml', True)
     if js:
+        generator.model.php_validate = False
         run('js', 'json')
 
 
