@@ -78,9 +78,6 @@ class GeneratorUnitTestsInterface(object):
                     self.add_method(test, func.name)
                     self.generate_messages_if_empty(impl, func)
 
-        if not test.functions:
-            return None
-
         method = Function()
         method.name = 'execute'
         method.return_type = Objects.VOID

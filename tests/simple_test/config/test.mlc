@@ -479,11 +479,18 @@ class TestDataListListBool<ITestDataListListBool>:tests:cpp:py
     }
 }
 
-class TestStaticPointer:tests
+class StaticPointer
 {
     CommandBase*:static command
 }
 
+class TestStaticPointer<ITestStaticPointer>
+{
+    fn void test_foo()
+    {
+        this->assertTrue(true);
+    }
+}
 
 class ClassMissingTestMethod
 {
