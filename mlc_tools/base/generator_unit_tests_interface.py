@@ -54,9 +54,14 @@ class GeneratorUnitTestsInterface(object):
     def generate_test_interface(self, cls):
         if cls.is_test:
             return None
+        class_name = 'ITest' + cls.name
+
+        if not self.model.get_subclasses_of_class(class_name):
+            return None
+
         test = Class()
         test.type = 'class'
-        test.name = 'ITest' + cls.name
+        test.name = class_name
         test.group = 'tests'
         test.superclasses.append('TestCase')
         generated_functions = []

@@ -1,4 +1,7 @@
 from copy import copy
+from typing import List
+
+from mlc_tools.core.class_ import Class
 
 
 class SerializeFormat(object):
@@ -18,7 +21,7 @@ class Model(object):
     def __init__(self):
         self.parser = None
 
-        self.classes = []
+        self.classes:List[Class] = []
         self.classes_for_data = []
         self.objects = []
         self.functions = []
@@ -99,3 +102,10 @@ class Model(object):
 
     def add_file(self, cls, local_path, content):
         self.files.append((cls, local_path, content))
+
+    def get_subclasses_of_class(self, cls_name: str) -> List[Class]:
+        result: List[Class] = []
+        for cls in self.classes:
+            if cls.superclasses and cls.superclasses[0] == cls_name:
+                result.append(cls)
+        return result

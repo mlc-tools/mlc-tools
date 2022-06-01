@@ -483,3 +483,16 @@ class TestStaticPointer:tests
 {
     CommandBase*:static command
 }
+
+
+class ClassMissingTestMethod
+{
+    function void foo(){}
+    function void bar(){}
+}
+
+class TestClassMissingTestMethod<ITestClassMissingTestMethod>
+{
+    function void test_foo(){}
+    function void test_bar(){}
+}
