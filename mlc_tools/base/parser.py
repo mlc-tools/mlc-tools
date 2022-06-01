@@ -164,7 +164,7 @@ class Parser(object):
 
     def parse_object(self, obj, line):
         if ';' in line:
-            Error.warning(Error.SYNTAX_WARNING, line)
+            Error.warning(Error.WARNING_SYNTAX, line)
             line = line.replace(';', '')
 
         # parse initialize value

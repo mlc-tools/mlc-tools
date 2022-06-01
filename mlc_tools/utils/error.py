@@ -56,13 +56,15 @@ class Error(object):
     CANNOT_PARSE_XML = inspect.currentframe().f_lineno
     ENUM_CANNOT_BE_COMBINATED = inspect.currentframe().f_lineno
     INTERNAL_ERROR = inspect.currentframe().f_lineno
-    SYNTAX_WARNING = inspect.currentframe().f_lineno
+    WARNING_SYNTAX = inspect.currentframe().f_lineno
     UNKNOWN_DATA_TYPE = inspect.currentframe().f_lineno
     CLASS_HAVE_MORE_THAN_ONE_CONSTRUCTOR = inspect.currentframe().f_lineno
     PARSE_ERROR = inspect.currentframe().f_lineno
     TESTS_FAILED = inspect.currentframe().f_lineno
     CIRCULAR_REFERENCE = inspect.currentframe().f_lineno
     ERROR_CONST_MODIFIER = inspect.currentframe().f_lineno
+
+    WARNING_TEST_CLASS_NOT_IMPLEMENT_METHOD = inspect.currentframe().f_lineno
 
     texts = {
         UNKNOWN_SERIALISED_TYPE: '[{}] unknown serialized serialized format. Base type - [{}]',
@@ -78,13 +80,14 @@ class Error(object):
         CANNOT_PARSE_XML: 'Error on parsing xml [{}]',
         ENUM_CANNOT_BE_COMBINATED: 'Enum member [{}::{}] cannot be initialed by [{}] value',
         INTERNAL_ERROR: 'Internal error',
-        SYNTAX_WARNING: 'Syntax warning: Found symbol ";" in member declaration: [{}]',
+        WARNING_SYNTAX: 'Syntax warning: Found symbol ";" in member declaration: [{}]',
         UNKNOWN_DATA_TYPE: 'Unknown data type [{}]->[{}]. please check configuration. File: [{}]',
         CLASS_HAVE_MORE_THAN_ONE_CONSTRUCTOR: 'A class [{}] can have one constructor',
         PARSE_ERROR: 'Parsing error',
         TESTS_FAILED: 'Tests failed',
         CIRCULAR_REFERENCE: 'Circular reference: [{}]',
         ERROR_CONST_MODIFIER: 'Const modifier should be declare as [Type:const]: {}',
+        WARNING_TEST_CLASS_NOT_IMPLEMENT_METHOD: 'Test class [{}] has not implemented method [{}]',
     }
 
     @staticmethod

@@ -3,7 +3,7 @@ from ..core.class_ import Class
 from ..core.object import Object, Objects, AccessSpecifier
 from ..core.function import Function
 from ..utils.common import *
-
+from ..utils.error import Error
 
 ASSERTS = {
     'this->assertTrue(': 1,
@@ -94,12 +94,20 @@ class GeneratorUnitTestsInterface(object):
         self.tests.append(test)
         return test
 
-    @staticmethod
-    def add_method(class_, name):
+    def add_method(self, class_, name):
+        all_has_implement = True
+        subclasses = self.model.get_subclasses_of_class(class_.name)
+        for cls in subclasses:
+            method = cls.get_method_with_name(name)
+            if not method or method.is_abstract:
+                all_has_implement = False
+                Error.warning(Error.WARNING_TEST_CLASS_NOT_IMPLEMENT_METHOD, class_.name, name)
+                break
+
         method = Function()
         method.name = name
         method.return_type = Objects.VOID
-        method.is_abstract = True
+        method.is_abstract = all_has_implement
         class_.functions.append(method)
 
     def generate_all_tests_class(self,):

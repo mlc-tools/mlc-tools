@@ -1,4 +1,6 @@
 import re
+
+from .function import Function
 from .object import Object
 from .modifiers import Modifiers
 from ..utils.error import Error
@@ -34,6 +36,12 @@ class Class(Object):
             if method.name == name:
                 return True
         return False
+
+    def get_method_with_name(self, name) -> Function or None:
+        for method in self.functions:
+            if method.name == name:
+                return method
+        return None
 
     def has_abstract_method(self):
         for method in self.functions:

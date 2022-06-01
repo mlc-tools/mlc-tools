@@ -494,5 +494,4 @@ class ClassMissingTestMethod
 class TestClassMissingTestMethod<ITestClassMissingTestMethod>
 {
     function void test_foo(){}
-    function void test_bar(){}
 }
