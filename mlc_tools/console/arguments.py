@@ -37,6 +37,7 @@ class Arguments:
         print('Usage')
         print('')
         print('  mlc help, --help, -h            - Print usage information and exit')
+        print('  mlc version, --version, -v      - Print version')
         print('  mlc init <app-name> [options]   - Initialize new app')
         print('  mlc generate [options]          - Generate sources')
         print('  mlc build [options]             - Build app')
@@ -81,7 +82,8 @@ class Arguments:
             'run',
             'generate',
             'build',
-            'help', '--help', '-h'
+            'help', '--help', '-h',
+            'version', '--version', '-v',
         ]
         if command not in valid:
             raise ArgumentsError('Unknown command: ' + command)
@@ -92,6 +94,8 @@ class Arguments:
                 raise ArgumentsError('Error:\n  - mlc init [name]. Parameter name is skipped')
             self.project_name = sys.argv[2]
         if self.command in ['--help', '-h']:
+            self.command = 'help'
+        if self.command in ['--version', '-v']:
             self.command = 'help'
 
     def set_option(self, option):

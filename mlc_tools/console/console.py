@@ -1,7 +1,7 @@
 import os
 import sys
 import shutil
-from mlc_tools import Mlc
+from mlc_tools import Mlc, version
 from mlc_tools.console.arguments import Arguments, ArgumentsError
 from mlc_tools.console.config import ProjectConfig, Feature
 from mlc_tools.utils.fileutils import normalize_path, write
@@ -40,11 +40,15 @@ class Console(object):
             'build': Console.build,
             'run': Console.run,
             'help': Console.help,
+            'version': Console.version,
         }[self.arguments.command]
         action(self)
 
     def help(self):
         self.arguments.print_usage()
+
+    def version(self):
+        print(f'ml_tools {version}');
 
     def init(self):
         self._init()

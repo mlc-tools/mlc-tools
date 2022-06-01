@@ -13,6 +13,16 @@ def usage():
     return result
 
 
+def version():
+    result = True
+    result = result and os.system(f'PYTHONPATH=../../ python3 ../../mlc_tools/console/console.py version') == 0
+    result = result and os.system(f'PYTHONPATH=../../ python3 ../../mlc_tools/console/console.py --version') == 0
+    result = result and os.system(f'PYTHONPATH=../../ python3 ../../mlc_tools/console/console.py -v') == 0
+    if not result:
+        print('version: Failed')
+    return result
+
+
 def init():
     app = 'test_app'
     if os.path.isdir(f'{app}'):
@@ -136,6 +146,7 @@ def clean_after_build():
 def main():
     result = True
     result = result and usage()
+    result = result and version()
     result = result and init()
     result = result and clean_empty()
     result = result and build()
