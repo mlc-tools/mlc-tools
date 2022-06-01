@@ -493,5 +493,5 @@ class ClassMissingTestMethod
 
 class TestClassMissingTestMethod<ITestClassMissingTestMethod>
 {
-    function void test_foo(){}
+    fn void test_foo(){}
 }

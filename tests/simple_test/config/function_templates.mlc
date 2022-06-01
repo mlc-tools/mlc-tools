@@ -5,7 +5,7 @@ class FunctionTemplates
         return a + b;
     }
 
-    function<T> void use_other_class(T t)
+    fn<T> void use_other_class(T t)
     {
         FunctionTemplatesSomeOtherClass obj;
         obj.some_method();

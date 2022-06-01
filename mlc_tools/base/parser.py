@@ -201,18 +201,24 @@ class Parser(object):
 
     FUNC_0 = re.compile(r'function<([\w, ]+?)>')
     FUNC_1 = re.compile(r'function<[\w, ]+?>')
+    FUNC_0s = re.compile(r'fn<([\w, ]+?)>')
+    FUNC_1s = re.compile(r'fn<[\w, ]+?>')
     FUNC_2 = re.compile(r'{.*}')
 
     def parse_function_header(self, method, line):
         line = line.strip()
 
+        use_s = False
         templates = Parser.FUNC_0.findall(line)
+        if not templates:
+            templates = Parser.FUNC_0s.findall(line)
+            use_s = True
         if templates:
-            line = Parser.FUNC_1.sub('', line)
+            line = Parser.FUNC_1.sub('', line) if not use_s else Parser.FUNC_1s.sub('', line)
             method.template_types = smart_split(templates[0], ',')
             method.template_types = [x.strip() for x in method.template_types]
         else:
-            len_function = 8  # len('function')
+            len_function = 8 if line.startswith('function') else 2 # len('function') or len('fn')
             line = line[len_function:].strip()
 
         has_callable, method.args, line = self.parse_function_args(line)
@@ -263,7 +269,7 @@ class Parser(object):
 
     @staticmethod
     def _is_function(line):
-        return line.find('function') == 0
+        return line.find('function') == 0 or line.find('fn') == 0
 
     @staticmethod
     def _is_constructor(line):
