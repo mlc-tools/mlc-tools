@@ -222,7 +222,7 @@ $json->$(FIELD) = ($(TYPE))$(OWNER)$(FIELD);
 #with default value:
 if(isset($json->$(FIELD)))
 {
-    $(OWNER)$(FIELD) = $json->$(FIELD);
+    $(OWNER)$(FIELD) = ($(TYPE))$json->$(FIELD);
 }
 #without default value:
 $(OWNER)$(FIELD) = $json->$(FIELD);
