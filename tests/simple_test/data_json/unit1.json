@@ -19,6 +19,7 @@
 			{ "key": "unitname1", "value" : 1},
 			{ "key": "unitname2", "value" : 2}
 		],
-		"skill": { "type": "SkillFoo", "foo" : 1}
+		"skill": { "type": "SkillFoo", "foo" : 1},
+		"convert_float_to_int": 1.0
 	}
 }

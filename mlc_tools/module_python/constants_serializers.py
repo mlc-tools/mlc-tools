@@ -194,7 +194,12 @@ class DeserializerXml(object):
             return True if value in ['true', 'yes'] else False if value in ['false', 'no'] else default_value if default_value else False
         if meta == str and not value and not default_value:
             return ''
-        return meta(value or default_value or 0)
+        try:
+            return meta(value or default_value or 0)
+        except ValueError as e:
+            if meta == int:
+                return int(float(value or default_value or 0))
+            raise e
 
     def deserialize_dict(self, key, meta):
         node = DeserializerXml(self.node) if not key else self.get_child(key)
@@ -382,7 +387,7 @@ class DeserializerJson(object):
                 return default_value
         if self.json.__class__ == meta:
             return meta(self.json)
-        return self.json or default_value
+        return meta(self.json or default_value)
 
     def deserialize_dict(self, key, meta):
         js = DeserializerJson(self.json) if not key else self.get_child_array(key)

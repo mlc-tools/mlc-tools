@@ -29,6 +29,8 @@ class data/DataUnit:storage
 	int64_t int64_value = 0
 	SkillBase* skill
 
+	int convert_float_to_int = 0
+
 	function bool tests(Logger* logger):static
 	{
 	    auto data = DataStorage::shared().get<DataUnit>("unitname1");
@@ -40,6 +42,8 @@ class data/DataUnit:storage
 	    result = DataUnit::test_list_links(logger) && result;
 	    result = DataUnit::test_map_links(logger) && result;
 	    result = DataUnit::test_map_data_links(logger) && result;
+	    result = DataUnit::test_convert_float_to_int(logger) && result;
+
 	    return result;
 	}
 
@@ -166,6 +170,23 @@ class data/DataUnit:storage
             result = result && (count == 1 || count == 2);
         }
 
+        return result;
+    }
+
+    function bool test_convert_float_to_int(Logger* logger):static
+    {
+        bool result = true;
+        auto unit1 = DataStorage::shared().get<DataUnit>("unitname1");
+        auto unit2 = DataStorage::shared().get<DataUnit>("unitname2");
+
+        result = result && unit1->convert_float_to_int == 1;
+        result = result && unit2->convert_float_to_int == 1;
+        if(!result)
+        {
+            logger->message("Fail: DataUnit test_convert_float_to_int");
+            logger->message("      unit1 value = " + toStr(unit1->convert_float_to_int));
+            logger->message("      unit2 value = " + toStr(unit2->convert_float_to_int));
+        }
         return result;
     }
 
