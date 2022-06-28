@@ -29,10 +29,10 @@ class DataWrapper(object):
         return object.__getattribute__(self, 'instance').__getattribute__(name)
 
     def __eq__(self, rhs):
-        return rhs.name is not None and self.name == rhs.name
+        return rhs is not None and rhs.name is not None and self.name == rhs.name
 
     def __ne__(self, rhs):
-        return rhs.name is None or self.name != rhs.name
+        return rhs is not None and rhs.name is None or self.name != rhs.name
 
     def __hash__(self):
         return hash(self.name)
