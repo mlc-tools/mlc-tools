@@ -82,7 +82,7 @@ class SerializerXml(object):
         self.node = node
 
     def serialize(self, obj, key, default_value=None):
-        if isinstance(obj, DataWrapper):
+        if isinstance(obj, DataWrapper) and obj is not None:
             self.serialize_attr(obj.name, key, default_value)
         elif isinstance(obj, IntrusivePtr):
             child = self.add_child(key)
