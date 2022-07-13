@@ -1,16 +1,18 @@
-class Intrusive
+class Intrusive:cpp:py
 {
     function void add_self_to_list(list<Intrusive*>:ref list)
     {
-        list_push(list, this);
+        auto r = this;
+        list_push(list, r);
     }
     function void remove_self_from_list(list<Intrusive*>:ref list)
     {
-        list_remove(list, this);
+        auto r = this;
+        list_remove(list, r);
     }
 }
 
-class TestIntrusive<ITestIntrusive>
+class TestIntrusive<ITestIntrusive>:cpp:py
 {
     list<Intrusive*> pointers
     function void test_add_self_to_list()
