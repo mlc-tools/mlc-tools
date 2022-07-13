@@ -37,6 +37,12 @@ class Class(Object):
                 return True
         return False
 
+    def has_member_with_name(self, name):
+        for member in self.members:
+            if member.name == name:
+                return True
+        return False
+
     def get_method_with_name(self, name) -> Function or None:
         for method in self.functions:
             if method.name == name:
