@@ -63,7 +63,7 @@ class IntrusivePtr(object):
         if rhs is None:
             return
         self_instance = object.__getattribute__(self, 'instance')
-        rhs_instance = object.__getattribute__(rhs, 'instance')
+        rhs_instance = object.__getattribute__(rhs, 'instance') if isinstance(rhs, IntrusivePtr) else rhs
         return self_instance.__eq__(rhs_instance)
 
     def __hash__(self):
