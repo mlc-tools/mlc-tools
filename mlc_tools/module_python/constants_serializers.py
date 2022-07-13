@@ -26,7 +26,10 @@ class DataWrapper(object):
         object.__setattr__(object.__getattribute__(self, 'instance'), name, value)
 
     def __getattribute__(self, name):
-        return object.__getattribute__(self, 'instance').__getattribute__(name)
+        try:
+            return object.__getattribute__(self, 'instance').__getattribute__(name)
+        except AttributeError as e:
+            return None
 
     def __eq__(self, rhs):
         if rhs is None:
