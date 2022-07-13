@@ -29,9 +29,13 @@ class DataWrapper(object):
         return object.__getattribute__(self, 'instance').__getattribute__(name)
 
     def __eq__(self, rhs):
+        if rhs is None:
+            return object.__getattribute__(self, 'instance') is None
         return rhs is not None and rhs.name is not None and self.name == rhs.name
 
     def __ne__(self, rhs):
+        if rhs is None:
+            return object.__getattribute__(self, 'instance') is not None
         return rhs is not None and rhs.name is None or self.name != rhs.name
 
     def __hash__(self):
