@@ -116,7 +116,7 @@ class Object(object):
 
     def set_default_initial_value(self):
         if self.initial_value is None:
-            if self.type == 'int':
+            if self.type in ['int', 'int64_t', 'uint', 'uint64_t']:
                 self.initial_value = "0"
             elif self.type == 'float':
                 self.initial_value = "0.0"

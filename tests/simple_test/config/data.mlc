@@ -27,6 +27,7 @@ class data/DataUnit:storage
 	map<DataUnit:link, int>:cpp:py map_units_data
 	EnumWithIntValue enum_with_int_value
 	int64_t int64_value = 0
+	int64_t int64_value_without_default_value
 	SkillBase* skill
 
 	int convert_float_to_int = 0
