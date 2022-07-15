@@ -4,12 +4,16 @@ class Factory
 {
     static function build($type)
     {
-        if(strcmp($type, "") == 0)
+        if(strcmp($type, "") == 0 || strcmp($type, "null") == 0)
         {
             return null;
         }
-        require_once "$type.php";
-        return new $type;
+        try {
+            require_once "$type.php";
+            return new $type;
+        } catch (Exception $e) {
+            return null;
+        }
     }
 };
 

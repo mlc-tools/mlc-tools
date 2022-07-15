@@ -927,8 +927,11 @@ public:
         SerializerXml child = key.empty() ? *this : add_child(key);
         for (const intrusive_ptr<T>& value : values)
         {
-            SerializerXml item = child.add_child(value->get_type());
-            value->serialize_xml(item);
+            SerializerXml item = child.add_child(value ? value->get_type() : "");
+            if(value)
+            {
+                value->serialize_xml(item);
+            }
         }
     }
 
@@ -1006,7 +1009,7 @@ public:
             }
             SerializerXml item = child.add_child("pair");
             item.add_attribute("key", pair.first, default_value::value<Key>());
-            item.add_attribute("value", pair.second->name, default_value::value<std::string>());            
+            item.add_attribute("value", pair.second ? pair.second->name : "", default_value::value<std::string>());            
         }
     }
 
@@ -1070,7 +1073,7 @@ public:
             }
             SerializerXml item = child.add_child("pair");
             item.add_attribute("key", pair.first.str(), default_value::value<std::string>());
-            item.add_attribute("value", pair.second->name, default_value::value<std::string>());            
+            item.add_attribute("value", pair.second ? pair.second->name : "", default_value::value<std::string>());            
         }
     }
 
@@ -1103,7 +1106,7 @@ public:
                 continue;
             }
             SerializerXml item = child.add_child("pair");
-            item.add_attribute("key", pair.first->name, default_value::value<std::string>());
+            item.add_attribute("key", pair.first ? pair.first->name : "", default_value::value<std::string>());
             item.add_attribute("value", pair.second, default_value::value<Value>());            
         }
     }
@@ -1122,7 +1125,7 @@ public:
                 continue;
             }
             SerializerXml item = child.add_child("pair");
-            item.add_attribute("key", pair.first->name, default_value::value<std::string>());
+            item.add_attribute("key", pair.first ? pair.first->name : "", default_value::value<std::string>());
             item.add_attribute("value", pair.second.str(), default_value::value<std::string>());            
         }
     }
@@ -1141,8 +1144,8 @@ public:
                 continue;
             }
             SerializerXml item = child.add_child("pair");
-            item.add_attribute("key", pair.first->name, default_value::value<std::string>());
-            item.add_attribute("value", pair.second->name, default_value::value<std::string>());            
+            item.add_attribute("key", pair.first ? pair.first->name : "", default_value::value<std::string>());
+            item.add_attribute("value", pair.second ? pair.second->name : "", default_value::value<std::string>());            
         }
     }
 
@@ -1160,7 +1163,7 @@ public:
                 continue;
             }
             SerializerXml item = child.add_child("pair");
-            item.add_attribute("key", pair.first->name, default_value::value<std::string>());
+            item.add_attribute("key", pair.first ? pair.first->name : "", default_value::value<std::string>());
             item.serialize(pair.second, "value");            
         }
     }
@@ -1210,7 +1213,7 @@ public:
             }
             SerializerXml item = child.add_child("pair");
             item.serialize(pair.first, "key");
-            item.add_attribute("value", pair.second->name, default_value::value<std::string>());
+            item.add_attribute("value", pair.second ? pair.second->name : "", default_value::value<std::string>());
         }
     }
 
@@ -1332,8 +1335,8 @@ public:
             if(object)
             {
                 object->deserialize_xml(item);
-                values.push_back(object);
             }
+            values.push_back(object);
         }
     }
 
@@ -1873,7 +1876,7 @@ public:
         SerializerJson child = key.empty() ? *this : add_array(key);
         for (const T &value : values)
         {
-            child.add_array_item(value->name);
+            child.add_array_item(value ? value->name : "");
         }
     }
 

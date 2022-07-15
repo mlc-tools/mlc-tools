@@ -30,7 +30,6 @@ def serialize_command_to_xml(command):
     root = ET.Element(command.get_type())
     serializer = SerializerXml(root)
     command.serialize_xml(serializer)
-    print(ET.tostring(root))
     return ET.tostring(root)
 
 

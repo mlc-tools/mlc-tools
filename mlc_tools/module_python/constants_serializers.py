@@ -27,6 +27,8 @@ class DataWrapper(object):
 
     def __getattribute__(self, name):
         try:
+            if name in ['is_valid']:
+                return object.__getattribute__(self, name)
             return object.__getattribute__(self, 'instance').__getattribute__(name)
         except AttributeError as e:
             return None
@@ -43,6 +45,9 @@ class DataWrapper(object):
 
     def __hash__(self):
         return hash(self.name)
+
+    def is_valid(self):
+        return object.__getattribute__(self, 'instance') is not None
 """
 
 INTRUSIVE = """# -*- coding: utf-8 -*-
@@ -57,6 +62,8 @@ class IntrusivePtr(object):
         object.__setattr__(object.__getattribute__(self, 'instance'), name, value)
 
     def __getattribute__(self, name):
+        if name in ['is_valid']:
+            return object.__getattribute__(self, name)
         return object.__getattribute__(self, 'instance').__getattribute__(name)
 
     def __eq__(self, rhs):
@@ -68,6 +75,9 @@ class IntrusivePtr(object):
 
     def __hash__(self):
         return id(object.__getattribute__(self, 'instance'))
+
+    def is_valid(self):
+        return object.__getattribute__(self, 'instance') is not None
 
 
 def make_intrusive(class_name, *args):
@@ -137,7 +147,8 @@ class SerializerXml(object):
             self.serialize_attr(obj.name, 'value', '')
         elif isinstance(obj, IntrusivePtr):
             self.node.tag = obj.get_type()
-            obj.serialize_xml(self)
+            if obj.is_valid():
+                obj.serialize_xml(self)
         elif hasattr(obj, 'serialize_xml'):
             self.serialize(obj, '')
         elif isinstance(obj, list):
@@ -256,7 +267,8 @@ class DeserializerXml(object):
                 return getattr(DataStorage.shared(), 'get' + meta.args[1].TYPE)(value)
             if meta.args[0] == IntrusivePtr:
                 obj = Factory.build(self.node.tag)
-                obj.deserialize_xml(self)
+                if obj and obj.is_valid():
+                    obj.deserialize_xml(self)
                 return obj
         else:
             return self.deserialize_attr('value', meta, None)
@@ -331,8 +343,9 @@ class SerializerJson(object):
             self.json[-1] = obj.name
         elif isinstance(obj, IntrusivePtr):
             self.json[-1] = {}
-            self.json[-1]['type'] = obj.get_type()
-            obj.serialize_xml(SerializerJson(self.json[-1]))
+            self.json[-1]['type'] = obj.get_type() if obj.is_valid() else ''
+            if obj.is_valid():
+                obj.serialize_json(SerializerJson(self.json[-1]))
             pass
         elif hasattr(obj, 'serialize_json'):
             self.json[-1] = {}

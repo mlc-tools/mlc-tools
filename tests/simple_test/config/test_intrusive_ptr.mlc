@@ -22,14 +22,16 @@ class TestIntrusive<ITestIntrusive>:cpp:py
         auto c = new Intrusive();
 
         list_push(this->pointers, a);
+        list_push(this->pointers, nullptr);
         b->add_self_to_list(this->pointers);
         c->add_self_to_list(this->pointers);
-        this->assertEqual(list_size(this->pointers), 3);
+        this->assertEqual(list_size(this->pointers), 4, "list size == 4");
 
         c->remove_self_from_list(this->pointers);
         list_remove(this->pointers, a);
+        list_remove(this->pointers, nullptr);
 
-        this->assertEqual(list_size(this->pointers), 1);
+        this->assertEqual(list_size(this->pointers), 1, "list size == 1");
     }
     function void test_remove_self_from_list(){}
 }

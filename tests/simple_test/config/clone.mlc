@@ -11,6 +11,9 @@ class clone/CloneObject2<CloneObject>
 {
     CloneObject* ptr
 
+	list<CloneObject*> list1
+	list<DataUnit:link> list2
+
     function void foo()
     {
     }
@@ -36,5 +39,26 @@ class clone/TestCloneObject<ITestCloneObject>:test
         auto object_b = clone_object(object_a);
         this->assertEqual(object_a->t, object_b->t);
         this->assertEqual(object_a->ptr->t, object_b->ptr->t);
+    }
+
+
+    function void test_copy_list_with_null():cpp:py
+    {
+        auto obj1 = new CloneObject2();
+        list_push(obj1->list1, new CloneObject2());
+        list_push(obj1->list1, nullptr);
+        list_push(obj1->list1, new CloneObject2());
+        auto obj2 = clone_object(obj1);
+        this->assertEqual(list_size(obj2->list1), 3);
+    }
+
+    function void test_copy_list_with_null2():cpp:py
+    {
+        auto obj1 = new CloneObject2();
+        list_push(obj1->list2, DataStorage::shared().get<DataUnit>("unitname1"));
+        list_push(obj1->list2, nullptr);
+        list_push(obj1->list2, DataStorage::shared().get<DataUnit>("unitname1"));
+        auto obj2 = clone_object(obj1);
+        this->assertEqual(list_size(obj2->list2), 3);
     }
 }
