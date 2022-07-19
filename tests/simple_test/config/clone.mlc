@@ -19,6 +19,11 @@ class clone/CloneObject2<CloneObject>
 	map<DataUnit:link, CloneObject*>:cpp:py map3
 	map<DataUnit:link, DataUnit:link>:cpp:py map4
 
+	map<CloneObject*, int>:cpp:py map5
+	map<int, CloneObject*>:cpp:py map6
+	map<DataUnit:link, int>:cpp:py map7
+	map<int, DataUnit:link>:cpp:py map8
+
     function void foo()
     {
     }
@@ -102,5 +107,40 @@ class clone/TestCloneObject<ITestCloneObject>:test
         this->assertTrue(map_size(obj2->map4) == 1)
         //this->assertTrue(in_map(nullptr, obj2->map4));
         //this->assertTrue(obj2->map4.at(nullptr) == nullptr);
+    }
+
+    function void test_copy_map5():cpp:py
+    {
+        auto obj1 = new CloneObject2();
+        obj1->map5[nullptr] = 1;
+        auto obj2 = clone_object(obj1);
+        this->assertTrue(map_size(obj2->map5) == 1);
+        this->assertTrue(obj2->map5.at(nullptr) == 1);
+    }
+
+    function void test_copy_map6():cpp:py
+    {
+        auto obj1 = new CloneObject2();
+        obj1->map6[1] = nullptr;
+        auto obj2 = clone_object(obj1);
+        this->assertTrue(map_size(obj2->map6) == 1);
+        this->assertTrue(obj2->map6.at(1) == nullptr);
+    }
+
+    function void test_copy_map7():cpp:py
+    {
+        auto obj1 = new CloneObject2();
+        obj1->map7[nullptr] = 1;
+        auto obj2 = clone_object(obj1);
+        this->assertTrue(map_size(obj2->map7) == 1);
+        this->assertTrue(obj2->map7.at(nullptr) == 1);
+    }
+
+    function void test_copy_map8():cpp:py
+    {
+        auto obj1 = new CloneObject2();
+        obj1->map8[1] = nullptr;
+        auto obj2 = clone_object(obj1);
+        this->assertTrue(map_size(obj2->map8) == 1);
     }
 }
