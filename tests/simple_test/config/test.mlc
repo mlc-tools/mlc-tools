@@ -253,17 +253,10 @@ class FunctionTest
     function bool test_for(Logger* logger):static
     {
         auto result = true;
-        auto units = DataStorage::shared().units;
+        auto units = DataStorage::shared().get_units_keys();
         int index = 0;
-        int count = map_size(units);
+        int count = list_size(units);
         for(auto& pair : units)
-        {
-            ++index;
-        }
-        result = result && index == count;
-
-        index = 0;
-        for(auto&& [name, unit] : units)
         {
             ++index;
         }

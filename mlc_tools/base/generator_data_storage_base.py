@@ -85,9 +85,11 @@ class GeneratorDataStorageBase(Class):
                 obj.name = get_data_list_name(get_data_name(class_.name))
                 obj.template_args.append(Objects.STRING)
                 obj.template_args.append(class_.name)
-                obj.access = AccessSpecifier.public
+                obj.access = AccessSpecifier.private
                 self.members.append(obj)
                 self.data_members[class_.name] = obj
+
+                self.create_keys_getter(obj.name)
 
         loaded = Object()
         loaded.is_runtime = True
@@ -170,3 +172,18 @@ class GeneratorDataStorageBase(Class):
 
     def get_pattern_getter(self):
         return ''
+
+    def create_keys_getter(self, map_name):
+        method = Function()
+        method.name = f'get_{map_name}_keys'
+        method.is_const = True
+        method.return_type = Parser.create_object('list<string>')
+        method.operations.append(f'''
+        list<std::string> result;
+        for(auto&& [key, _] : this->{map_name})
+        {{
+            list_push(result, key);   
+        }}
+        return result;
+        ''')
+        self.functions.append(method)

@@ -56,12 +56,11 @@ class data/DataUnit:storage
 	function bool test_1(Logger* logger):static
 	{
 	    auto result = true;
-	    auto units = DataStorage::shared().units;
-        for (auto&& [name, unit] : units)
+	    auto units = DataStorage::shared().get_units_keys();
+        for (auto& name : units)
         {
-            auto pUnit = DataStorage::shared().get<DataUnit>(name);
-            result = result && pUnit == &unit;
-            result = result && name == unit.name;
+            auto unit = DataStorage::shared().get<DataUnit>(name);
+            result = result && name == unit->name;
         }
         return result;
 	}
@@ -70,8 +69,8 @@ class data/DataUnit:storage
 	{
         bool result = true;
 
-        auto units_map = DataStorage::shared().units;
-        result = (2 == map_size(units_map)) && result;
+        auto units = DataStorage::shared().get_units_keys();
+        result = (2 == list_size(units)) && result;
 
         auto unit1 = DataStorage::shared().get<DataUnit>("unitname1");
         auto unit2 = DataStorage::shared().get<DataUnit>("unitname2");
@@ -203,8 +202,8 @@ class TestDataAdd<ITestDataAdd>:test
     function void test_test()
     {
         DataStorage::shared().get<DataAdd>("add_data");
-        auto& mapdata = DataStorage::shared().adds;
-        this->assertTrue(in_map("add_data", mapdata), "Additional data in DataStorage");
+        auto keys = DataStorage::shared().get_adds_keys();
+        this->assertTrue(in_list("add_data", keys), "Additional data in DataStorage");
     }
 }
 
