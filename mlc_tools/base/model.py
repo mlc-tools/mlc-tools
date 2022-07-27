@@ -52,7 +52,7 @@ class Model(object):
         self.auto_registration = True
         self.generate_ref_counter = False
 
-        self.simple_types = ["int", "float", "bool", "string", 'int64_t', 'uint', 'uint64_t']
+        self.simple_types = ["int", "float", "bool", "string", 'int64_t', 'uint', 'uint64_t', 'double']
 
         self.out_dict = None
         self.files = []

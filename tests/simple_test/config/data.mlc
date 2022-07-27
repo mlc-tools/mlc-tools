@@ -28,6 +28,10 @@ class data/DataUnit:storage
 	EnumWithIntValue enum_with_int_value
 	int64_t int64_value = 0
 	int64_t int64_value_without_default_value
+	double double_value = 0
+	double double_value_without_default_value
+	float float_value = 0
+	float float_value_without_default_value
 	SkillBase* skill
 
 	int convert_float_to_int = 0

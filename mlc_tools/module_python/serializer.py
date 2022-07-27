@@ -132,6 +132,7 @@ class Serializer(SerializerBase):
             'int64_t': 'int',
             'uint64_t': 'int',
             'float': 'float',
+            'double': 'float',
             'bool': 'bool',
         }
         if obj.is_link:

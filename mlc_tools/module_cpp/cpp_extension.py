@@ -844,6 +844,7 @@ public:
     void add_attribute(const std::string& key, const int64_t& value, int64_t default_value=0);
     void add_attribute(const std::string& key, const bool& value, bool default_value=false);
     void add_attribute(const std::string& key, const float& value, float default_value=0.f);
+    void add_attribute(const std::string& key, const double& value, double default_value=0.f);
     void add_attribute(const std::string& key, const std::string& value, const std::string& default_value);
 
     template <class T>
@@ -1226,6 +1227,7 @@ public:
     int64_t get_attribute(const std::string& key, int64_t default_value=0);
     bool get_attribute(const std::string& key, bool default_value=false);
     float get_attribute(const std::string& key, float default_value=0.f);
+    double get_attribute(const std::string& key, double default_value=0.f);
     std::string get_attribute(const std::string& key, const std::string& default_value);
 
     DeserializerXml begin();
@@ -1623,6 +1625,14 @@ void SerializerXml::add_attribute(const std::string &key, const float &value, fl
     }
 }
 
+void SerializerXml::add_attribute(const std::string &key, const double &value, double default_value)
+{
+    if (value != default_value)
+    {
+        _node->append_attribute(key.c_str()).set_value(value);
+    }
+}
+
 void SerializerXml::add_attribute(const std::string &key, const std::string &value, const std::string &default_value)
 {
     if (value != default_value)
@@ -1683,6 +1693,11 @@ bool DeserializerXml::get_attribute(const std::string &key, bool default_value)
 float DeserializerXml::get_attribute(const std::string &key, float default_value)
 {
     return _node->attribute(key.c_str()).as_float(default_value);
+}
+
+double DeserializerXml::get_attribute(const std::string &key, double default_value)
+{
+    return _node->attribute(key.c_str()).as_double(default_value);
 }
 
 std::string DeserializerXml::get_attribute(const std::string &key, const std::string &default_value)
@@ -1756,6 +1771,7 @@ public:
     void add_attribute(const std::string &key, const int64_t &value, int64_t default_value = 0);
     void add_attribute(const std::string &key, const bool &value, bool default_value = false);
     void add_attribute(const std::string &key, const float &value, float default_value = 0.f);
+    void add_attribute(const std::string &key, const double &value, double default_value = 0.f);
     void add_attribute(const std::string &key, const std::string &value, const std::string &default_value);
 
     void add_array_item(const int &value);
@@ -2137,6 +2153,7 @@ public:
     int64_t get_attribute(const std::string &key, int64_t default_value = 0);
     bool get_attribute(const std::string &key, bool default_value = false);
     float get_attribute(const std::string &key, float default_value = 0.f);
+    double get_attribute(const std::string &key, double default_value = 0.f);
     std::string get_attribute(const std::string &key, const std::string &default_value);
 
     void get_array_item(int &value);
@@ -2527,6 +2544,14 @@ void SerializerJson::add_attribute(const std::string &key, const float &value, f
     }
 }
 
+void SerializerJson::add_attribute(const std::string &key, const double &value, double default_value)
+{
+    if (value != default_value)
+    {
+        _json[key] = value;
+    }
+}
+
 void SerializerJson::add_attribute(const std::string &key, const std::string &value, const std::string &default_value)
 {
     if (value != default_value)
@@ -2596,6 +2621,11 @@ bool DeserializerJson::get_attribute(const std::string &key, bool default_value)
 }
 
 float DeserializerJson::get_attribute(const std::string &key, float default_value)
+{
+    return _json.isMember(key) ? _json[key].asFloat() : default_value;
+}
+
+double DeserializerJson::get_attribute(const std::string &key, double default_value)
 {
     return _json.isMember(key) ? _json[key].asFloat() : default_value;
 }
@@ -2685,6 +2715,7 @@ struct is_attribute
                                    std::is_same<uint64_t, T>::value ||
                                    std::is_same<bool, T>::value ||
                                    std::is_same<float, T>::value ||
+                                   std::is_same<double, T>::value ||
                                    std::is_same<std::string, T>::value) &&
                                   !std::is_base_of<BaseEnum, T>::value;
 
@@ -2782,6 +2813,10 @@ struct default_value
     template<class T>
     static typename std::enable_if<std::is_same<float, T>::value, float>::type
     value() { return 0.f; }
+
+    template<class T>
+    static typename std::enable_if<std::is_same<double, T>::value, double>::type
+    value() { return 0.0; }
 
     template<class T>
     static typename std::enable_if<std::is_same<std::string, T>::value, std::string>::type

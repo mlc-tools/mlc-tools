@@ -353,8 +353,12 @@ class Parser(object):
         pattern = []
         if type_object in ['int64_t', 'uint', 'uint64_t']:
             type_object = 'int'
+        if type_object in ['double']:
+            type_object = 'float'
         if type_object in ['list<int64_t>', 'list<uint>', 'list<uint64_t>']:
             type_object = 'list<int>'
+        if type_object in ['list<double>']:
+            type_object = 'list<float>'
         for original_line in lines:
             if original_line.endswith('\n'):
                 original_line = original_line[0:-1]

@@ -118,7 +118,7 @@ class Object(object):
         if self.initial_value is None:
             if self.type in ['int', 'int64_t', 'uint', 'uint64_t']:
                 self.initial_value = "0"
-            elif self.type == 'float':
+            elif self.type in ['float', 'double']:
                 self.initial_value = "0.0"
             elif self.type == 'bool':
                 self.initial_value = "false"
