@@ -29,7 +29,7 @@ class RegexPatternCpp(object):
         # FROM:
         #   list_remove_if(this->test_list_lambda, (value :> value == 3));
         (re.compile(r'list_remove_if\(([\w\d\-\>\[\]]+),\s*\((\w+)\s*:>\s*(.+)\)\)'), r'''
-auto iter = std::remove_if(\1.begin(), \1.end(), [](const auto& value){return \3;});
+auto iter = std::remove_if(\1.begin(), \1.end(), [](const auto& \2){return \3;});
 \1.erase(iter, \1.end());
 ''', ['list_remove_if']),
 

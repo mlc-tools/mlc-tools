@@ -69,7 +69,7 @@ class TestTranslates<ITestTranslates>
         list_clear(this->test_list_lambda);
         list_push(this->test_list_lambda, 3);
         list_push(this->test_list_lambda, 4);
-        list_remove_if(this->test_list_lambda, (value :> value == 3));
+        list_remove_if(this->test_list_lambda, (val :> val == 3));
 
         this->assertEqual(list_size(this->test_list_lambda), 1);
         this->assertEqual(this->test_list_lambda[0], 4);
