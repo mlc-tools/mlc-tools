@@ -4,6 +4,7 @@ import collections
 import os
 import sys
 import subprocess
+from inspect import getmembers
 
 from .base.circular_reference import CircularReference
 from .utils.error import Log, Error
@@ -90,7 +91,7 @@ class Mlc(object):
             result_files = []
             for path in files:
                 if path.endswith('.mlc'):
-                    if isinstance(self.model.filter_code, collections.Callable) and not self.model.filter_code(path):
+                    if isinstance(self.model.filter_code, collections.abc.Callable) and not self.model.filter_code(path):
                         continue
                     result_files.append(path)
             return result_files
