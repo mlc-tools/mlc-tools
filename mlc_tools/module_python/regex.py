@@ -141,6 +141,7 @@ class RegexPatternPython(object):
          r'try:\n{\n\1\n}\nexcept BaseException as \4:\n{\n\5\n}\n', ['try']),
         (re.compile(r'throw Exception\((.*?)\)'), r'raise BaseException()', ['throw']),
         (re.compile(r'throw make_intrusive\(Exception\)'), r'raise BaseException()', ['throw']),
+        (re.compile(r'swap\((.+)\s*,\s*(.+)\)'), r'\1, \2 = \2, \1', ['swap']),
     )
 
     PEP8 = (

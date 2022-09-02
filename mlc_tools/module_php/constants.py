@@ -80,5 +80,10 @@ function clone_object($obj)
 COMMON = '''<?php
 @{xml}
 @{json}
+
+function swap(&$x, &$y) {
+    list($x,$y) = array($y, $x);
+}
+
 ?>
 '''

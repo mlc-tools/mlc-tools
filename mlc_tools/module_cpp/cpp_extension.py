@@ -110,6 +110,13 @@ namespace @{namespace}
 
     float random_float();
     int random_int(int min, int max);
+    
+    template <class T>
+    void swap(T& a, T& b)
+    {
+        std::swap(a, b);
+    }
+    
 
     // Converters
     template <typename T> T strTo(const std::string &value);

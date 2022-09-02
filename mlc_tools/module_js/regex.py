@@ -114,6 +114,7 @@ class RegexPatternJs(object):
         # # Exception with try/catch block (one catch)
         # (re.compile(r'try\n\s*{([\s\S.]+?)}\n\s*catch__((\w+)__(\w*))\n\s+{([\s\S.]+?)}'),
         #  r'try\n{\1}\ncatch(\3 $\4)\n{\5}', ['try'])
+        (re.compile(r'swap\((.+)\s*,\s*(.+)\)'), r'[\1, \2] = [\2, \1];', ['swap']),
     )
 
     INITIALIZE = (re.compile(r'(\w+)::(\w+)'), r'\1::\2')

@@ -26,6 +26,8 @@ class TestTranslates<ITestTranslates>
     }
     map<string, Model*> test_map_models
     list<int> test_list_lambda
+    list<int> test_list_swap1
+    list<int> test_list_swap2
 
     function void test_map_remove_if():cpp:py
     {
@@ -377,6 +379,32 @@ class TestTranslates<ITestTranslates>
         this->assertEqual(std::min<float>(1, 2), 1.f);
         this->assertEqual(std::max<float>(1, 2), 2.f);
     }
+
+    function void test_swap()
+    {
+        list_push(this->test_list_swap1, 1);
+        list_push(this->test_list_swap1, 2);
+        list_push(this->test_list_swap2, 3);
+        swap(this->test_list_swap1, this->test_list_swap2);
+        this->assertEqual(list_size(this->test_list_swap1), 1);
+        this->assertEqual(list_size(this->test_list_swap2), 2);
+        this->assertEqual(this->test_list_swap1[0], 3);
+        this->assertEqual(this->test_list_swap2[0], 1);
+        this->assertEqual(this->test_list_swap2[1], 2);
+
+        int a = 1;
+        int b = 2;
+        swap(a, b);
+        this->assertEqual(a, 2);
+        this->assertEqual(b, 1);
+
+        std::string sa = "1";
+        std::string sb = "2";
+        swap(sa, sb);
+        this->assertTrue(sa == "2");
+        this->assertTrue(sb == "1");
+    }
+
 }
 
 class NullishOperator
