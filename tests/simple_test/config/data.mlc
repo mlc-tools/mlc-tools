@@ -60,11 +60,10 @@ class data/DataUnit:storage
 	function bool test_1(Logger* logger):static
 	{
 	    auto result = true;
-	    auto units = DataStorage::shared().get_units_keys();
-        for (auto& name : units)
+	    auto units = DataStorage::shared().get_units();
+        for (auto&& [name, unit] : units)
         {
-            auto unit = DataStorage::shared().get<DataUnit>(name);
-            result = result && name == unit->name;
+            result = result && name == unit.name;
         }
         return result;
 	}

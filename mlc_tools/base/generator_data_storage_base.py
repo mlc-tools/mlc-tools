@@ -105,6 +105,7 @@ class GeneratorDataStorageBase(Class):
         if model.serialize_formats & SerializeFormat.json:
             self.add_initialize_function_json()
         self.create_getters(model.classes)
+        self.create_getters_maps(model.classes)
         model.add_class(self)
 
     def add_initialize_function_xml(self):
@@ -187,3 +188,16 @@ class GeneratorDataStorageBase(Class):
         return result;
         ''')
         self.functions.append(method)
+
+    def create_getters_maps(self, classes):
+        for class_ in classes:
+            if class_.is_storage and class_.side in [self.model.side, 'both']:
+                method = Function()
+                map_name = get_data_list_name(get_data_name(class_.name))
+                method.name = f'get_{map_name}'
+                method.is_const = True
+                method.return_type = Parser.create_object(f'map<string, {class_.name}>:const:ref')
+                method.operations.append(f'''
+                return this->{map_name};
+                ''')
+                self.functions.append(method)
