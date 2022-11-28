@@ -81,7 +81,7 @@ COMMON = '''<?php
 @{xml}
 @{json}
 
-function swap(&$x, &$y) {
+function mg_swap(&$x, &$y) {
     list($x,$y) = array($y, $x);
 }
 

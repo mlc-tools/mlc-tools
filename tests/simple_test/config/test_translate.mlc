@@ -385,7 +385,7 @@ class TestTranslates<ITestTranslates>
         list_push(this->test_list_swap1, 1);
         list_push(this->test_list_swap1, 2);
         list_push(this->test_list_swap2, 3);
-        swap(this->test_list_swap1, this->test_list_swap2);
+        mg_swap(this->test_list_swap1, this->test_list_swap2);
         this->assertEqual(list_size(this->test_list_swap1), 1);
         this->assertEqual(list_size(this->test_list_swap2), 2);
         this->assertEqual(this->test_list_swap1[0], 3);
@@ -394,13 +394,13 @@ class TestTranslates<ITestTranslates>
 
         int a = 1;
         int b = 2;
-        swap(a, b);
+        mg_swap(a, b);
         this->assertEqual(a, 2);
         this->assertEqual(b, 1);
 
         std::string sa = "1";
         std::string sb = "2";
-        swap(sa, sb);
+        mg_swap(sa, sb);
         this->assertTrue(sa == "2");
         this->assertTrue(sb == "1");
     }

@@ -112,7 +112,7 @@ namespace @{namespace}
     int random_int(int min, int max);
     
     template <class T>
-    void swap(T& a, T& b)
+    void mg_swap(T& a, T& b)
     {
         std::swap(a, b);
     }
