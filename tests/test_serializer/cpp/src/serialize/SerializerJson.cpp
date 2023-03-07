@@ -63,6 +63,14 @@ void SerializerJson::add_attribute(const std::string &key, const float &value, f
     }
 }
 
+void SerializerJson::add_attribute(const std::string &key, const double &value, double default_value)
+{
+    if (value != default_value)
+    {
+        _json[key] = value;
+    }
+}
+
 void SerializerJson::add_attribute(const std::string &key, const std::string &value, const std::string &default_value)
 {
     if (value != default_value)
@@ -132,6 +140,11 @@ bool DeserializerJson::get_attribute(const std::string &key, bool default_value)
 }
 
 float DeserializerJson::get_attribute(const std::string &key, float default_value)
+{
+    return _json.isMember(key) ? _json[key].asFloat() : default_value;
+}
+
+double DeserializerJson::get_attribute(const std::string &key, double default_value)
 {
     return _json.isMember(key) ? _json[key].asFloat() : default_value;
 }

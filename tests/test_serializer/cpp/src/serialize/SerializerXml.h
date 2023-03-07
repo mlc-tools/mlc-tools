@@ -33,6 +33,7 @@ public:
     void add_attribute(const std::string& key, const int64_t& value, int64_t default_value=0);
     void add_attribute(const std::string& key, const bool& value, bool default_value=false);
     void add_attribute(const std::string& key, const float& value, float default_value=0.f);
+    void add_attribute(const std::string& key, const double& value, double default_value=0.f);
     void add_attribute(const std::string& key, const std::string& value, const std::string& default_value);
 
     template <class T>
@@ -92,7 +93,7 @@ public:
             item.serialize(value, "value", default_value::value<T>());
         }
     }
-    
+
     template <class T>
     typename std::enable_if<is_attribute<T>::value && std::is_same<T, bool>::value, void>::type
     serialize(const std::vector<T>& values, const std::string& key)
@@ -116,8 +117,11 @@ public:
         SerializerXml child = key.empty() ? *this : add_child(key);
         for (const intrusive_ptr<T>& value : values)
         {
-            SerializerXml item = child.add_child(value->get_type());
-            value->serialize_xml(item);
+            SerializerXml item = child.add_child(value ? value->get_type() : "");
+            if(value)
+            {
+                value->serialize_xml(item);
+            }
         }
     }
 
@@ -161,7 +165,7 @@ public:
         {
             SerializerXml item = child.add_child("pair");
             item.add_attribute("key", pair.first, default_value::value<Key>());
-            item.add_attribute("value", pair.second, default_value::value<Value>());            
+            item.add_attribute("value", pair.second, default_value::value<Value>());
         }
     }
 
@@ -176,7 +180,7 @@ public:
         {
             SerializerXml item = child.add_child("pair");
             item.add_attribute("key", pair.first, default_value::value<Key>());
-            item.add_attribute("value", pair.second.str(), default_value::value<std::string>());            
+            item.add_attribute("value", pair.second.str(), default_value::value<std::string>());
         }
     }
 
@@ -191,7 +195,7 @@ public:
         {
             SerializerXml item = child.add_child("pair");
             item.add_attribute("key", pair.first, default_value::value<Key>());
-            item.add_attribute("value", pair.second->name, default_value::value<std::string>());            
+            item.add_attribute("value", pair.second ? pair.second->name : "", default_value::value<std::string>());
         }
     }
 
@@ -206,7 +210,7 @@ public:
         {
             SerializerXml item = child.add_child("pair");
             item.add_attribute("key", pair.first, default_value::value<Key>());
-            item.serialize(pair.second, "value");            
+            item.serialize(pair.second, "value");
         }
     }
 
@@ -221,7 +225,7 @@ public:
         {
             SerializerXml item = child.add_child("pair");
             item.add_attribute("key", pair.first.str(), default_value::value<std::string>());
-            item.add_attribute("value", pair.second, default_value::value<Value>());            
+            item.add_attribute("value", pair.second, default_value::value<Value>());
         }
     }
 
@@ -236,7 +240,7 @@ public:
         {
             SerializerXml item = child.add_child("pair");
             item.add_attribute("key", pair.first.str(), default_value::value<std::string>());
-            item.add_attribute("value", pair.second.str(), default_value::value<std::string>());            
+            item.add_attribute("value", pair.second.str(), default_value::value<std::string>());
         }
     }
 
@@ -251,7 +255,7 @@ public:
         {
             SerializerXml item = child.add_child("pair");
             item.add_attribute("key", pair.first.str(), default_value::value<std::string>());
-            item.add_attribute("value", pair.second->name, default_value::value<std::string>());            
+            item.add_attribute("value", pair.second ? pair.second->name : "", default_value::value<std::string>());
         }
     }
 
@@ -266,7 +270,7 @@ public:
         {
             SerializerXml item = child.add_child("pair");
             item.add_attribute("key", pair.first.str(), default_value::value<std::string>());
-            item.serialize(pair.second, "value");            
+            item.serialize(pair.second, "value");
         }
     }
 
@@ -280,8 +284,8 @@ public:
         for (auto& pair : values)
         {
             SerializerXml item = child.add_child("pair");
-            item.add_attribute("key", pair.first->name, default_value::value<std::string>());
-            item.add_attribute("value", pair.second, default_value::value<Value>());            
+            item.add_attribute("key", pair.first ? pair.first->name : "", default_value::value<std::string>());
+            item.add_attribute("value", pair.second, default_value::value<Value>());
         }
     }
 
@@ -295,8 +299,8 @@ public:
         for (auto& pair : values)
         {
             SerializerXml item = child.add_child("pair");
-            item.add_attribute("key", pair.first->name, default_value::value<std::string>());
-            item.add_attribute("value", pair.second.str(), default_value::value<std::string>());            
+            item.add_attribute("key", pair.first ? pair.first->name : "", default_value::value<std::string>());
+            item.add_attribute("value", pair.second.str(), default_value::value<std::string>());
         }
     }
 
@@ -310,8 +314,8 @@ public:
         for (auto& pair : values)
         {
             SerializerXml item = child.add_child("pair");
-            item.add_attribute("key", pair.first->name, default_value::value<std::string>());
-            item.add_attribute("value", pair.second->name, default_value::value<std::string>());            
+            item.add_attribute("key", pair.first ? pair.first->name : "", default_value::value<std::string>());
+            item.add_attribute("value", pair.second ? pair.second->name : "", default_value::value<std::string>());
         }
     }
 
@@ -325,8 +329,8 @@ public:
         for (auto& pair : values)
         {
             SerializerXml item = child.add_child("pair");
-            item.add_attribute("key", pair.first->name, default_value::value<std::string>());
-            item.serialize(pair.second, "value");            
+            item.add_attribute("key", pair.first ? pair.first->name : "", default_value::value<std::string>());
+            item.serialize(pair.second, "value");
         }
     }
 
@@ -341,7 +345,7 @@ public:
         {
             SerializerXml item = child.add_child("pair");
             item.serialize(pair.first, "key");
-            item.add_attribute("value", pair.second, default_value::value<Value>());            
+            item.add_attribute("value", pair.second, default_value::value<Value>());
         }
     }
 
@@ -356,7 +360,7 @@ public:
         {
             SerializerXml item = child.add_child("pair");
             item.serialize(pair.first, "key");
-            item.add_attribute("value", pair.second.str(), default_value::value<std::string>());            
+            item.add_attribute("value", pair.second.str(), default_value::value<std::string>());
         }
     }
 
@@ -371,7 +375,7 @@ public:
         {
             SerializerXml item = child.add_child("pair");
             item.serialize(pair.first, "key");
-            item.add_attribute("value", pair.second->name, default_value::value<std::string>());            
+            item.add_attribute("value", pair.second ? pair.second->name : "", default_value::value<std::string>());
         }
     }
 
@@ -386,7 +390,7 @@ public:
         {
             SerializerXml item = child.add_child("pair");
             item.serialize(pair.first, "key");
-            item.serialize(pair.second, "value");            
+            item.serialize(pair.second, "value");
         }
     }
 /* Maps serialization finish */
@@ -412,6 +416,7 @@ public:
     int64_t get_attribute(const std::string& key, int64_t default_value=0);
     bool get_attribute(const std::string& key, bool default_value=false);
     float get_attribute(const std::string& key, float default_value=0.f);
+    double get_attribute(const std::string& key, double default_value=0.f);
     std::string get_attribute(const std::string& key, const std::string& default_value);
 
     DeserializerXml begin();
@@ -452,7 +457,10 @@ public:
         if(!type.empty())
         {
             value = Factory::shared().build<T>(type);
-            value->deserialize_xml(child);
+            if(value)
+            {
+                value->deserialize_xml(child);
+            }
         }
     }
 
@@ -487,7 +495,10 @@ public:
         {
             std::string type = item.get_name();
             intrusive_ptr<T> object = Factory::shared().build<T>(type);
-            object->deserialize_xml(item);
+            if(object)
+            {
+                object->deserialize_xml(item);
+            }
             values.push_back(object);
         }
     }
@@ -527,7 +538,7 @@ public:
         {
             Key key_ = item.get_attribute("key", default_value::value<Key>());
             Value value_ = item.get_attribute("value", default_value::value<Value>());
-            map[key_] = value_;            
+            map[key_] = value_;
         }
     }
 
@@ -540,7 +551,7 @@ public:
         {
             Key key_ = item.get_attribute("key", default_value::value<Key>());
             Value value_; item.deserialize(value_, "value");
-            map[key_] = value_;            
+            map[key_] = value_;
         }
     }
 
@@ -553,7 +564,7 @@ public:
         {
             Key key_ = item.get_attribute("key", default_value::value<Key>());
             Value value_ = DataStorage::shared().get<typename data_type<Value>::type>(item.get_attribute("value", default_value::value<std::string>()));
-            map[key_] = value_;            
+            map[key_] = value_;
         }
     }
 
@@ -566,7 +577,7 @@ public:
         {
             Key key_ = item.get_attribute("key", default_value::value<Key>());
             Value value_; item.deserialize(value_, "value");
-            map[key_] = value_;            
+            map[key_] = value_;
         }
     }
 
@@ -579,7 +590,7 @@ public:
         {
             Key key_; item.deserialize(key_, "key");
             Value value_ = item.get_attribute("value", default_value::value<Value>());
-            map[key_] = value_;            
+            map[key_] = value_;
         }
     }
 
@@ -592,7 +603,7 @@ public:
         {
             Key key_; item.deserialize(key_, "key");
             Value value_; item.deserialize(value_, "value");
-            map[key_] = value_;            
+            map[key_] = value_;
         }
     }
 
@@ -605,7 +616,7 @@ public:
         {
             Key key_; item.deserialize(key_, "key");
             Value value_ = DataStorage::shared().get<typename data_type<Value>::type>(item.get_attribute("value", default_value::value<std::string>()));
-            map[key_] = value_;            
+            map[key_] = value_;
         }
     }
 
@@ -618,7 +629,7 @@ public:
         {
             Key key_; item.deserialize(key_, "key");
             Value value_; item.deserialize(value_, "value");
-            map[key_] = value_;            
+            map[key_] = value_;
         }
     }
 
@@ -631,7 +642,7 @@ public:
         {
             Key key_ = DataStorage::shared().get<typename data_type<Key>::type>(item.get_attribute("key", default_value::value<std::string>()));
             Value value_ = item.get_attribute("value", default_value::value<Value>());
-            map[key_] = value_;            
+            map[key_] = value_;
         }
     }
 
@@ -644,7 +655,7 @@ public:
         {
             Key key_ = DataStorage::shared().get<typename data_type<Key>::type>(item.get_attribute("key", default_value::value<std::string>()));
             Value value_; item.deserialize(value_, "value");
-            map[key_] = value_;            
+            map[key_] = value_;
         }
     }
 
@@ -657,7 +668,7 @@ public:
         {
             Key key_ = DataStorage::shared().get<typename data_type<Key>::type>(item.get_attribute("key", default_value::value<std::string>()));
             Value value_ = DataStorage::shared().get<typename data_type<Value>::type>(item.get_attribute("value", default_value::value<std::string>()));
-            map[key_] = value_;            
+            map[key_] = value_;
         }
     }
 
@@ -670,7 +681,7 @@ public:
         {
             Key key_ = DataStorage::shared().get<typename data_type<Key>::type>(item.get_attribute("key", default_value::value<std::string>()));
             Value value_; item.deserialize(value_, "value");
-            map[key_] = value_;            
+            map[key_] = value_;
         }
     }
 
@@ -683,7 +694,7 @@ public:
         {
             Key key_; item.deserialize(key_, "key");
             Value value_ = item.get_attribute("value", default_value::value<Value>());
-            map[key_] = value_;            
+            map[key_] = value_;
         }
     }
 
@@ -696,7 +707,7 @@ public:
         {
             Key key_; item.deserialize(key_, "key");
             Value value_; item.deserialize(value_, "value");
-            map[key_] = value_;            
+            map[key_] = value_;
         }
     }
 
@@ -709,7 +720,7 @@ public:
         {
             Key key_; item.deserialize(key_, "key");
             Value value_ = DataStorage::shared().get<typename data_type<Value>::type>(item.get_attribute("value", default_value::value<std::string>()));
-            map[key_] = value_;            
+            map[key_] = value_;
         }
     }
 
@@ -722,7 +733,7 @@ public:
         {
             Key key_; item.deserialize(key_, "key");
             Value value_; item.deserialize(value_, "value");
-            map[key_] = value_;            
+            map[key_] = value_;
         }
     }
 /* Maps deserialization finish */

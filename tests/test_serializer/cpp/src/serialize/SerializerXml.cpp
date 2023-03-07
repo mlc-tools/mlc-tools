@@ -66,6 +66,14 @@ void SerializerXml::add_attribute(const std::string &key, const float &value, fl
     }
 }
 
+void SerializerXml::add_attribute(const std::string &key, const double &value, double default_value)
+{
+    if (value != default_value)
+    {
+        _node->append_attribute(key.c_str()).set_value(value);
+    }
+}
+
 void SerializerXml::add_attribute(const std::string &key, const std::string &value, const std::string &default_value)
 {
     if (value != default_value)
@@ -126,6 +134,11 @@ bool DeserializerXml::get_attribute(const std::string &key, bool default_value)
 float DeserializerXml::get_attribute(const std::string &key, float default_value)
 {
     return _node->attribute(key.c_str()).as_float(default_value);
+}
+
+double DeserializerXml::get_attribute(const std::string &key, double default_value)
+{
+    return _node->attribute(key.c_str()).as_double(default_value);
 }
 
 std::string DeserializerXml::get_attribute(const std::string &key, const std::string &default_value)

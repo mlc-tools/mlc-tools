@@ -155,13 +155,13 @@ types = [
 xml_key_serialize = {
     'is_attribute': 'item.add_attribute("key", pair.first, default_value::value<Key>());',
     'is_enum': 'item.add_attribute("key", pair.first.str(), default_value::value<std::string>());',
-    'is_data': 'item.add_attribute("key", pair.first->name, default_value::value<std::string>());',
+    'is_data': 'item.add_attribute("key", pair.first ? pair.first->name : "", default_value::value<std::string>());',
     'is_not_serialize_to_attribute': 'item.serialize(pair.first, "key");',
 }
 xml_value_serialize = {
     'is_attribute': 'item.add_attribute("value", pair.second, default_value::value<Value>());',
     'is_enum': 'item.add_attribute("value", pair.second.str(), default_value::value<std::string>());',
-    'is_data': 'item.add_attribute("value", pair.second->name, default_value::value<std::string>());',
+    'is_data': 'item.add_attribute("value", pair.second ? pair.second->name : "", default_value::value<std::string>());',
     'is_not_serialize_to_attribute': 'item.serialize(pair.second, "value");',
 }
 xml_key_deserialize = {
@@ -182,13 +182,13 @@ xml_value_deserialize = {
 json_key_serialize = {
     'is_attribute': 'item.add_attribute("key", pair.first, default_value::value<Key>());',
     'is_enum': 'item.add_attribute("key", pair.first.str(), default_value::value<std::string>());',
-    'is_data': 'item.add_attribute("key", pair.first->name, default_value::value<std::string>());',
+    'is_data': 'item.add_attribute("key", pair.first ? pair.first->name : "", default_value::value<std::string>());',
     'is_not_serialize_to_attribute': 'SerializerJson pair_key = item.add_child("key"); pair_key.serialize(pair.first);',
 }
 json_value_serialize = {
     'is_attribute': 'item.add_attribute("value", pair.second, default_value::value<Value>());',
     'is_enum': 'item.add_attribute("value", pair.second.str(), default_value::value<std::string>());',
-    'is_data': 'item.add_attribute("value", pair.second->name, default_value::value<std::string>());',
+    'is_data': 'item.add_attribute("value", pair.second ? pair.second->name : "", default_value::value<std::string>());',
     'is_not_serialize_to_attribute': 'SerializerJson pair_value = item.add_child("value"); pair_value.serialize(pair.second);',
 }
 json_key_deserialize = {
@@ -225,7 +225,7 @@ for type1 in types:
         {{
             SerializerXml item = child.add_child("pair");
             {key}
-            {value}            
+            {value}
         }}
     }}\n'''.format(type1=type1, type2=type2, key=key, value=value)
 
@@ -241,7 +241,7 @@ for type1 in types:
         {{
             {key}
             {value}
-            map[key_] = value_;            
+            map[key_] = value_;
         }}
     }}\n'''.format(type1=type1, type2=type2, key=key, value=value)
         xml_map_serialize += body_xml_serialize
@@ -261,7 +261,7 @@ for type1 in types:
         {{
             SerializerJson item = child.add_array_item();
             {key}
-            {value}            
+            {value}
         }}
     }}\n'''.format(type1=type1, type2=type2, key=key, value=value)
 
@@ -277,7 +277,7 @@ for type1 in types:
         {{
             {key}
             {value}
-            map[key_] = value_;            
+            map[key_] = value_;
         }}
     }}\n'''.format(type1=type1, type2=type2, key=key, value=value)
 

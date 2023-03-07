@@ -21,6 +21,7 @@ struct is_attribute
                                    std::is_same<uint64_t, T>::value ||
                                    std::is_same<bool, T>::value ||
                                    std::is_same<float, T>::value ||
+                                   std::is_same<double, T>::value ||
                                    std::is_same<std::string, T>::value) &&
                                   !std::is_base_of<BaseEnum, T>::value;
 
@@ -118,6 +119,10 @@ struct default_value
     template<class T>
     static typename std::enable_if<std::is_same<float, T>::value, float>::type
     value() { return 0.f; }
+
+    template<class T>
+    static typename std::enable_if<std::is_same<double, T>::value, double>::type
+    value() { return 0.0; }
 
     template<class T>
     static typename std::enable_if<std::is_same<std::string, T>::value, std::string>::type
