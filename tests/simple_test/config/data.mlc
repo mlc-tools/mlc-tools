@@ -15,6 +15,10 @@ class SkillFoo<SkillBase>
 {
     int foo = -1
 }
+class data/LadderLevels:storage
+{
+    string name
+}
 
 class data/DataUnit:storage
 {
