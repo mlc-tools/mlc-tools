@@ -25,6 +25,9 @@ def create_test_model(with_ctr=False):
     m.initial_value = '42'
     cls.members.append(m)
 
+    m = Parser.create_object('list<string>:static test_list')
+    cls.members.append(m)
+
     f = Function()
     f.name = 'foo'
     f.return_type = Object()
@@ -284,12 +287,14 @@ def get_cpp(with_ctr):
     return '''#include "intrusive_ptr.h"
 #include "mg_Factory.h"
 #include "Test.h"
+#include <string>
 #include "mg_extensions.h"
 #include "SerializerJson.h"
 #include "SerializerXml.h"
 
 namespace mg
 {
+    std::vector<std::string> Test::test_list;
     const std::string Test::TYPE("Test");
 
     REGISTRATION_OBJECT(Test);
@@ -356,6 +361,7 @@ def get_hpp():
 #include "intrusive_ptr.h"
 #include "pugixml/pugixml.hpp"
 #include <string>
+#include <vector>
 
 namespace mg
 {
@@ -377,6 +383,7 @@ namespace mg
         std::string get_type() const;
 
         int int_value;
+        static std::vector<std::string> test_list;
     private:
         int _reference_counter;
     public:

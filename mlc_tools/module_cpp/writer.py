@@ -254,20 +254,25 @@ class Writer(WriterBase):
                                                                     value=obj.initial_value)
 
     def write_member_static_init(self, cls, obj, use_intrusive=True):
-        string_pointer = '{const}intrusive_ptr<{type}> {owner}::{name}({initial_value});'
-        string_non_pointer = '{const}{type}{pointer} {owner}::{name}({initial_value});'
+        string_pointer = '{const}intrusive_ptr<{type}{templates}> {owner}::{name}{initial_value};'
+        string_non_pointer = '{const}{type}{templates}{pointer} {owner}::{name}{initial_value};'
 
         if use_intrusive and obj.is_pointer and not obj.is_const and not obj.is_link and not obj.denied_intrusive:
             string = string_pointer
         else:
             string = string_non_pointer
 
+        templates = Writer.get_templates(obj)
+        initial_value = self.convert_initial_value(obj)
+        if initial_value:
+            initial_value = f'({initial_value})'
         return string.format(const='const ' if obj.is_const else '',
                              type=self.convert_type(obj.type),
+                             templates=templates,
                              pointer='*' if obj.is_pointer else '',
                              owner=cls.name,
                              name=obj.name,
-                             initial_value=self.convert_initial_value(obj))
+                             initial_value=initial_value)
 
     def write_member_static_enum(self, cls, obj):
         assert self is not None
@@ -290,14 +295,7 @@ class Writer(WriterBase):
         return '{}({})'.format(obj.name, initial_value)
 
     @staticmethod
-    def write_named_object(obj, name, try_to_use_const_ref, use_intrusive):
-
-        def can_use_const_ref(object_):
-            assert isinstance(object_, Object)
-            return object_.type in ['string', 'list', 'map']
-
-        string_non_pointer = '{static}{const}{type}{templates}{pointer}{ref}{name}'
-        string_pointer = '{static}{const}intrusive_ptr<{type}{templates}>{ref}{name}'
+    def get_templates(obj):
         templates = []
         for arg in obj.template_args:
             assert isinstance(arg, Object)
@@ -310,6 +308,18 @@ class Writer(WriterBase):
                 templates[-1] += callable_args
 
         templates = ('<' + ', '.join(templates) + '>') if templates else ''
+        return templates
+
+    @staticmethod
+    def write_named_object(obj, name, try_to_use_const_ref, use_intrusive):
+
+        def can_use_const_ref(object_):
+            assert isinstance(object_, Object)
+            return object_.type in ['string', 'list', 'map']
+
+        string_non_pointer = '{static}{const}{type}{templates}{pointer}{ref}{name}'
+        string_pointer = '{static}{const}intrusive_ptr<{type}{templates}>{ref}{name}'
+        templates = Writer.get_templates(obj)
         is_ref = obj.is_ref
         is_const = obj.is_const
         if not is_ref and not is_const and try_to_use_const_ref and can_use_const_ref(obj):

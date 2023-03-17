@@ -7,6 +7,9 @@ class model/ModelCity<ModelBase>
 	int:private id
 	int owner
 
+	map<string, string>:static test_map
+	list<string>:static test_list
+
 	function int some_function(string resource)
 	{
 	    return 0;
