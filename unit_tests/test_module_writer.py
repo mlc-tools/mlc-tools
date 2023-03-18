@@ -131,8 +131,9 @@ class TestWriteObject(unittest.TestCase):
 
     def test_python(self):
         model = create_test_model()
-        result = save_object('py', model)
+        result, imports = save_object('py', model)
         self.assertEqual(result, 'self.int_value = 42')
+        self.assertEqual(imports, [])
 
     def test_php(self):
         model = create_test_model()
