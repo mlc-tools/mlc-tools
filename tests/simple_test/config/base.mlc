@@ -9,6 +9,7 @@ class model/ModelCity<ModelBase>
 
 	map<string, string>:static test_map
 	list<string>:static test_list
+	ModelBase:static model_base_static
 
 	function int some_function(string resource)
 	{

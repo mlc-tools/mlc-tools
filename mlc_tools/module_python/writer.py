@@ -93,7 +93,8 @@ class Writer(WriterBase):
             else:
                 if self.model.has_class(obj.type):
                     value = obj.type + '()'
-                    imports += 'from .{0} import {0}\n        '.format(obj.type)
+                    tabs = ' ' * (4 if obj.is_static else 8)
+                    imports += 'from .{0} import {0}\n{1}'.format(obj.type, tabs)
         if value and value.endswith('f'):
             value = value[0:-1] + '0'
 
