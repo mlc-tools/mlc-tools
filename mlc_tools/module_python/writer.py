@@ -10,16 +10,30 @@ class Writer(WriterBase):
     def write_class(self, cls):
         self.set_initial_values(cls)
 
+        imports_in_static = []
+        imports_in_ctr = []
         initialize_list = ''
         static_list = ''
         slots = []
         for obj in cls.members:
             if not obj.is_static:
-                initialize_list += '        ' + self.write_object(obj) + '\n'
+                v, i = self.write_object(obj)
+                initialize_list += '        ' + v + '\n'
+                imports_in_ctr.extend(i)
                 slots.append('"%s"' % obj.name)
             else:
-                static_list += '    ' + self.write_object(obj) + '\n'
+                v, i = self.write_object(obj)
+                static_list += '    ' + v + '\n'
+                imports_in_static.extend(i)
         slots = '__slots__ = [' + ', '.join(slots) + ']'
+
+        imports_in_ctr = [' ' * 8 + x for x in imports_in_ctr]
+        imports_in_static = [' ' * 4 + x for x in imports_in_static]
+        initialize_list = '\n'.join(imports_in_ctr) + '\n' + initialize_list
+        static_list = '\n'.join(imports_in_static) + '\n' + static_list
+
+        if not initialize_list.strip():
+            initialize_list = ' ' * 8 + 'pass'
 
         functions = ''
         for method in cls.functions:
@@ -70,7 +84,7 @@ class Writer(WriterBase):
         ]
 
     def write_object(self, obj):
-        imports = ''
+        imports = []
         if obj.name == 'from':
             obj.name = 'from_'
         value = obj.initial_value
@@ -94,7 +108,7 @@ class Writer(WriterBase):
                 if self.model.has_class(obj.type):
                     value = obj.type + '()'
                     tabs = ' ' * (4 if obj.is_static else 8)
-                    imports += 'from .{0} import {0}\n{1}'.format(obj.type, tabs)
+                    imports.append(f'from .{obj.type} import {obj.type}')
         if value and value.endswith('f'):
             value = value[0:-1] + '0'
 
@@ -102,8 +116,8 @@ class Writer(WriterBase):
             out = '{0} = {1}'
         else:
             out = 'self.{0} = {1}'
-        out = imports + out.format(obj.name, Serializer().convert_initialize_value(value))
-        return out if out.strip() else 'pass'
+        out = out.format(obj.name, Serializer().convert_initialize_value(value))
+        return out, imports
 
     def prepare_file(self, text):
         lines = text.split('\n')
