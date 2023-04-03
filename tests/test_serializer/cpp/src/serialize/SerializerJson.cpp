@@ -99,6 +99,11 @@ void SerializerJson::add_array_item(const float &value)
     _json.append(value);
 }
 
+void SerializerJson::add_array_item(const double &value)
+{
+    _json.append(value);
+}
+
 void SerializerJson::add_array_item(const std::string &value)
 {
     _json.append(value);
@@ -172,6 +177,11 @@ void DeserializerJson::get_array_item(bool &value)
 void DeserializerJson::get_array_item(float &value)
 {
     value = _json.asFloat();
+}
+
+void DeserializerJson::get_array_item(double &value)
+{
+    value = _json.asDouble();
 }
 
 void DeserializerJson::get_array_item(std::string &value)

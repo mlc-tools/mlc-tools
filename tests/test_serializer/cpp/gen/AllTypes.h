@@ -45,6 +45,7 @@ namespace mg
         std::string str_value1;
         std::vector<int> int_list;
         std::vector<float> float_list;
+        std::vector<double> double_list;
         std::vector<bool> bool_list;
         std::vector<std::string> string_list;
         std::map<int, std::string> int_string_map;

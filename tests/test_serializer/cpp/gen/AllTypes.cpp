@@ -164,6 +164,7 @@ namespace mg
         serializer.serialize(str_value1, "str_value1", std::string(""));
         serializer.serialize(int_list, "int_list");
         serializer.serialize(float_list, "float_list");
+        serializer.serialize(double_list, "double_list");
         serializer.serialize(bool_list, "bool_list");
         serializer.serialize(string_list, "string_list");
         serializer.serialize(int_string_map, "int_string_map");
@@ -196,6 +197,7 @@ namespace mg
         deserializer.deserialize(str_value1, "str_value1", std::string(""));
         deserializer.deserialize(int_list, "int_list");
         deserializer.deserialize(float_list, "float_list");
+        deserializer.deserialize(double_list, "double_list");
         deserializer.deserialize(bool_list, "bool_list");
         deserializer.deserialize(string_list, "string_list");
         deserializer.deserialize(int_string_map, "int_string_map");
@@ -228,6 +230,7 @@ namespace mg
         serializer.serialize(str_value1, "str_value1", std::string(""));
         serializer.serialize(int_list, "int_list");
         serializer.serialize(float_list, "float_list");
+        serializer.serialize(double_list, "double_list");
         serializer.serialize(bool_list, "bool_list");
         serializer.serialize(string_list, "string_list");
         serializer.serialize(int_string_map, "int_string_map");
@@ -260,6 +263,7 @@ namespace mg
         deserializer.deserialize(str_value1, "str_value1", std::string(""));
         deserializer.deserialize(int_list, "int_list");
         deserializer.deserialize(float_list, "float_list");
+        deserializer.deserialize(double_list, "double_list");
         deserializer.deserialize(bool_list, "bool_list");
         deserializer.deserialize(string_list, "string_list");
         deserializer.deserialize(int_string_map, "int_string_map");

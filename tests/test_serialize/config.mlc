@@ -31,6 +31,7 @@ class TestData
 	string i_str_value_1 = ""
 	list<int> int_list
 	list<float> float_list
+	list<double> double_list
 	list<bool> bool_list
 	list<string> string_list
 	map<int, string> int_string_map
@@ -40,6 +41,7 @@ class TestData
 	map<string, int> string_int_map
 	map<string, float> string_float_map
 	map<string, bool> string_bool_map
+	map<double, double> double_double_map
 	TestObject object
 	TestObject* object_ptr
 	list<TestObject> object_list

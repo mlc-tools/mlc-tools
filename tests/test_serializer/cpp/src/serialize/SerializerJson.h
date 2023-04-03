@@ -43,6 +43,7 @@ public:
     void add_array_item(const int64_t &value);
     void add_array_item(const bool &value);
     void add_array_item(const float &value);
+    void add_array_item(const double &value);
     void add_array_item(const std::string &value);
 
     template <class T>
@@ -425,6 +426,7 @@ public:
     void get_array_item(int64_t &value);
     void get_array_item(bool &value);
     void get_array_item(float &value);
+    void get_array_item(double &value);
     void get_array_item(std::string &value);
 
     iterator begin();
