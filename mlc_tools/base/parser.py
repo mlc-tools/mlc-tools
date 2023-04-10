@@ -67,7 +67,7 @@ class Parser(object):
         body, header, text = Parser.parse_body(text)
         skip, header = self.check_skip(header)
         cls = Class()
-        cls.parse(header)
+        Parser.parse_class(cls, header)
         if is_abstract:
             cls.is_abstract = True
 
@@ -79,7 +79,7 @@ class Parser(object):
 
         parser = Parser(self.model.empty_copy())
         parser.model.side = self.model.side
-        cls.parse_body(parser, body)
+        parser.parse_class_body(cls, body)
         if self.model.has_class(cls.name):
             Error.exit(Error.DUBLICATE_CLASS, cls.name)
         for inner_cls in cls.inner_classes:
@@ -98,13 +98,13 @@ class Parser(object):
 
         cls = Class()
         cls.type = 'enum'
-        cls.parse(header)
+        Parser.parse_class(cls, header)
         cls.superclasses.append('BaseEnum')
         if not self.model.is_side(cls.side):
             return text
         parser = Parser(self.model.empty_copy())
         parser.model.side = self.model.side
-        cls.parse_body(parser, body)
+        parser.parse_class_body(cls, body)
         self.model.add_class(cls)
         return text
 
@@ -412,3 +412,73 @@ class Parser(object):
             print(def_)
             sys.exit(-1)
         return pattern
+
+    @staticmethod
+    def parse_class(cls: Class, line: str):
+        from ..utils.common import smart_split
+        line = line.strip()
+        if cls.type in line:
+            line = line[len(cls.type):]
+        elif 'interface' in line:
+            line = line[len('interface'):]
+        line = cls.find_modifiers(line)
+
+        pattern = re.compile(r' ([\w/]+)(<(\w+)>)*')
+        parts = pattern.findall(line)[0]
+        cls.name = parts[0]
+        cls.superclasses = smart_split(parts[2], ',')
+        cls.template_args = []
+        if '/' in cls.name:
+            k = cls.name.rindex('/')
+            cls.group = cls.name[0:k]
+            cls.name = cls.name[k + 1:]
+
+    def parse_class_body(self, cls: Class, body: str):
+        self.parse_text(body)
+
+        for member in self.model.objects:
+            if self.model.has_class(member.type):
+                member.type = cls.name + member.type
+            for i, arg in enumerate(member.template_args):
+                if self.model.has_class(arg):
+                    member.template_args[i] = cls.name + member.template_args[i]
+
+        for func in self.model.functions:
+            if self.model.has_class(func.return_type):
+                func.return_type = cls.name + func.return_type
+            for arg in func.args:
+                if self.model.has_class(arg[1]):
+                    arg[1] = cls.name + arg[1]
+
+            for inner_class in self.model.classes:
+                pattern = re.compile(r'\b{}\b'.format(inner_class.name))
+                new_name = cls.name + inner_class.name
+                for i, line in enumerate(func.operations):
+                    func.operations[i] = re.sub(pattern, new_name, line)
+        for inner_class in self.model.classes:
+            inner_class_name = inner_class.name
+            inner_class.name = cls.name + inner_class.name
+            inner_class.group = cls.group
+            inner_class.side = cls.side
+            inner_class.is_test = cls.is_test
+            cls.inner_classes.append(inner_class)
+
+            for obj in self.model.objects:
+                if obj.type == inner_class_name:
+                    obj.type = inner_class.name
+                for arg in obj.template_args:
+                    if arg.type == inner_class_name:
+                        arg.type = inner_class.name
+
+            for method in self.model.functions:
+                for _, arg in method.args:
+                    if arg.type == inner_class_name:
+                        arg.type = inner_class.name
+                if method.return_type.type == inner_class_name:
+                    method.return_type.type = inner_class.name
+
+        cls.members = self.model.objects
+        cls.functions = self.model.functions
+
+        for member in cls.members:
+            member.set_default_initial_value()

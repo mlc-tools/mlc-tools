@@ -52,7 +52,7 @@ class GeneratorUnitTestsInterface(object):
         return name_
 
     def generate_test_interface(self, cls):
-        if cls.is_test:
+        if cls.name.find('ITest') == 0:
             return None
         class_name = 'ITest' + cls.name
 
