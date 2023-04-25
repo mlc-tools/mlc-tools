@@ -123,4 +123,7 @@ def string_empty(container):
 def string_size(container):
     return len(container)
 
+def split(string, delimiter):
+    return string.split(delimiter)
+
 '''

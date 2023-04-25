@@ -116,6 +116,9 @@ namespace @{namespace}
     {
         std::swap(a, b);
     }
+    
+    std::vector<std::string> split(const std::string& string, const char delimiter);
+    
 
 
     // Converters
@@ -551,6 +554,26 @@ namespace @{namespace}
             v.resize(size);
             va_end(args2);
         }
+    }
+    
+    std::vector<std::string> split(const std::string& string, const char delimiter)
+    {
+        std::vector<std::string> result;
+        size_t pos = 0;
+        do
+        {
+            size_t k = string.find_first_of(delimiter, pos);
+            if(k == -1)
+            {
+                result.push_back(string.substr(pos));
+                break;
+            }
+    
+            result.push_back(string.substr(pos, k));
+            pos = k + 1;
+        }
+        while(true);
+        return result;
     }
 }
 

@@ -405,6 +405,37 @@ class TestTranslates<ITestTranslates>
         this->assertTrue(sb == "1");
     }
 
+    function void test_split()
+    {
+        auto string = "123x4568";
+        auto values = split(string, 'x');
+        this->assertEqual(list_size(values), 2);
+        this->assertTrue(values[0] == "123");
+        this->assertTrue(values[1] == "4568");
+
+        string = "123x";
+        values = split(string, 'x');
+        this->assertEqual(list_size(values), 2);
+        this->assertTrue(values[0] == "123");
+        this->assertTrue(values[1] == "");
+
+        string = "x123";
+        values = split(string, 'x');
+        this->assertEqual(list_size(values), 2);
+        this->assertTrue(values[0] == "");
+        this->assertTrue(values[1] == "123");
+
+        string = "x";
+        values = split(string, 'x');
+        this->assertEqual(list_size(values), 2);
+        this->assertTrue(values[0] == "");
+        this->assertTrue(values[1] == "");
+
+        string = "";
+        values = split(string, 'x');
+        this->assertEqual(list_size(values), 1);
+    }
+
 }
 
 class NullishOperator
