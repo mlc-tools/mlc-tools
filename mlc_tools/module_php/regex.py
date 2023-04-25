@@ -96,6 +96,7 @@ class RegexPatternPhp(object):
         (re.compile(r'list_insert\s*\((\$.+?),\s*([\$.\w]+?),\s*([\$.\w]+?)\)'), r'array_splice(\1, \2, 0, \3);',
          ['list_insert']),
         (re.compile(r'split\((.+?),\s*(.+?)\)'), r'explode(\2, \1)', ['split']),
+        (re.compile(r'join\((.+?),\s*(.+?)\)'), r'implode(\2, \1)', ['join']),
 
         # Exception with try/catch block (one catch)
         (re.compile(r'try\n\s*{([\s\S.]+?)}\n\s*catch__((\w+)__(\w*))\n\s+{([\s\S.]+?)}'),

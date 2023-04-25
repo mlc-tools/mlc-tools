@@ -118,8 +118,7 @@ namespace @{namespace}
     }
     
     std::vector<std::string> split(const std::string& string, const char delimiter);
-    
-
+    std::string join(const std::vector<std::string>& values, const char delimiter);
 
     // Converters
     template <typename T> T strTo(const std::string &value);
@@ -573,6 +572,20 @@ namespace @{namespace}
             pos = k + 1;
         }
         while(true);
+        return result;
+    }
+    
+    std::string join(const std::vector<std::string>& values, const char delimiter)
+    {
+        std::string result;
+        for(size_t i=0; i<values.size(); ++i)
+        {
+            result += values[i];
+            if(i != values.size() - 1)
+            {
+                result += delimiter;
+            }
+        }
         return result;
     }
 }

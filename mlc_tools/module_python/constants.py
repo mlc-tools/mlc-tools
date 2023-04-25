@@ -126,4 +126,7 @@ def string_size(container):
 def split(string, delimiter):
     return string.split(delimiter)
 
+def join(values, delimiter):
+    return delimiter.join(values)
+
 '''

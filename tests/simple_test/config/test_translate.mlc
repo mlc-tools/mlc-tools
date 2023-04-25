@@ -412,28 +412,33 @@ class TestTranslates<ITestTranslates>
         this->assertEqual(list_size(values), 2);
         this->assertTrue(values[0] == "123");
         this->assertTrue(values[1] == "4568");
+        this->assertTrue(join(values, 'x') == string);
 
         string = "123x";
         values = split(string, 'x');
         this->assertEqual(list_size(values), 2);
         this->assertTrue(values[0] == "123");
         this->assertTrue(values[1] == "");
+        this->assertTrue(join(values, 'x') == string);
 
         string = "x123";
         values = split(string, 'x');
         this->assertEqual(list_size(values), 2);
         this->assertTrue(values[0] == "");
         this->assertTrue(values[1] == "123");
+        this->assertTrue(join(values, 'x') == string);
 
         string = "x";
         values = split(string, 'x');
         this->assertEqual(list_size(values), 2);
         this->assertTrue(values[0] == "");
         this->assertTrue(values[1] == "");
+        this->assertTrue(join(values, 'x') == string);
 
         string = "";
         values = split(string, 'x');
         this->assertEqual(list_size(values), 1);
+        this->assertTrue(join(values, 'x') == string);
     }
 
 }
