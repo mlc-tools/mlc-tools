@@ -46,6 +46,7 @@ def main():
     add('-namespace')
     add('-only_data')
     add('-php_validate')
+    add('-validate_allow_different_virtual_method')
     add('-test_script')
     add('-test_script_args')
     add('-auto_registration')

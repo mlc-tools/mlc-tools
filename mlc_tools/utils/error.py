@@ -63,8 +63,8 @@ class Error(object):
     TESTS_FAILED = inspect.currentframe().f_lineno
     CIRCULAR_REFERENCE = inspect.currentframe().f_lineno
     ERROR_CONST_MODIFIER = inspect.currentframe().f_lineno
-
     WARNING_TEST_CLASS_NOT_IMPLEMENT_METHOD = inspect.currentframe().f_lineno
+    ERROR_VIRTUAL_METHOD_HAS_DIFFERENT_DECLARATION = inspect.currentframe().f_lineno
 
     texts = {
         UNKNOWN_SERIALISED_TYPE: '[{}] unknown serialized serialized format. Base type - [{}]',
@@ -88,6 +88,7 @@ class Error(object):
         CIRCULAR_REFERENCE: 'Circular reference: [{}]',
         ERROR_CONST_MODIFIER: 'Const modifier should be declare as [Type:const]: {}',
         WARNING_TEST_CLASS_NOT_IMPLEMENT_METHOD: 'Test class [{}] has not implemented method [{}]',
+        ERROR_VIRTUAL_METHOD_HAS_DIFFERENT_DECLARATION: 'Class [{}] has different declaration of method [{}]. See class [{}]',
     }
 
     @staticmethod

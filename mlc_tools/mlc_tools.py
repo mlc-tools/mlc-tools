@@ -37,6 +37,8 @@ class Mlc(object):
         self.model.namespace = kwargs.get('namespace', self.model.namespace)
         self.model.side = kwargs.get('side', self.model.side)
         self.model.php_validate = kwargs.get('php_validate', self.model.php_validate)
+        self.model.validate_allow_different_virtual_method = kwargs.get('validate_allow_different_virtual_method',
+                                                             self.model.validate_allow_different_virtual_method)
         self.model.test_script = kwargs.get('test_script', self.model.test_script)
         self.model.test_script_args = kwargs.get('test_script_args', self.model.test_script_args)
         self.model.generate_tests = kwargs.get('generate_tests', self.model.generate_tests)

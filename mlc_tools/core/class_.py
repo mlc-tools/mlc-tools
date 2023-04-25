@@ -8,6 +8,8 @@ from ..utils.error import Error
 
 class Class(Object):
 
+    OPERATOR_MATCH = re.compile(r'operator\b.+')
+
     def __init__(self, name=''):
         Object.__init__(self)
         self.superclasses = []
@@ -74,7 +76,9 @@ class Class(Object):
                 func.is_virtual or \
                 func.is_abstract or \
                 self.has_function_in_subclasses(func)
-            if 'operator' in func.name:
+
+            # if 'operator' in func.name:
+            if Class.OPERATOR_MATCH.findall(func.name):
                 func.is_virtual = False
             func.is_virtual = func.is_virtual or \
                 self.has_function_in_superclasses(func)

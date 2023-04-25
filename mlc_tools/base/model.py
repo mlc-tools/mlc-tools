@@ -37,6 +37,7 @@ class Model(object):
         self.namespace = 'mg'
         self.side = 'both'
         self.php_validate = True
+        self.validate_allow_different_virtual_method = True
         self.test_script = ''
         self.test_script_args = ''
         self.generate_tests = False

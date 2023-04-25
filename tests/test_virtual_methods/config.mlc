@@ -39,3 +39,17 @@ class TestFoo2<ITestFoo2>
         this->assertEqual(c->virtual_method(), Foo2::TYPE, "Correct result on call Foo2::virtual_method");
     }
 }
+
+class Foo3
+{
+    function void virtual_method(int arg)
+    {
+    }
+}
+class Foo4<Foo3>
+{
+    function void virtual_method(int arg1)
+    {
+        //Should be ERROR on validate_allow_different_virtual_method is False
+    }
+}

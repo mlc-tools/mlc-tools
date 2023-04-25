@@ -26,6 +26,8 @@ class SerializerBase(object):
                 for cls in model.classes:
                     if cls.type == 'enum':
                         continue
+                    if cls.name == 'BaseEnum':
+                        continue
                     self.current_class = cls
                     self.create_serialization_function(cls, SERIALIZATION, string_format)
                     self.create_serialization_function(cls, DESERIALIZATION, string_format)

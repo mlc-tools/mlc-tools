@@ -75,6 +75,7 @@ class GeneratorUnitTestsInterface(object):
             impl = self.model.get_class(test.name[1:])
             for func in impl.functions:
                 if func.name.startswith('test_') and func.name not in generated_functions:
+                    func.is_virtual = True
                     self.add_method(test, func.name)
                     self.generate_messages_if_empty(impl, func)
 

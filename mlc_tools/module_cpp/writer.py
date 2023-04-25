@@ -1,7 +1,10 @@
 import re
 from ..base import WriterBase
+from ..core.class_ import Class
+from ..core.function import Function
 from ..core.object import Object, AccessSpecifier
 from .regex import RegexPatternCpp
+from ..utils.error import Error
 
 
 class Writer(WriterBase):
@@ -176,6 +179,41 @@ class Writer(WriterBase):
         args = ', '.join(args)
         return args
 
+    def is_overrides(self, method: Function):
+        if not method.is_virtual:
+            return False
+        superclass: Class = self.current_class.superclasses[0] if self.current_class.superclasses else None
+        allowed = ['visit']
+        while superclass is not None:
+            for function in superclass.functions:
+                if function.name != method.name:
+                    continue
+                if function.return_type.type != method.return_type.type:
+                    if not self.model.validate_allow_different_virtual_method:
+                        Error.exit(Error.ERROR_VIRTUAL_METHOD_HAS_DIFFERENT_DECLARATION, self.current_class.name,
+                                   method.name, superclass.name)
+                    continue
+
+                if len(function.args) != len(method.args):
+                    if not self.model.validate_allow_different_virtual_method and method.name not in allowed:
+                        Error.exit(Error.ERROR_VIRTUAL_METHOD_HAS_DIFFERENT_DECLARATION, self.current_class.name,
+                                   method.name, superclass.name)
+                    continue
+                cont = False
+                for i, args in enumerate(function.args):
+                    if args[1].type != method.args[i][1].type:
+                        if not self.model.validate_allow_different_virtual_method and method.name not in allowed:
+                            Error.exit(Error.ERROR_VIRTUAL_METHOD_HAS_DIFFERENT_DECLARATION, self.current_class.name,
+                                       method.name, superclass.name)
+                        cont = True
+                        break
+                if cont:
+                    continue
+                return True
+
+            superclass = superclass.superclasses[0] if superclass.superclasses else None
+        return False
+
     def write_function_hpp(self, method):
         string = '{virtual}{static}{friend}{type} {name}({args}){const}{override}{abstract}'
         assert isinstance(method.return_type, Object)
@@ -198,12 +236,14 @@ class Writer(WriterBase):
         else:
             string += ';\n'
 
+        is_overrides = self.is_overrides(method)
+
         return string.format(virtual=virtual,
                              static='static ' if method.is_static else '',
                              friend='friend ' if method.is_friend else '',
                              const=' const' if method.is_const else '',
                              abstract=' = 0' if method.is_abstract else '',
-                             override='',
+                             override=' override' if is_overrides else '',
                              type=return_type,
                              name=method.name,
                              args=args,
