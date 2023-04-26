@@ -558,34 +558,45 @@ namespace @{namespace}
     std::vector<std::string> split(const std::string& string, const char delimiter)
     {
         std::vector<std::string> result;
-        size_t pos = 0;
-        do
+        auto start = string.begin();
+        auto end = string.begin();
+        while (end != string.end())
         {
-            size_t k = string.find_first_of(delimiter, pos);
-            if(k == -1)
+            if (*end == delimiter)
             {
-                result.push_back(string.substr(pos));
-                break;
+                result.emplace_back(start, end);
+                start = end + 1;
             }
-    
-            result.push_back(string.substr(pos, k));
-            pos = k + 1;
+            ++end;
         }
-        while(true);
+        result.emplace_back(start, end);
         return result;
     }
     
     std::string join(const std::vector<std::string>& values, const char delimiter)
     {
-        std::string result;
-        for(size_t i=0; i<values.size(); ++i)
+        if (values.empty())
         {
-            result += values[i];
-            if(i != values.size() - 1)
-            {
-                result += delimiter;
-            }
+            return "";
         }
+    
+        size_t total_size = 0;
+        for (const auto& value : values)
+        {
+            total_size += value.size();
+        }
+        total_size += values.size() - 1;
+    
+        std::string result;
+        result.reserve(total_size);
+    
+        for (size_t i=0; i<values.size()-1; ++i)
+        {
+            result.append(values[i]);
+            result.push_back(delimiter);
+        }
+        result.append(values.back());
+    
         return result;
     }
 }

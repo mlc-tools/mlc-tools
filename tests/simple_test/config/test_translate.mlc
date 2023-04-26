@@ -439,6 +439,16 @@ class TestTranslates<ITestTranslates>
         values = split(string, 'x');
         this->assertEqual(list_size(values), 1);
         this->assertTrue(join(values, 'x') == string);
+
+        string = "1,,2,,3";
+        values = split(string, ',');
+        this->assertEqual(list_size(values), 5);
+        this->assertTrue(values[0] == "1");
+        this->assertTrue(values[1] == "");
+        this->assertTrue(values[2] == "2");
+        this->assertTrue(values[3] == "");
+        this->assertTrue(values[4] == "3");
+        this->assertTrue(join(values, ',') == string);
     }
 
 }
