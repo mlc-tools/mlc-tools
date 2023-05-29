@@ -2,6 +2,14 @@ enum FooEnum
 {
     foo
     bar
+
+	function list<FooEnum> get_all():static
+	{
+		list<FooEnum> stats;
+		list_push(stats, FooEnum::foo);
+		list_push(stats, FooEnum::bar);
+		return stats;
+	}
 }
 
 enum EnumWithIntValue

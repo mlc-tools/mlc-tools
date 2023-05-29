@@ -105,9 +105,9 @@ class Class(Object):
                 if equal:
                     func.is_virtual = True
                     return True
-        for cls in list_of_classes:
-            if cls.has_function_in_subclasses(method):
-                return True
+        # for cls in list_of_classes:
+        #     if cls.has_function_in_subclasses(method):
+        #         return True
         return False
 
 
