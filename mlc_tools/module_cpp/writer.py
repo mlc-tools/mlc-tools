@@ -472,6 +472,8 @@ class Writer(WriterBase):
                     add(forward_declarations, argtype)
             if not self.model.user_includes:
                 add(includes, method.return_type)
+            else:
+                add(forward_declarations, method.return_type)
 
         # superclasses
         for superclass in cls.superclasses:
