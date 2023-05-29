@@ -470,7 +470,8 @@ class Writer(WriterBase):
                     add(forward_declarations_out, argtype)
                 else:
                     add(forward_declarations, argtype)
-            add(includes, method.return_type)
+            if not self.model.user_includes:
+                add(includes, method.return_type)
 
         # superclasses
         for superclass in cls.superclasses:
@@ -485,13 +486,14 @@ class Writer(WriterBase):
 
         return includes, forward_declarations, forward_declarations_out
 
-    def get_includes_for_source(self, cls, functions_text, hpp_includes, forw_declarations, forw_declarations_out):
+    def get_includes_for_source(self, cls: Class, functions_text, hpp_includes, forw_declarations, forw_declarations_out):
         includes = set()
         includes.add(cls.name)
         includes.update(forw_declarations)
         includes.update(forw_declarations_out)
 
         includes.update(self.get_includes_for_method(cls, functions_text, hpp_includes))
+        includes.update(cls.user_includes)
 
         return self.build_includes(cls, includes)
 
@@ -536,6 +538,7 @@ class Writer(WriterBase):
                 include = '#include '
                 include += self.get_include_path_to_class(cls, other_class)
                 result.append(include)
+
         result = sorted(result)
         return '\n'.join(result)
 

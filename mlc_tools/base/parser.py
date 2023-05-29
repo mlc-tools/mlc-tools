@@ -27,6 +27,8 @@ class Parser(object):
                 text = self._create_class(text, True)
             elif Parser._is_enum(text):
                 text = self._create_enum_class(text)
+            elif Parser._is_include(text):
+                text = self._create_include(text)
             elif Parser._is_function(text):
                 text = self._create_function(text)
             elif Parser._is_constructor(text):
@@ -124,6 +126,14 @@ class Parser(object):
         self.parse_object(obj, line)
         if self.model.is_side(obj.side):
             self.model.objects.append(obj)
+        return text
+
+    def _create_include(self, text):
+        k = text.find('\n')
+        line = text[0:k]
+        text = text[k+1:]
+        class_name = line.replace('@include ', '').strip()
+        self.model.includes.add(class_name)
         return text
 
     def _create_function(self, text):
@@ -274,6 +284,10 @@ class Parser(object):
     @staticmethod
     def _is_constructor(line):
         return line.find('constructor') == 0
+
+    @staticmethod
+    def _is_include(line):
+        return line.startswith('@include')
 
     @staticmethod
     def _is_enum(line):
@@ -479,6 +493,8 @@ class Parser(object):
 
         cls.members = self.model.objects
         cls.functions = self.model.functions
+        cls.user_includes = self.model.includes
+        self.model.includes = set()
 
         for member in cls.members:
             member.set_default_initial_value()

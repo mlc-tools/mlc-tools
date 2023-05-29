@@ -26,6 +26,7 @@ class Model(object):
         self.objects = []
         self.functions = []
         self.classes_dict = {}
+        self.includes = set()
 
         self.model = None
         self.configs_directory = ''
@@ -52,6 +53,7 @@ class Model(object):
         self.join_to_one_file = False
         self.auto_registration = True
         self.generate_ref_counter = False
+        self.user_includes = False
 
         self.simple_types = ["int", "float", "bool", "string", 'int64_t', 'uint', 'uint64_t', 'double']
 
@@ -67,6 +69,7 @@ class Model(object):
         model.objects = []
         model.functions = []
         model.classes_dict = {}
+        model.includes = set()
         return model
 
     def clear_data(self):

@@ -1,0 +1,19 @@
+class test/TestIncludesGet
+{
+    fn CommandBase* get()
+    {
+        return new CommandBase();
+    }
+}
+
+class test/TestIncludes
+{
+    @include CommandBase
+
+    fn void get()
+    {
+        auto get = new TestIncludesGet();
+        auto command = get->get();
+        command->user_id = 0;
+    }
+}

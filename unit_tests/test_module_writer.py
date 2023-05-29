@@ -214,6 +214,7 @@ class TestCppWriterBuildIncludesWithGroups(unittest.TestCase):
         cls.functions.append(method)
 
         writer = Writer('')
+        writer.model = Model()
         includes, f, f_out = writer.get_includes_for_header(cls)
         self.assertIn('std::map', includes, '<map> in includes')
 

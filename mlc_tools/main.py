@@ -51,6 +51,7 @@ def main():
     add('-test_script_args')
     add('-auto_registration')
     add('-generate_ref_counter')
+    add('-user_includes')
 
     print(args)
 

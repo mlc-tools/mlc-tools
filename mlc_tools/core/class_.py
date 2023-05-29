@@ -17,6 +17,7 @@ class Class(Object):
         self.constructor = None
         self.members = []
         self.functions = []
+        self.user_includes = set()
         self.is_abstract = False
         self.is_serialized = False
         self.is_visitor = False

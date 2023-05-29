@@ -74,7 +74,8 @@ def simple_test():
                     generate_tests=True,
                     generate_intrusive=True,
                     generate_factory=True,
-                    auto_registration=False)
+                    auto_registration=False,
+                    user_includes=True)
     generator.add_config_directories(root + 'config_additional')
     generator.add_data_directories(root + 'data_additional')
     run_tests(generator, root, True, with_join=True)
