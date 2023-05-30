@@ -132,7 +132,11 @@ class RegexPatternPython(object):
         (re.compile(r'([\w\.]+?)\s*==\s*False'), r'not (\1)', ['False']),
         (re.compile(r'\bstrTo<(\w+)>\((.+?)\)'), r'strTo(\2, \1)', ['strTo']),
         (re.compile(r'\btoStr\((.+?)\)'), r'str(\1)', ['toStr']),
-        (re.compile(r'(\w+)<(.+)>\((.+?)\)'), r'\1(\3, \2)', ['<']),
+
+        # Template arguments
+        (re.compile(r'(\w+)<(.+?)>\(\)'), r'\1(\2)', ['<']),
+        (re.compile(r'(\w+)<(.+?)>\((.+?)\)'), r'\1(\3, \2)', ['<']),
+
         (re.compile(r'std::strcat\((.+?),\s*(.+?)\)'), r'((\1)+(\2))', ['std::strcat']),
         (re.compile(r'\.at\((.*?)\)'), r'[\1]', ['at']),
 
