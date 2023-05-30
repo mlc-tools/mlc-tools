@@ -453,12 +453,14 @@ class Writer(WriterBase):
 
         # members
         for member in cls.members:
-            def parse_object(obj):
-                add(includes, obj)
+            def parse_object(container, obj):
+                add(container, obj)
                 for arg in obj.template_args:
-                    parse_object(arg)
-
-            parse_object(member)
+                    if cls.name == 'DataStorage':
+                        parse_object(forward_declarations, arg)
+                    else:
+                        parse_object(container, arg)
+            parse_object(includes, member)
 
         # functions
         std_includes = ['map', 'list', 'string']
