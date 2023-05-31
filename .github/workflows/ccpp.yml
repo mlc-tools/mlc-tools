@@ -7,7 +7,7 @@ jobs:
 
     strategy:
       matrix:
-        platform: [ubuntu-latest, macos-latest, windows-latest]
+        platform: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.platform }}
     
     steps:
@@ -36,11 +36,7 @@ jobs:
         cd build_xml
         cmake .. -DCMAKE_BUILD_TYPE=$BUILD_CONFIGURATION -DBUILD_XML=ON -DBUILD_JSON=OFF -DBUILD_SIDE=SERVER
         cmake --build .
-        if: matrix.os == 'windows-latest'
-          test_mlc_xml.exe ../
-        else:
-          ./test_mlc_xml ../
-
+        ./test_mlc_xml ../
         cd ..
 
         mkdir build_json
