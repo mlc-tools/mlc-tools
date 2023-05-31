@@ -15,7 +15,7 @@ class Parser(object):
 
     def parse_files(self, files):
         for path in files:
-            text = open(path).read()
+            text = open(path, encoding='utf-8').read()
             self.parse_text(text)
 
     def parse_text(self, text):

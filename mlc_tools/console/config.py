@@ -51,7 +51,7 @@ class ProjectConfig(object):
         config_file = root + arguments.config
         if not isfile(config_file):
             return
-        with open(config_file) as stream:
+        with open(config_file, encoding='utf-8') as stream:
             try:
                 data = yaml.safe_load(stream)
                 self._parse_dict(data)

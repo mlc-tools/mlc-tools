@@ -49,7 +49,7 @@ def normalize_path(path, append_slash=True):
 def load_dict(path):
     dictionary = {}
     try:
-        file_ = open(path)
+        file_ = open(path, encoding='utf-8')
         for line in file_:
             string = line.strip()
             args = string.split(' ')
@@ -67,7 +67,7 @@ def save_dict(path, dict_):
         dictionary = load_dict(path)
         for key in dict_:
             dictionary[key] = dict_[key]
-        with open(path, 'w') as stream:
+        with open(path, 'w', encoding='utf-8') as stream:
             for key in dictionary:
                 string = key + ' ' + dictionary[key] + '\n'
                 stream.write(string)
@@ -79,11 +79,11 @@ def save_dict(path, dict_):
 def write(path, content):
     rewrite = True
     if os.path.exists(path):
-        with open(path) as stream:
+        with open(path, encoding='utf-8') as stream:
             rewrite = stream.read() != content
     if rewrite:
         create_dir_for_file(path)
-        with open(path, 'w') as stream:
+        with open(path, 'w', encoding='utf-8') as stream:
             if isinstance(content, bytes):
                 content = content.decode()
             stream.write(content)
@@ -100,7 +100,7 @@ def file_has_changes(path):
         cache = dictionary[path]
 
         md5 = hashlib.md5()
-        md5.update(open(path).read())
+        md5.update(open(path, encoding='utf-8').read())
         return not cache == str(md5.hexdigest())
     return True
 
@@ -108,5 +108,5 @@ def file_has_changes(path):
 def save_md5_to_cache(path):
     create_dir_for_file(__CACHE_FILES)
     md5 = hashlib.md5()
-    md5.update(open(path).read())
+    md5.update(open(path, encoding='utf-8').read())
     save_dict(__CACHE_FILES, {path: md5.hexdigest()})

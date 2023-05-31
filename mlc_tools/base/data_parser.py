@@ -77,7 +77,7 @@ class DataParser(object):
             Error.exit(Error.CANNOT_PARSE_XML, full_path)
 
     def _parse_json(self, full_path):
-        root = json.loads(open(full_path).read())
+        root = json.loads(open(full_path, encoding='utf-8').read())
 
         if isinstance(root, dict):
             for key in root:
