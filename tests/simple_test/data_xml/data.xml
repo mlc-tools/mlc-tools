@@ -1,4 +1,7 @@
 <data>
+<!-- TEST COMMENT-->
+<!-- ТЕСТОВЫЙ КОММЕНТАРИЙ-->
+
 	<unit name="unitname1" link_to_data="unitname2" unit_type="attack" enum_with_int_value="foo" convert_float_to_int="1.0">
 		<visual  icon="some_image" name="some_locale_key">
 		</visual>
