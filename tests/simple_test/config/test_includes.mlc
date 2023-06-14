@@ -16,4 +16,9 @@ class test/TestIncludes
         auto command = get->get();
         command->user_id = 0;
     }
+
+    fn list<int> get_vector():cpp
+    {
+        return std::vector<int>();
+    }
 }

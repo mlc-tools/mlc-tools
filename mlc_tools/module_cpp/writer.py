@@ -472,7 +472,7 @@ class Writer(WriterBase):
                     add(forward_declarations_out, argtype)
                 else:
                     add(forward_declarations, argtype)
-            if not self.model.user_includes:
+            if not self.model.user_includes or method.return_type.type in std_includes:
                 add(includes, method.return_type)
             else:
                 add(forward_declarations, method.return_type)
