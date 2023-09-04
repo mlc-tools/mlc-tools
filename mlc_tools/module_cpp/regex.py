@@ -70,7 +70,7 @@ auto iter = std::remove_if(\1.begin(), \1.end(), [](const auto& \2){return \3;})
         (re.compile(r'std::strcat\((.+?),\s*(.+?)\)'), r'(std::string(\1) + std::string(\2))', ['std::strcat']),
         (re.compile(r'std::std::'), r'std::', ['std::std']),
         (re.compile(r'([\w\->\.]+)\s*=\s*([\w\->\.]+)\s*\?\?\s*([\w\->\.]+)'), r'\1 = (\2 != nullptr) ? \2 : (\3)', ['??']),
-        (re.compile(r'print\s*\(\s*(.+)\);'), r'std::cout << format(\1) << std::endl;', ['print']),
+        (re.compile(r'\bprint\s*\(\s*(.+)\);'), r'std::cout << format(\1) << std::endl;', ['print']),
 
         # Exception with try/catch block (one catch)
         (re.compile(r'try\n\s*{([\s\S.]+?)}\n\s*catch\(((\w+)\s*(\w*))\)\n\s+{([\s\S.]+?)}'),
