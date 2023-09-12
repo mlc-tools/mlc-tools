@@ -12,9 +12,9 @@ file(GLOB_RECURSE SRC ${GEN_DIR}/*.cpp ${ROOT}/external/*.cpp)
 include_directories(${GEN_DIR} ${ROOT}/external)
 
 if(WIN32)
-    add_definitions(-W1 -std=c++14)
+    add_definitions(-W1 -std=c++17)
 else()
-    add_definitions(-Wall -std=c++14)
+    add_definitions(-Wall -std=c++17)
 endif()
 
 if(WITH_DATA)
