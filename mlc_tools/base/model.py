@@ -52,7 +52,7 @@ class Model(object):
         self.serialize_protocol = []
         self.join_to_one_file = False
         self.auto_registration = True
-        self.generate_ref_counter = False
+        self.generate_ref_counter = True
         self.user_includes = False
 
         self.simple_types = ["int", "float", "bool", "string", 'int64_t', 'uint', 'uint64_t', 'double']

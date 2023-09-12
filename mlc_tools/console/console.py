@@ -127,7 +127,7 @@ class Console(object):
                              generate_factory=self.config.features.get(Feature.FACTORY, True),
                              generate_tests=self.config.features.get(Feature.GENERATE_TESTS, False),
                              language=self.config.lang,
-                             php_validate=self.config.features.get(Feature.PHP_VALIDATE, True),
+                             php_validate=self.config.features.get(Feature.PHP_VALIDATE, False),
                              join_to_one_file=True,
                              auto_registration=self.config.features.get(Feature.AUTO_REGISTRATION, False),
                              formats=self.config.serialize_format)

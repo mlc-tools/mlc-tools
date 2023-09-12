@@ -12,9 +12,7 @@ serialize_format:
 
 features:
   tests
-  intrusive_ptr
   factory
-  php_validate
 
 lang:
   cpp

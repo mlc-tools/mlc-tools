@@ -2,6 +2,14 @@ import os
 import shutil
 
 
+def build_app():
+    result = True
+    result = result and os.system(f'cd app; PYTHONPATH=../../../ python3 ../../../mlc_tools/console/console.py build') == 0
+    if not result:
+        print('build_app: Failed')
+    return result
+
+
 def usage():
     result = True
     result = result and os.system(f'PYTHONPATH=../../ python3 ../../mlc_tools/console/console.py') == 0
@@ -145,6 +153,7 @@ def clean_after_build():
 
 def main():
     result = True
+    result = result and build_app()
     result = result and usage()
     result = result and version()
     result = result and init()

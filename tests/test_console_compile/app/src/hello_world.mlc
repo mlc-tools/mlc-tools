@@ -1,7 +1,14 @@
 class Main
 {
+    map<DataTest:link, int> test_map
+
     function void main():static
     {
         print("Hello World!!!");
     }
+}
+
+class DataTest:storage
+{
+    string name
 }
