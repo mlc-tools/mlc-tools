@@ -130,7 +130,9 @@ class Console(object):
                              php_validate=self.config.features.get(Feature.PHP_VALIDATE, False),
                              join_to_one_file=True,
                              auto_registration=self.config.features.get(Feature.AUTO_REGISTRATION, False),
-                             formats=self.config.serialize_format)
+                             formats=self.config.serialize_format,
+                             add_config=self.config.src_directory_add
+                             )
 
         self.generator.generate()
         if os.path.isdir(self.generator.model.data_directory):

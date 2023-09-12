@@ -20,6 +20,7 @@ class ProjectConfig(object):
         self.binary_type = 'app'
         self.serialize_format = None
         self.src_directory = None
+        self.src_directory_add = None
         self.data_directory = None
         self.build_directory = None
         self.third_party_source_url = None
@@ -68,6 +69,8 @@ class ProjectConfig(object):
             self.lang = dictionary.get('lang', self.lang)
             if 'src_directory' in dictionary:
                 self.src_directory = normalize_path(self.root + dictionary.get('src_directory'))
+            if 'src_directory_add' in dictionary:
+                self.src_directory_add = normalize_path(self.root + dictionary.get('src_directory_add'))
             if 'data_directory' in dictionary:
                 self.data_directory = normalize_path(self.root + dictionary.get('data_directory'))
             if 'build_directory' in dictionary:

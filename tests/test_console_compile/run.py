@@ -10,6 +10,14 @@ def build_app():
     return result
 
 
+def build_and_run_app_run_tests():
+    result = True
+    result = result and os.system(f'cd app_run_tests; PYTHONPATH=../../../ python3 ../../../mlc_tools/console/console.py run') == 0
+    if not result:
+        print('build_app: Failed')
+    return result
+
+
 def usage():
     result = True
     result = result and os.system(f'PYTHONPATH=../../ python3 ../../mlc_tools/console/console.py') == 0
@@ -154,6 +162,7 @@ def clean_after_build():
 def main():
     result = True
     result = result and build_app()
+    result = result and build_and_run_app_run_tests()
     result = result and usage()
     result = result and version()
     result = result and init()
@@ -164,7 +173,6 @@ def main():
 
     result = result and init_lib()
     result = result and build_lib()
-    print(result)
     if not result:
         exit(1)
 

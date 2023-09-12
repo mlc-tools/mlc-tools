@@ -314,6 +314,8 @@ namespace @{namespace}
         return clone;
     }
     {{end_format=both}}
+    
+    std::string fs_get_string(const std::string& path);
 }
 
 #endif
@@ -324,6 +326,8 @@ FUNCTIONS_CPP = '''
 #include <sstream>
 #include <vector>
 #include "@{namespace}_extensions.h"
+#include <fstream>
+#include <iostream>
 
 namespace @{namespace}
 {
@@ -599,6 +603,13 @@ namespace @{namespace}
     
         return result;
     }
+    
+    std::string fs_get_string(const std::string& path)
+    {
+        std::fstream stream(path, std::ios::in);
+        std::string buffer((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
+        return buffer;
+    }   
 }
 
 '''
