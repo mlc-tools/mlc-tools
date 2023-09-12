@@ -188,8 +188,14 @@ class Console(object):
         if process.call() != 0:
             raise RuntimeError('Error on cmake')
 
-        process = SubprocessWrapper(f'make -j4 -C {self.config.build_directory}')
-        if process.call() != 0:
+        process = SubprocessWrapper(f'make -j4 -C {self.config.build_directory}', require_out=True)
+        code, out, err = process.call()
+        if code != 0:
+            print('----\nmake Out:\n----')
+            print(out)
+            print('----\nmake Err:\n----')
+            print(err)
+            print('----\nEnd make log:\n----')
             raise RuntimeError('Error on make')
 
     def _run(self):
