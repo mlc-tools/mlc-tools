@@ -23,6 +23,37 @@
 #include "tests/RunAllTests.h"
 #include "Registrar.h"
 #include "SerializerCommon.h"
+#include "Observable.h"
+
+
+class ListenerAuto
+{
+public:
+    std::vector<mg::ObservableBase*> observers;
+
+    virtual ~ListenerAuto()
+    {
+        for(auto observer : this->observers)
+        {
+            observer->remove(this);
+        }
+    }
+
+    template<class R, class... A, class T, class M, class... P> typename std::enable_if<std::is_member_function_pointer<M>::value>::type
+    listen(mg::Observable<R(A...)>& observer, T object, M method, P&&... placeholders)
+    {
+        observers.push_back(&observer);
+        observer.add(object, method, std::forward<P>(placeholders)...);
+    }
+
+    template<class R, class... A, class F> typename std::enable_if<!std::is_member_function_pointer<F>::value || std::is_function<F>::value>::type
+    listen(mg::Observable<R(A...)>& observer, F lambda)
+    {
+        observers.push_back(&observer);
+        observer.add(this, lambda);
+    }
+};
+
 
 extern mg::intrusive_ptr<mg::CommandBase> createCommand(const std::string& payload);
 std::string root = "../../";
@@ -110,5 +141,19 @@ int main(int argc, char ** args)
     result = result && test.execute();
 
 	std::cout << "Execute results = " << (result ? "Ok" : "Fail") << std::endl;
+
+    int count = 0;
+	mg::Observable<void()> observer;
+	{
+	    ListenerAuto listener;
+	    listener.listen(observer, [&count](){
+	        std::cout << "Nice" << std::endl;
+	        ++count;
+	    });
+	    observer.notify();
+	}
+	observer.notify();
+	assert(count == 1);
+
 	return result ? 0 : -1;
 }

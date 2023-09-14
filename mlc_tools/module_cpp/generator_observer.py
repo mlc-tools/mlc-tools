@@ -13,10 +13,17 @@ PREDEFINED = '''
 
 namespace @{namespace}
 {
+    class ObservableBase{
+    public:
+        virtual void remove(void* object) = 0;
+        virtual void remove(int object) = 0;
+    };
+    
+    
     template<class R> class Observable;
 
     template<class R, class... A>
-    class Observable<R(A...)>
+    class Observable<R(A...)> : public ObservableBase
     {
     public:
         Observable()
@@ -63,8 +70,11 @@ namespace @{namespace}
             }
         }
 
-        template<class T>
-        void remove(T object)
+        virtual void remove(void* object) override
+        {
+            remove(get_tag(object));
+        }
+        virtual void remove(int object) override
         {
             remove(get_tag(object));
         }
