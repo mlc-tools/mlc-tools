@@ -1,0 +1,21 @@
+class SerializeTest
+{
+    list<DataUnit*> list_of_data
+}
+
+class TestSerializeTest<ITestSerializeTest>
+{
+    fn void test_serialize_python()
+    {
+        auto obj = new SerializeTest();
+        auto data = new DataUnit();
+        data->name = "test_unit";
+        list_push(obj->list_of_data, data);
+        auto obj2 = clone_object(obj);
+        this->assertNotNull(obj2);
+        this->assertEqual(list_size(obj2->list_of_data), 1);
+        this->assertNotNull(obj2->list_of_data.at(0));
+        this->assertEqual(obj2->list_of_data.at(0)->name, data->name);
+    }
+
+}
