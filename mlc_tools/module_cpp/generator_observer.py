@@ -15,6 +15,7 @@ namespace @{namespace}
 {
     class ObservableBase{
     public:
+        virtual ~ObservableBase() = default;
         virtual void remove(void* object) = 0;
         virtual void remove(int object) = 0;
     };

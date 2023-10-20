@@ -15,7 +15,9 @@ class GeneratorDataStorage(GeneratorDataStorageBase):
 return DataStorage.__instance'''
 
     def get_pattern_getter(self):
-        return '''        if not self._loaded and name not in self.{map}:
+        return '''        if name == '':
+            return None
+        if not self._loaded and name not in self.{map}:
             from .{type} import {type}
             self.{map}[name] = {type}()
             self.{map}[name].name = name
@@ -66,8 +68,9 @@ return DataStorage.__instance'''
             method.operations.append(f"        self.{getter}(o.attrib['key'])")
             method.operations.append(f"    for o in {map_name}:")
             method.operations.append(f"        data = self.{getter}(o.attrib['key'])")
-            method.operations.append(f"        deserializer_data = DeserializerXml(o.find('value'))")
-            method.operations.append(f"        data.deserialize_xml(deserializer_data)")
+            method.operations.append(f"        if data:")
+            method.operations.append(f"            deserializer_data = DeserializerXml(o.find('value'))")
+            method.operations.append(f"            data.deserialize_xml(deserializer_data)")
 
     def add_deserialize_method(self, name):
         method = Function()

@@ -37,6 +37,7 @@ class data/DataUnit:storage
 	float float_value = 0
 	float float_value_without_default_value
 	SkillBase* skill
+	DataNonExist:link empty
 
 	int convert_float_to_int = 0
 
@@ -211,6 +212,9 @@ class TestDataAdd<ITestDataAdd>:test
         DataStorage::shared().get<DataAdd>("add_data");
         auto keys = DataStorage::shared().get_adds_keys();
         this->assertTrue(in_list("add_data", keys), "Additional data in DataStorage");
+
+        auto unit = DataStorage::shared().get<DataUnit>("unitname1");
+        this->assertTrue(unit->empty == nullptr, "empty is null");
     }
 }
 
