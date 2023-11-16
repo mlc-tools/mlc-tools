@@ -456,7 +456,7 @@ class Writer(WriterBase):
             def parse_object(container, obj):
                 add(container, obj)
                 for arg in obj.template_args:
-                    if cls.name == 'DataStorage':
+                    if cls.name == 'DataStorage' or cls.prefer_use_forward_declarations:
                         parse_object(forward_declarations, arg)
                     else:
                         parse_object(container, arg)

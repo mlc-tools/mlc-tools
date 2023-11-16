@@ -26,8 +26,10 @@ class Modifiers(object):
     pointer = ':pointer'
     ref = ':ref'
     generate = ':generate'
+    prefer_use_forward_declarations = ':prefer_use_forward_declarations'
 
     client = ':client'
     server = ':server'
     side_client = 'client'
     side_server = 'server'
+

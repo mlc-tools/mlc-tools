@@ -33,6 +33,7 @@ class Class(Object):
         self.auto_generated = True
         self.inner_classes = []
         self._linked = False
+        self.prefer_use_forward_declarations = False
 
         self.name = name
 
@@ -127,6 +128,8 @@ class Class(Object):
         self.is_inline = self.is_inline or Modifiers.inline in string
         self.is_virtual = self.is_virtual or Modifiers.virtual in string
         self.generate_set_function = self.generate_set_function or Modifiers.set_function in string
+        self.prefer_use_forward_declarations = self.prefer_use_forward_declarations or Modifiers.prefer_use_forward_declarations in string
+
         if Modifiers.server in string:
             self.side = Modifiers.side_server
         if Modifiers.client in string:
@@ -143,6 +146,8 @@ class Class(Object):
         string = string.replace(Modifiers.test, '')
         string = string.replace(Modifiers.inline, '')
         string = string.replace(Modifiers.virtual, '')
+        string = string.replace(Modifiers.prefer_use_forward_declarations, '')
+
         return string
 
     def generate_constructor(self):
