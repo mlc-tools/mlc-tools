@@ -29,10 +29,10 @@ class RegexPatternCpp(object):
         # FROM:
         #   list_remove_if(this->test_list_lambda, (value :> value == 3));
         (re.compile(r'list_remove_if\(([\w\d\-\>\[\]]+),\s*\((\w+)\s*:>\s*(.+)\)\)'), r'''
-auto iter = std::remove_if(\1.begin(), \1.end(), [](const auto& \2){
+auto iter = std::remove_if(\1.begin(), \1.end(), [&](const auto& \2){
     return \3;
 });
-\1.erase(iter, \1.end());
+\1.erase(iter, \1.end())
 ''', ['list_remove_if']),
 
         # lambdas
@@ -51,7 +51,7 @@ auto iter = std::remove_if(\1.begin(), \1.end(), [](const auto& \2){
         (re.compile(r'list_do_if\(([\w\d\-\>\.\[\]]+),\s*\((\w+)\s*:>\s*(.+?):>\s*(.+)\)\);'), r'''
         for(int __index__ = 0; __index__ < \1.size(); ++__index__)
         {
-            auto \2 = \1.at(__index__);
+            auto& \2 = \1.at(__index__);
             if(\3)
             {
                 auto __size__ = \1.size();
