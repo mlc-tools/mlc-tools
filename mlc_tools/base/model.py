@@ -55,7 +55,7 @@ class Model(object):
         self.generate_ref_counter = True
         self.user_includes = False
 
-        self.simple_types = ["int", "float", "bool", "string", 'int64_t', 'uint', 'uint64_t', 'double']
+        self.simple_types = ["int", "float", "bool", "string", 'int64_t', 'uint', 'unsigned', 'uint64_t', 'double']
 
         self.out_dict = None
         self.files = []

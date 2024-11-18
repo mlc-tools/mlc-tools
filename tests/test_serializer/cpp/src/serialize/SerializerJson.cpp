@@ -47,6 +47,22 @@ void SerializerJson::add_attribute(const std::string &key, const int64_t &value,
     }
 }
 
+void SerializerJson::add_attribute(const std::string &key, const unsigned int &value, unsigned int default_value)
+{
+    if (value != default_value)
+    {
+        _json[key] = value;
+    }
+}
+
+void SerializerJson::add_attribute(const std::string &key, const uint64_t &value, uint64_t default_value)
+{
+    if (value != default_value)
+    {
+        _json[key] = value;
+    }
+}
+
 void SerializerJson::add_attribute(const std::string &key, const bool &value, bool default_value)
 {
     if (value != default_value)
@@ -85,6 +101,16 @@ void SerializerJson::add_array_item(const int &value)
 }
 
 void SerializerJson::add_array_item(const int64_t &value)
+{
+    _json.append(value);
+}
+
+void SerializerJson::add_array_item(const unsigned int &value)
+{
+    _json.append(value);
+}
+
+void SerializerJson::add_array_item(const uint64_t &value)
 {
     _json.append(value);
 }
@@ -137,6 +163,16 @@ int DeserializerJson::get_attribute(const std::string &key, int default_value)
 int64_t DeserializerJson::get_attribute(const std::string &key, int64_t default_value)
 {
     return _json.isMember(key) ? _json[key].asInt64() : default_value;
+}
+
+unsigned int DeserializerJson::get_attribute(const std::string &key, unsigned int default_value)
+{
+    return _json.isMember(key) ? _json[key].asUInt() : default_value;
+}
+
+uint64_t DeserializerJson::get_attribute(const std::string &key, uint64_t default_value)
+{
+    return _json.isMember(key) ? _json[key].asUInt64() : default_value;
 }
 
 bool DeserializerJson::get_attribute(const std::string &key, bool default_value)

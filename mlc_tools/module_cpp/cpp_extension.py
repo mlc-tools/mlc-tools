@@ -907,6 +907,8 @@ public:
 
     void add_attribute(const std::string& key, const int& value, int default_value=0);
     void add_attribute(const std::string& key, const int64_t& value, int64_t default_value=0);
+    void add_attribute(const std::string& key, const unsigned int& value, unsigned int default_value=0);
+    void add_attribute(const std::string& key, const uint64_t& value, uint64_t default_value=0);
     void add_attribute(const std::string& key, const bool& value, bool default_value=false);
     void add_attribute(const std::string& key, const float& value, float default_value=0.f);
     void add_attribute(const std::string& key, const double& value, double default_value=0.f);
@@ -1290,6 +1292,8 @@ public:
     std::string get_name()const;
     int get_attribute(const std::string& key, int default_value=0);
     int64_t get_attribute(const std::string& key, int64_t default_value=0);
+    unsigned int get_attribute(const std::string& key, unsigned int default_value=0);
+    uint64_t get_attribute(const std::string& key, uint64_t default_value=0);
     bool get_attribute(const std::string& key, bool default_value=false);
     float get_attribute(const std::string& key, float default_value=0.f);
     double get_attribute(const std::string& key, double default_value=0.f);
@@ -1674,6 +1678,22 @@ void SerializerXml::add_attribute(const std::string &key, const int64_t &value, 
     }
 }
 
+void SerializerXml::add_attribute(const std::string &key, const unsigned int &value, unsigned int default_value)
+{
+    if (value != default_value)
+    {
+        _node->append_attribute(key.c_str()).set_value(value);
+    }
+}
+
+void SerializerXml::add_attribute(const std::string &key, const uint64_t &value, uint64_t default_value)
+{
+    if (value != default_value)
+    {
+        _node->append_attribute(key.c_str()).set_value(value);
+    }
+}
+
 void SerializerXml::add_attribute(const std::string &key, const bool &value, bool default_value)
 {
     if (value != default_value)
@@ -1748,6 +1768,16 @@ int DeserializerXml::get_attribute(const std::string &key, int default_value)
 int64_t DeserializerXml::get_attribute(const std::string &key, int64_t default_value)
 {
     return _node->attribute(key.c_str()).as_llong(default_value);
+}
+
+unsigned int DeserializerXml::get_attribute(const std::string &key, unsigned int default_value)
+{
+    return _node->attribute(key.c_str()).as_uint(default_value);
+}
+
+uint64_t DeserializerXml::get_attribute(const std::string &key, uint64_t default_value)
+{
+    return _node->attribute(key.c_str()).as_ullong(default_value);
 }
 
 bool DeserializerXml::get_attribute(const std::string &key, bool default_value)
@@ -1834,6 +1864,8 @@ public:
 
     void add_attribute(const std::string &key, const int &value, int default_value = 0);
     void add_attribute(const std::string &key, const int64_t &value, int64_t default_value = 0);
+    void add_attribute(const std::string &key, const unsigned int &value, unsigned int default_value = 0);
+    void add_attribute(const std::string &key, const uint64_t &value, uint64_t default_value = 0);
     void add_attribute(const std::string &key, const bool &value, bool default_value = false);
     void add_attribute(const std::string &key, const float &value, float default_value = 0.f);
     void add_attribute(const std::string &key, const double &value, double default_value = 0.f);
@@ -1841,6 +1873,8 @@ public:
 
     void add_array_item(const int &value);
     void add_array_item(const int64_t &value);
+    void add_array_item(const unsigned int &value);
+    void add_array_item(const uint64_t &value);
     void add_array_item(const bool &value);
     void add_array_item(const float &value);
     void add_array_item(const double &value);
@@ -2217,6 +2251,8 @@ public:
 
     int get_attribute(const std::string &key, int default_value = 0);
     int64_t get_attribute(const std::string &key, int64_t default_value = 0);
+    unsigned int get_attribute(const std::string &key, unsigned int default_value = 0);
+    uint64_t get_attribute(const std::string &key, uint64_t default_value = 0);
     bool get_attribute(const std::string &key, bool default_value = false);
     float get_attribute(const std::string &key, float default_value = 0.f);
     double get_attribute(const std::string &key, double default_value = 0.f);
@@ -2224,6 +2260,8 @@ public:
 
     void get_array_item(int &value);
     void get_array_item(int64_t &value);
+    void get_array_item(unsigned int &value);
+    void get_array_item(uint64_t &value);
     void get_array_item(bool &value);
     void get_array_item(float &value);
     void get_array_item(double &value);
@@ -2595,6 +2633,22 @@ void SerializerJson::add_attribute(const std::string &key, const int64_t &value,
     }
 }
 
+void SerializerJson::add_attribute(const std::string &key, const unsigned int &value, unsigned int default_value)
+{
+    if (value != default_value)
+    {
+        _json[key] = value;
+    }
+}
+
+void SerializerJson::add_attribute(const std::string &key, const uint64_t &value, uint64_t default_value)
+{
+    if (value != default_value)
+    {
+        _json[key] = value;
+    }
+}
+
 void SerializerJson::add_attribute(const std::string &key, const bool &value, bool default_value)
 {
     if (value != default_value)
@@ -2633,6 +2687,16 @@ void SerializerJson::add_array_item(const int &value)
 }
 
 void SerializerJson::add_array_item(const int64_t &value)
+{
+    _json.append(value);
+}
+
+void SerializerJson::add_array_item(const unsigned int &value)
+{
+    _json.append(value);
+}
+
+void SerializerJson::add_array_item(const uint64_t &value)
 {
     _json.append(value);
 }
@@ -2685,6 +2749,16 @@ int DeserializerJson::get_attribute(const std::string &key, int default_value)
 int64_t DeserializerJson::get_attribute(const std::string &key, int64_t default_value)
 {
     return _json.isMember(key) ? _json[key].asInt64() : default_value;
+}
+
+unsigned int DeserializerJson::get_attribute(const std::string &key, unsigned int default_value)
+{
+    return _json.isMember(key) ? _json[key].asUInt() : default_value;
+}
+
+uint64_t DeserializerJson::get_attribute(const std::string &key, uint64_t default_value)
+{
+    return _json.isMember(key) ? _json[key].asUInt64() : default_value;
 }
 
 bool DeserializerJson::get_attribute(const std::string &key, bool default_value)
@@ -2787,7 +2861,7 @@ template<class T>
 struct is_attribute
 {
     constexpr static bool value = (std::is_same<int, T>::value ||
-                                   std::is_same<unsigned, T>::value ||
+                                   std::is_same<unsigned int, T>::value ||
                                    std::is_same<int64_t, T>::value ||
                                    std::is_same<uint64_t, T>::value ||
                                    std::is_same<bool, T>::value ||

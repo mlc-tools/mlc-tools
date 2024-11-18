@@ -29,7 +29,8 @@ class RegexPatternCpp(object):
         # FROM:
         #   list_remove_if(this->test_list_lambda, (value :> value == 3));
         (re.compile(r'list_remove_if\(([\w\d\-\>\[\]]+),\s*\((\w+)\s*:>\s*(.+)\)\)'), r'''
-auto iter = std::remove_if(\1.begin(), \1.end(), [&](const auto& \2){
+auto iter = std::remove_if(\1.begin(), \1.end(), [&](const auto& \2)
+{
     return \3;
 });
 \1.erase(iter, \1.end())
@@ -66,7 +67,7 @@ auto iter = std::remove_if(\1.begin(), \1.end(), [&](const auto& \2){
 
         (re.compile(r'throw new Exception\((.*?)\)'), r'throw std::exception(\1)', ['throw ']),
         (re.compile(r'(\w+)\*\s+(\w+) = new\s*(\w+)\s*\(\s*\)'), r'auto \2 = make_intrusive<\3>()', ['new']),
-        (re.compile(r'new\s*(\w+)\s*\((.*)\)'), r'make_intrusive<\1>(\2)', ['new']),
+        (re.compile(r'\bnew\s*(\w+)\s*\((.*)\)'), r'make_intrusive<\1>(\2)', ['new']),
         (re.compile(r'\blist<([<:>\w\s\*&]+)>\s*(\w+)'), r'std::vector<\1> \2', ['list<']),
         (re.compile(r'\bmap<([<:>\w\s\*&]+),\s*([<:>\w\s\*&]+)>\s*(\w+)'), r'std::map<\1, \2> \3', ['map<']),
         (re.compile(r'std::strcat\((.+?),\s*(.+?)\)'), r'(std::string(\1) + std::string(\2))', ['std::strcat']),

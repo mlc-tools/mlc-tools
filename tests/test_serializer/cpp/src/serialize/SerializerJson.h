@@ -34,6 +34,8 @@ public:
 
     void add_attribute(const std::string &key, const int &value, int default_value = 0);
     void add_attribute(const std::string &key, const int64_t &value, int64_t default_value = 0);
+    void add_attribute(const std::string &key, const unsigned int &value, unsigned int default_value = 0);
+    void add_attribute(const std::string &key, const uint64_t &value, uint64_t default_value = 0);
     void add_attribute(const std::string &key, const bool &value, bool default_value = false);
     void add_attribute(const std::string &key, const float &value, float default_value = 0.f);
     void add_attribute(const std::string &key, const double &value, double default_value = 0.f);
@@ -41,6 +43,8 @@ public:
 
     void add_array_item(const int &value);
     void add_array_item(const int64_t &value);
+    void add_array_item(const unsigned int &value);
+    void add_array_item(const uint64_t &value);
     void add_array_item(const bool &value);
     void add_array_item(const float &value);
     void add_array_item(const double &value);
@@ -417,6 +421,8 @@ public:
 
     int get_attribute(const std::string &key, int default_value = 0);
     int64_t get_attribute(const std::string &key, int64_t default_value = 0);
+    unsigned int get_attribute(const std::string &key, unsigned int default_value = 0);
+    uint64_t get_attribute(const std::string &key, uint64_t default_value = 0);
     bool get_attribute(const std::string &key, bool default_value = false);
     float get_attribute(const std::string &key, float default_value = 0.f);
     double get_attribute(const std::string &key, double default_value = 0.f);
@@ -424,6 +430,8 @@ public:
 
     void get_array_item(int &value);
     void get_array_item(int64_t &value);
+    void get_array_item(unsigned int &value);
+    void get_array_item(uint64_t &value);
     void get_array_item(bool &value);
     void get_array_item(float &value);
     void get_array_item(double &value);

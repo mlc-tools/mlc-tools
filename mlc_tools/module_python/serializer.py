@@ -129,6 +129,7 @@ class Serializer(SerializerBase):
             'map': 'dict',
             'int': 'int',
             'uint': 'int',
+            'unsigned': 'int',
             'int64_t': 'int',
             'uint64_t': 'int',
             'float': 'float',

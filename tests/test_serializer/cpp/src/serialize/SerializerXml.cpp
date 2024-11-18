@@ -50,6 +50,22 @@ void SerializerXml::add_attribute(const std::string &key, const int64_t &value, 
     }
 }
 
+void SerializerXml::add_attribute(const std::string &key, const unsigned int &value, unsigned int default_value)
+{
+    if (value != default_value)
+    {
+        _node->append_attribute(key.c_str()).set_value(value);
+    }
+}
+
+void SerializerXml::add_attribute(const std::string &key, const uint64_t &value, uint64_t default_value)
+{
+    if (value != default_value)
+    {
+        _node->append_attribute(key.c_str()).set_value(value);
+    }
+}
+
 void SerializerXml::add_attribute(const std::string &key, const bool &value, bool default_value)
 {
     if (value != default_value)
@@ -124,6 +140,16 @@ int DeserializerXml::get_attribute(const std::string &key, int default_value)
 int64_t DeserializerXml::get_attribute(const std::string &key, int64_t default_value)
 {
     return _node->attribute(key.c_str()).as_llong(default_value);
+}
+
+unsigned int DeserializerXml::get_attribute(const std::string &key, unsigned int default_value)
+{
+    return _node->attribute(key.c_str()).as_uint(default_value);
+}
+
+uint64_t DeserializerXml::get_attribute(const std::string &key, uint64_t default_value)
+{
+    return _node->attribute(key.c_str()).as_ullong(default_value);
 }
 
 bool DeserializerXml::get_attribute(const std::string &key, bool default_value)

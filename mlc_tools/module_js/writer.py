@@ -47,11 +47,7 @@ class Writer(WriterBase):
         if (value is None or value == '"NONE"') and not obj.is_pointer:
             if obj.type == "string":
                 value = '""'
-            elif obj.type == "int":
-                value = "0"
-            elif obj.type == "float":
-                value = "0"
-            elif obj.type == "uint":
+            elif obj.type in ["uint", 'unsigned', 'int', 'float', 'int64_t', 'uint64_t']:
                 value = "0"
             elif obj.type == "bool":
                 value = "false"

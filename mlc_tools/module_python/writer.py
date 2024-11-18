@@ -96,7 +96,7 @@ class Writer(WriterBase):
                 value = "0"
             if type_ == "float":
                 value = "0"
-            if type_ == "uint":
+            if type_ in ["uint", 'unsigned']:
                 value = "0"
             if type_ == "bool":
                 value = "False"

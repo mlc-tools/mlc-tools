@@ -365,11 +365,11 @@ class Parser(object):
         in_serialize = False
         in_initial_value = initial_value is None
         pattern = []
-        if type_object in ['int64_t', 'uint', 'uint64_t']:
+        if type_object in ['int64_t', 'uint', 'uint64_t', 'unsigned']:
             type_object = 'int'
         if type_object in ['double']:
             type_object = 'float'
-        if type_object in ['list<int64_t>', 'list<uint>', 'list<uint64_t>']:
+        if type_object in ['list<int64_t>', 'list<uint>', 'list<uint64_t>', 'list<unsigned>']:
             type_object = 'list<int>'
         if type_object in ['list<double>']:
             type_object = 'list<float>'

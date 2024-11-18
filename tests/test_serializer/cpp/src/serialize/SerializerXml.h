@@ -31,6 +31,8 @@ public:
 
     void add_attribute(const std::string& key, const int& value, int default_value=0);
     void add_attribute(const std::string& key, const int64_t& value, int64_t default_value=0);
+    void add_attribute(const std::string& key, const unsigned int& value, unsigned int default_value=0);
+    void add_attribute(const std::string& key, const uint64_t& value, uint64_t default_value=0);
     void add_attribute(const std::string& key, const bool& value, bool default_value=false);
     void add_attribute(const std::string& key, const float& value, float default_value=0.f);
     void add_attribute(const std::string& key, const double& value, double default_value=0.f);
@@ -414,6 +416,8 @@ public:
     std::string get_name()const;
     int get_attribute(const std::string& key, int default_value=0);
     int64_t get_attribute(const std::string& key, int64_t default_value=0);
+    unsigned int get_attribute(const std::string& key, unsigned int default_value=0);
+    uint64_t get_attribute(const std::string& key, uint64_t default_value=0);
     bool get_attribute(const std::string& key, bool default_value=false);
     float get_attribute(const std::string& key, float default_value=0.f);
     double get_attribute(const std::string& key, double default_value=0.f);
