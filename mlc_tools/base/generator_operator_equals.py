@@ -44,6 +44,14 @@ class GeneratorOperatorEqualsBase(object):
         for member in cls.members:
             if member.is_static or member.is_const or member.type == 'Observable':
                 continue
+            skip = False
+            for t in member.template_args:
+                if t.type == 'Observable':
+                    skip = True
+                    break
+            if skip:
+                continue;
+
             pattern = self.get_compare_method_pattern(cls, member)
             operator.operations.append(pattern.format(member.name))
         operator.operations.append('return result;')

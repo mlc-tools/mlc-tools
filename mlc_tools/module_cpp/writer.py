@@ -573,6 +573,7 @@ class Writer(WriterBase):
             'bool',
             'float',
             'void',
+            'Observable',
         ]
         predefined = {
             'Json::Value': 'namespace Json\n{\nclass Value;\n}\n',

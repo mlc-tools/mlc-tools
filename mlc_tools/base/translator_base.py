@@ -10,6 +10,12 @@ class TranslatorBase(object):
             for member in cls.members:
                 if member.type == 'Observable':
                     member.is_runtime = True
+                else:
+                    for t in member.template_args:
+                        if t.type == 'Observable':
+                            member.is_runtime = True
+                            break
+
             if cls.type == 'enum':
                 self.convert_to_enum(cls)
             for method in cls.functions:

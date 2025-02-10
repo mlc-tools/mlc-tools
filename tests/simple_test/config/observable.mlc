@@ -7,6 +7,9 @@ class observable/ObservableClass
 	Observable<void(string)> eventTestString2
 	Observable<void(DataUnit:link)> eventTestDataLink
 	Observable<void(DataUnit*)> eventTestDataPointer
+
+	map<int, Observable<void()>> mapEventsVoid
+	map<int, Observable<void(int)>> mapEventsInt
 }
 
 class observable/ListenerClass
