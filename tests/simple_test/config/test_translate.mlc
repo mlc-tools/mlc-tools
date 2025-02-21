@@ -30,6 +30,7 @@ class TestTranslates<ITestTranslates>
     }
     map<string, Model*> test_map_models
     list<int> test_list_lambda
+    list<Model*> test_list_lambda2
     list<int> test_list_swap1
     list<int> test_list_swap2
 
@@ -89,6 +90,17 @@ class TestTranslates<ITestTranslates>
 
         this->assertEqual(list_size(this->test_list_lambda), 1);
         this->assertEqual(this->test_list_lambda[0], 4);
+    }
+    function void test_list_do():cpp:py
+    {
+        list_clear(this->test_list_lambda2);
+        list_push(this->test_list_lambda2, new Model());
+        list_push(this->test_list_lambda2, new Model());
+        std::string name = "unitname1";
+        list_do(this->test_list_lambda2, (model :> model->data = DataStorage::shared().get<DataUnit>(name)));
+
+        this->assertEqual(this->test_list_lambda2[0]->data->name, name);
+        this->assertEqual(this->test_list_lambda2[1]->data->name, name);
     }
     function void test_dummy_function()
     {

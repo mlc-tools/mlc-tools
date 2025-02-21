@@ -62,8 +62,16 @@ auto iter = std::remove_if(\1.begin(), \1.end(), [&](const auto& \2)
                     __index__ -= 1;
                 }
             }
-        }
-    ''', ['list_do_if']),
+        }''', ['list_do_if']),
+
+        # FROM:
+        #   list_do(this->test_list_lambda, (value :> some_action);
+        (re.compile(r'list_do\(([\w\d\-\>\.\[\]]+),\s*\((\w+)\s*:>\s*(.+)\)\)'), r'''
+        for(int __index__ = 0; __index__ < \1.size(); ++__index__)
+        {
+            auto& \2 = \1.at(__index__);
+            \3;
+        }''', ['list_do']),
 
         (re.compile(r'throw new Exception\((.*?)\)'), r'throw std::exception(\1)', ['throw ']),
         (re.compile(r'(\w+)\*\s+(\w+) = new\s*(\w+)\s*\(\s*\)'), r'auto \2 = make_intrusive<\3>()', ['new']),

@@ -63,6 +63,15 @@ class RegexPatternPython(object):
     }
     ''', ['list_do_if']),
 
+        # FROM:
+        #   list_do(this->test_list_lambda, (value :> some_action);
+        (re.compile(r'list_do\(([\w\d\-\>\.\[\]]+),\s*\((\w+)\s*:>\s*(.+)\)\)'), r'''
+    for __index__ in range(len(\1)):
+    {
+        \2 = \1[__index__]
+        \3
+    }''', ['list_do']),
+
         (re.compile(r'\bDataStorage::shared\(\).get<(\w+)>'), r'DataStorage::shared().get\1', ['DataStorage::shared']),
         (re.compile(r'\bFactory::(.+)<\w+>'), r'Factory.\1', ['Factory::']),
         (re.compile(r'\bfor\s*\(\s*\w+[\s&\*]*(\w+)\s*:\s*(.+)\s*\)'), r'for \1 in \2:', ['for']),
