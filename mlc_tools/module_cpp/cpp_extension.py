@@ -174,7 +174,15 @@ namespace @{namespace}
     {
         Json::Value json;
         Json::Reader reader;
-        reader.parse(payload, json);
+        if(!reader.parse(payload, json))
+        {
+            return nullptr;
+        }
+        
+        if(json.getMemberNames().size() == 0)
+        {
+            return nullptr;
+        }
 
         auto type = json.getMemberNames()[0];
         DeserializerJson deserializer(json[type]);
