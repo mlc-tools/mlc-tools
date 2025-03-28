@@ -139,6 +139,22 @@ class TestTranslates<ITestTranslates>
         this->assertTrue(in_list("", l2));
         this->assertTrue(list_size(l3) == 1);
     }
+    function void test_list_index()
+    {
+        list<int> l;
+        list_push(l, 1);
+        list_push(l, 2);
+        list_push(l, 5);
+        list_push(l, 4);
+        list_push(l, 3);
+
+        this->assertTrue(list_index(l, 1) == 0);
+        this->assertTrue(list_index(l, 2) == 1);
+        this->assertTrue(list_index(l, 5) == 2);
+        this->assertTrue(list_index(l, 4) == 3);
+        this->assertTrue(list_index(l, 3) == 4);
+        this->assertTrue(list_index(l, 0) == -1);
+    }
 
     function void test_map()
     {

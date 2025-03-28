@@ -72,6 +72,15 @@ namespace @{namespace}
     {
         return static_cast<int>(vector.size());
     }
+    
+    template <class T>
+    int list_index(const std::vector<T>& list, const T& t)
+    {
+        auto iter = std::find(list.begin(), list.end(), t);
+        if(iter != list.end())
+            return iter - list.begin();
+        return -1;
+    }
 
     template <class T>
     void list_clear(std::vector<T>& vector)
@@ -235,7 +244,10 @@ namespace @{namespace}
         auto root = doc.root().first_child();
         DeserializerXml deserializer(root);
         auto command = Factory::shared().build<TType>(root.name());
-        command->deserialize_xml(deserializer);
+        if(command)
+        {
+            command->deserialize_xml(deserializer);
+        }
         return command;
     }
 
@@ -281,7 +293,8 @@ namespace @{namespace}
         auto root = doc.root().first_child();
         auto command = Factory::shared().build<TType>(root.name());
         DeserializerXml deserializer(root);
-        command->deserialize_xml(deserializer);
+        if(command)
+            command->deserialize_xml(deserializer);
         return command;
     }
 

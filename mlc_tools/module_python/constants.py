@@ -100,6 +100,9 @@ def list_clear(container):
 def list_size(container):
     return len(container)
     
+def list_index(container, item):
+    return container.index(item) if item in container else -1
+    
 def list_resize(container, size):
     list_truncate(container, size)
     while len(container) < size:
