@@ -315,7 +315,15 @@ namespace @{namespace}
     {
         Json::Value json;
         Json::Reader reader;
-        reader.parse(payload, json);
+        if(!reader.parse(payload, json))
+        {
+            return nullptr;
+        }
+        
+        if(json.getMemberNames().size() == 0)
+        {
+            return nullptr;
+        }
 
         auto type = json.getMemberNames()[0];
         DeserializerJson deserializer(json[type]);
@@ -337,6 +345,9 @@ namespace @{namespace}
     {{end_format=both}}
     
     std::string fs_get_string(const std::string& path);
+    
+    template<typename T> struct Default { static constexpr T value = 0; };
+    template<> struct Default<std::string> {static const std::string value;};
 }
 
 #endif
@@ -352,6 +363,8 @@ FUNCTIONS_CPP = '''
 
 namespace @{namespace}
 {
+    const std::string Default<std::string>::value;
+    
     float random_float()
     {
         return std::rand() / static_cast<float>(RAND_MAX);

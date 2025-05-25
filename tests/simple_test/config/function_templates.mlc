@@ -89,4 +89,15 @@ class TestTemplateMethod<ITestTemplateMethod>:tests
         this->assertNull(test->get<BarClassFromBase>("base"), "test->get<BarClassFromBase>'base'");
         this->assertNull(test->get<BarClassFromBase>("foo"), "test->get<BarClassFromBase>'foo'");
     }
+
+    fn void test_default():cpp
+    {
+        this->assertEqual(Default<int>::value, 0);
+        this->assertEqual(Default<unsigned int>::value, 0u);
+        this->assertEqual(Default<int64_t>::value, 0ll);
+        this->assertEqual(Default<float>::value, 0.f);
+        this->assertEqual(Default<bool>::value, false);
+        this->assertEqual(Default<std::string>::value, std::string(""));
+    }
+
 }
