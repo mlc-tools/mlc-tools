@@ -5,7 +5,7 @@
 #include "TestEnum.h"
 #include <string>
 #include "mg_extensions.h"
-#include "SerializerJson.h"
+#include "SerializerBinary.h"
 #include "SerializerXml.h"
 
 namespace mg
@@ -218,7 +218,7 @@ namespace mg
 
     }
 
-    void AllTypes::serialize_json(SerializerJson& serializer) const
+    void AllTypes::serialize_binary(SerializerBinary& serializer) const
     {
         serializer.serialize(int_value0, "int_value0", int(0));
         serializer.serialize(int_value1, "int_value1", int(0));
@@ -251,7 +251,7 @@ namespace mg
 
     }
 
-    void AllTypes::deserialize_json(DeserializerJson& deserializer)
+    void AllTypes::deserialize_binary(DeserializerBinary& deserializer)
     {
         deserializer.deserialize(int_value0, "int_value0", int(0));
         deserializer.deserialize(int_value1, "int_value1", int(0));

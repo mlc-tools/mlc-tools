@@ -4,7 +4,7 @@
 #include "DataUnit.h"
 #include <string>
 #include "../mg_extensions.h"
-#include "SerializerJson.h"
+#include "SerializerBinary.h"
 #include "SerializerXml.h"
 
 namespace mg
@@ -88,7 +88,7 @@ namespace mg
 
     }
 
-    void DataUnit::serialize_json(SerializerJson& serializer) const
+    void DataUnit::serialize_binary(SerializerBinary& serializer) const
     {
         serializer.serialize(name, "name", std::string(""));
         serializer.serialize(visual, "visual");
@@ -98,7 +98,7 @@ namespace mg
 
     }
 
-    void DataUnit::deserialize_json(DeserializerJson& deserializer)
+    void DataUnit::deserialize_binary(DeserializerBinary& deserializer)
     {
         deserializer.deserialize(name, "name", std::string(""));
         deserializer.deserialize(visual, "visual");

@@ -12,8 +12,8 @@ namespace mg
 {
     class SerializerXml;
     class DeserializerXml;
-    class SerializerJson;
-    class DeserializerJson;
+    class SerializerBinary;
+    class DeserializerBinary;
     class Logger;
 
     class DataUnit
@@ -29,8 +29,8 @@ namespace mg
         std::string get_type() const;
         void serialize_xml(SerializerXml& serializer) const;
         void deserialize_xml(DeserializerXml& deserializer);
-        void serialize_json(SerializerJson& serializer) const;
-        void deserialize_json(DeserializerJson& deserializer);
+        void serialize_binary(SerializerBinary& serializer) const;
+        void deserialize_binary(DeserializerBinary& deserializer);
 
         std::string name;
         VisualUnit visual;

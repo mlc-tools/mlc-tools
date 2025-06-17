@@ -1,7 +1,7 @@
 #include "intrusive_ptr.h"
 #include "FooObject.h"
 #include "serialize/SerializerXml.h"
-#include "serialize/SerializerJson.h"
+#include "serialize/SerializerBinary.h"
 
 namespace mg
 {
@@ -43,12 +43,12 @@ namespace mg
         xml.deserialize(value, "value", 0);
         xml.deserialize(name, "name", std::string(""));
     }
-    void FooObject::serialize_json(SerializerJson& json) const
+    void FooObject::serialize_binary(SerializerBinary& json) const
     {
         json.serialize(value, "value", 0);
         json.serialize(name, "name", std::string(""));
     }
-    void FooObject::deserialize_json(DeserializerJson& json)
+    void FooObject::deserialize_binary(DeserializerBinary& json)
     {
         json.deserialize(value, "value", 0);
         json.deserialize(name, "name", std::string(""));
@@ -71,15 +71,15 @@ namespace mg
         deserializer.deserialize(foo, "foo");
         deserializer.deserialize(foo_ptr, "foo_ptr");
     }
-    void BarObject::serialize_json(SerializerJson& serializer) const
+    void BarObject::serialize_binary(SerializerBinary& serializer) const
     {
-        FooObject::serialize_json(serializer);
+        FooObject::serialize_binary(serializer);
         serializer.serialize(foo, "foo");
         serializer.serialize(foo_ptr, "foo_ptr");
     }
-    void BarObject::deserialize_json(DeserializerJson& json)
+    void BarObject::deserialize_binary(DeserializerBinary& json)
     {
-        FooObject::deserialize_json(json);
+        FooObject::deserialize_binary(json);
         json.deserialize(foo, "foo");
         json.deserialize(foo_ptr, "foo_ptr");
     }

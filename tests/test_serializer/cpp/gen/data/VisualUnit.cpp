@@ -2,7 +2,7 @@
 #include "../mg_Factory.h"
 #include "VisualUnit.h"
 #include "../mg_extensions.h"
-#include "SerializerJson.h"
+#include "SerializerBinary.h"
 #include "SerializerXml.h"
 
 namespace mg
@@ -70,14 +70,14 @@ namespace mg
 
     }
 
-    void VisualUnit::serialize_json(SerializerJson& serializer) const
+    void VisualUnit::serialize_binary(SerializerBinary& serializer) const
     {
         serializer.serialize(name, "name", std::string(""));
         serializer.serialize(icon, "icon", std::string(""));
 
     }
 
-    void VisualUnit::deserialize_json(DeserializerJson& deserializer)
+    void VisualUnit::deserialize_binary(DeserializerBinary& deserializer)
     {
         deserializer.deserialize(name, "name", std::string(""));
         deserializer.deserialize(icon, "icon", std::string(""));

@@ -4,7 +4,7 @@
 #include "data/DataUnit.h"
 #include <string>
 #include "mg_extensions.h"
-#include "SerializerJson.h"
+#include "SerializerBinary.h"
 #include "SerializerXml.h"
 
 namespace mg
@@ -40,11 +40,11 @@ namespace mg
 
     void DataStorage::initialize_json(const std::string& content) const
     {
-        Json::Value json;
-        Json::Reader reader;
-        reader.parse(content, json);
-        DeserializerJson deserializer(json);
-        const_cast<DataStorage*>(this)->deserialize_json(deserializer);
+        std::vector<unsigned char> data;
+        data.assign(content.begin(), content.end());
+        BinaryFormat json(data);
+        DeserializerBinary deserializer(json);
+        const_cast<DataStorage*>(this)->deserialize_binary(deserializer);
         const_cast<DataStorage*>(this)->_loaded = true;
     }
 
@@ -75,13 +75,13 @@ namespace mg
 
     }
 
-    void DataStorage::serialize_json(SerializerJson& serializer) const
+    void DataStorage::serialize_binary(SerializerBinary& serializer) const
     {
 //        serializer.serialize(units, "units");
 
     }
 
-    void DataStorage::deserialize_json(DeserializerJson& deserializer)
+    void DataStorage::deserialize_binary(DeserializerBinary& deserializer)
     {
 //        deserializer.deserialize(units, "units");
     }

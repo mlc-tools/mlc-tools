@@ -2,7 +2,7 @@
 #include "mg_Factory.h"
 #include "AllTypesChildren.h"
 #include "mg_extensions.h"
-#include "SerializerJson.h"
+#include "SerializerBinary.h"
 #include "SerializerXml.h"
 
 namespace mg
@@ -66,13 +66,13 @@ namespace mg
 
     }
 
-    void AllTypesChildren::serialize_json(SerializerJson& serializer) const
+    void AllTypesChildren::serialize_binary(SerializerBinary& serializer) const
     {
         serializer.serialize(value, "value", int(0));
 
     }
 
-    void AllTypesChildren::deserialize_json(DeserializerJson& deserializer)
+    void AllTypesChildren::deserialize_binary(DeserializerBinary& deserializer)
     {
         deserializer.deserialize(value, "value", int(0));
 

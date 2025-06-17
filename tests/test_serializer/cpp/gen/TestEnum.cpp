@@ -2,7 +2,7 @@
 #include "mg_Factory.h"
 #include "TestEnum.h"
 #include "mg_extensions.h"
-#include "SerializerJson.h"
+#include "SerializerBinary.h"
 #include "SerializerXml.h"
 
 namespace mg

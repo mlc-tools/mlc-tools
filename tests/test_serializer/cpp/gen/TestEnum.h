@@ -10,8 +10,8 @@ namespace mg
 {
     class SerializerXml;
     class DeserializerXml;
-    class SerializerJson;
-    class DeserializerJson;
+    class SerializerBinary;
+    class DeserializerBinary;
 
     class TestEnum : public BaseEnum
     {

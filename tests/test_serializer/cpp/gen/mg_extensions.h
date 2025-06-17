@@ -14,7 +14,7 @@
 #include "jsoncpp/json.h"
 #include "mg_Factory.h"
 #include "SerializerXml.h"
-#include "SerializerJson.h"
+#include "SerializerBinary.h"
 
 namespace mg
 {

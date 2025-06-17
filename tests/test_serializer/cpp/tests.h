@@ -8,7 +8,7 @@
 #include "data/DataUnit.h"
 #include "AllTypesChildren.h"
 #include "src/serialize/SerializerXml.h"
-#include "src/serialize/SerializerJson.h"
+#include "src/serialize/SerializerBinary.h"
 #include "intrusive_ptr.h"
 
 using namespace mg;
@@ -25,15 +25,9 @@ inline void log(const pugi::xml_document &document)
 {
     std::cout << "XML:" << std::endl << toStr(document) << std::endl;
 }
-inline std::string toStr(const Json::Value &json)
+inline void log(const BinaryFormat &json)
 {
-    Json::StreamWriterBuilder wbuilder;
-    wbuilder["indentation"] = " ";
-    return Json::writeString(wbuilder, json);
-}
-inline void log(const Json::Value &json)
-{
-    std::cout << "JSON:" << std::endl << toStr(json) << std::endl;
+    std::cout << "BinaryFormat: (not printed)" << std::endl;
 }
 
 
@@ -65,7 +59,7 @@ inline void test_0_xml()
     assert(value == deserialized_value);
 }
 
-inline void test_1_json()
+inline void test_1_binary()
 {
     std::map<int, int> object1;
     std::map<int, int> object2;
@@ -74,14 +68,12 @@ inline void test_1_json()
     auto value = 123;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
-    std::cout << std::endl << ",\"map<int|int>\":" << std::endl; 
-    log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -120,7 +112,7 @@ inline void test_2_xml()
     assert(value == deserialized_value);
 }
 
-inline void test_3_json()
+inline void test_3_binary()
 {
     std::map<int, bool> object1;
     std::map<int, bool> object2;
@@ -129,14 +121,14 @@ inline void test_3_json()
     auto value = true;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<int|bool>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -184,14 +176,14 @@ inline void test_5_json()
     auto value = 123.5f;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<int|float>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -239,14 +231,14 @@ inline void test_7_json()
     auto value = "434312some_random";
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<int|std::string>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -294,14 +286,14 @@ inline void test_9_json()
     auto value = TestEnum::value2;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<int|TestEnum>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -349,14 +341,14 @@ inline void test_11_json()
     auto value = DataStorage::shared().get<DataUnit>("unit1");
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<int|const DataUnit*>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -404,14 +396,14 @@ inline void test_13_json()
     auto value = AllTypesChildren();
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<int|AllTypesChildren>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -459,14 +451,14 @@ inline void test_15_json()
     auto value = make_intrusive<AllTypesChildren>();
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<int|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -514,14 +506,14 @@ inline void test_17_json()
     auto value = std::vector<int>{1, 2, 3, 4};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<int|std::vector<int>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -569,14 +561,14 @@ inline void test_19_json()
     auto value = std::vector<std::vector<bool>>{{true, false}, {false, true}};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<int|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -624,14 +616,14 @@ inline void test_21_json()
     auto value = std::map<int, int>{std::make_pair(1, 2), std::make_pair(2, 3)};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<int|std::map<int, int>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -679,14 +671,14 @@ inline void test_23_json()
     auto value = 123;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<bool|int>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -734,14 +726,14 @@ inline void test_25_json()
     auto value = true;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<bool|bool>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -789,14 +781,14 @@ inline void test_27_json()
     auto value = 123.5f;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<bool|float>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -844,14 +836,14 @@ inline void test_29_json()
     auto value = "434312some_random";
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<bool|std::string>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -899,14 +891,14 @@ inline void test_31_json()
     auto value = TestEnum::value2;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<bool|TestEnum>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -954,14 +946,14 @@ inline void test_33_json()
     auto value = DataStorage::shared().get<DataUnit>("unit1");
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<bool|const DataUnit*>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -1009,14 +1001,14 @@ inline void test_35_json()
     auto value = AllTypesChildren();
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<bool|AllTypesChildren>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -1064,14 +1056,14 @@ inline void test_37_json()
     auto value = make_intrusive<AllTypesChildren>();
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<bool|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -1119,14 +1111,14 @@ inline void test_39_json()
     auto value = std::vector<int>{1, 2, 3, 4};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<bool|std::vector<int>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -1174,14 +1166,14 @@ inline void test_41_json()
     auto value = std::vector<std::vector<bool>>{{true, false}, {false, true}};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<bool|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -1229,14 +1221,14 @@ inline void test_43_json()
     auto value = std::map<int, int>{std::make_pair(1, 2), std::make_pair(2, 3)};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<bool|std::map<int, int>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -1284,14 +1276,14 @@ inline void test_45_json()
     auto value = 123;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<float|int>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -1339,14 +1331,14 @@ inline void test_47_json()
     auto value = true;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<float|bool>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -1394,14 +1386,14 @@ inline void test_49_json()
     auto value = 123.5f;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<float|float>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -1449,14 +1441,14 @@ inline void test_51_json()
     auto value = "434312some_random";
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<float|std::string>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -1504,14 +1496,14 @@ inline void test_53_json()
     auto value = TestEnum::value2;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<float|TestEnum>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -1559,14 +1551,14 @@ inline void test_55_json()
     auto value = DataStorage::shared().get<DataUnit>("unit1");
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<float|const DataUnit*>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -1614,14 +1606,14 @@ inline void test_57_json()
     auto value = AllTypesChildren();
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<float|AllTypesChildren>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -1669,14 +1661,14 @@ inline void test_59_json()
     auto value = make_intrusive<AllTypesChildren>();
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<float|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -1724,14 +1716,14 @@ inline void test_61_json()
     auto value = std::vector<int>{1, 2, 3, 4};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<float|std::vector<int>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -1779,14 +1771,14 @@ inline void test_63_json()
     auto value = std::vector<std::vector<bool>>{{true, false}, {false, true}};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<float|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -1834,14 +1826,14 @@ inline void test_65_json()
     auto value = std::map<int, int>{std::make_pair(1, 2), std::make_pair(2, 3)};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<float|std::map<int, int>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -1889,14 +1881,14 @@ inline void test_67_json()
     auto value = 123;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::string|int>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -1944,14 +1936,14 @@ inline void test_69_json()
     auto value = true;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::string|bool>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -1999,14 +1991,14 @@ inline void test_71_json()
     auto value = 123.5f;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::string|float>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -2054,14 +2046,14 @@ inline void test_73_json()
     auto value = "434312some_random";
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::string|std::string>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -2109,14 +2101,14 @@ inline void test_75_json()
     auto value = TestEnum::value2;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::string|TestEnum>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -2164,14 +2156,14 @@ inline void test_77_json()
     auto value = DataStorage::shared().get<DataUnit>("unit1");
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::string|const DataUnit*>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -2219,14 +2211,14 @@ inline void test_79_json()
     auto value = AllTypesChildren();
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::string|AllTypesChildren>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -2274,14 +2266,14 @@ inline void test_81_json()
     auto value = make_intrusive<AllTypesChildren>();
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::string|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -2329,14 +2321,14 @@ inline void test_83_json()
     auto value = std::vector<int>{1, 2, 3, 4};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::string|std::vector<int>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -2384,14 +2376,14 @@ inline void test_85_json()
     auto value = std::vector<std::vector<bool>>{{true, false}, {false, true}};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::string|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -2439,14 +2431,14 @@ inline void test_87_json()
     auto value = std::map<int, int>{std::make_pair(1, 2), std::make_pair(2, 3)};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::string|std::map<int, int>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -2494,14 +2486,14 @@ inline void test_89_json()
     auto value = 123;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<TestEnum|int>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -2549,14 +2541,14 @@ inline void test_91_json()
     auto value = true;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<TestEnum|bool>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -2604,14 +2596,14 @@ inline void test_93_json()
     auto value = 123.5f;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<TestEnum|float>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -2659,14 +2651,14 @@ inline void test_95_json()
     auto value = "434312some_random";
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<TestEnum|std::string>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -2714,14 +2706,14 @@ inline void test_97_json()
     auto value = TestEnum::value2;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<TestEnum|TestEnum>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -2769,14 +2761,14 @@ inline void test_99_json()
     auto value = DataStorage::shared().get<DataUnit>("unit1");
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<TestEnum|const DataUnit*>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -2824,14 +2816,14 @@ inline void test_101_json()
     auto value = AllTypesChildren();
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<TestEnum|AllTypesChildren>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -2879,14 +2871,14 @@ inline void test_103_json()
     auto value = make_intrusive<AllTypesChildren>();
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<TestEnum|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -2934,14 +2926,14 @@ inline void test_105_json()
     auto value = std::vector<int>{1, 2, 3, 4};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<TestEnum|std::vector<int>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -2989,14 +2981,14 @@ inline void test_107_json()
     auto value = std::vector<std::vector<bool>>{{true, false}, {false, true}};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<TestEnum|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -3044,14 +3036,14 @@ inline void test_109_json()
     auto value = std::map<int, int>{std::make_pair(1, 2), std::make_pair(2, 3)};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<TestEnum|std::map<int, int>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -3099,14 +3091,14 @@ inline void test_111_json()
     auto value = 123;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<const DataUnit*|int>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -3154,14 +3146,14 @@ inline void test_113_json()
     auto value = true;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<const DataUnit*|bool>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -3209,14 +3201,14 @@ inline void test_115_json()
     auto value = 123.5f;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<const DataUnit*|float>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -3264,14 +3256,14 @@ inline void test_117_json()
     auto value = "434312some_random";
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<const DataUnit*|std::string>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -3319,14 +3311,14 @@ inline void test_119_json()
     auto value = TestEnum::value2;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<const DataUnit*|TestEnum>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -3374,14 +3366,14 @@ inline void test_121_json()
     auto value = DataStorage::shared().get<DataUnit>("unit1");
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<const DataUnit*|const DataUnit*>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -3429,14 +3421,14 @@ inline void test_123_json()
     auto value = AllTypesChildren();
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<const DataUnit*|AllTypesChildren>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -3484,14 +3476,14 @@ inline void test_125_json()
     auto value = make_intrusive<AllTypesChildren>();
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<const DataUnit*|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -3539,14 +3531,14 @@ inline void test_127_json()
     auto value = std::vector<int>{1, 2, 3, 4};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<const DataUnit*|std::vector<int>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -3594,14 +3586,14 @@ inline void test_129_json()
     auto value = std::vector<std::vector<bool>>{{true, false}, {false, true}};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<const DataUnit*|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -3649,14 +3641,14 @@ inline void test_131_json()
     auto value = std::map<int, int>{std::make_pair(1, 2), std::make_pair(2, 3)};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<const DataUnit*|std::map<int, int>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -3704,14 +3696,14 @@ inline void test_133_json()
     auto value = 123;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<AllTypesChildren|int>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -3759,14 +3751,14 @@ inline void test_135_json()
     auto value = true;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<AllTypesChildren|bool>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -3814,14 +3806,14 @@ inline void test_137_json()
     auto value = 123.5f;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<AllTypesChildren|float>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -3869,14 +3861,14 @@ inline void test_139_json()
     auto value = "434312some_random";
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<AllTypesChildren|std::string>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -3924,14 +3916,14 @@ inline void test_141_json()
     auto value = TestEnum::value2;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<AllTypesChildren|TestEnum>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -3979,14 +3971,14 @@ inline void test_143_json()
     auto value = DataStorage::shared().get<DataUnit>("unit1");
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<AllTypesChildren|const DataUnit*>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -4034,14 +4026,14 @@ inline void test_145_json()
     auto value = AllTypesChildren();
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<AllTypesChildren|AllTypesChildren>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -4089,14 +4081,14 @@ inline void test_147_json()
     auto value = make_intrusive<AllTypesChildren>();
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<AllTypesChildren|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -4144,14 +4136,14 @@ inline void test_149_json()
     auto value = std::vector<int>{1, 2, 3, 4};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<AllTypesChildren|std::vector<int>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -4199,14 +4191,14 @@ inline void test_151_json()
     auto value = std::vector<std::vector<bool>>{{true, false}, {false, true}};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<AllTypesChildren|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -4254,14 +4246,14 @@ inline void test_153_json()
     auto value = std::map<int, int>{std::make_pair(1, 2), std::make_pair(2, 3)};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<AllTypesChildren|std::map<int, int>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -4309,14 +4301,14 @@ inline void test_155_json()
     auto value = 123;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|int>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -4364,14 +4356,14 @@ inline void test_157_json()
     auto value = true;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|bool>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -4419,14 +4411,14 @@ inline void test_159_json()
     auto value = 123.5f;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|float>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -4474,14 +4466,14 @@ inline void test_161_json()
     auto value = "434312some_random";
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|std::string>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -4529,14 +4521,14 @@ inline void test_163_json()
     auto value = TestEnum::value2;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|TestEnum>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -4584,14 +4576,14 @@ inline void test_165_json()
     auto value = DataStorage::shared().get<DataUnit>("unit1");
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|const DataUnit*>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -4639,14 +4631,14 @@ inline void test_167_json()
     auto value = AllTypesChildren();
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|AllTypesChildren>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -4694,14 +4686,14 @@ inline void test_169_json()
     auto value = make_intrusive<AllTypesChildren>();
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -4749,14 +4741,14 @@ inline void test_171_json()
     auto value = std::vector<int>{1, 2, 3, 4};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|std::vector<int>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -4804,14 +4796,14 @@ inline void test_173_json()
     auto value = std::vector<std::vector<bool>>{{true, false}, {false, true}};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -4859,14 +4851,14 @@ inline void test_175_json()
     auto value = std::map<int, int>{std::make_pair(1, 2), std::make_pair(2, 3)};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<intrusive_ptr<AllTypesChildren>|std::map<int, int>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -4914,14 +4906,14 @@ inline void test_177_json()
     auto value = 123;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::vector<int>|int>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -4969,14 +4961,14 @@ inline void test_179_json()
     auto value = true;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::vector<int>|bool>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -5024,14 +5016,14 @@ inline void test_181_json()
     auto value = 123.5f;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::vector<int>|float>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -5079,14 +5071,14 @@ inline void test_183_json()
     auto value = "434312some_random";
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::vector<int>|std::string>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -5134,14 +5126,14 @@ inline void test_185_json()
     auto value = TestEnum::value2;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::vector<int>|TestEnum>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -5189,14 +5181,14 @@ inline void test_187_json()
     auto value = DataStorage::shared().get<DataUnit>("unit1");
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::vector<int>|const DataUnit*>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -5244,14 +5236,14 @@ inline void test_189_json()
     auto value = AllTypesChildren();
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::vector<int>|AllTypesChildren>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -5299,14 +5291,14 @@ inline void test_191_json()
     auto value = make_intrusive<AllTypesChildren>();
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::vector<int>|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -5354,14 +5346,14 @@ inline void test_193_json()
     auto value = std::vector<int>{1, 2, 3, 4};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::vector<int>|std::vector<int>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -5409,14 +5401,14 @@ inline void test_195_json()
     auto value = std::vector<std::vector<bool>>{{true, false}, {false, true}};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::vector<int>|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -5464,14 +5456,14 @@ inline void test_197_json()
     auto value = std::map<int, int>{std::make_pair(1, 2), std::make_pair(2, 3)};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::vector<int>|std::map<int, int>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -5519,14 +5511,14 @@ inline void test_199_json()
     auto value = 123;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|int>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -5574,14 +5566,14 @@ inline void test_201_json()
     auto value = true;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|bool>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -5629,14 +5621,14 @@ inline void test_203_json()
     auto value = 123.5f;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|float>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -5684,14 +5676,14 @@ inline void test_205_json()
     auto value = "434312some_random";
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|std::string>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -5739,14 +5731,14 @@ inline void test_207_json()
     auto value = TestEnum::value2;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|TestEnum>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -5794,14 +5786,14 @@ inline void test_209_json()
     auto value = DataStorage::shared().get<DataUnit>("unit1");
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|const DataUnit*>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -5849,14 +5841,14 @@ inline void test_211_json()
     auto value = AllTypesChildren();
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|AllTypesChildren>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -5904,14 +5896,14 @@ inline void test_213_json()
     auto value = make_intrusive<AllTypesChildren>();
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -5959,14 +5951,14 @@ inline void test_215_json()
     auto value = std::vector<int>{1, 2, 3, 4};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|std::vector<int>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -6014,14 +6006,14 @@ inline void test_217_json()
     auto value = std::vector<std::vector<bool>>{{true, false}, {false, true}};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -6069,14 +6061,14 @@ inline void test_219_json()
     auto value = std::map<int, int>{std::make_pair(1, 2), std::make_pair(2, 3)};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::vector<std::vector<bool>>|std::map<int, int>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -6124,14 +6116,14 @@ inline void test_221_json()
     auto value = 123;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::map<int, int>|int>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -6179,14 +6171,14 @@ inline void test_223_json()
     auto value = true;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::map<int, int>|bool>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -6234,14 +6226,14 @@ inline void test_225_json()
     auto value = 123.5f;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::map<int, int>|float>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -6289,14 +6281,14 @@ inline void test_227_json()
     auto value = "434312some_random";
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::map<int, int>|std::string>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -6344,14 +6336,14 @@ inline void test_229_json()
     auto value = TestEnum::value2;
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::map<int, int>|TestEnum>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -6399,14 +6391,14 @@ inline void test_231_json()
     auto value = DataStorage::shared().get<DataUnit>("unit1");
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::map<int, int>|const DataUnit*>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -6454,14 +6446,14 @@ inline void test_233_json()
     auto value = AllTypesChildren();
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::map<int, int>|AllTypesChildren>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -6509,14 +6501,14 @@ inline void test_235_json()
     auto value = make_intrusive<AllTypesChildren>();
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::map<int, int>|intrusive_ptr<AllTypesChildren>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -6564,14 +6556,14 @@ inline void test_237_json()
     auto value = std::vector<int>{1, 2, 3, 4};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::map<int, int>|std::vector<int>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -6619,14 +6611,14 @@ inline void test_239_json()
     auto value = std::vector<std::vector<bool>>{{true, false}, {false, true}};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
     std::cout << std::endl << ",\"map<std::map<int, int>|std::vector<std::vector<bool>>>\":" << std::endl; 
     log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);
@@ -6674,14 +6666,12 @@ inline void test_241_json()
     auto value = std::map<int, int>{std::make_pair(1, 2), std::make_pair(2, 3)};
     object1[key] = value;
     
-    Json::Value json;
+    BinaryFormat json;
 
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(object1, "object");
-    std::cout << std::endl << ",\"map<std::map<int, int>|std::map<int, int>>\":" << std::endl; 
-    log(json);
 
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(object2, "object");
     
     assert(object1.size() == object2.size() && object2.size() == 1);

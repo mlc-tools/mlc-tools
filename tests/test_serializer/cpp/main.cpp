@@ -4,7 +4,7 @@
 #include "third/jsoncpp/json.h"
 #include "third/pugixml/pugixml.hpp"
 #include "src/serialize/SerializerXml.h"
-#include "src/serialize/SerializerJson.h"
+#include "src/serialize/SerializerBinary.h"
 #include "src/serialize/SerializerCommon.h"
 #include "src/FooObject.h"
 #include "intrusive_ptr.h"
@@ -13,6 +13,7 @@
 #include "TestEnum.h"
 #include "mg_extensions.h"
 #include "tests.h"
+#include "binary/binary.h"
 
 using namespace mg;
 
@@ -109,31 +110,83 @@ AllTypes build_object(){
 void compare_objects(const AllTypes& objA, const AllTypes& objB){
     auto result = true;
     result = result && objA.int_value0 == objB.int_value0;
+    assert(result);
+    
     result = result && objA.int_value1 == objB.int_value1;
+    assert(result);
+    
     result = result && std::fabs(objA.float_value0 - objB.float_value0) < 0.0001f;
+    assert(result);
+    
     result = result && std::fabs(objA.float_value1 - objB.float_value1) < 0.0001f;
+    assert(result);
+    
     result = result && objA.bool_value0 == objB.bool_value0;
+    assert(result);
+    
     result = result && objA.bool_value1 == objB.bool_value1;
+    assert(result);
+    
     result = result && objA.str_value0 == objB.str_value0;
+    assert(result);
+    
     result = result && objA.str_value1 == objB.str_value1;
+    assert(result);
+    
     result = result && objA.int_list == objB.int_list;
+    assert(result);
+    
     result = result && objA.float_list == objB.float_list;
+    assert(result);
+    
     result = result && objA.bool_list == objB.bool_list;
+    assert(result);
+    
     result = result && objA.string_list == objB.string_list;
+    assert(result);
+    
     result = result && objA.int_string_map == objB.int_string_map;
+    assert(result);
+    
     result = result && objA.float_string_map == objB.float_string_map;
+    assert(result);
+    
     result = result && objA.bool_string_map == objB.bool_string_map;
+    assert(result);
+    
     result = result && objA.string_string_map == objB.string_string_map;
+    assert(result);
+    
     result = result && objA.string_int_map == objB.string_int_map;
+    assert(result);
+    
     result = result && objA.string_float_map == objB.string_float_map;
+    assert(result);
+    
     result = result && objA.string_bool_map == objB.string_bool_map;
+    assert(result);
+    
     result = result && objA.object == objB.object;
+    assert(result);
+    
     result = result && *objA.object_ptr == *objB.object_ptr;
+    assert(result);
+    
     result = result && objA.object_list == objB.object_list;
+    assert(result);
+    
     result = result && objA.object_map == objB.object_map;
+    assert(result);
+    
     result = result && objA.object_ptr_list.size() == objB.object_ptr_list.size();
+    assert(result);
+    
     result = result && objA.enum_list == objB.enum_list;
+    assert(result);
+    
     result = result && objA.enum_map == objB.enum_map;
+    assert(result);
+    
     
     for(size_t i=0; i<objA.object_ptr_list.size(); ++i)
         result = result && *objA.object_ptr_list[i] == *objB.object_ptr_list[i];
@@ -176,20 +229,14 @@ void test_all_types_equals_with_old_format_xml() {
 void test_all_types_equals_with_old_format_json() {
     auto objA = build_object();
     
-    Json::Value json;
-    SerializerJson serializer(json);
-    objA.serialize_json(serializer);
+    BinaryFormat json;
+    SerializerBinary serializer(json);
+    objA.serialize_binary(serializer);
     
-    Json::Value jsonSource;
-    Json::Reader reader;
-    reader.parse(getAllTypesSourcesJSON(), jsonSource);
-    
-//    SerializerJson::log(json);
-//    SerializerJson::log(jsonSource);
-
-    DeserializerJson deserializer(json);
+    BinaryFormat json2(json.get_data());
+    DeserializerBinary deserializer(json2);
     AllTypes objB;
-    objB.deserialize_json(deserializer);
+    objB.deserialize_binary(deserializer);
     
     compare_objects(objA, objB);
 }
@@ -491,9 +538,9 @@ int test_json() {
     std::vector<intrusive_ptr<FooObject>> vector_intrusive_foo_and_bar = {foo_ptr, bar_ptr};
 
 
-    Json::Value json;
+    BinaryFormat json;
     
-    SerializerJson serializer(json);
+    SerializerBinary serializer(json);
     serializer.serialize(int_type, "int_type", 0);
     serializer.serialize(bool_type, "bool_type", false);
     serializer.serialize(float_type, "float_type", 0.f);
@@ -591,7 +638,7 @@ int test_json() {
     d_map_units_3.clear();
     d_vector_intrusive_foo_and_bar.clear();
     
-    DeserializerJson deserializer(json);
+    DeserializerBinary deserializer(json);
     deserializer.deserialize(int_type, "int_type", 0);
     deserializer.deserialize(bool_type, "bool_type", false);
     deserializer.deserialize(float_type, "float_type", 0.f);
@@ -728,7 +775,9 @@ void test_static_asserts()
 }
 
 int main() {
+    std::cout << sizeof(mg::BinaryFormat) << std::endl;
     test_static_asserts();
+    tests::test_binary_format();
 
     Factory::shared().registrationCommand<AllTypesChildren>(AllTypesChildren::TYPE);
     Factory::shared().registrationCommand<AllTypes>(AllTypes::TYPE);
@@ -742,8 +791,8 @@ int main() {
     const_cast<DataStorage&>(DataStorage::shared())._loaded = true;
 
     std::cout << " xml: " << sizeof(pugi::xml_node) << "\n";
-    std::cout << "json: " << sizeof(Json::Value) << "\n";
-    std::cout << "iter: " << sizeof(Json::ValueIterator) << "\n";
+//    std::cout << "json: " << sizeof(BinaryFormat) << "\n";
+//    std::cout << "iter: " << sizeof(BinaryFormat::Iterator) << "\n";
     test_all_types_equals_with_old_format_xml();
     test_all_types_equals_with_old_format_json();
     test_xml();

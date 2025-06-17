@@ -8,8 +8,8 @@ namespace mg
 {
     class SerializerXml;
     class DeserializerXml;
-    class SerializerJson;
-    class DeserializerJson;
+    class SerializerBinary;
+    class DeserializerBinary;
 
     class FooObject
     {
@@ -21,8 +21,8 @@ namespace mg
         virtual std::string get_type() const;
         virtual void serialize_xml(SerializerXml& xml) const;
         virtual void deserialize_xml(DeserializerXml& xml);
-        virtual void serialize_json(SerializerJson& json) const;
-        virtual void deserialize_json(DeserializerJson& json);
+        virtual void serialize_binary(SerializerBinary& json) const;
+        virtual void deserialize_binary(DeserializerBinary& json);
         bool operator < (const FooObject& rhs) const;
 
         int _reference_counter;
@@ -36,8 +36,8 @@ namespace mg
         virtual std::string get_type() const override { return "BarObject"; }
         virtual void serialize_xml(SerializerXml& xml) const override;
         virtual void deserialize_xml(DeserializerXml& xml) override;
-        virtual void serialize_json(SerializerJson& json) const override;
-        virtual void deserialize_json(DeserializerJson& json) override;
+        virtual void serialize_binary(SerializerBinary& json) const override;
+        virtual void deserialize_binary(DeserializerBinary& json) override;
         bool operator < (const BarObject& rhs) const;
 
         FooObject foo;

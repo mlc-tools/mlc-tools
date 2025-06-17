@@ -9,8 +9,8 @@ namespace mg
 {
 class SerializerXml;
 class DeserializerXml;
-class SerializerJson;
-class DeserializerJson;
+class SerializerBinary;
+class DeserializerBinary;
 
 template<class T>
 struct is_attribute
@@ -66,7 +66,7 @@ template <class T>
 struct is_serializable{
     constexpr static bool value =
             has_serialize<T, void(SerializerXml&)>::value_xml ||
-            has_serialize<T, void(SerializerJson&)>::value_json;
+            has_serialize<T, void(SerializerBinary&)>::value_json;
     constexpr bool operator()() {
         return value;
     }
