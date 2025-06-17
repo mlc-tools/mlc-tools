@@ -69,7 +69,7 @@ def run_tests(generator, root, withdata=False, cpp=True, python=True, php=True, 
 def simple_test():
     root = get_root() + '/tests/simple_test/'
     generator = Mlc(configs_directory=root + 'config',
-                    side='client',
+                    side='server',
                     disable_logs=False,
                     generate_tests=True,
                     generate_intrusive=True,

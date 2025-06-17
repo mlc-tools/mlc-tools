@@ -36,7 +36,7 @@ class clone/TestCloneObject<ITestCloneObject>:test
         auto object_a = new CloneObject();
         object_a->t = 1;
 
-        auto object_b = clone_object(object_a);
+        auto object_b = clone_object<CloneObject>(object_a);
         this->assertEqual(object_a->t, object_b->t);
     }
     function void test_clone2()
@@ -46,7 +46,7 @@ class clone/TestCloneObject<ITestCloneObject>:test
         object_a->ptr = new CloneObject();
         object_a->ptr->t = 10;
 
-        auto object_b = clone_object(object_a);
+        auto object_b = clone_object<CloneObject2>(object_a);
         this->assertEqual(object_a->t, object_b->t);
         this->assertEqual(object_a->ptr->t, object_b->ptr->t);
     }
@@ -58,7 +58,7 @@ class clone/TestCloneObject<ITestCloneObject>:test
         list_push(obj1->list1, new CloneObject2());
         list_push(obj1->list1, nullptr);
         list_push(obj1->list1, new CloneObject2());
-        auto obj2 = clone_object(obj1);
+        auto obj2 = clone_object<CloneObject2>(obj1);
         this->assertEqual(list_size(obj2->list1), 3);
     }
 
@@ -68,7 +68,7 @@ class clone/TestCloneObject<ITestCloneObject>:test
         list_push(obj1->list2, DataStorage::shared().get<DataUnit>("unitname1"));
         list_push(obj1->list2, nullptr);
         list_push(obj1->list2, DataStorage::shared().get<DataUnit>("unitname1"));
-        auto obj2 = clone_object(obj1);
+        auto obj2 = clone_object<CloneObject2>(obj1);
         this->assertEqual(list_size(obj2->list2), 3);
     }
 
@@ -76,7 +76,7 @@ class clone/TestCloneObject<ITestCloneObject>:test
     {
         auto obj1 = new CloneObject2();
         obj1->map1[nullptr] = nullptr;
-        auto obj2 = clone_object(obj1);
+        auto obj2 = clone_object<CloneObject2>(obj1);
         this->assertTrue(in_map(nullptr, obj2->map1));
         this->assertTrue(obj2->map1.at(nullptr) == nullptr);
     }
@@ -85,7 +85,7 @@ class clone/TestCloneObject<ITestCloneObject>:test
     {
         auto obj1 = new CloneObject2();
         obj1->map2[nullptr] = nullptr;
-        auto obj2 = clone_object(obj1);
+        auto obj2 = clone_object<CloneObject2>(obj1);
         this->assertTrue(in_map(nullptr, obj2->map2));
         //this->assertTrue(obj2->map2.at(nullptr) == nullptr);
     }
@@ -94,7 +94,7 @@ class clone/TestCloneObject<ITestCloneObject>:test
     {
         auto obj1 = new CloneObject2();
         obj1->map3[nullptr] = nullptr;
-        auto obj2 = clone_object(obj1);
+        auto obj2 = clone_object<CloneObject2>(obj1);
         this->assertTrue(in_map(nullptr, obj2->map3));
         //this->assertTrue(obj2->map3.at(nullptr) == nullptr);
     }
@@ -103,7 +103,7 @@ class clone/TestCloneObject<ITestCloneObject>:test
     {
         auto obj1 = new CloneObject2();
         obj1->map4[nullptr] = nullptr;
-        auto obj2 = clone_object(obj1);
+        auto obj2 = clone_object<CloneObject2>(obj1);
         this->assertTrue(map_size(obj2->map4) == 1)
         //this->assertTrue(in_map(nullptr, obj2->map4));
         //this->assertTrue(obj2->map4.at(nullptr) == nullptr);
@@ -113,7 +113,7 @@ class clone/TestCloneObject<ITestCloneObject>:test
     {
         auto obj1 = new CloneObject2();
         obj1->map5[nullptr] = 1;
-        auto obj2 = clone_object(obj1);
+        auto obj2 = clone_object<CloneObject2>(obj1);
         this->assertTrue(map_size(obj2->map5) == 1);
         this->assertTrue(obj2->map5.at(nullptr) == 1);
     }
@@ -122,7 +122,7 @@ class clone/TestCloneObject<ITestCloneObject>:test
     {
         auto obj1 = new CloneObject2();
         obj1->map6[1] = nullptr;
-        auto obj2 = clone_object(obj1);
+        auto obj2 = clone_object<CloneObject2>(obj1);
         this->assertTrue(map_size(obj2->map6) == 1);
         this->assertTrue(obj2->map6.at(1) == nullptr);
     }
@@ -131,7 +131,7 @@ class clone/TestCloneObject<ITestCloneObject>:test
     {
         auto obj1 = new CloneObject2();
         obj1->map7[nullptr] = 1;
-        auto obj2 = clone_object(obj1);
+        auto obj2 = clone_object<CloneObject2>(obj1);
         this->assertTrue(map_size(obj2->map7) == 1);
         this->assertTrue(obj2->map7.at(nullptr) == 1);
     }
@@ -140,7 +140,7 @@ class clone/TestCloneObject<ITestCloneObject>:test
     {
         auto obj1 = new CloneObject2();
         obj1->map8[1] = nullptr;
-        auto obj2 = clone_object(obj1);
+        auto obj2 = clone_object<CloneObject2>(obj1);
         this->assertTrue(map_size(obj2->map8) == 1);
     }
 }

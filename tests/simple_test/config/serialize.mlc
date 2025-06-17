@@ -11,7 +11,7 @@ class TestSerializeTest<ITestSerializeTest>
         auto data = new DataUnit();
         data->name = "test_unit";
         list_push(obj->list_of_data, data);
-        auto obj2 = clone_object(obj);
+        auto obj2 = clone_object<SerializeTest>(obj);
         this->assertNotNull(obj2);
         this->assertEqual(list_size(obj2->list_of_data), 1);
         this->assertNotNull(obj2->list_of_data.at(0));

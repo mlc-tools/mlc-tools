@@ -1,4 +1,7 @@
 from ..base.generator_operator_equals import GeneratorOperatorEqualsBase
+from ..core.class_ import Class
+from ..core.function import Function
+from ..core.object import Objects
 
 
 class GeneratorOperatorEquals(GeneratorOperatorEqualsBase):
@@ -21,3 +24,33 @@ class GeneratorOperatorEquals(GeneratorOperatorEqualsBase):
 
     def get_not_equal_method_operation(self):
         return 'return !(*this == rhs);'
+
+    def add_copy_constructor(self, cls: Class):
+        copy_constructor = Function()
+        copy_constructor.name = cls.name
+        copy_constructor.return_type = Objects.VOID
+        copy_constructor.args.append(['rhs', GeneratorOperatorEqualsBase.get_const_ref(cls)])
+        # operator.operations.append(self.get_not_equal_method_operation())
+
+        copy_constructor.operations.append(f'this->operator=(rhs);')
+        cls.functions.append(copy_constructor)
+
+    def add_move_constructor(self, cls):
+        pass
+
+    def add_copy_operator(self, cls):
+        copy_operator = Function()
+        copy_operator.name = 'operator ='
+        copy_operator.return_type = GeneratorOperatorEqualsBase.get_const_ref(cls)
+        copy_operator.args.append(['rhs', GeneratorOperatorEqualsBase.get_const_ref(cls)])
+
+        if cls.superclasses and cls.superclasses[0] != 'SerializedObject':
+            parent = f'this->{cls.superclasses[0]}::operator=(rhs);'
+            copy_operator.operations.append(parent)
+
+        for member in cls.members:
+            if member.is_static:
+                continue
+            copy_operator.operations.append(f'this->{member.name} = rhs.{member.name};')
+        copy_operator.operations.append('return *this;')
+        cls.functions.append(copy_operator)

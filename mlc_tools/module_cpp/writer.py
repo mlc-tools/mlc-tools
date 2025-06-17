@@ -217,9 +217,11 @@ class Writer(WriterBase):
     def write_function_hpp(self, method):
         string = '{virtual}{static}{friend}{type} {name}({args}){const}{override}{abstract}'
         assert isinstance(method.return_type, Object)
-        return_type = self.write_named_object(method.return_type, '', False, True)
+        return_type = self.write_named_object(method.return_type, '', False, True) if method.name != self.current_class.name else ''
         args = self.create_function_hpp_args_string(method)
         virtual = 'virtual ' if method.is_virtual or method.is_abstract or self.current_class.is_virtual else ''
+        if method.name == self.current_class.name:
+            virtual = ''
 
         body = ''
         if method.template_types:
@@ -272,7 +274,8 @@ class Writer(WriterBase):
         }}
         
         '''
-        return_type = self.write_named_object(method.return_type, '', False, True)
+        return_type = self.write_named_object(method.return_type, '', False,
+                                              True) if method.name != self.current_class.name else ''
         args = self.create_function_cpp_args_string(method)
 
         body = method.body
@@ -461,6 +464,10 @@ class Writer(WriterBase):
                     else:
                         parse_object(container, arg)
             parse_object(includes, member)
+            if 'std::atomic' in member.type:
+                includes.add('std::atomic')
+
+
 
         # functions
         std_includes = ['map', 'list', 'string']
@@ -521,6 +528,7 @@ class Writer(WriterBase):
     def build_includes(self, cls, includes):
         types = {
             'std::list': '<vector>',
+            'std::atomic': '<atomic>',
             'std::vector': '<vector>',
             'std::map': '<map>',
             'std::set': '<set>',

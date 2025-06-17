@@ -167,7 +167,7 @@ namespace @{namespace}
 
     {{format=json}}
     template <class TType>
-    std::string serialize_command_to_json(intrusive_ptr<TType> command)
+    std::string serialize_command_to_json(const TType* command)
     {
         Json::Value json;
         SerializerJson serializer(json[command->get_type()]);
@@ -203,7 +203,7 @@ namespace @{namespace}
         return command;
     }
     template <class TType>
-    static intrusive_ptr<TType> clone_object(intrusive_ptr<TType> object)
+    static intrusive_ptr<TType> clone_object(const TType* object)
     {
         auto payload = serialize_command_to_json<TType>(object);
         auto clone = create_command_from_json<TType>(payload);
@@ -213,7 +213,7 @@ namespace @{namespace}
 
     {{format=xml}}
     template <class TType>
-    static std::string serialize_command_to_xml(intrusive_ptr<TType> command)
+    static std::string serialize_command_to_xml(const TType* command)
     {
         pugi::xml_document doc;
         auto root = doc.append_child(command->get_type().c_str());
@@ -252,7 +252,7 @@ namespace @{namespace}
     }
 
     template <class TType>
-    static intrusive_ptr<TType> clone_object(intrusive_ptr<TType> object)
+    static intrusive_ptr<TType> clone_object(const TType* object)
     {
         auto payload = serialize_command_to_xml<TType>(object);
         auto clone = create_command_from_xml<TType>(payload);
@@ -262,7 +262,7 @@ namespace @{namespace}
 
     {{format=both}}
     template <class TType>
-    static std::string serialize_command_to_xml(intrusive_ptr<TType> command)
+    static std::string serialize_command_to_xml(const TType* command)
     {
         pugi::xml_document doc;
         auto root = doc.append_child(command->get_type().c_str());
@@ -299,7 +299,7 @@ namespace @{namespace}
     }
 
     template <class TType>
-    static std::string serialize_command_to_json(intrusive_ptr<TType> command)
+    static std::string serialize_command_to_json(const TType* command)
     {
         Json::Value json;
         SerializerJson serializer(json[command->get_type()]);
@@ -336,7 +336,7 @@ namespace @{namespace}
     }
 
     template <class TType>
-    static intrusive_ptr<TType> clone_object(intrusive_ptr<TType> object)
+    static intrusive_ptr<TType> clone_object(const TType* object)
     {
         auto payload = serialize_command_to_json<TType>(object);
         auto clone = create_command_from_json<TType>(payload);

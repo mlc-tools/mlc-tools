@@ -1,3 +1,4 @@
+from ..core.class_ import Class
 from ..core.function import Function
 from ..core.object import Object, Objects
 
@@ -18,6 +19,9 @@ class GeneratorOperatorEqualsBase(object):
                 continue
             self.add_equal_method(cls)
             self.add_not_equal_method(cls)
+            self.add_copy_constructor(cls)
+            self.add_move_constructor(cls)
+            self.add_copy_operator(cls)
 
     @staticmethod
     def get_const_ref(cls_):
@@ -81,3 +85,12 @@ class GeneratorOperatorEqualsBase(object):
 
     def get_call_superclass_equal(self):
         return 'this->{}::{}(rhs);'
+
+    def add_copy_constructor(self, cls: Class):
+        pass
+
+    def add_move_constructor(self, cls):
+        pass
+
+    def add_copy_operator(self, cls):
+        pass

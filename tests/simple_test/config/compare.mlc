@@ -21,6 +21,21 @@ class compare/TestCompareTestWithoutPointer<ITestCompareTestWithoutPointer>
 {
     function void test_test(){}
 
+    function void test_operator_copy()
+    {
+        CompareTestWithoutPointer o1;
+        CompareTestWithoutPointer o2;
+
+        o1.id = 1;
+        o1.a = 1;
+        o1.b = "string";
+
+        o2 = o1;
+        this->assertTrue(o1 == o2, "test_operator_copy. o1 == o2");
+        this->assertEqual(o1, o2, "test_operator_copy. equal");
+    }
+
+
     function void test_without_pointer_compare()
     {
         CompareTestWithoutPointer o1;
@@ -46,28 +61,28 @@ class compare/TestCompareTestWithoutPointer<ITestCompareTestWithoutPointer>
         this->assertTrue(o2 != o1, "TestCompare. !=");
         this->assertFalse(o1 == o2, "TestCompare false. ==");
         this->assertFalse(o2 == o1, "TestCompare false. ==");
-        this->assertNotEqual(o1, o2, "TestCompare. not equal");
-        this->assertNotEqual(o2, o1, "TestCompare. not equal");
+        this->assertNotEqual(o1, o2, "TestCompare. not equal 1");
+        this->assertNotEqual(o2, o1, "TestCompare. not equal 2");
 
         o2.b = "other";
         this->assertTrue(o1 != o2, "TestCompare. !=");
         this->assertTrue(o2 != o1, "TestCompare. !=");
         this->assertFalse(o1 == o2, "TestCompare false. ==");
         this->assertFalse(o2 == o1, "TestCompare false. ==");
-        this->assertNotEqual(o1, o2, "TestCompare. not equal");
-        this->assertNotEqual(o2, o1, "TestCompare. not equal");
+        this->assertNotEqual(o1, o2, "TestCompare. not equal 3");
+        this->assertNotEqual(o2, o1, "TestCompare. not equal 4");
 
         o2.a = 2;
         o2.b = "string";
         this->assertTrue(o1 != o2, "TestCompare. !=");
         this->assertFalse(o1 == o2, "TestCompare false. ==");
-        this->assertNotEqual(o1, o2, "TestCompare. not equal");
+        this->assertNotEqual(o1, o2, "TestCompare. not equal 5");
 
         o2.a = 2;
         o2.b = "other";
         this->assertTrue(o1 != o2, "TestCompare. !=");
         this->assertFalse(o1 == o2, "TestCompare false. ==");
-        this->assertNotEqual(o1, o2, "TestCompare. not equal");
+        this->assertNotEqual(o1, o2, "TestCompare. not equal 6");
     }
 
     function void test_with_pointer_compare()
