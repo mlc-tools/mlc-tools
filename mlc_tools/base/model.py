@@ -7,12 +7,14 @@ from mlc_tools.core.class_ import Class
 class SerializeFormat(object):
     xml = 1
     json = 2
+    binary = 4
 
     @staticmethod
     def get_all():
         return (
             (SerializeFormat.xml, 'xml'),
             (SerializeFormat.json, 'json'),
+            (SerializeFormat.binary, 'binary'),
         )
 
 
@@ -60,7 +62,7 @@ class Model(object):
         self.out_dict = None
         self.files = []
         self.created_files = []
-        self.serialize_formats = SerializeFormat.xml | SerializeFormat.json
+        self.serialize_formats = SerializeFormat.xml | SerializeFormat.json | SerializeFormat.binary
 
     def empty_copy(self):
         model = copy(self)

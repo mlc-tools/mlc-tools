@@ -35,6 +35,12 @@ class Serializer(SerializerBase):
             obj.is_ref = True
             return obj
 
+        def get_binary():
+            obj = Object()
+            obj.type = 'SerializerBinary' if serialize_type == SERIALIZATION else 'DeserializerBinary'
+            obj.is_ref = True
+            return obj
+
         if serialize_format == 'json' and serialize_type == SERIALIZATION:
             return ['serializer', get_json()]
         if serialize_format == 'json' and serialize_type == DESERIALIZATION:
@@ -43,6 +49,10 @@ class Serializer(SerializerBase):
             return ['serializer', get_xml()]
         if serialize_format == 'xml' and serialize_type == DESERIALIZATION:
             return ['deserializer', get_xml()]
+        if serialize_format == 'binary' and serialize_type == SERIALIZATION:
+            return ['serializer', get_binary()]
+        if serialize_format == 'binary' and serialize_type == DESERIALIZATION:
+            return ['deserializer', get_binary()]
 
     def build_serialize_operation(self, obj: Object, serialization_type, serialize_format):
         # return self.build_serialize_operation_(obj.name, obj.type, obj.initial_value,

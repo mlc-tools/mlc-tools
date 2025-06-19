@@ -186,6 +186,7 @@ class data/DataUnit:storage
     function bool test_convert_float_to_int(Logger* logger):static
     {
         bool result = true;
+#if SERIALIZE_FORMAT != BINARY
         auto unit1 = DataStorage::shared().get<DataUnit>("unitname1");
         auto unit2 = DataStorage::shared().get<DataUnit>("unitname2");
 
@@ -197,6 +198,7 @@ class data/DataUnit:storage
             logger->message("      unit1 value = " + toStr(unit1->convert_float_to_int));
             logger->message("      unit2 value = " + toStr(unit2->convert_float_to_int));
         }
+#endif
         return result;
     }
 

@@ -88,6 +88,10 @@ bool test_all_types(mg::Logger* logger)
     auto str = mg::serialize_command_to_xml<mg::AllTypes>(&objA);
 	auto objB = mg::create_command_from_xml<mg::AllTypes>(str);
 #endif
+#if SERIALIZE_FORMAT == BINARY
+    auto str = mg::serialize_command_to_binary<mg::AllTypes>(&objA);
+	auto objB = mg::create_command_from_binary<mg::AllTypes>(str);
+#endif
 
 	auto result = true;
 	result = result && objA.int_value0 == objB->int_value0;

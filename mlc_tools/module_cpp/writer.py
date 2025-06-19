@@ -614,6 +614,8 @@ namespace {namespace}
     class DeserializerXml;
     class SerializerJson;
     class DeserializerJson;
+    class SerializerBinary;
+    class DeserializerBinary;
 {forward_declarations}
 
     class {class_name}{superclass}
@@ -636,6 +638,7 @@ SOURCE = '''
 #include "{path_to_root}{namespace}_extensions.h"
 #include "{path_to_root}SerializerJson.h"
 #include "{path_to_root}SerializerXml.h"
+#include "{path_to_root}SerializerBinary.h"
 
 namespace {namespace}
 {{

@@ -127,7 +127,7 @@ class WriterBase(object):
             txt = txt.replace('{{end_format=%s}}' % obj_type, '')
             return txt
 
-        all_formats = SerializeFormat.xml | SerializeFormat.json
+        all_formats = SerializeFormat.xml | SerializeFormat.json | SerializeFormat.binary
         for format_code, format_string in SerializeFormat.get_all():
             if self.model.serialize_formats == all_formats:
                 text = remove_content(text, format_string)

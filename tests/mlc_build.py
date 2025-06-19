@@ -49,6 +49,7 @@ def run_tests(generator, root, withdata=False, cpp=True, python=True, php=True, 
         generator.model.php_validate = False
         run('cpp', 'json', clean_out_dir=False)
         run('cpp', 'xml', clean_out_dir=False)
+        run('cpp', 'binary', clean_out_dir=False)
     if python:
         generator.model.php_validate = False
         run('py', 'json', False)

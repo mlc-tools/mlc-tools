@@ -26,6 +26,8 @@ public:
     std::vector<unsigned char> get_data() const;
     std::string get_string_data() const;
     
+    std::string get_human_string(int indent=0) const;
+    
     
     BinaryFormat& add_node(const std::string& name);
     BinaryFormat& get_node(const std::string& name);

@@ -408,6 +408,10 @@ class TestFactory
         auto string = serialize_command_to_xml<RequestBar>(command);
         auto command2 = create_command_from_xml<Request>(string);
 #endif
+#if SERIALIZE_FORMAT == BINARY
+        auto string = serialize_command_to_binary<RequestBar>(command);
+        auto command2 = create_command_from_binary<Request>(string);
+#endif
         result = (command2 != nullptr) && result;
         if(result)
         {

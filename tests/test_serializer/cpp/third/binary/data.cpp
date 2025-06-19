@@ -61,4 +61,12 @@ void Data::set_offset(size_t offset) const
     _iter_read = offset;
 }
 
+Data::data_type Data::read_type(size_t offset) const
+{
+    assert(offset + sizeof(data_type) < _data.size());
+    data_type type_read;
+    memcpy(&type_read, &_data.at(offset), sizeof(data_type));
+    return type_read;
+}
+
 }

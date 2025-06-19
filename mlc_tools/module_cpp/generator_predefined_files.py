@@ -1,4 +1,5 @@
-from .cpp_extension import FILES_DICT, FACTORY_REGISTRATION
+from .cpp_extension import FILES_DICT
+from mlc_tools.module_cpp.cpp.factory import FACTORY_REGISTRATION
 from ..base.writer_base import WriterBase
 from ..base.model import SerializeFormat
 from ..core.class_ import Class

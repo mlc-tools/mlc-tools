@@ -27,6 +27,7 @@ public:
     void add(const std::string& key, size_t size);
     bool has(const std::string& key) const;
     std::pair<size_t, size_t> get(const std::string& key) const;
+    std::unordered_map<std::string, std::pair<size_t, size_t>> get_all() const { return _keys; };
 private:
     std::unordered_map<std::string, std::pair<size_t, size_t>> _keys; /* key-> [offset, size] */
     size_t _offset;

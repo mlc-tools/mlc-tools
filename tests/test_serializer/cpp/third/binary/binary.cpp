@@ -7,6 +7,8 @@
 
 #include "binary.h"
 #include <cassert>
+#include <list>
+#include "mg_extensions.h"
 
 namespace mg{
 
@@ -46,6 +48,61 @@ void BinaryFormat::set_string_data(const std::string& data)
     std::vector<unsigned char> udata(data.begin(), data.end());
     set_data(udata);
 }
+
+std::string BinaryFormat::get_human_string(int indent) const
+{
+    auto get_indent = [](int indent){
+        std::string res;
+        for(int i=0; i<indent; ++i)
+            res += " ";
+        return res;
+    };
+    auto dataTypeToStr = [](const Data::data_type& type) -> std::string
+    {
+        switch(type)
+        {
+            case Data::data_type::t_int32: return "t_int32";
+            case Data::data_type::t_uint32: return "t_uint32";
+            case Data::data_type::t_int64: return "t_int64";
+            case Data::data_type::t_uint64: return "t_uint64";
+            case Data::data_type::t_bool: return "t_bool";
+            case Data::data_type::t_float: return "t_float";
+            case Data::data_type::t_double: return "t_double";
+            case Data::data_type::t_string: return "t_string";
+            case Data::data_type::t_char: return "t_char";
+            case Data::data_type::t_vector: return "t_vector";
+            case Data::data_type::t_map: return "t_map";
+            default:
+                assert(0);
+        }
+        return "";
+    };
+    std::string result;
+    std::list<std::pair<std::string, std::pair<size_t, size_t>>> keys;
+    keys.insert(keys.end(), _dict.get_all().begin(), _dict.get_all().end());
+    keys.sort([](const std::pair<std::string, std::pair<size_t, size_t>>& lhs, const std::pair<std::string, std::pair<size_t, size_t>>& rhs){
+        return lhs.second.first < rhs.second.first;
+    });
+    for(auto& pair : keys)
+    {
+        auto type = _data.read_type(pair.second.first);
+        result += get_indent(indent) + pair.first + ": offset=" + toStr(pair.second.first) + ", size=" + toStr(pair.second.second) + ", type: " + dataTypeToStr(type);
+        if(type == Data::data_type::t_string)
+        {
+            _data.set_offset(pair.second.first);
+            result += ", value: " + _data.read<std::string>();
+        }
+        result += "\n";
+    }
+    result += get_indent(indent) + "children count=" + toStr(_children.size()) + ":\n";
+    for(size_t i=0; i<_children.size(); ++i)
+    {
+        result += get_indent(indent) + "name=" + _childrenNames.at(i) + ":\n";
+        result += _children.at(i).get_human_string(indent + 2);
+    }
+    return result;
+}
+
 std::vector<unsigned char> BinaryFormat::get_data() const
 {
     Data temp;
@@ -262,6 +319,8 @@ void test_binary_format_()
     writer.add_node("inner_node2").add("l", 223.f);
     writer.add_node("inner_node3").add("m", 323.f);
     writer.add_node("inner_node4").add("n", 423.f);
+    
+    std::cout << writer.get_human_string() << std::endl;
     
     BinaryFormat reader(writer.get_data());
     assert(reader.get_int("key0", 0) == 1);

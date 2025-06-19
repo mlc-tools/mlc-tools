@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.6.2)
 
 option(BUILD_XML "Build the xml test" OFF)
 option(BUILD_JSON "Build the json test" OFF)
+option(BUILD_BINARY "Build the binary test" OFF)
 
 SET(ROOT ${CMAKE_SOURCE_DIR})
 set(THIRD_PARTY_DIR ${ROOT}/../../third_party)
@@ -10,6 +11,8 @@ if(BUILD_XML)
     set(TYPE xml)
 elseif(BUILD_JSON)
     set(TYPE json)
+elseif(BUILD_BINARY)
+    set(TYPE binary)
 endif(BUILD_XML)
 
 project(test_mlc_${TYPE})
@@ -20,6 +23,7 @@ file(GLOB_RECURSE SRC
 						${ROOT}/generated_cpp/${TYPE}/*.cpp *.h
 						${THIRD_PARTY_DIR}/pugixml/*.cpp *.h
 						${THIRD_PARTY_DIR}/jsoncpp/*.cpp *.h
+						${THIRD_PARTY_DIR}/binary/*.cpp *.h
 						)
 
 foreach(FILE ${SRC})
@@ -49,6 +53,8 @@ if(BUILD_XML)
     add_definitions(-DSERIALIZE_FORMAT=XML)
 elseif(BUILD_JSON)
     add_definitions(-DSERIALIZE_FORMAT=JSON)
+elseif(BUILD_BINARY)
+    add_definitions(-DSERIALIZE_FORMAT=BINARY)
 endif(BUILD_XML)
 
 

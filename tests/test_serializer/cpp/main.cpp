@@ -54,6 +54,8 @@ AllTypes build_object(){
         objA.bool_list.push_back(i % 2 == 1);
     for(int i=0; i<count;++i)
         objA.string_list.push_back(rand_str());
+    objA.string_list[0] = "";
+    objA.string_list.back() = "";
     
     for (int i = 0; i < count; ++i)
         objA.int_string_map[i] = rand_str();
@@ -266,7 +268,7 @@ int test_xml() {
     bool bool_type = true;
     float float_type = 25.f;
     std::string string_type = "gdhsih";
-    TestEnum enum_value = TestEnum::value1;
+    TestEnum enum_value = TestEnum::value2;
     std::vector<int> v_int = {1, 2, 3};
     std::vector<bool> v_bool = {true, false};
     std::vector<float> v_float = {1.f, 2.f, 5.f};
@@ -775,6 +777,17 @@ void test_static_asserts()
 }
 
 int main() {
+    
+//    mg::Data::get_data_type<int32_t>();
+//    mg::Data::get_data_type<int32_t>();
+//    mg::Data::get_data_type<uint32_t>();
+//    mg::Data::get_data_type<int64_t>();
+//    mg::Data::get_data_type<uint64_t>();
+//    mg::Data::get_data_type<bool>();
+//    mg::Data::get_data_type<float>();
+//    mg::Data::get_data_type<double>();
+//    mg::Data::get_data_type<char>();
+    
     std::cout << sizeof(mg::BinaryFormat) << std::endl;
     test_static_asserts();
     tests::test_binary_format();

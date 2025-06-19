@@ -25,9 +25,14 @@ inline void log(const pugi::xml_document &document)
 {
     std::cout << "XML:" << std::endl << toStr(document) << std::endl;
 }
+inline std::string toStr(const BinaryFormat &bin)
+{
+    return bin.get_human_string();
+}
 inline void log(const BinaryFormat &json)
 {
-    std::cout << "BinaryFormat: (not printed)" << std::endl;
+    std::cout << "BinaryFormat:\n" << toStr(json) << std::endl;
+    exit(0);
 }
 
 
