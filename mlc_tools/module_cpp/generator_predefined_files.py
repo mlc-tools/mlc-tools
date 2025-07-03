@@ -18,6 +18,9 @@ class GeneratorPredefinedFiles(object):
         writer.model = model
         self.generate_config_files(model)
         self.generate_base_enum_class(model)
+        if model.custom_generator:
+            files = model.custom_generator.get_prefedined_files(model)
+            FILES_DICT.extend(files)
         for pair in FILES_DICT:
             filename = pair[0]
             if 'intrusive_ptr' in filename and not model.generate_intrusive:

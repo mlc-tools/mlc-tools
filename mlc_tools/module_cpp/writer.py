@@ -31,6 +31,10 @@ class Writer(WriterBase):
 
         header, includes, forward_declarations, forward_declarations_out = self.write_hpp(cls)
         source = self.write_cpp(cls, includes, forward_declarations, forward_declarations_out)
+
+        if self.model.custom_generator:
+            header, source = self.model.custom_generator.modify_sources(self.model, cls, header, source)
+
         return [
             (self.get_filename(cls, 'h'), self.prepare_file(header)),
             (self.get_filename(cls, 'cpp'), self.prepare_file(source)),
