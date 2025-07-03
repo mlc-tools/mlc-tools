@@ -46,7 +46,7 @@ class GeneratorOperatorEqualsBase(object):
             operator.operations.append('bool result = ' + pattern.
                                        format(cls.superclasses[0], self.get_equal_method_name()))
         for member in cls.members:
-            if member.is_static or member.is_const or member.type == 'Observable':
+            if member.is_static or member.is_const or member.type == 'Observable' or member.name == '_reference_counter':
                 continue
             skip = False
             for t in member.template_args:

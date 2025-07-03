@@ -17,6 +17,6 @@ class Generator(GeneratorBase):
         GeneratorDataStorage().generate(model)
         GeneratorPredefinedFiles().generate(model)
         GeneratorVisitor().generate(model, True)
-        GeneratorOperatorEquals().generate(model)
         GeneratorObserver().generate(model)
         GeneratorRefCounter().generate(model)
+        GeneratorOperatorEquals().generate(model)

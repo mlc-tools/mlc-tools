@@ -51,6 +51,9 @@ class GeneratorOperatorEquals(GeneratorOperatorEqualsBase):
         for member in cls.members:
             if member.is_static:
                 continue
-            copy_operator.operations.append(f'this->{member.name} = rhs.{member.name};')
+            if self.model.side == 'server' and member.name == '_reference_counter':
+                copy_operator.operations.append(f'this->{member.name}.store(rhs.{member.name}.load());')
+            else:
+                copy_operator.operations.append(f'this->{member.name} = rhs.{member.name};')
         copy_operator.operations.append('return *this;')
         cls.functions.append(copy_operator)
