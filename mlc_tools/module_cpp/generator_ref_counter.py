@@ -17,7 +17,7 @@ return counter;
 '''
 RELEASE_ATOMIC = '''
 auto ret = _reference_counter.fetch_sub(1, std::memory_order_acq_rel);
-if(ret == 0)
+if(ret == 1)
 {
     delete this;
 }

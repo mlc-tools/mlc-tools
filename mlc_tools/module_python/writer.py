@@ -105,7 +105,7 @@ class Writer(WriterBase):
             if type_ == "map":
                 value = "{}"
             else:
-                if self.model.has_class(obj.type):
+                if self.model.has_class(obj.type) and self.current_class.name != obj.type:
                     value = obj.type + '()'
                     tabs = ' ' * (4 if obj.is_static else 8)
                     imports.append(f'from .{obj.type} import {obj.type}')

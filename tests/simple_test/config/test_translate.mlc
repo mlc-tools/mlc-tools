@@ -154,6 +154,7 @@ class TestTranslates<ITestTranslates>
         this->assertTrue(list_index(l, 4) == 3);
         this->assertTrue(list_index(l, 3) == 4);
         this->assertTrue(list_index(l, 0) == -1);
+        this->assertInList(1, l, "1 in list");
     }
 
     function void test_map()

@@ -54,6 +54,7 @@ class Model(object):
         self.auto_registration = True
         self.generate_ref_counter = True
         self.user_includes = False
+        self.empty_methods = False
 
         self.simple_types = ["int", "float", "bool", "string", 'int64_t', 'uint', 'unsigned', 'uint64_t', 'double']
 

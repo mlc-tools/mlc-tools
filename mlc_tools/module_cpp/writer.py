@@ -471,10 +471,9 @@ class Writer(WriterBase):
             if 'std::atomic' in member.type:
                 includes.add('std::atomic')
 
-
-
         # functions
         std_includes = ['map', 'list', 'string']
+        mg_extensions = ['in_list', 'in_map']
         for method in cls.functions:
             for _, argtype in method.args:
                 if argtype.type in std_includes:
@@ -487,6 +486,12 @@ class Writer(WriterBase):
                 add(includes, method.return_type)
             else:
                 add(forward_declarations, method.return_type)
+
+            if method.template_types or method.is_template:
+                for func in mg_extensions:
+                    for line in method.operations:
+                        if func in line:
+                            includes.add('mg_extensions')
 
         # superclasses
         for superclass in cls.superclasses:
@@ -541,6 +546,7 @@ class Writer(WriterBase):
             'pugi::xml_node': '"pugixml/pugixml.hpp"',
             'Observer': '"Observer.h"',
             'intrusive_ptr': '"intrusive_ptr.h"',
+            'mg_extensions': '"mg_extensions.h"',
         }
         result = []
         for typename in includes:

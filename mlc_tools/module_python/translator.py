@@ -12,6 +12,10 @@ class Translator(TranslatorBase):
         TranslatorBase.__init__(self)
 
     def translate_function(self, cls, method, model):
+        if model.empty_methods and cls.name not in ['DataStorage'] and method.name not in ['get_type']:
+            method.body = '        pass'
+            return
+
         if not method.translated:
             body = '\n'.join(method.operations)
             body = self.translate_function_body(cls, method, body, model, method.args)

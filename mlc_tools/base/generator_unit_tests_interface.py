@@ -67,7 +67,7 @@ class GeneratorUnitTestsInterface(object):
         generated_functions = []
         for func in cls.functions:
             ignored = ['visit', 'accept']
-            if func.name not in ignored and func.access == AccessSpecifier.public:
+            if func.name not in ignored and func.access == AccessSpecifier.public and 'operator' not in func.name and not test.has_method_with_name('test_' + func.name):
                 self.add_method(test, 'test_' + func.name)
                 generated_functions.append('test_' + func.name)
 
@@ -207,11 +207,11 @@ class tests/TestCase:test
     {
         this->add_result(!expression, message);
     }
-    function<T> void assertEqual(T left, T right, string message="")
+    function<L, R> void assertEqual(L left, R right, string message="")
     {
         this->add_result(left == right, message);
     }
-    function<T> void assertNotEqual(T left, T right, string message="")
+    function<L, R> void assertNotEqual(L left, R right, string message="")
     {
         this->add_result(left != right, message);
     }

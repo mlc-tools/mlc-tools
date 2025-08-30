@@ -51,6 +51,7 @@ class Mlc(object):
         self.model.auto_registration = kwargs.get('auto_registration', self.model.auto_registration)
         self.model.generate_ref_counter = kwargs.get('generate_ref_counter', self.model.generate_ref_counter)
         self.model.user_includes = kwargs.get('user_includes', self.model.user_includes)
+        self.model.empty_methods = kwargs.get('empty_methods', self.model.empty_methods)
         if 'add_config' in kwargs and kwargs.get('add_config') is not None:
             directory = fileutils.normalize_path(kwargs.get('add_config'))
             self.model.additional_config_directories.append(directory)
