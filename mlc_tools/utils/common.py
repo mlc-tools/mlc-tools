@@ -56,7 +56,16 @@ def parse_object(obj, string):
     args = args.group(0) if args else None
     if args:
         string = string.replace(args, '')
-    type_s = re.search(r'\w+[&\*]*', string).group(0)
+    # extract base type token; be robust if pattern not found
+    m = re.search(r'[A-Za-z_]\w*[&\*]*', string)
+    if not m:
+        # Fallback: keep entire string as type, empty name
+        obj.type = string.strip() + (args if args else '')
+        obj.name = ''
+        obj.template_args = smart_split(templates, ',')
+        obj.template_args = [x.strip() for x in obj.template_args]
+        return obj
+    type_s = m.group(0)
     string = string[len(type_s):]
     while True:
         match = re.search(r':\w+', string)

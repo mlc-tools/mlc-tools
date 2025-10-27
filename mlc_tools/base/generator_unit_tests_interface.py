@@ -87,7 +87,18 @@ class GeneratorUnitTestsInterface(object):
             name = func.name
             if name in ['initialize', 'execute']:
                 continue
-            method.operations.append('this->{}();'.format(name))
+            if self.model.language == 'cpp':
+                method.operations.append('try')
+                method.operations.append('{')
+                method.operations.append(f'this->{name}();')
+                method.operations.append('}')
+                method.operations.append('catch(...)')
+                method.operations.append('{')
+                method.operations.append(f'add_result(false, "Exception on execute {cls.name}::{name}.");')
+                method.operations.append('}')
+            else:
+                method.operations.append(f'this->{name}();')
+
 
         self.tests.append(test)
         return test
@@ -187,7 +198,7 @@ class tests/TestCase:test
         this->logger = logger;
     }
     function void execute():abstract
-    function void add_result(bool result, string message):private
+    function void add_result(bool result, string message)
     {
         if(this->result && !result)
         {

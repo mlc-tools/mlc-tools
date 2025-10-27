@@ -12,6 +12,27 @@ class RegexPatternPython(object):
     FACTORY = re.compile(r'\bFactory\b')
 
     FUNCTION = (
+        # compound assignment with conditional call for Python: lhs <op>= pre obj?->call;
+        # emits a guarded block
+        (re.compile(r'(?m)^(?P<indent>\s*)(?:[^+\-*/=\n;]*?\b)?(?P<lhs_name>\w+)\s*(?P<op>\+=|\-=|\*=|/=)\s*(?P<pre>.*?)(?P<obj>[\w:\.\-\>\(\)<> ,\*]+)\s*\?->\s*(?P<call>[^;\n]+);'),
+         r'\g<indent>__tmp_\g<lhs_name> = \g<obj>\n\g<indent>if(__tmp_\g<lhs_name>)\n{\n\g<indent>\g<lhs_name> \g<op> \g<pre>__tmp_\g<lhs_name>->\g<call>;\n}', ['?->']),
+
+        # assignment with conditional call shorthand for Python:
+        #   lhs = expr?->call();
+        # becomes:
+        #   __tmp_<lhs> = expr
+        #   lhs = (__tmp_<lhs>->call() if __tmp_<lhs> is not None else None)
+        (re.compile(r'(?m)^(?P<indent>\s*)(?:[^=\n;]*?\b)?(?P<lhs_name>\w+)\s*=\s*(?P<pre>.*?)(?P<obj>[\w:\.\-\>\(\)<> ,\*]+)\s*\?->\s*(?P<call>[^;\n]+);'),
+         r'\g<indent>__tmp_\g<lhs_name> = \g<obj>\n\g<indent>\g<lhs_name> = None\n\g<indent>if(__tmp_\g<lhs_name>)\n{\n\g<indent>\g<lhs_name> = \g<pre>__tmp_\g<lhs_name>->\g<call>;\n}', ['?->']),
+
+        # statement form: condition?->action();
+        # convert to if-block; later passes will replace '->' with '.' and braces with indents
+        (re.compile(r'([\w\->\.:\[\]\(\)]+?)\s*\?->\s*([^;]+);'), r'if(\1)\n{\n\1->\2;\n}', ['?->']),
+
+        # assignment with C++-style ternary: var = (cond) ? a : b;
+        # convert to explicit if/else block to avoid clobbering by the generic 'else' rule
+        (re.compile(r'(?m)^(?P<indent>\s*)(?:[^=\n;]*?\b)?(?P<lhs_name>\w+)\s*=\s*\((?P<cond>[^\)]+)\)\s*\?\s*(?P<when_true>[^:;]+)\s*:\s*(?P<when_false>[^;\n]+);'),
+         r'\g<indent>\g<lhs_name> = None\n\g<indent>if(\g<cond>)\n{\n\g<indent>\g<lhs_name> = \g<when_true>;\n}\n\g<indent>else\n{\n\g<indent>\g<lhs_name> = \g<when_false>;\n}', ['?']),
 
         # lambdas
         # FROM:

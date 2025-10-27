@@ -14,6 +14,31 @@ class RegexPatternCpp(object):
     FUNC_ARGS = (re.compile(r'\s*=\s*.+'), r'')
 
     FUNCTION = [
+        # compound assignment with conditional call: lhs <op>= pre obj?->call;
+        # becomes:
+        #   auto __tmp_lhs = obj;
+        #   if(__tmp_lhs) { lhs <op>= pre __tmp_lhs->call; }
+        (re.compile(r'(?m)^(?P<indent>\s*)(?P<lhs_prefix>[^+\-*/=\n;]*?\b)(?P<lhs_name>\w+)\s*(?P<op>\+=|\-=|\*=|/=)\s*(?P<pre>.*?)(?P<obj>[\w:\.\-\>\(\)<> ,\*]+)\s*\?->\s*(?P<call>[^;\n]+);'),
+         r'\g<indent>auto __tmp_\g<lhs_name> = \g<obj>;\n\g<indent>if(__tmp_\g<lhs_name>)\n{\n\g<indent>    \g<lhs_prefix>\g<lhs_name> \g<op> \g<pre>__tmp_\g<lhs_name>->\g<call>;\n\g<indent>}', ['?->']),
+        # assignment with conditional call shorthand (declaration form):
+        #   Type name = pre obj?->call;
+        # becomes:
+        #   auto __tmp_name = obj;
+        #   Type name;
+        #   if(__tmp_name) { name = pre __tmp_name->call; }
+        (re.compile(r'(?m)^(?P<indent>\s*)(?P<type>[A-Za-z_][\w:\s<>&\*]*?)\s+(?P<lhs_name>\w+)\s*=\s*(?P<pre>.*?)(?P<obj>[\w:\.\-\>\(\)<> ,\*]+)\s*\?->\s*(?P<call>[^;\n]+);'),
+         r'\g<indent>auto __tmp_\g<lhs_name> = \g<obj>;\n\g<indent>\g<type> \g<lhs_name>;\n\g<indent>if(__tmp_\g<lhs_name>)\n{\n\g<indent>    \g<lhs_name> = \g<pre>__tmp_\g<lhs_name>->\g<call>;\n\g<indent>}', ['?->']),
+
+        # assignment with conditional call shorthand (plain assignment form):
+        #   lhs = pre obj?->call;
+        # becomes:
+        #   auto __tmp_lhs = obj;
+        #   if(__tmp_lhs) { lhs = pre __tmp_lhs->call; }
+        (re.compile(r'(?m)^(?P<indent>\s*)(?P<lhs_prefix>[^=\n;]*?\b)(?P<lhs_name>\w+)\s*=\s*(?P<pre>.*?)(?P<obj>[\w:\.\-\>\(\)<> ,\*]+)\s*\?->\s*(?P<call>[^;\n]+);'),
+         r'\g<indent>auto __tmp_\g<lhs_name> = \g<obj>;\n\g<indent>if(__tmp_\g<lhs_name>)\n{\n\g<indent>    \g<lhs_prefix>\g<lhs_name> = \g<pre>__tmp_\g<lhs_name>->\g<call>;\n\g<indent>}', ['?->']),
+        # conditional call shorthand: condition?->action; => if(condition) condition->action;
+        # keep ternary operator intact by specifically matching '?->'
+        (re.compile(r'([\w\->\.:\[\]\(\)]+?)\s*\?->\s*([^;]+);'), r'if(\1)\n{\n\1->\2;\n}', ['?->']),
 
         # lambdas
         # FROM:

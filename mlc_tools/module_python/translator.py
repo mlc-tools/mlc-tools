@@ -72,7 +72,8 @@ class Translator(TranslatorBase):
         func = func.replace('\n    \n', '\n')
         func = func.replace('\n        \n', '\n')
         func = func.replace('\n            \n', '\n')
-        func = func.replace('\n                \n', '\n')
+        func = func.replace('\n                '
+                            '\n', '\n')
         func = func.replace('\n                    \n', '\n')
         func = func.replace('\n                        \n', '\n')
         return func

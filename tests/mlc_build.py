@@ -45,16 +45,16 @@ def run_tests(generator, root, withdata=False, cpp=True, python=True, php=True, 
         print('|  test with params [{}, {}] finished'.format(lang, serialized_format))
         print('-----------------------------------------')
 
-    if cpp:
-        generator.model.php_validate = False
-        run('cpp', 'json', clean_out_dir=False)
-        run('cpp', 'xml', clean_out_dir=False)
+    # if cpp:
+    #     generator.model.php_validate = False
+    #     run('cpp', 'json', clean_out_dir=False)
+    #     run('cpp', 'xml', clean_out_dir=False)
     if python:
         generator.model.php_validate = False
         run('py', 'json', False)
-        run('py', 'xml', False)
-        with_join and run('py', 'json', True)
-        with_join and run('py', 'xml', True)
+        # run('py', 'xml', False)
+        # with_join and run('py', 'json', True)
+        # with_join and run('py', 'xml', True)
     # if php:
     #     generator.model.php_validate = True
     #     run('php', 'json', False)

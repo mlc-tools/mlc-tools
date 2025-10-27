@@ -1,13 +1,35 @@
 class Translates
 {
-    function void dummy_function()
-    {
+    int value = 0
 
+    function int dummy_function()
+    {
+        return 5;
     }
     function void new_function()
     {
-
     }
+
+    function<T> Translates* get_null(T value)
+    {
+        return nullptr;
+    }
+    function<T> Translates* get_not_null(T value)
+    {
+        return this;
+    }
+
+    fn int get_with_string(string value)
+    {
+        return 10;
+    }
+
+
+    function Translates* build_object():static
+    {
+        return new Translates();
+    }
+
 }
 class Point
 {
@@ -484,6 +506,41 @@ class TestTranslates<ITestTranslates>
         this->assertTrue(join(values, ',') == string);
     }
 
+    function void test_conditional_arrow_and_ternary():cpp:py
+    {
+        auto obj = new Translates();
+        // Should translate to: if(obj) obj->dummy_function();
+        obj?->dummy_function();
+
+        // Ensure multiple uses compile and do nothing harmful when nullptr
+        obj = nullptr;
+        obj?->dummy_function();
+
+        //
+//        auto result = Translates::build_object()?->dummy_function();
+//        this->assertEqual(result, 5);
+
+        //
+        int value5 = 5 + Translates::build_object()?->dummy_function();
+        this->assertEqual(value5, 10);
+
+        //
+        obj = new Translates();
+        obj->value = 1;
+        obj->value = obj->get_null<int>(obj->value)?->get_with_string("attack");
+        this->assertEqual(obj->value, 1);
+
+        int value1 = 0;
+        value1 += obj->get_not_null<int>(obj->value)?->get_with_string("attack");
+        this->assertEqual(value1, 10);
+
+
+        // Ternary operator must remain intact
+        int a = 1;
+        int b = 2;
+        int c = (a > b) ? a : b;
+        this->assertEqual(c, 2);
+    }
 }
 
 class NullishOperator
@@ -516,5 +573,19 @@ class TestNullishOperator<ITestNullishOperator>
         this->assertNotNull(point_c);
         this->assertEqual(point_c->x, 10);
         this->assertEqual(point_c->y, 20);
+    }
+
+class group/TestMgExtensionIncludeGroup<ITestNullishOperator>
+{
+    fn<T> void test_include_mg_with_cls_group()
+    {
+        random_float();
+    }
+}
+class TestMgExtensionInclude<ITestNullishOperator>
+{
+    fn<T> void test_include_mg_without_cls_group()
+    {
+        random_float();
     }
 }

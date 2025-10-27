@@ -436,7 +436,7 @@ class Writer(WriterBase):
             text.append(line)
         text = '\n'.join(text)
         text = text.strip().replace('\n\n\n', '\n\n') + '\n'
-        return WriterBase.prepare_file(self, text)
+        return text
 
     @staticmethod
     def get_filename(class_, ext):
@@ -450,8 +450,8 @@ class Writer(WriterBase):
         forward_declarations = set()
         forward_declarations_out = set()
 
-        def add(set_, obj):
-            set_.add(self.convert_type(obj.type))
+        def add(container, obj):
+            container.add(self.convert_type(obj.type))
             for arg in obj.template_args:
                 add(forward_declarations, arg)
             if obj.callable_args is not None:
@@ -473,7 +473,38 @@ class Writer(WriterBase):
 
         # functions
         std_includes = ['map', 'list', 'string']
-        mg_extensions = ['in_list', 'in_map']
+        mg_extensions = ['in_map',
+            'in_list',
+            'list_push',
+            'list_insert',
+            'list_remove',
+            'list_erase',
+            'list_truncate',
+            'list_size',
+            'list_index',
+            'list_clear',
+            'list_resize',
+            'map_size',
+            'map_clear',
+            'map_remove',
+            'string_empty',
+            'string_size',
+            'random_float',
+            'random_int',
+            'mg_swap',
+            'split',
+            'join',
+            'strTo',
+            'toStr',
+            'serialize_command_to_xml',
+            'create_command_from_xml',
+            'serialize_command_to_json',
+            'create_command_from_json',
+            'clone_object',
+            'fs_get_string',
+            'Default',
+            'format',
+        ]
         for method in cls.functions:
             for _, argtype in method.args:
                 if argtype.type in std_includes:
@@ -546,7 +577,7 @@ class Writer(WriterBase):
             'pugi::xml_node': '"pugixml/pugixml.hpp"',
             'Observer': '"Observer.h"',
             'intrusive_ptr': '"intrusive_ptr.h"',
-            'mg_extensions': '"mg_extensions.h"',
+            'mg_extensions': f'"{Writer.get_path_to_root(cls)}mg_extensions.h"',
         }
         result = []
         for typename in includes:
